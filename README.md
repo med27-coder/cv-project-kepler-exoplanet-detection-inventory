@@ -1,9 +1,8 @@
 # 🪐 Kepler Exoplanet Detection — AstroNet-style 1D CNN
 
 ## Team Members
-- [Name 1] - [Email]
-- [Name 2] - [Email] *(if applicable)*
-- [Name 3] - [Email] *(if applicable)*
+- Francisco Medina - franciscomed927@gmailcom
+
 
 ---
 
@@ -23,7 +22,7 @@ NASA's Kepler Space Telescope recorded brightness measurements for over 150,000 
 
 ## Solution Overview
 
-We built an automated exoplanet detection pipeline using a 1D Convolutional Neural Network (inspired by Google's AstroNet architecture) trained on phase-folded Kepler light curves. The model takes a 201-point normalised flux array as input and outputs a probability score (0–1) indicating whether the signal is a confirmed planet or a false positive. The full pipeline covers data acquisition, quality filtering, model training, and evaluation.
+I built an automated exoplanet detection pipeline using a 1D Convolutional Neural Network (inspired by Google's AstroNet architecture) trained on phase-folded Kepler light curves. The model takes a 201-point normalised flux array as input and outputs a probability score (0–1) indicating whether the signal is a confirmed planet or a false positive. The full pipeline covers data acquisition, quality filtering, model training, and evaluation.
 
 ---
 
@@ -87,13 +86,11 @@ Dense(1, sigmoid) → Planet probability (0–1)
 
 | Metric | Target | Actual |
 |---|---|---|
-| Test Accuracy | >80% | *(fill in after running)* |
-| Test AUC | >0.85 | *(fill in after running)* |
-| Precision | >80% | *(fill in after running)* |
-| Recall | >80% | *(fill in after running)* |
-| Prediction speed | <1s per curve | *(fill in after running)* |
-
-> Run the **Slide 7 Metrics cell** in the notebook to get your exact values to fill in above.
+| Test Accuracy | >80% | *59.38%* |
+| Test AUC | >0.85 | *0.573* |
+| Precision | >80% | *59.57%* |
+| Recall | >80% | *80.00%* |
+| Prediction speed | <1s per curve | *7.4 ms* |
 
 ---
 
@@ -159,5 +156,4 @@ kepler-exoplanet-detection/
 
 | Date | Tool | Task | Notes |
 |---|---|---|---|
-| *(date)* | Claude (Anthropic) | Notebook setup, debugging, PDF creation | Used for code generation and error fixing |
-| *(date)* | *(tool)* | *(task)* | *(notes)* |
+| *Feb 24,2026* | Claude (Anthropic) | Notebook setup, debugging, PDF creation | Used for code generation and error fixing |
