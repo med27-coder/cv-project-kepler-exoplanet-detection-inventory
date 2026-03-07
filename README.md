@@ -156,4 +156,5 @@ kepler-exoplanet-detection/
 
 | Date | Tool | Task | Notes |
 |---|---|---|---|
-| *Feb 24,2026* | Claude (Anthropic) | Notebook setup, debugging, PDF creation | Used for code generation and error fixing |
+| *Feb 24,2026* | Claude (Anthropic) | Notebook setup, debugging | Used for code generation and error fixing |
+| March 6, 2026 | Gamma AI | Slide design & visualization | Used to design and structure project presentation slides from written content |
