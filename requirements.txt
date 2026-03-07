@@ -1,0 +1,27 @@
+# Kepler Exoplanet Detection — Python Dependencies
+# Install with: pip install -r requirements.txt
+#
+# Note for Google Colab: run Step 1 of the notebook instead,
+# which pins fsspec correctly before installing lightkurve.
+
+# Core data
+numpy>=1.23.0
+pandas>=1.5.0
+
+# Astronomy / light curve access
+lightkurve>=2.4.0
+astropy>=5.0.0
+
+# Machine learning
+tensorflow>=2.10.0
+scikit-learn>=1.1.0
+
+# Visualisation
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Progress bar
+tqdm>=4.64.0
+
+# Dependency pin — resolves fsspec conflict between s3fs, gcsfs, and datasets
+fsspec==2025.3.0
