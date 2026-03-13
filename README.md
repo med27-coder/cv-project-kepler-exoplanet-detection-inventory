@@ -10,7 +10,7 @@
 
 **Tier 2 — Advanced Project**
 
-We train a 1D Convolutional Neural Network from scratch on real NASA Kepler mission data, building a full custom data pipeline that downloads, filters, phase-folds, and normalises stellar light curves directly from the NASA Exoplanet Archive and MAST. This goes significantly beyond using a pre-trained model on a packaged dataset.
+I train a 1D Convolutional Neural Network from scratch on real NASA Kepler mission data, building a full custom data pipeline that downloads, filters, phase-folds, and normalises stellar light curves directly from the NASA Exoplanet Archive and MAST. This goes significantly beyond using a pre-trained model on a packaged dataset.
 
 ---
 
