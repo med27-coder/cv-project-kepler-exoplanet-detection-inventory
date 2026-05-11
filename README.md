@@ -90,16 +90,19 @@ Dense(1, sigmoid) → Planet probability (0–1)
  
 Results from V1 (400 samples baseline run):
  
-| Metric | Target | Actual (V1) |
-|---|---|---|
-| Test Accuracy | >80% | 59.38% |
-| Test AUC | >0.85 | 0.573 |
-| Precision | >80% | 59.57% |
-| Recall | >80% | 80.00% |
-| Prediction speed | <1s per curve | 7.4 ms ✅ |
+## Success Metrics
+ 
+| Metric | Target | Actual (V1) | Actual (V1.5) |
+|---|---|---|---|
+| Test Accuracy | >80% | 59.38% ❌ | 70.44% ❌ |
+| Test AUC | >0.85 | 0.573 ❌ | 0.771 ❌ |
+| Precision | >80% | 59.57% ❌ | 72.73% ❌ |
+| Recall | >80% | 80.00% ✅ | 73.56% ❌ |
+| Prediction speed | <1s per curve | 7.4 ms ✅ | 7.4 ms ✅ |
  
 > V1 did not meet accuracy and AUC targets — this directly motivated the V1.5 improvements. See the section below.
- 
+
+> V1.5 shows meaningful improvement across all metrics (+11% accuracy, +0.198 AUC) but targets were not fully reached. Scaling to the full ~9,000 KOI catalog and hyperparameter tuning are the recommended next steps.
 ---
  
 ## Original Plan vs. Actual Implementation
@@ -137,7 +140,16 @@ No data files are committed to this repository.
 | Week 1 | Feb 17 | Get dataset, set up Colab environment, install dependencies |
 | Week 2 | Feb 24 | Train and fine-tune 1D CNN model architecture |
 | Week 3 | Mar 3 | Test, evaluate results, and complete documentation |
-| Week 4 (Completed) | Mar 6 | Project finished! 🎉 |
+| Week 4 (V1 Completed) | Mar 6 | V1 finished — 59.38% accuracy, 0.573 AUC; targets not met, began planning V1.5 |
+| Week 5 | Mar 10 | V1.5 planning: identified dataset size, caching, and parallelism as key improvements |
+| Week 6 | Mar 17 | Implemented Google Drive checkpointing and ThreadPoolExecutor parallel downloads |
+| Week 7 | Mar 24 | Expanded dataset to 500 per class (1,000 total); added EDA step (Step 2.5) |
+| Week 8 | Mar 31 | Added Before/After training comparison (Cell 14.5); fixed KOI-203 → KOI-114 FP example |
+| Week 9 | Apr 7 | Built Gradio web frontend (Step 12); switched model save format to `.keras` |
+| Week 10 | Apr 14 | Full V1.5 training run; evaluated results and compared against V1 baseline |
+| Week 11 | Apr 21 | Documentation pass: cleaned notebook, added data source comments and markdown cell |
+| Week 12 | Apr 28 | Portfolio deliverables: README updated, PPTX presentation created |
+| Week 13 (V1.5 Completed) | May 8 | V1.5 finished — 70.44% accuracy, 0.771 AUC; +11% and +0.198 improvement over V1 🎉 |
  
 ---
  
