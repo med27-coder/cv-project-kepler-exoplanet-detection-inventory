@@ -29,5 +29,11 @@ ipywidgets>=8.0
 # Notebook kernel for VS Code
 ipykernel>=6.25
 
+# Encrypts the private V3 artifacts (scripts/secure_artifacts.py)
+cryptography>=42
+
 # Optional web demo (app.py)
 gradio>=4.0
+
+# Tests (.venv\Scripts\python -m pytest)
+pytest>=8

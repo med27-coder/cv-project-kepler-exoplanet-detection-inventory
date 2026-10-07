@@ -22,3 +22,7 @@ results/colab_import/
 # Gradio
 .gradio/
 flagged/
+
+# V3 Star Gazer: model + detailed results are committed only encrypted (secure/*.enc)
+results/v3/
+.secrets/
