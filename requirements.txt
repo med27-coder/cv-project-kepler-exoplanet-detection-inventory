@@ -1,27 +1,33 @@
-# Kepler Exoplanet Detection — Python Dependencies
-# Install with: pip install -r requirements.txt
+# Kepler Exoplanet Detection — V2 (local / VS Code)
+# Install into a virtual environment:
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\python -m pip install -r requirements.txt
 #
-# Note for Google Colab: run Step 1 of the notebook instead,
-# which pins fsspec correctly before installing lightkurve.
+# Python 3.10–3.12 (x64) recommended. TensorFlow does not ship native
+# Windows-on-ARM wheels; the x64 Python build runs fine under emulation.
 
 # Core data
-numpy>=1.23.0
-pandas>=1.5.0
+numpy>=1.26
+pandas>=2.0
 
 # Astronomy / light curve access
-lightkurve>=2.4.0
-astropy>=5.0.0
+lightkurve>=2.4
+astropy>=5.3
 
-# Machine learning
-tensorflow>=2.10.0
-scikit-learn>=1.1.0
+# Machine learning (TF >= 2.16 bundles Keras 3, which reads .keras files saved on Colab)
+tensorflow>=2.16
+scikit-learn>=1.3
 
 # Visualisation
-matplotlib>=3.6.0
-seaborn>=0.12.0
+matplotlib>=3.7
+seaborn>=0.13
 
-# Progress bar
-tqdm>=4.64.0
+# Progress bars (tqdm.auto renders as widgets in VS Code notebooks)
+tqdm>=4.66
+ipywidgets>=8.0
 
-# Dependency pin — resolves fsspec conflict between s3fs, gcsfs, and datasets
-fsspec==2025.3.0
+# Notebook kernel for VS Code
+ipykernel>=6.25
+
+# Optional web demo (app.py)
+gradio>=4.0

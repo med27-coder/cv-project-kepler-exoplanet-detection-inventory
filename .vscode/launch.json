@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Gradio app (local)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Import Colab checkpoints",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/import_colab_checkpoints.py",
+      "args": ["${input:colabFolder}"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "colabFolder",
+      "type": "promptString",
+      "description": "Folder containing your downloaded Colab / Drive files"
+    }
+  ]
+}

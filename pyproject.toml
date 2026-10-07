@@ -1,0 +1,18 @@
+[project]
+name = "kepler-cnn"
+version = "2.0.0"
+description = "AstroNet-style 1D CNN for Kepler exoplanet transit classification"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.mypy]
+ignore_missing_imports = true
