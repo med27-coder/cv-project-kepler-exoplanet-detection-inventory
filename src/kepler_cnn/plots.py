@@ -427,3 +427,186 @@ def v3_mistakes(views_by_row, names, y_true, y_prob, n=5, path=None):
     axes[-1][2].set_xlabel('Secondary dip (brown) + centroid offset (teal)')
     plt.tight_layout()
     return _save_to(fig, path)
+
+
+# Diverging scale for saliency: red = pushes towards false positive, gray = no effect,
+# blue = pushes towards planet.
+def _saliency_cmap():
+    from matplotlib.colors import LinearSegmentedColormap
+    return LinearSegmentedColormap.from_list('saliency', ['#e34948', '#f0efec', '#2a78d6'])
+
+
+def _strip(ax, values, vmax, extent_x, label):
+    ax.imshow(np.asarray(values)[None, :], aspect='auto', cmap=_saliency_cmap(), vmin=-vmax, vmax=vmax,
+              extent=(extent_x[0], extent_x[1], 0, 1), interpolation='nearest')
+    ax.set_yticks([])
+    ax.set_ylabel(label, rotation=0, ha='right', va='center', fontsize=8)
+    ax.tick_params(axis='x', labelsize=7)
+
+
+def v3_saliency(v, sal, feature_names, title, color, path=None, top_features=10):
+    """Occlusion saliency for one KOI (saliency.explain): what pushed the score up or down.
+
+    Each view is drawn with a colour strip below it: blue bins support "planet",
+    red bins support "false positive". The bar chart ranks the catalog features.
+    """
+    keys = [k for k in ('global_view', 'local_view', 'secondary_view', 'features') if k in sal]
+    vmax = max([float(np.max(np.abs(sal[k]))) for k in keys] + [1e-3])
+    fig = plt.figure(figsize=(14, 8.5))
+    outer = fig.add_gridspec(2, 2, height_ratios=[1, 1.35], width_ratios=[1.25, 1], hspace=0.45, wspace=0.3)
+
+    if 'global_view' in sal:
+        gs = outer[0, :].subgridspec(2, 1, height_ratios=[4, 1], hspace=0.05)
+        ax, st = fig.add_subplot(gs[0]), fig.add_subplot(gs[1])
+        gv = np.asarray(v['global_view']).ravel()
+        ax.plot(np.linspace(-0.5, 0.5, len(gv)), gv, color=color, lw=0.6)
+        ax.set_xlim(-0.5, 0.5)
+        ax.set_xticks([])
+        ax.set_title('Global view (whole orbit)', fontsize=10, loc='left')
+        _strip(st, sal['global_view'], vmax, (-0.5, 0.5), 'effect')
+        st.set_xlabel('Orbital phase', fontsize=8)
+
+    if 'local_view' in sal:
+        gs = outer[1, 0].subgridspec(5, 1, height_ratios=[4, 1, 1, 1, 1], hspace=0.12)
+        ax = fig.add_subplot(gs[0])
+        x = np.linspace(-2, 2, len(np.asarray(v['local_view']).ravel()))
+        ax.plot(x, v['local_view'], color=color, lw=2.2, alpha=0.35, label='all transits')
+        ax.plot(x, v['odd_view'], color=ODD_COLOR, lw=1, label='odd')
+        ax.plot(x, v['even_view'], color=EVEN_COLOR, lw=1, label='even')
+        ax.set_xlim(-2, 2)
+        ax.set_xticks([])
+        ax.legend(fontsize=7, loc='lower left')
+        ax.set_title('Transit zoom: effect of each channel', fontsize=10, loc='left')
+        n_ch = sal['local_view'].shape[-1]
+        for j, name in enumerate(['transit', 'odd', 'even', 'centroid'][:n_ch]):
+            st = fig.add_subplot(gs[1 + j])
+            _strip(st, sal['local_view'][:, j], vmax, (-2, 2), name)
+            if j < n_ch - 1:
+                st.set_xticks([])
+        st.set_xlabel('Transit durations from mid-transit', fontsize=8)
+
+    right = outer[1, 1].subgridspec(2, 1, height_ratios=[1, 1.6], hspace=0.6)
+    if 'secondary_view' in sal:
+        gs = right[0].subgridspec(2, 1, height_ratios=[3, 1], hspace=0.05)
+        ax, st = fig.add_subplot(gs[0]), fig.add_subplot(gs[1])
+        sv = np.asarray(v['secondary_view']).ravel()
+        ax.plot(np.linspace(-2, 2, len(sv)), sv, color=SECONDARY_COLOR, lw=1)
+        ax.set_xlim(-2, 2)
+        ax.set_xticks([])
+        ax.set_title('Secondary eclipse search', fontsize=10, loc='left')
+        _strip(st, sal['secondary_view'], vmax, (-2, 2), 'effect')
+    if 'features' in sal:
+        ax = fig.add_subplot(right[1])
+        f = np.asarray(sal['features'])
+        order = np.argsort(-np.abs(f))[:top_features][::-1]
+        cmap = _saliency_cmap()
+        ax.barh([feature_names[i].replace('koi_', '') for i in order], f[order],
+                color=[cmap(0.5 + 0.5 * f[i] / vmax) for i in order], edgecolor='#898781', linewidth=0.5)
+        ax.axvline(0, color='#898781', lw=0.8)
+        ax.set_title('Catalog features (change in P(planet))', fontsize=10, loc='left')
+        ax.tick_params(labelsize=8)
+        ax.grid(True, axis='x', alpha=0.3)
+
+    fig.suptitle(f'{title}\nBlue = pushed towards planet, red = towards false positive '
+                 f'(drop in P(planet) when hidden; scale ±{vmax:.2f})', fontsize=11, fontweight='bold')
+    return _save_to(fig, path)
+
+
+def v3_saliency_average(sal_list, y, feature_names, path=None):
+    """Mean saliency over many test KOIs, split by true class: what the model looks at in general."""
+    y = np.asarray(y)
+    has = {k for k in ('global_view', 'local_view', 'secondary_view', 'features')
+           if sal_list and all(k in s for s in sal_list)}   # models without some inputs omit them
+    fig, axes = plt.subplots(2, 2, figsize=(14, 7), gridspec_kw={'width_ratios': [1.4, 1]})
+    fig.suptitle('Average saliency on test KOIs (positive = supports "planet")', fontsize=13, fontweight='bold')
+    ax_g, ax_l, ax_s, ax_f = axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]
+    channel_names = ['transit', 'odd', 'even', 'centroid']
+    for label, color, name in ((1, C.PLANET_COLOR, 'confirmed planets'), (0, C.FP_COLOR, 'false positives')):
+        sel = [s for s, t in zip(sal_list, y) if t == label]
+        if not sel:
+            continue
+        if 'global_view' in has:
+            g = np.mean([s['global_view'] for s in sel], axis=0)
+            ax_g.plot(np.linspace(-0.5, 0.5, len(g)), g, color=color, lw=1, label=name)
+        if 'local_view' in has:
+            loc = np.mean([s['local_view'] for s in sel], axis=0)
+            x = np.linspace(-2, 2, loc.shape[0])
+            for j in range(loc.shape[1]):
+                ax_l.plot(x, loc[:, j], color=color, ls=['-', '--', ':', '-.'][j % 4], lw=1.2,
+                          label=f'{name}: {channel_names[j] if j < 4 else j}')
+        if 'secondary_view' in has:
+            sec = np.mean([s['secondary_view'] for s in sel], axis=0)
+            ax_s.plot(np.linspace(-2, 2, len(sec)), sec, color=color, lw=1.2, label=name)
+    if 'features' in has:
+        feats = np.mean([np.abs(s['features']) for s in sal_list], axis=0)
+        names = [n.replace('koi_', '') for n in feature_names]
+        order = np.argsort(-feats)[:10][::-1]
+        ax_f.barh([names[i] for i in order], feats[order], color=C.PLANET_COLOR)
+    panels = [(ax_g, 'global_view', 'Global view', 'Orbital phase'),
+              (ax_l, 'local_view', 'Transit zoom channels', 'Transit durations'),
+              (ax_s, 'secondary_view', 'Secondary eclipse view', 'Durations from deepest secondary dip'),
+              (ax_f, 'features', 'Catalog features: mean |effect|', '|change in P(planet)|')]
+    for ax, key, title, xlabel in panels:
+        if key not in has:
+            ax.set_axis_off()
+            ax.text(0.5, 0.5, f'{title}: not used by this model', ha='center', va='center',
+                    transform=ax.transAxes, color='gray')
+            continue
+        ax.set(title=title, xlabel=xlabel)
+        ax.grid(True, alpha=0.3)
+        ax.tick_params(labelsize=8)
+        if key != 'features':
+            ax.axhline(0, color='gray', lw=0.6)
+            ax.legend(fontsize=6 if key == 'local_view' else 8, loc='upper left')
+    plt.tight_layout()
+    return _save_to(fig, path)
+
+
+def v3_cross_validation(folds, path=None):
+    """Per-fold test accuracy and AUC for each variant, with mean ± std (cross_validate.py)."""
+    names = list(folds)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
+    fig.suptitle(f'Star Gazer: {len(folds[names[0]])}-fold cross-validation, grouped by star',
+                 fontsize=13, fontweight='bold')
+    rng = np.random.default_rng(0)
+    for ax, metric, fmt in ((axes[0], 'accuracy', '{:.1%}'), (axes[1], 'auc', '{:.3f}')):
+        for i, n in enumerate(names):
+            vals = np.array([f[metric] for f in folds[n]])
+            sd = vals.std(ddof=1) if len(vals) > 1 else 0.0
+            ax.scatter(i + rng.uniform(-0.08, 0.08, len(vals)), vals, s=36, color=C.PLANET_COLOR,
+                       alpha=0.7, zorder=3, edgecolor='white')
+            ax.errorbar(i + 0.25, vals.mean(), yerr=sd, fmt='o', color='black', capsize=4, zorder=4)
+            ax.annotate((fmt + ' ± ' + fmt).format(vals.mean(), sd), (i + 0.32, vals.mean()),
+                        fontsize=8, va='center')
+        ax.set_xticks(range(len(names)), names)
+        ax.set_xlim(-0.5, len(names) - 0.1)
+        ax.set_title(f'Test {"AUC" if metric == "auc" else metric} per fold', fontsize=11)
+        ax.grid(True, axis='y', alpha=0.3)
+    plt.tight_layout()
+    return _save_to(fig, path)
+
+
+def v3_candidates(prob, nasa_score, threshold, path=None):
+    """Star Gazer scores for unlabelled CANDIDATE KOIs, compared with NASA's koi_score."""
+    prob, nasa_score = np.asarray(prob), np.asarray(nasa_score, dtype=float)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
+    fig.suptitle(f'Star Gazer on {len(prob):,} unlabelled CANDIDATE KOIs', fontsize=13, fontweight='bold')
+    ax = axes[0]
+    ax.hist(prob, bins=np.linspace(0, 1, 26), color=C.PLANET_COLOR, alpha=0.8)
+    ax.axvline(threshold, color='black', ls='--', lw=1.2, label=f'threshold {threshold:.2f}')
+    ax.set(xlabel='Star Gazer P(planet)', ylabel='KOIs',
+           title=f'{(prob >= threshold).mean():.0%} score above the threshold')
+    ax.legend(fontsize=8)
+    ax = axes[1]
+    from .star_gazer import agreement_with_nasa
+    ok = ~np.isnan(nasa_score)
+    ax.scatter(nasa_score[ok], prob[ok], s=6, alpha=0.35, color=C.PLANET_COLOR)
+    nasa = agreement_with_nasa(prob, nasa_score, threshold)
+    title = 'No NASA koi_score to compare with' if nasa is None else \
+        f'Agreement with NASA: {nasa[0]:.0%} (Pearson r = {nasa[1]:.2f})'
+    ax.set(xlabel='NASA Robovetter score (koi_score; not a model input)', ylabel='Star Gazer P(planet)',
+           title=title, xlim=(-0.02, 1.02), ylim=(-0.02, 1.02))
+    for a in axes:
+        a.grid(True, alpha=0.3)
+    plt.tight_layout()
+    return _save_to(fig, path)

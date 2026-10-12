@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kepler Star Map</title>
+  <meta name="description" content="A pixel map of the Kepler field: search a star system and watch its planets orbit.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>KEPLER STAR MAP</h1>
+    <p class="sub">3,600+ stars with planets or planet candidates, from NASA's Kepler mission. Pick one and watch its planets orbit.</p>
+  </header>
+
+  <form id="search" autocomplete="off" role="search">
+    <label for="query" class="visually-hidden">Star system</label>
+    <input id="query" type="text" placeholder="Kepler-90, KOI-351 or a Kepler ID" spellcheck="false">
+    <button type="submit">SCAN</button>
+  </form>
+  <div id="chips" aria-label="Featured systems"></div>
+
+  <main>
+    <section class="panel" aria-labelledby="map-title">
+      <h2 id="map-title">THE KEPLER FIELD</h2>
+      <canvas id="map" width="192" height="192" tabindex="0"
+              aria-label="Pixel map of the Kepler field. Click a pixel, or focus the map and use the arrow keys to move between stars."></canvas>
+      <p id="hover" class="status">Click a pixel, or use the arrow keys</p>
+      <ul class="legend">
+        <li><span class="dot" style="background:#ffd34d"></span>spotlight</li>
+        <li><span class="dot" style="background:#c8d6ff"></span>drawn</li>
+        <li><span class="dot" style="background:#3c4870"></span>soon</li>
+        <li id="legend-sg" hidden><span class="dot" style="background:#6fe39a"></span>/<span class="dot" style="background:#ff7a59;margin-left:6px"></span>Star Gazer: likely planet / likely false positive</li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-live="polite" aria-labelledby="sys-title">
+      <h2 id="sys-title">PICK A STAR</h2>
+      <canvas id="system" width="256" height="160" aria-hidden="true"></canvas>
+      <div id="info">
+        <p>Type a system above, tap a chip, or click a pixel on the map.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Data: <a href="https://exoplanetarchive.ipac.caltech.edu">NASA Exoplanet Archive</a> (KOI cumulative table) ·
+       Kepler mission, NASA. Orbits are to scale within each system (log scale), not between systems.
+       <span id="exported"></span></p>
+  </footer>
+
+  <script src="data/systems.js"></script>
+  <script src="starmap.js"></script>
+</body>
+</html>

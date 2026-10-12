@@ -88,6 +88,34 @@ def save_figures(ds, te, p_test, threshold, results, hist):
     print(f'Saved {len(figures)} figures to {C.rel(out)}')
 
 
+def save_saliency_figures(models, ds, feats, feature_names, te, p_test, n_average=150):
+    """Occlusion saliency: the most confident correct planet and false positive, and the
+    average over a sample of test KOIs."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    from kepler_cnn import plots, saliency
+    out, y_te = S.RESULTS_DIR, ds['y'][te]
+    for label, name, color in ((1, 'planet', C.PLANET_COLOR), (0, 'false_positive', C.FP_COLOR)):
+        if not (y_te == label).any():
+            print(f'  no {name.replace("_", " ")} in the test split; skipping saliency_{name}.png')
+            continue
+        conf = np.where(y_te == label, p_test if label else 1 - p_test, -1)
+        i = te[int(np.argmax(conf))]
+        sal = saliency.explain(models, saliency.available_for_row(ds, feats, i))
+        truth = 'confirmed planet' if label else 'false positive'
+        fig = plots.v3_saliency(S.row_views(ds, i), sal, feature_names,
+                                f'{ds["names"][i]} ({truth}): P(planet) = {sal["prob"]:.1%}', color,
+                                path=out / f'saliency_{name}.png')
+        plt.close(fig)
+    rng = np.random.default_rng(C.SEED)
+    sample = rng.choice(len(te), size=min(n_average, len(te)), replace=False)
+    sals = saliency.explain_many(models, [saliency.available_for_row(ds, feats, te[j]) for j in sample])
+    plt.close(plots.v3_saliency_average(sals, y_te[sample], feature_names, out / 'saliency_average.png'))
+    print(f'Saved saliency figures ({len(sample)} test KOIs averaged) to {C.rel(out)}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--quick', action='store_true', help='5 epochs, for testing the pipeline')
@@ -153,6 +181,7 @@ def main():
         print(f'Saved {len(models)} model file(s) to {C.rel(S.MODEL_DIR)}')
         threshold = results['hybrid']['threshold_val']['threshold']
         save_figures(ds, te, p_test, threshold, results, hists['hybrid'])
+        save_saliency_figures(models, ds, feats, pre.columns, te, p_test, n_average=20 if args.quick else 150)
     print(f'Saved {C.rel(S.RESULTS_DIR / "metrics.json")}')
 
 

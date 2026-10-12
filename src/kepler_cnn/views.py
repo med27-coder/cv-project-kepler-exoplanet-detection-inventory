@@ -20,6 +20,7 @@ Only the small per-KOI views are kept in data/interim/views/.
 """
 
 import concurrent.futures
+import re
 import shutil
 import tempfile
 import warnings
@@ -29,7 +30,7 @@ import numpy as np
 
 from . import config as C
 
-VIEW_VERSION = 2            # bump when the view recipe changes; older files get rebuilt
+VIEW_VERSION = 3           # bump when the view recipe changes; older files get rebuilt
 GLOBAL_BINS = 2001
 LOCAL_BINS = 201
 LOCAL_HALF_WIDTH = 2.0      # local view spans ±2 transit durations
@@ -42,6 +43,17 @@ VIEW_KEYS = ('global_view', 'local_view', 'odd_view', 'even_view', 'secondary_vi
 VIEWS_DIR = C.DATA_DIR / 'interim' / 'views'
 VIEWS_FAILED = VIEWS_DIR / '_failed.txt'     # stars that could not be downloaded / read
 VIEWS_SKIPPED = VIEWS_DIR / '_skipped.txt'   # KOIs whose light curve could not be folded
+KOI_NAME = re.compile(r'K\d{5}\.\d{2}')
+
+
+def log_paths(candidates=False):
+    """(failed-stars log, skipped-KOIs log) for the labelled build or the --candidates build.
+
+    Each mode keeps its own logs so one mode's failures never hide or erase the other's.
+    """
+    if not candidates:
+        return VIEWS_FAILED, VIEWS_SKIPPED
+    return VIEWS_DIR / '_failed_candidates.txt', VIEWS_DIR / '_skipped_candidates.txt'
 
 
 def _odd(n):
@@ -110,7 +122,12 @@ def _secondary_phase(g_raw, period, dur):
     """Phase (days) of the deepest duration-wide dip in the global view, away from the transit."""
     phase = np.linspace(-period / 2, period / 2, len(g_raw))
     k = max(1, int(round(dur / (period / len(g_raw)))))
-    smooth = np.convolve(g_raw, np.ones(k) / k, mode='same')
+    if 2 * k >= len(g_raw):   # transit ≥ half the orbit: the mask below would hide every phase anyway
+        return None
+    # Phase is circular: pad by wrapping, not with zeros (zero padding makes the ends of a
+    # flux ~1 curve look like the deepest dip, so phase ±0.5 was always picked).
+    padded = np.concatenate([g_raw[-k:], g_raw, g_raw[:k]])
+    smooth = np.convolve(padded, np.ones(k) / k, mode='same')[k:-k]
     smooth[np.abs(phase) < 1.5 * dur] = np.inf
     if not np.isfinite(smooth).any():
         return None
@@ -329,6 +346,9 @@ def download_quarters(kepid, dest, threads=4, attempts=4):
 # Cache
 # ---------------------------------------------------------------------------
 def view_path(kepoi_name):
+    """Cache file for a KOI. Only real KOI names (e.g. K00010.01) can become file names."""
+    if not isinstance(kepoi_name, str) or not KOI_NAME.fullmatch(kepoi_name):
+        raise ValueError(f'not a KOI name: {kepoi_name!r} (expected e.g. K00010.01)')
     return VIEWS_DIR / f'{kepoi_name}.npz'
 
 
