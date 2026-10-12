@@ -402,7 +402,7 @@ def load_trained(allow_stale=False):
         raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; run scripts/train_star_gazer.py')
     if not allow_stale:
         check_view_version()
-    models = [keras.models.load_model(p) for p in files]
+    models = [keras.models.load_model(p, safe_mode=True) for p in files]   # no embedded Python code
     pre = FeaturePreprocessor.load()
     threshold = json.loads(THRESHOLD_FILE.read_text())['threshold'] if THRESHOLD_FILE.exists() else 0.5
     return models, pre, threshold

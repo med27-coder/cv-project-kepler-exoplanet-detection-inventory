@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Security: GitHub Pages can't send headers, so the policy is set here. Only this site's own
+       scripts, styles and fonts run; images may also come from the CDS sky-survey service. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://alasky.cds.unistra.fr; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Kepler Star Map</title>
   <meta name="description" content="A pixel map of the Kepler field: search a star system and watch its planets orbit.">
   <meta name="theme-color" content="#070b1a">
@@ -13,9 +17,6 @@
   <meta property="og:image" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/og.png">
   <meta property="og:url" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,7 +28,7 @@
   <form id="search" autocomplete="off" role="search">
     <div class="search-box">
       <label for="query" class="visually-hidden">Star system</label>
-      <input id="query" type="text" placeholder="Kepler-90, KOI-351 or a Kepler ID" spellcheck="false"
+      <input id="query" type="text" placeholder="Kepler-90, KOI-351 or a Kepler ID" spellcheck="false" maxlength="60"
              role="combobox" aria-autocomplete="list" aria-controls="suggest" aria-expanded="false">
       <ul id="suggest" role="listbox" aria-label="Matching systems" hidden></ul>
     </div>
@@ -50,10 +51,10 @@
               aria-label="Pixel map of the Kepler field. Click a pixel, or focus the map and use the arrow keys to move between stars and plus or minus to zoom."></canvas>
       <p id="hover" class="status">Click a pixel · arrows move · scroll or +/− zooms · drag pans</p>
       <ul class="legend">
-        <li><span class="dot" style="background:#ffd34d"></span>spotlight</li>
-        <li><span class="dot" style="background:#c8d6ff"></span>drawn</li>
-        <li><span class="dot" style="background:#3c4870"></span>soon</li>
-        <li id="legend-sg" hidden><span class="dot" style="background:#6fe39a"></span>/<span class="dot" style="background:#ff7a59;margin-left:6px"></span>Star Gazer: likely planet / likely false positive</li>
+        <li><span class="dot lg-spot"></span>spotlight</li>
+        <li><span class="dot lg-drawn"></span>drawn</li>
+        <li><span class="dot lg-soon"></span>soon</li>
+        <li id="legend-sg" hidden><span class="dot lg-likely"></span>/<span class="dot lg-unlikely"></span>Star Gazer: likely planet / likely false positive</li>
       </ul>
       <p class="label">Highlight:</p>
       <div id="highlights" class="highlights" aria-label="Highlight systems on the map"></div>
@@ -75,6 +76,9 @@
        between systems; the habitable zone is approximate. <span id="exported"></span></p>
     <p>Part of <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory">Star Gazer</a>,
        an educational exoplanet-detection project. Not a scientific classification.</p>
+    <p>Privacy: no cookies, no analytics, nothing stored. The only outside request is the sky photo,
+       loaded from <a href="https://alasky.cds.unistra.fr/">CDS</a> (Strasbourg) when you open a system.
+       Fonts: Press Start 2P and VT323 (<a href="fonts/OFL-PressStart2P.txt">SIL OFL</a>).</p>
   </footer>
 
   <script src="data/systems.js"></script>

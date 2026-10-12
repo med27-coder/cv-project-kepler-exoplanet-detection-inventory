@@ -11,6 +11,7 @@ global/local views + NASA catalog features (scripts/train_star_gazer.py).
 """
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -74,6 +75,21 @@ def make_predict_v3(models, pre, threshold, catalog):
     return predict
 
 
+def check_manual_inputs(kepler_id, period, t0):
+    """Reason the manual inputs are unusable, or None. Keeps nonsense (NaN, huge or negative
+    values) away from the MAST download and the phase-folding."""
+    values = {'Kepler ID': kepler_id, 'period': period, 'epoch': t0 or 0}
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in values.values()):
+        return 'Kepler ID, period and epoch must be finite numbers.'
+    if not (1 <= kepler_id <= 100_000_000 and float(kepler_id).is_integer()):
+        return 'Kepler ID must be a whole number between 1 and 100,000,000.'
+    if not 0.1 <= period <= 2000:
+        return 'Period must be between 0.1 and 2,000 days.'
+    if not -10_000 <= (t0 or 0) <= 10_000:
+        return 'Epoch (BKJD) must be between -10,000 and 10,000.'
+    return None
+
+
 def make_predict_cnn(model, df_koi):
     def predict(agree, kepoi_name, kepler_id, period, t0, progress=gr.Progress()):
         if not agree:
@@ -89,6 +105,9 @@ def make_predict_cnn(model, df_koi):
         else:
             if not (kepler_id and period):
                 return 'Enter a KOI name, or a Kepler ID + period + epoch.', None
+            problem = check_manual_inputs(kepler_id, period, t0)
+            if problem:
+                return f'Error: {problem}', None
             title = f'KIC {int(kepler_id)}'
 
         progress(0.1, desc='Downloading light curve from NASA MAST...')
@@ -180,7 +199,12 @@ def main():
                      f'DATASET = {args.model!r} first.')
         ui = build_ui(make_predict_cnn(M.load_trained_model(), data.load_catalog()),
                       f'{args.model} single-quarter 1D CNN')
-    ui.launch(server_name=args.host, server_port=args.port, share=args.share)
+    # Public-facing limits: one prediction at a time (each downloads from MAST and runs the model),
+    # a short waiting line, no direct API calls around the queue, no tracebacks shown to visitors.
+    ui.queue(default_concurrency_limit=1, max_size=20, api_open=False)
+    ui.launch(server_name=args.host, server_port=args.port, share=args.share,
+              show_error=False, strict_cors=True, max_file_size='1mb', max_threads=8,
+              enable_monitoring=False)
 
 
 if __name__ == '__main__':

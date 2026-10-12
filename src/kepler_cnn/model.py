@@ -89,7 +89,7 @@ def save_model(model):
 def load_trained_model(path=None):
     """Load a saved .keras model (works with models saved on Colab by V1.5)."""
     path = path or C.MODEL_FILE
-    model = _keras().models.load_model(path)
+    model = _keras().models.load_model(path, safe_mode=True)   # refuse models carrying Python code
     print(f'Loaded model from {C.rel(path)}')
     return model
 
