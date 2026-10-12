@@ -8,7 +8,7 @@
 
 # Core data
 numpy>=1.26
-pandas>=2.0
+pandas>=2.3.3
 
 # Astronomy / light curve access
 lightkurve>=2.4
