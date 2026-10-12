@@ -33,7 +33,7 @@ ipykernel>=6.25
 cryptography>=42
 
 # Optional web demo (app.py)
-gradio>=4.0
+gradio>=6.30.0
 
 # Tests (.venv\Scripts\python -m pytest)
 pytest>=8
