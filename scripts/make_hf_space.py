@@ -20,11 +20,12 @@ import shutil
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+
+from kepler_cnn import star_gazer as S
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'build' / 'hf_space'
-sys.path.insert(0, str(ROOT / 'src'))
-
-from kepler_cnn import star_gazer as S  # noqa: E402
 
 SPACE_README = """---
 title: Star Gazer
