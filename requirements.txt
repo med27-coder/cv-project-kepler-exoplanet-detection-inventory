@@ -11,7 +11,7 @@ numpy>=1.26
 pandas>=2.0
 
 # Astronomy / light curve access
-lightkurve>=2.4
+lightkurve>=2.6.0
 astropy>=5.3
 
 # Machine learning (TF >= 2.16 bundles Keras 3, which reads .keras files saved on Colab)
