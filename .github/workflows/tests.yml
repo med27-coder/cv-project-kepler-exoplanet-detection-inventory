@@ -21,3 +21,5 @@ jobs:
           pip install -r requirements.txt
       - name: Run tests
         run: python -m pytest -q
+      - name: Check the star map's JavaScript syntax
+        run: node --check web/starmap.js && node --check web/data/systems.js

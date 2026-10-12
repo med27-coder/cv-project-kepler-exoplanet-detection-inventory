@@ -263,6 +263,9 @@ def main():
           f'{len(scores)} Star Gazer scores, {size / 1024:.0f} KB')
     if size > MAX_BYTES:
         print(f'Warning: over {MAX_BYTES / 1e6:.1f} MB; consider lazy-loading system details.')
+    if args.out == OUT_FILE:   # keep the social preview image in step with the published data
+        import make_og_image
+        make_og_image.main()
 
 
 if __name__ == '__main__':

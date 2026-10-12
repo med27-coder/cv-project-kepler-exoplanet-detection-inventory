@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kepler Star Map</title>
   <meta name="description" content="A pixel map of the Kepler field: search a star system and watch its planets orbit.">
+  <meta name="theme-color" content="#070b1a">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%23070b1a'/%3E%3Crect x='6' y='5' width='4' height='6' fill='%23ffd34d'/%3E%3Crect x='5' y='6' width='6' height='4' fill='%23ffd34d'/%3E%3Crect x='1' y='7' width='3' height='1' fill='%233a4888'/%3E%3Crect x='12' y='8' width='3' height='1' fill='%233a4888'/%3E%3Crect x='12' y='4' width='2' height='2' fill='%234fd17a'/%3E%3Crect x='2' y='11' width='1' height='1' fill='%23ffa64d'/%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kepler Star Map">
+  <meta property="og:description" content="3,600+ stars from NASA's Kepler mission. Search a system and watch its planets orbit, in pixels.">
+  <meta property="og:image" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/og.png">
+  <meta property="og:url" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -17,39 +25,56 @@
   </header>
 
   <form id="search" autocomplete="off" role="search">
-    <label for="query" class="visually-hidden">Star system</label>
-    <input id="query" type="text" placeholder="Kepler-90, KOI-351 or a Kepler ID" spellcheck="false">
+    <div class="search-box">
+      <label for="query" class="visually-hidden">Star system</label>
+      <input id="query" type="text" placeholder="Kepler-90, KOI-351 or a Kepler ID" spellcheck="false"
+             role="combobox" aria-autocomplete="list" aria-controls="suggest" aria-expanded="false">
+      <ul id="suggest" role="listbox" aria-label="Matching systems" hidden></ul>
+    </div>
     <button type="submit">SCAN</button>
+    <button type="button" id="random" class="ghost" title="Surprise me" aria-label="Surprise me: a random system">🎲</button>
   </form>
-  <div id="chips" aria-label="Featured systems"></div>
+  <div id="chips" aria-label="Spotlight systems"></div>
 
   <main>
     <section class="panel" aria-labelledby="map-title">
-      <h2 id="map-title">THE KEPLER FIELD</h2>
+      <div class="panel-head">
+        <h2 id="map-title">THE KEPLER FIELD</h2>
+        <div class="zoom" aria-label="Map zoom">
+          <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+          <span id="zoom-level" aria-live="polite">1×</span>
+          <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+        </div>
+      </div>
       <canvas id="map" width="192" height="192" tabindex="0"
-              aria-label="Pixel map of the Kepler field. Click a pixel, or focus the map and use the arrow keys to move between stars."></canvas>
-      <p id="hover" class="status">Click a pixel, or use the arrow keys</p>
+              aria-label="Pixel map of the Kepler field. Click a pixel, or focus the map and use the arrow keys to move between stars and plus or minus to zoom."></canvas>
+      <p id="hover" class="status">Click a pixel · arrows move · scroll or +/− zooms · drag pans</p>
       <ul class="legend">
         <li><span class="dot" style="background:#ffd34d"></span>spotlight</li>
         <li><span class="dot" style="background:#c8d6ff"></span>drawn</li>
         <li><span class="dot" style="background:#3c4870"></span>soon</li>
         <li id="legend-sg" hidden><span class="dot" style="background:#6fe39a"></span>/<span class="dot" style="background:#ff7a59;margin-left:6px"></span>Star Gazer: likely planet / likely false positive</li>
       </ul>
+      <p class="label">Highlight:</p>
+      <div id="highlights" class="highlights" aria-label="Highlight systems on the map"></div>
     </section>
 
     <section class="panel" aria-live="polite" aria-labelledby="sys-title">
       <h2 id="sys-title">PICK A STAR</h2>
       <canvas id="system" width="256" height="160" aria-hidden="true"></canvas>
       <div id="info">
-        <p>Type a system above, tap a chip, or click a pixel on the map.</p>
+        <p>Type a system above, tap a chip, roll the 🎲, or click a pixel on the map.</p>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Data: <a href="https://exoplanetarchive.ipac.caltech.edu">NASA Exoplanet Archive</a> (KOI cumulative table) ·
-       Kepler mission, NASA. Orbits are to scale within each system (log scale), not between systems.
-       <span id="exported"></span></p>
+    <p>Data: <a href="https://exoplanetarchive.ipac.caltech.edu">NASA Exoplanet Archive</a> (KOI cumulative and
+       confirmed-planet tables) · Kepler mission, NASA · Sky images: Digitized Sky Survey via
+       <a href="https://aladin.cds.unistra.fr/">CDS</a>. Orbits are to scale within each system (log scale), not
+       between systems; the habitable zone is approximate. <span id="exported"></span></p>
+    <p>Part of <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory">Star Gazer</a>,
+       an educational exoplanet-detection project. Not a scientific classification.</p>
   </footer>
 
   <script src="data/systems.js"></script>

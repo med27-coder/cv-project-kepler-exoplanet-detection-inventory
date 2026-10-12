@@ -27,8 +27,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
-      - name: Check the map data exists
-        run: test -s web/data/systems.js
+      - name: Check the map data and JavaScript
+        run: |
+          test -s web/data/systems.js
+          node --check web/starmap.js
+          node --check web/data/systems.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
