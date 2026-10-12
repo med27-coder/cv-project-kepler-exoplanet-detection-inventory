@@ -10,7 +10,9 @@ V2 (single quarter, 1D CNN) and V3 Star Gazer (all quarters, multi-view CNN) use
 data/
 ├── raw/
 │   ├── nasa_koi_catalog.csv      ← KOI cumulative table (labels, period, epoch), V2
-│   └── koi_cumulative_full.csv   ← the same table with all 150+ columns, V3
+│   ├── koi_cumulative_full.csv   ← the same table with all 150+ columns, V3
+│   ├── ps_kepler_planets.csv     ← confirmed-planet table (pscomppars) for the Kepler field, star map
+│   └── berger2020_gaia_kepler.csv ← Gaia-based stellar properties (scripts/fetch_extra_data.py)
 ├── interim/
 │   ├── views/                    ← V3: one .npz of views per KOI (see below)
 │   └── flux/
@@ -113,4 +115,24 @@ Built by `scripts/build_full_dataset.py` (resumable; a few hours for all ~6,600 
 
 The raw FITS files are deleted after each star, so the whole cache is about 200 MB.
 
-KOIs that could not be folded (no usable data at their period) are listed in `views/_skipped.txt`, and stars that could not be downloaded in `views/_failed.txt`; `--retry-failed` retries both. Each view file records its recipe version (`views.VIEW_VERSION`), and files from an older recipe are rebuilt automatically.
+KOIs that could not be folded (no usable data at their period) are listed in `views/_skipped.txt`, and stars that could not be downloaded in `views/_failed.txt`; `--retry-failed` retries both. The `--candidates` build (unlabelled CANDIDATE KOIs, for `scripts/score_candidates.py`) keeps its own `_skipped_candidates.txt` / `_failed_candidates.txt`, so the two runs never hide or erase each other's records.
+
+Each view file records its recipe version (`views.VIEW_VERSION`), and files from an older recipe are rebuilt automatically. The trained model records the recipe it was trained on too: the app and `score_candidates.py` refuse a model whose recipe doesn't match the current views (retrain it, or pass `--allow-stale` to the app).
+
+Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0.5 (the opposite side of the orbit) because of zero padding, so eclipsing binaries with an off-centre secondary eclipse (eccentric orbits) were missed.
+
+## Star map data
+
+`scripts/export_starmap.py` builds `web/data/systems.js` (committed; it is what the web page loads) from:
+
+1. `koi_cumulative_full.csv`: every star with a CONFIRMED or CANDIDATE KOI becomes a map pixel.
+2. `ps_kepler_planets.csv`: NASA's confirmed-planet table (`pscomppars`) for every planet in the Kepler field, downloaded on first run and matched to KOI stars by position (NASA renamed some systems, e.g. Kepler-90 is "KOI-351" there): planet masses (measured, or estimated from a mass-radius relation), distances, discovery years, and planets found without a transit (radial velocity, timing variations).
+3. `results/v3/candidates.csv` (optional): Star Gazer's score for each candidate, from `scripts/score_candidates.py`. Only the scores are exported, never the model.
+
+## Extra data (not used for training yet)
+
+`scripts/fetch_extra_data.py` downloads public datasets for later experiments (see [docs/STARMAP_PLAN.md](../docs/STARMAP_PLAN.md), Phase 7):
+
+| Source | File | What it is |
+|---|---|---|
+| `gaia_stars` | `raw/berger2020_gaia_kepler.csv` | Berger et al. 2020 (AJ 159, 280; VizieR J/AJ/159/280): radius, mass, Teff, logg, [Fe/H], density, luminosity, age and distance for 186,301 Kepler stars, derived with Gaia DR2 parallaxes. Credit: Berger et al. 2020 and ESA Gaia. |

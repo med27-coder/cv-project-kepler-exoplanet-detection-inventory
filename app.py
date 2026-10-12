@@ -3,6 +3,7 @@
     .venv\\Scripts\\python app.py                  # local only (http://127.0.0.1:7860)
     .venv\\Scripts\\python app.py --share          # public gradio.live link (see TERMS_OF_USE.md §6)
     .venv\\Scripts\\python app.py --model v2       # serve an older model (v2 or v1_5)
+    python app.py --host 0.0.0.0                 # listen on all interfaces (e.g. a Hugging Face Space)
 
 --model v3 (default when trained) is the Star Gazer hybrid model: all-quarter
 global/local views + NASA catalog features (scripts/train_star_gazer.py).
@@ -19,34 +20,57 @@ import gradio as gr
 import matplotlib
 
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from kepler_cnn import config as C
-from kepler_cnn import data, model as M, plots, terms
+from kepler_cnn import data, plots, saliency, terms
+from kepler_cnn import model as M
 from kepler_cnn import star_gazer as S
 
 TERMS_LABEL = f'I have read and agree to the Terms of Use (v{terms.TERMS_VERSION})'
 DISCLAIMER = '(Model output for education only, not a scientific classification.)'
 
 
+def _release(*figs):
+    """Drop figures from pyplot's registry; Gradio still renders the Figure objects, but a
+    long-running server no longer keeps every figure it ever drew."""
+    for fig in figs:
+        if fig is not None:
+            plt.close(fig)
+    return figs
+
+
 def make_predict_v3(models, pre, threshold, catalog):
-    def predict(agree, kepoi_name, kepler_id, period, t0, progress=gr.Progress()):
+    known_kois = set(catalog.kepoi_name)
+
+    def predict(agree, kepoi_name, kepler_id, period, t0, explain=False, progress=gr.Progress()):
         if not agree:
-            return 'Please read and accept the Terms of Use first.', None
+            return 'Please read and accept the Terms of Use first.', None, None
         kepoi_name = (kepoi_name or '').strip().upper()
         if not kepoi_name:
-            return 'Star Gazer needs a KOI name (it uses the NASA catalog parameters).', None
+            return 'Star Gazer needs a KOI name (it uses the NASA catalog parameters).', None, None
+        if kepoi_name not in known_kois:          # validate before the name touches any file path
+            return f'Error: {kepoi_name} is not in the NASA KOI catalog (format: K00010.01).', None, None
         progress(0.1, desc='Using cached views' if S.views.is_current(kepoi_name)
                  else 'Downloading all Kepler quarters from NASA MAST (~10 s)...')
         try:
-            prob, verdict, v, row = S.predict_koi(models, pre, catalog, kepoi_name, threshold)
+            prob, verdict, v, row, inputs = S.predict_koi(models, pre, catalog, kepoi_name, threshold,
+                                                          return_inputs=True)
         except (KeyError, RuntimeError) as e:
-            return f'Error: {e}', None
-        progress(0.9, desc='Plotting')
+            return f'Error: {e}', None, None
+        progress(0.7, desc='Plotting')
         color = C.PLANET_COLOR if verdict == 'PLANET' else C.FP_COLOR
         title = (f'{kepoi_name} (KIC {int(row.kepid)}), catalog: {row.koi_disposition}  |  '
                  f'P(planet) = {prob:.1%} -> {verdict}')
         fig = plots.star_gazer_views(v, title, color)
-        return f'{verdict}: P(planet) = {prob:.1%} (threshold {threshold:.2f})\n{DISCLAIMER}', fig
+        sal_fig = None
+        if explain:
+            progress(0.8, desc='Explaining (hiding parts of each view and re-running the model)')
+            sal = saliency.explain(models, inputs)
+            sal_fig = plots.v3_saliency(v, sal, pre.columns,
+                                        f'{kepoi_name}: what drove P(planet) = {prob:.1%}', color)
+        _release(fig, sal_fig)
+        return f'{verdict}: P(planet) = {prob:.1%} (threshold {threshold:.2f})\n{DISCLAIMER}', fig, sal_fig
     return predict
 
 
@@ -75,11 +99,12 @@ def make_predict_cnn(model, df_koi):
             return 'Error: could not download or process this light curve.', None
         prob, verdict = M.predict_flux(model, flux)
         fig = plots.single_prediction(flux, prob, verdict, title)
+        _release(fig)
         return f'{verdict}: P(planet) = {prob:.1%}\n{DISCLAIMER}', fig
     return predict
 
 
-def build_ui(predict_fn, model_label, manual_inputs=True):
+def build_ui(predict_fn, model_label, manual_inputs=True, can_explain=False):
     terms_text = C.TERMS_FILE.read_text(encoding='utf-8')
     with gr.Blocks(title='Star Gazer') as demo:
         gr.Markdown('# 🔭 Star Gazer\n'
@@ -98,14 +123,22 @@ def build_ui(predict_fn, model_label, manual_inputs=True):
                     kepler_id = gr.Number(label='Kepler ID (KIC)', precision=0)
                     period = gr.Number(label='Orbital period (days)')
                     t0 = gr.Number(label='Transit epoch (BKJD)')
+                explain = gr.Checkbox(label='Explain this prediction (saliency map, a few seconds more)',
+                                      value=False, visible=can_explain)
                 btn = gr.Button('Predict', variant='primary')
             with gr.Column():
                 out_text = gr.Textbox(label='Model prediction', lines=2)
                 out_plot = gr.Plot(label='Phase-folded light curve')
+        out_sal = gr.Plot(label='Saliency: blue supports planet, red supports false positive',
+                          visible=can_explain)
 
         gr.Examples(examples=[[k] for k in C.EXAMPLE_KOIS], inputs=[kepoi], label='Example KOIs')
-        btn.click(predict_fn, inputs=[agree, kepoi, kepler_id, period, t0],
-                  outputs=[out_text, out_plot])
+        if can_explain:
+            btn.click(predict_fn, inputs=[agree, kepoi, kepler_id, period, t0, explain],
+                      outputs=[out_text, out_plot, out_sal])
+        else:
+            btn.click(predict_fn, inputs=[agree, kepoi, kepler_id, period, t0],
+                      outputs=[out_text, out_plot])
     return demo
 
 
@@ -115,8 +148,12 @@ def main():
     parser.add_argument('--share', action='store_true',
                         help='create a public gradio.live link (off by default)')
     parser.add_argument('--port', type=int, default=7860)
+    parser.add_argument('--host', default='127.0.0.1',
+                        help='interface to listen on (0.0.0.0 on a server such as a Hugging Face Space)')
     parser.add_argument('--model', choices=['v3', *C.DATASETS], default=default_model,
                         help='v3 = Star Gazer (default when trained); v2 / v1_5 = single-quarter CNN')
+    parser.add_argument('--allow-stale', action='store_true',
+                        help='serve a V3 model trained on an older view recipe anyway (not recommended)')
     args = parser.parse_args()
 
     try:
@@ -128,11 +165,14 @@ def main():
         if not S.MODEL_FILE.exists():
             sys.exit(f'No Star Gazer model at {C.rel(S.MODEL_FILE)}. '
                      'Run scripts/train_star_gazer.py first.')
-        models, pre, threshold = S.load_trained()
+        try:
+            models, pre, threshold = S.load_trained(allow_stale=args.allow_stale)
+        except S.StaleModelError as e:
+            sys.exit(f'{e}\n(Use --allow-stale to serve it anyway.)')
         predict = make_predict_v3(models, pre, threshold, S.load_catalog())
         ensemble = f', ensemble of {len(models)}' if len(models) > 1 else ''
         label = f'V3 Star Gazer (all-quarter multi-view CNN + NASA catalog features{ensemble})'
-        ui = build_ui(predict, label, manual_inputs=False)
+        ui = build_ui(predict, label, manual_inputs=False, can_explain=True)
     else:
         C.use_dataset(args.model)
         if not C.MODEL_FILE.exists():
@@ -140,7 +180,7 @@ def main():
                      f'DATASET = {args.model!r} first.')
         ui = build_ui(make_predict_cnn(M.load_trained_model(), data.load_catalog()),
                       f'{args.model} single-quarter 1D CNN')
-    ui.launch(server_name='127.0.0.1', server_port=args.port, share=args.share)
+    ui.launch(server_name=args.host, server_port=args.port, share=args.share)
 
 
 if __name__ == '__main__':

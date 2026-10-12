@@ -44,6 +44,8 @@ FEATURE_CLIP = 10.0   # standardised features are clipped to ±10 (a few catalog
 LOCAL_CHANNELS = ('local_view', 'odd_view', 'even_view', 'centroid_view')
 
 FULL_CATALOG = C.RAW_DIR / 'koi_cumulative_full.csv'
+FULL_CATALOG_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?'
+                    'query=select+*+from+cumulative&format=csv')
 MODEL_DIR = C.MODELS_DIR / 'v3'
 MODEL_FILE = MODEL_DIR / 'star_gazer.keras'          # ensemble members: star_gazer_1.keras, ...
 PREPROCESSOR_FILE = MODEL_DIR / 'feature_preprocessor.json'
@@ -56,13 +58,21 @@ RESULTS_DIR = C.PROJECT_ROOT / 'results' / 'v3'
 # Data
 # ---------------------------------------------------------------------------
 def load_catalog():
+    """The full KOI cumulative table, downloaded from the NASA Exoplanet Archive on first use."""
+    if not FULL_CATALOG.exists():
+        print('Downloading the full KOI cumulative table (all columns)...')
+        FULL_CATALOG.parent.mkdir(parents=True, exist_ok=True)
+        pd.read_csv(FULL_CATALOG_URL).to_csv(FULL_CATALOG, index=False)
     return pd.read_csv(FULL_CATALOG)
 
 
-def load_dataset(catalog=None, progress=True):
-    """All labelled KOIs that have current-version cached views. Returns a dict of aligned arrays."""
+def load_dataset(catalog=None, progress=True, dispositions=('CONFIRMED', 'FALSE POSITIVE')):
+    """All KOIs with these dispositions that have current-version cached views.
+
+    Returns a dict of aligned arrays; y is 1 for CONFIRMED (so all 0 for CANDIDATE KOIs).
+    """
     cat = catalog if catalog is not None else load_catalog()
-    lab = cat[cat.koi_disposition.isin(['CONFIRMED', 'FALSE POSITIVE'])].set_index('kepoi_name')
+    lab = cat[cat.koi_disposition.isin(list(dispositions))].set_index('kepoi_name')
     V, names = views.load_views(lab.index, progress=progress)
     rows = lab.loc[names]
     return {
@@ -88,9 +98,18 @@ def split_by_star(y, groups, seed=C.SEED):
     """Train / val / test indices (~64 / 16 / 20) with every star in exactly one split."""
     outer = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=seed)
     trainval, test = next(outer.split(np.zeros(len(y)), y, groups))
+    tr, va = split_train_val(y, groups, trainval, seed)
+    return tr, va, test
+
+
+def split_train_val(y, groups, idx, seed=C.SEED):
+    """Split the rows `idx` into train / validation (~80 / 20), grouped by star.
+
+    Shared by split_by_star() and scripts/cross_validate.py so both use the same protocol.
+    """
     inner = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=seed)
-    tr, va = next(inner.split(np.zeros(len(trainval)), y[trainval], groups[trainval]))
-    return trainval[tr], trainval[va], test
+    tr, va = next(inner.split(np.zeros(len(idx)), y[idx], groups[idx]))
+    return idx[tr], idx[va]
 
 
 class FeaturePreprocessor:
@@ -217,11 +236,15 @@ def _inputs(model, available):
     return out
 
 
+def dataset_inputs(ds, idx, features):
+    """Every model input for rows `idx` of a load_dataset() result (all local channels)."""
+    return {'global_view': ds['global'][idx], 'local_view': ds['local'][idx],
+            'secondary_view': ds['secondary'][idx],
+            'features': features[idx] if features is not None else None}
+
+
 def model_inputs(model, ds, idx, features):
-    available = {'global_view': ds['global'][idx], 'local_view': ds['local'][idx],
-                 'secondary_view': ds['secondary'][idx],
-                 'features': features[idx] if features is not None else None}
-    return _inputs(model, available)
+    return _inputs(model, dataset_inputs(ds, idx, features))
 
 
 def class_weights(y):
@@ -288,10 +311,35 @@ def best_threshold(y_true, y_prob):
     return float(grid[int(np.argmax(accs))])
 
 
+def recall_at_precision(y, prob, min_precision):
+    """Highest recall reachable at any threshold whose precision is >= min_precision
+    (the R@P0.99 figure ExoMiner reports)."""
+    from sklearn.metrics import precision_recall_curve
+    prec, rec, _ = precision_recall_curve(y, prob)
+    # the curve always ends at (precision 1, recall 0), so the selection is never empty
+    return float(rec[prec >= min_precision].max())
+
+
+def agreement_with_nasa(prob, nasa_score, threshold):
+    """(fraction where prob >= threshold agrees with koi_score >= 0.5, Pearson r, n compared),
+    or None when fewer than two KOIs have a NASA score to compare with."""
+    prob, score = np.asarray(prob, dtype=float), np.asarray(nasa_score, dtype=float)
+    ok = ~np.isnan(score)
+    if ok.sum() < 2:
+        return None
+    agree = float(((prob[ok] >= threshold) == (score[ok] >= 0.5)).mean())
+    constant = np.ptp(prob[ok]) == 0 or np.ptp(score[ok]) == 0
+    r = float('nan') if constant else float(np.corrcoef(score[ok], prob[ok])[0, 1])
+    return agree, r, int(ok.sum())
+
+
 def metrics(y, prob, threshold=0.5):
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
+    from sklearn.metrics import (accuracy_score, brier_score_loss, precision_score, recall_score,
+                                 roc_auc_score)
     pred = (prob >= threshold).astype(int)
     return {'accuracy': float(accuracy_score(y, pred)), 'auc': float(roc_auc_score(y, prob)),
+            'brier': float(brier_score_loss(y, prob)),
+            'recall_at_precision_0.99': recall_at_precision(y, prob, 0.99),
             'precision': float(precision_score(y, pred, zero_division=0)),
             'recall': float(recall_score(y, pred)), 'threshold': float(threshold), 'n': int(len(y))}
 
@@ -322,18 +370,38 @@ def save_trained(models, pre, history, threshold):
         save_model(m, MODEL_FILE if i == 0 else MODEL_DIR / f'{MODEL_FILE.stem}_{i}.keras')
     pre.save()
     HISTORY_FILE.write_text(json.dumps(history), encoding='utf-8')
-    THRESHOLD_FILE.write_text(json.dumps({'threshold': float(threshold)}), encoding='utf-8')
+    THRESHOLD_FILE.write_text(json.dumps({'threshold': float(threshold), 'view_version': views.VIEW_VERSION}),
+                              encoding='utf-8')
 
 
-def load_trained():
+class StaleModelError(RuntimeError):
+    """The saved model was trained on views from a different recipe (views.VIEW_VERSION)."""
+
+
+def check_view_version():
+    """Raise StaleModelError unless the saved model was trained on the current view recipe."""
+    meta = json.loads(THRESHOLD_FILE.read_text()) if THRESHOLD_FILE.exists() else {}
+    trained = meta.get('view_version')
+    if trained != views.VIEW_VERSION:
+        raise StaleModelError(
+            f'The Star Gazer model in {C.rel(MODEL_DIR)} was trained on view recipe '
+            f'v{trained if trained is not None else "?"}, but views are now built with recipe '
+            f'v{views.VIEW_VERSION}; its predictions would not be reliable. Rebuild the views '
+            '(scripts/build_full_dataset.py) and retrain (scripts/train_star_gazer.py).')
+
+
+def load_trained(allow_stale=False):
     """(models, preprocessor, threshold) saved by scripts/train_star_gazer.py.
 
     `models` is a list (one entry, or several for an ensemble); predict() averages them.
+    Raises StaleModelError if the model predates the current view recipe, unless allow_stale.
     """
     from tensorflow import keras
     files = model_files()
     if not files:
         raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; run scripts/train_star_gazer.py')
+    if not allow_stale:
+        check_view_version()
     models = [keras.models.load_model(p) for p in files]
     pre = FeaturePreprocessor.load()
     threshold = json.loads(THRESHOLD_FILE.read_text())['threshold'] if THRESHOLD_FILE.exists() else 0.5
@@ -362,15 +430,22 @@ def views_for_koi(catalog, kepoi_name):
     return result[kepoi_name]
 
 
-def predict_koi(models, pre, catalog, kepoi_name, threshold=0.5):
-    """Planet probability for one KOI by name. Returns (prob, verdict, views dict, catalog row)."""
+def koi_inputs(pre, catalog_rows, v):
+    """Model inputs (batch of 1) for one KOI from its views dict and catalog row(s)."""
+    return {'global_view': v['global_view'][None, :, None],
+            'local_view': np.stack([v[k] for k in LOCAL_CHANNELS], axis=-1)[None],
+            'secondary_view': v['secondary_view'][None, :, None],
+            'features': pre.transform(catalog_rows)}
+
+
+def predict_koi(models, pre, catalog, kepoi_name, threshold=0.5, return_inputs=False):
+    """Planet probability for one KOI by name. Returns (prob, verdict, views dict, catalog row),
+    plus the model inputs it built (for saliency.explain) when return_inputs=True."""
     match = catalog[catalog.kepoi_name == kepoi_name]
     if match.empty:
         raise KeyError(f'{kepoi_name} not found in the KOI catalog')
     v = views_for_koi(catalog, kepoi_name)
-    available = {'global_view': v['global_view'][None, :, None],
-                 'local_view': np.stack([v[k] for k in LOCAL_CHANNELS], axis=-1)[None],
-                 'secondary_view': v['secondary_view'][None, :, None],
-                 'features': pre.transform(match)}
+    available = koi_inputs(pre, match, v)
     prob = float(predict(models, lambda m: _inputs(m, available))[0])
-    return prob, ('PLANET' if prob >= threshold else 'FALSE POSITIVE'), v, match.iloc[0]
+    result = (prob, ('PLANET' if prob >= threshold else 'FALSE POSITIVE'), v, match.iloc[0])
+    return result + (available,) if return_inputs else result

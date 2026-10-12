@@ -26,3 +26,6 @@ flagged/
 # V3 Star Gazer: model + detailed results are committed only encrypted (secure/*.enc)
 results/v3/
 .secrets/
+
+# Hugging Face Space bundle (scripts/make_hf_space.py)
+build/

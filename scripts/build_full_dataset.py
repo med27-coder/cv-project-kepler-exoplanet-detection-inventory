@@ -5,6 +5,7 @@ NASA cumulative catalog.
     .venv\\Scripts\\python scripts\\build_full_dataset.py                # all ~6,600 stars
     .venv\\Scripts\\python scripts\\build_full_dataset.py --limit 20     # quick test
     .venv\\Scripts\\python scripts\\build_full_dataset.py --workers 4
+    .venv\\Scripts\\python scripts\\build_full_dataset.py --candidates   # unlabelled CANDIDATE KOIs
 
 Resumable: KOIs that already have a current-version view in data/interim/views/ are
 skipped. Stars that could not be downloaded are listed in _failed.txt and KOIs that could
@@ -20,25 +21,14 @@ import sys
 import time
 from pathlib import Path
 
-import pandas as pd
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from kepler_cnn import config as C
+from kepler_cnn import star_gazer as S
 from kepler_cnn import terms, views
 from kepler_cnn.runtime import low_priority
-
-FULL_CATALOG = C.RAW_DIR / 'koi_cumulative_full.csv'
-FULL_CATALOG_URL = 'https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+cumulative&format=csv'
-
-
-def load_full_catalog():
-    if not FULL_CATALOG.exists():
-        print('Downloading the full KOI cumulative table (all columns)...')
-        FULL_CATALOG.parent.mkdir(parents=True, exist_ok=True)
-        pd.read_csv(FULL_CATALOG_URL).to_csv(FULL_CATALOG, index=False)
-    return pd.read_csv(FULL_CATALOG)
 
 
 def _read_log(path):
@@ -59,6 +49,8 @@ def main():
     parser.add_argument('--limit', type=int, default=None, help='only process this many stars')
     parser.add_argument('--retry-failed', action='store_true',
                         help='retry stars in _failed.txt and KOIs in _skipped.txt')
+    parser.add_argument('--candidates', action='store_true',
+                        help='build views for the unlabelled CANDIDATE KOIs instead (scripts/score_candidates.py)')
     args = parser.parse_args()
 
     try:
@@ -67,20 +59,26 @@ def main():
         sys.exit(str(e))
 
     low_priority()
-    cat = load_full_catalog()
-    labelled = cat[cat.koi_disposition.isin(['CONFIRMED', 'FALSE POSITIVE'])]
+    cat = S.load_catalog()
+    kind = 'CANDIDATE' if args.candidates else 'labelled'
+    wanted = ['CANDIDATE'] if args.candidates else ['CONFIRMED', 'FALSE POSITIVE']
+    targets = cat[cat.koi_disposition.isin(wanted)]
+    failed_log, skipped_log = views.log_paths(candidates=args.candidates)   # separate logs per mode
     if args.retry_failed:
-        for log in (views.VIEWS_FAILED, views.VIEWS_SKIPPED):
+        for log in (failed_log, skipped_log):
             log.unlink(missing_ok=True)
-    failed = {int(w[0]) for w in _read_log(views.VIEWS_FAILED)}
-    skipped = {w[0] for w in _read_log(views.VIEWS_SKIPPED)}
-    todo = labelled[[n not in skipped and not views.is_current(n) for n in labelled.kepoi_name]]
+    failed = {int(w[0]) for w in _read_log(failed_log)}
+    skipped = {w[0] for w in _read_log(skipped_log)}
+    current = {n for n in targets.kepoi_name if views.is_current(n)}
+    todo = targets[[n not in skipped and n not in current for n in targets.kepoi_name]]
     stars = [k for k in todo.kepid.unique() if k not in failed]
     if args.limit:
         stars = stars[:args.limit]
-    print(f'{labelled.kepoi_name.nunique()} labelled KOIs on {labelled.kepid.nunique()} stars; '
-          f'{len(labelled) - len(todo) - len(skipped)} already done; {len(stars)} stars to process '
-          f'({len(failed)} stars failed and {len(skipped)} KOIs were skipped before; '
+    prior_skipped = len(skipped & set(targets.kepoi_name))
+    prior_failed = len(failed & set(targets.kepid))
+    print(f'{targets.kepoi_name.nunique()} {kind} KOIs on {targets.kepid.nunique()} stars; '
+          f'{len(current)} already done; {len(stars)} stars to process '
+          f'({prior_failed} stars failed and {prior_skipped} KOIs were skipped before; '
           '--retry-failed retries them)', flush=True)
     if not stars:
         return
@@ -109,12 +107,12 @@ def main():
             done += 1
             if err:
                 n_failed += 1
-                _append_log(views.VIEWS_FAILED, [f'{kepid} {err}'])
+                _append_log(failed_log, [f'{kepid} {err}'])
             else:
                 views.save_views(result)
                 n_views += len(result)
                 n_skipped += len(skipped_kois)
-                _append_log(views.VIEWS_SKIPPED, [f'{n} {why}' for n, why in skipped_kois.items()])
+                _append_log(skipped_log, [f'{n} {why}' for n, why in skipped_kois.items()])
             bar.update()
             bar.set_postfix(views=n_views, skipped=n_skipped, failed=n_failed, refresh=False)
             if not interactive and (done % 25 == 0 or done == len(stars)):
@@ -124,7 +122,8 @@ def main():
                       f'{n_failed} stars failed | {rate * 60:.1f} stars/min | ETA {eta:.1f} h', flush=True)
         bar.close()
     print(f'Done: {n_views} views saved, {n_skipped} KOIs skipped, {n_failed} stars failed'
-          + (' (see _skipped.txt / _failed.txt; retry with --retry-failed)' if n_failed or n_skipped else ''))
+          + (f' (see {skipped_log.name} / {failed_log.name}; retry with --retry-failed)'
+             if n_failed or n_skipped else ''))
 
 
 if __name__ == '__main__':

@@ -98,3 +98,152 @@ def test_model_files_orders_ensemble_members(tmp_path, monkeypatch):
         (tmp_path / name).touch()
     expected = ['star_gazer.keras', 'star_gazer_2.keras', 'star_gazer_10.keras']
     assert [p.name for p in S.model_files()] == expected
+
+
+def test_recall_at_precision():
+    y = np.array([1, 1, 1, 0, 0, 1])
+    p = np.array([0.9, 0.8, 0.7, 0.6, 0.2, 0.1])
+    assert S.recall_at_precision(y, p, 0.99) == 0.75
+    assert S.recall_at_precision(np.array([0, 1]), np.array([0.9, 0.1]), 0.99) == 0.0
+
+
+def test_saliency_shapes_and_sign(keras):
+    from kepler_cnn import saliency
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    model = S.build_model(n_features=feats.shape[1], compile=False)
+    available = saliency.available_for_row(ds, feats, 0)
+    sal = saliency.explain([model, model], available)
+    assert sal['global_view'].shape == (views.GLOBAL_BINS,)
+    assert sal['local_view'].shape == (views.LOCAL_BINS, len(S.LOCAL_CHANNELS))
+    assert sal['secondary_view'].shape == (views.LOCAL_BINS,)
+    assert sal['features'].shape == (feats.shape[1],)
+    # explain() credits each region with the drop in P(planet) when it is hidden
+    p0 = float(S.predict([model], lambda m: S._inputs(m, available))[0])
+    assert abs(sal['prob'] - p0) < 1e-5
+    hidden = {k: v.copy() for k, v in available.items()}
+    hidden['features'][0, 3] = 0
+    p_hidden = float(S.predict([model], lambda m: S._inputs(m, hidden))[0])
+    assert abs(sal['features'][3] - (p0 - p_hidden)) < 1e-5
+
+
+def test_saliency_skips_unused_inputs(keras):
+    from kepler_cnn import saliency
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    basic = S.build_model(use_secondary=False, use_features=False, local_channels=1, compile=False)
+    sal = saliency.explain(basic, saliency.available_for_row(ds, feats, 1))
+    assert set(sal) == {'prob', 'global_view', 'local_view'}
+    assert sal['local_view'].shape == (views.LOCAL_BINS, 1)
+
+
+def test_split_by_star_matches_original_protocol():
+    from sklearn.model_selection import StratifiedGroupKFold
+    rng = np.random.default_rng(1)
+    y, groups = rng.integers(0, 2, 300), rng.integers(0, 120, 300)
+    outer = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
+    trainval, test = next(outer.split(np.zeros(len(y)), y, groups))
+    inner = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
+    tr, va = next(inner.split(np.zeros(len(trainval)), y[trainval], groups[trainval]))
+    for got, want in zip(S.split_by_star(y, groups, seed=42), (trainval[tr], trainval[va], test)):
+        np.testing.assert_array_equal(got, want)
+
+
+def test_agreement_with_nasa_handles_missing_scores():
+    assert S.agreement_with_nasa([0.9, 0.1], [np.nan, np.nan], 0.5) is None
+    assert S.agreement_with_nasa([0.9, 0.1], [0.8, np.nan], 0.5) is None
+    agree, r, n = S.agreement_with_nasa([0.9, 0.1, 0.8, 0.2], [0.95, 0.05, 0.1, np.nan], 0.5)
+    assert n == 3 and abs(agree - 2 / 3) < 1e-9 and -1 <= r <= 1
+
+
+def test_stale_model_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setattr(S, 'MODEL_DIR', tmp_path)
+    monkeypatch.setattr(S, 'THRESHOLD_FILE', tmp_path / 'threshold.json')
+    (tmp_path / 'threshold.json').write_text('{"threshold": 0.4, "view_version": %d}' % views.VIEW_VERSION)
+    S.check_view_version()
+    (tmp_path / 'threshold.json').write_text('{"threshold": 0.4, "view_version": %d}' % (views.VIEW_VERSION - 1))
+    with pytest.raises(S.StaleModelError):
+        S.check_view_version()
+    (tmp_path / 'threshold.json').write_text('{"threshold": 0.4}')   # saved before versions were recorded
+    with pytest.raises(S.StaleModelError):
+        S.check_view_version()
+
+
+def test_explain_many_matches_explain(keras, monkeypatch):
+    from kepler_cnn import saliency
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    model = S.build_model(n_features=feats.shape[1], compile=False)
+    items = [saliency.available_for_row(ds, feats, i) for i in range(3)]
+    monkeypatch.setattr(saliency, 'MAX_ROWS', 300)        # force several predict groups
+    many = saliency.explain_many(model, items)
+    for one, item in zip(many, items):
+        single = saliency.explain(model, item)
+        for k in single:
+            np.testing.assert_allclose(one[k], single[k], atol=1e-6)
+
+
+def test_hf_space_refuses_stale_or_old_bundle(tmp_path, monkeypatch):
+    import os
+    from pathlib import Path
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    import make_hf_space
+    monkeypatch.setattr(S, 'MODEL_DIR', tmp_path)
+    monkeypatch.setattr(S, 'MODEL_FILE', tmp_path / 'star_gazer.keras')
+    monkeypatch.setattr(S, 'THRESHOLD_FILE', tmp_path / 'threshold.json')
+    bundle = tmp_path / 'bundle.enc'
+    bundle.write_bytes(b'x')
+    with pytest.raises(SystemExit, match='No local model'):
+        make_hf_space.check_bundle(bundle)
+    S.MODEL_FILE.write_bytes(b'model')
+    S.THRESHOLD_FILE.write_text('{"threshold": 0.5, "view_version": %d}' % (views.VIEW_VERSION - 1))
+    with pytest.raises(SystemExit, match='crash on start-up'):
+        make_hf_space.check_bundle(bundle)
+    S.THRESHOLD_FILE.write_text('{"threshold": 0.5, "view_version": %d}' % views.VIEW_VERSION)
+    os.utime(bundle, (0, 0))                                    # bundle older than the model
+    with pytest.raises(SystemExit, match='older than the model'):
+        make_hf_space.check_bundle(bundle)
+    os.utime(bundle, None)
+    for p in (S.MODEL_FILE, S.THRESHOLD_FILE):
+        os.utime(p, (1, 1))
+    make_hf_space.check_bundle(bundle)                          # current and fresh: no exit
+
+
+def test_explain_many_mixed_channel_ensemble(keras):
+    from kepler_cnn import saliency
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    one_ch = S.build_model(n_features=feats.shape[1], local_channels=1, compile=False)
+    four_ch = S.build_model(n_features=feats.shape[1], compile=False)
+    sal = saliency.explain([one_ch, four_ch], saliency.available_for_row(ds, feats, 0))
+    assert sal['local_view'].shape[-1] == len(S.LOCAL_CHANNELS)   # every channel some member reads
+
+
+def test_saliency_average_plot_with_basic_model(keras, tmp_path):
+    import matplotlib
+    matplotlib.use('Agg')
+    from kepler_cnn import plots, saliency
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    basic = S.build_model(use_secondary=False, use_features=False, local_channels=1, compile=False)
+    sals = saliency.explain_many(basic, [saliency.available_for_row(ds, feats, i) for i in range(4)])
+    plots.v3_saliency_average(sals, ds['y'][:4], S.FEATURES, tmp_path / 'avg.png')
+    assert (tmp_path / 'avg.png').exists()
+
+
+def test_saliency_figures_skip_missing_class(keras, tmp_path, monkeypatch):
+    from pathlib import Path
+
+    import matplotlib
+    matplotlib.use('Agg')
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))   # undone after the test
+    import train_star_gazer
+    monkeypatch.setattr(S, 'RESULTS_DIR', tmp_path)
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    model = S.build_model(n_features=feats.shape[1], compile=False)
+    te = np.flatnonzero(ds['y'] == 1)[:4]                  # planets only
+    train_star_gazer.save_saliency_figures([model], ds, feats, S.FEATURES, te, np.full(len(te), 0.7),
+                                           n_average=4)
+    assert (tmp_path / 'saliency_planet.png').exists()
+    assert not (tmp_path / 'saliency_false_positive.png').exists()
