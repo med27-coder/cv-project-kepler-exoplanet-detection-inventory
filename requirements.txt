@@ -30,7 +30,7 @@ ipywidgets>=8.0
 ipykernel>=6.25
 
 # Encrypts the private V3 artifacts (scripts/secure_artifacts.py)
-cryptography>=42
+cryptography>=50.0.2
 
 # Optional web demo (app.py)
 gradio>=4.0
