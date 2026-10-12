@@ -1,0 +1,16 @@
+# Dependabot (free): weekly pull requests that update the pinned GitHub Actions and flag
+# Python dependencies with security fixes. Review and merge them like any other change.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

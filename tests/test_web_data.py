@@ -49,6 +49,27 @@ def test_systems(data):
                 assert p['method'], (name, p)
 
 
+def test_page_security_policy():
+    """The page keeps a strict Content Security Policy and nothing that would need loosening it."""
+    html = (WEB / 'index.html').read_text(encoding='utf-8')
+    csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
+    assert csp, 'Content-Security-Policy meta tag missing'
+    policy = dict(part.strip().split(' ', 1) for part in csp.group(1).split(';') if part.strip())
+    assert policy['default-src'] == "'none'"
+    assert policy['script-src'] == "'self'" and policy['style-src'] == "'self'"
+    assert "'unsafe-inline'" not in csp.group(1) and "'unsafe-eval'" not in csp.group(1)
+    assert policy['object-src'] == "'none'" and policy['base-uri'] == "'none'"
+    # nothing inline: no <script> bodies, style attributes or on*= handlers, in the page or the JS templates
+    assert not re.search(r'<script(?![^>]*\bsrc=)[^>]*>', html)
+    js = (WEB / 'starmap.js').read_text(encoding='utf-8')
+    for text in (html, js):
+        assert not re.search(r'\sstyle="', text)
+        assert not re.search(r'\son[a-z]+="', text)
+    # every script and stylesheet is local
+    assert not re.search(r'<script[^>]+src="https?:', html)
+    assert not re.search(r'<link[^>]+rel="stylesheet"[^>]+href="https?:', html)
+
+
 def test_page_assets_exist():
     html = (WEB / 'index.html').read_text(encoding='utf-8')
     for ref in re.findall(r'(?:src|href)="([^":#]+)"', html):   # relative links only

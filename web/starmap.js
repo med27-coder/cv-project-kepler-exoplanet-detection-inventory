@@ -12,6 +12,7 @@
   const SG_THRESHOLD = DATA.sg_threshold ?? 0.5;
   const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LY_PER_PC = 3.26156;
+  const MAX_QUERY = 60;   // longest search text accepted (input maxlength, links, lookups)
 
   const SOON = [
     'Soon to cross the stars',
@@ -47,17 +48,17 @@
     return '#a8c8ff';
   }
 
-  const PLANET_BANDS = [   // equilibrium temperature (K) -> colour
-    [1500, '#ff5a36'],     // molten
-    [700, '#ffa64d'],      // scorching
-    [350, '#e8d27a'],      // hot
-    [180, '#4fd17a'],      // temperate
-    [-Infinity, '#8fd3ff'],// icy
+  const PLANET_BANDS = [   // equilibrium temperature (K) -> canvas colour, CSS class (style.css)
+    [1500, '#ff5a36', 't-molten'],
+    [700, '#ffa64d', 't-scorching'],
+    [350, '#e8d27a', 't-hot'],
+    [180, '#4fd17a', 't-temperate'],
+    [-Infinity, '#8fd3ff', 't-icy'],
   ];
-  function planetColor(teq) {
-    if (teq == null) return '#c0c6e0';
-    return PLANET_BANDS.find(([t]) => teq >= t)[1];
-  }
+  const band = teq => (teq == null ? null : PLANET_BANDS.find(([t]) => teq >= t));
+  const planetColor = teq => band(teq)?.[1] ?? '#c0c6e0';
+  const planetClass = teq => band(teq)?.[2] ?? '';
+  const STATUSES = new Set(['confirmed', 'candidate', 'other']);
   function planetSize(radius) {   // Earth radii -> pixel radius
     if (radius == null || radius < 1.5) return 1;
     if (radius < 4) return 2;
@@ -411,6 +412,8 @@
   const title = document.getElementById('sys-title');
   const info = document.getElementById('info');
 
+  // Every value written with innerHTML goes through esc() or fmt(); the data is our own export,
+  // but escaping everything means a bad or tampered data file still can't inject markup.
   function esc(text) {
     return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -418,7 +421,7 @@
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
   function skyLink(ra, dec) {
-    const url = 'https://aladin.cds.unistra.fr/AladinLite/?target=' + encodeURIComponent(`${ra} ${dec}`) +
+    const url = 'https://aladin.cds.unistra.fr/AladinLite/?target=' + encodeURIComponent(`${Number(ra)} ${Number(dec)}`) +
                 '&fov=0.08&survey=' + encodeURIComponent('CDS/P/DSS2/color');
     return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">See the real sky here ↗</a>`;
   }
@@ -428,18 +431,25 @@
   function skyThumb(ra, dec) {
     const url = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=' +
                 encodeURIComponent('CDS/P/DSS2/color') +
-                `&width=32&height=32&fov=0.04&projection=TAN&coordsys=icrs&ra=${ra}&dec=${dec}&format=jpg`;
+                `&width=32&height=32&fov=0.04&projection=TAN&coordsys=icrs&ra=${Number(ra)}&dec=${Number(dec)}&format=jpg`;
     return `<figure class="sky"><img src="${esc(url)}" width="32" height="32" loading="lazy"
-              alt="Real sky photo (DSS2) around the star" onerror="this.closest('figure').hidden = true">
+              referrerpolicy="no-referrer" alt="Real sky photo (DSS2) around the star">
             <figcaption>real sky</figcaption></figure>`;
+  }
+
+  // Hide the sky photo if it can't load (offline, service down). A listener, not an inline
+  // onerror attribute, so the Content Security Policy can forbid inline scripts.
+  function wireSkyThumbs() {
+    info.querySelectorAll('.sky img').forEach(img =>
+      img.addEventListener('error', () => { img.closest('figure').hidden = true; }));
   }
 
   function statusText(p) {
     if (p.status === 'other') return esc(p.method);
     if (p.status === 'candidate' && p.sg != null) {
-      return `candidate · Star Gazer ${Math.round(p.sg * 100)}% ${p.sg_planet ? 'planet' : '(likely false positive)'}`;
+      return `candidate · Star Gazer ${fmt(Math.round(p.sg * 100))}% ${p.sg_planet ? 'planet' : '(likely false positive)'}`;
     }
-    return p.status;
+    return esc(p.status);
   }
 
   function showSystem(s, detail) {
@@ -449,17 +459,17 @@
     if (count('candidate')) parts.push(`${plural(count('candidate'), 'candidate')} (hollow)`);
     if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
     const rows = detail.planets.map(p => {
-      const c = planetColor(p.teq);
+      const cls = `${planetClass(p.teq)} ${STATUSES.has(p.status) ? p.status : ''}`;
       const mass = p.mass == null ? '-' : (p.mass_kind === 'estimated' ? '~' : '') + fmt(p.mass, 1);
       return `
       <tr>
-        <td><span class="dot ${p.status}" style="background:${c};color:${c}"></span>${esc(p.name)}</td>
+        <td><span class="dot ${cls}"></span>${esc(p.name)}</td>
         <td class="num">${fmt(p.radius, 1)}</td>
         <td class="num">${mass}</td>
         <td class="num">${fmt(p.period, 1)}</td>
         <td class="num">${fmt(p.teq)}</td>
         <td>${statusText(p)}</td>
-        <td class="num">${p.year ?? '-'}</td>
+        <td class="num">${p.year == null ? '-' : esc(p.year)}</td>
       </tr>`;
     }).join('');
     const dist = detail.dist_pc != null ? ` · ${fmt(detail.dist_pc * LY_PER_PC)} light-years away` : '';
@@ -473,7 +483,8 @@
           <th class="num">Year (days)</th><th class="num">Temp (K)</th><th>Status</th><th class="num">Found</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
-      <p class="note">~ mass estimated from size · green ring = habitable zone (approx.) · Kepler ID ${detail.kepid}</p>`;
+      <p class="note">~ mass estimated from size · green ring = habitable zone (approx.) · Kepler ID ${esc(detail.kepid)}</p>`;
+    wireSkyThumbs();
     scene = buildScene(detail);
   }
 
@@ -486,6 +497,7 @@
       <p>${esc(label(s))}. Only unconfirmed candidates orbit this star, so its pixel portrait is still in the hangar
          until Star Gazer has scored them.</p></div>
       <p>${skyLink(s[COL.ra], s[COL.dec])} · ${fmt(Object.keys(SYSTEMS).length)} systems are already drawn; try one above.</p>`;
+    wireSkyThumbs();
     scene = { mystery: true };
   }
 
@@ -509,6 +521,7 @@
   }
 
   function lookup(query, updateHash = true) {
+    query = String(query).slice(0, MAX_QUERY);
     if (!query.trim()) return;
     const s = find(query);
     if (s) select(s, updateHash); else showUnknown(query);
@@ -555,7 +568,7 @@
     active = -1;
     suggest.innerHTML = options.map((s, i) => `
       <li role="option" id="opt-${i}" data-i="${i}">${esc(s[COL.name])}
-        <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${s[COL.koi]} · ` : ''}${
+        <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
           s[COL.drawn] ? plural(SYSTEMS[s[COL.name]].planets.length, 'planet') : 'soon'}</span></li>`).join('');
     suggest.hidden = false;
     input.setAttribute('aria-expanded', 'true');
@@ -621,7 +634,12 @@
   document.getElementById('exported').textContent = `Exported ${DATA.exported}.`;
 
   function fromHash() {
-    const q = decodeURIComponent(location.hash.slice(1));
+    let q;
+    try {
+      q = decodeURIComponent(location.hash.slice(1)).slice(0, MAX_QUERY);
+    } catch {
+      return;   // malformed %-escape in a hand-edited link: ignore it
+    }
     if (q) { input.value = q; lookup(q, false); }
   }
   window.addEventListener('hashchange', fromHash);

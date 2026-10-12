@@ -1,3 +1,16 @@
+/* Fonts are served from this site (SIL Open Font License, see fonts/OFL-*.txt), so no
+   third party sees visitors' requests. Latin subset; other symbols fall back to system fonts. */
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("fonts/press-start-2p-latin.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "VT323";
+  src: url("fonts/vt323-latin.woff2") format("woff2");
+  font-display: swap;
+}
+
 :root {
   --bg: #070b1a;
   --panel: #0e1530;
@@ -121,8 +134,20 @@ th { text-align: left; color: var(--ink-2); font-weight: normal; border-bottom: 
 td, th { padding: 2px 6px 2px 0; }
 td:first-child { white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
-.dot.candidate { background: transparent !important; border: 2px solid currentColor; }
+.dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c, #c0c6e0); }
+.dot.candidate { background: transparent; border: 2px solid var(--c, #c0c6e0); }
+/* Planet temperature bands (same colours as the canvas, starmap.js PLANET_BANDS) */
+.t-molten { --c: #ff5a36; }
+.t-scorching { --c: #ffa64d; }
+.t-hot { --c: #e8d27a; }
+.t-temperate { --c: #4fd17a; }
+.t-icy { --c: #8fd3ff; }
+/* Map legend */
+.lg-spot { --c: #ffd34d; }
+.lg-drawn { --c: #c8d6ff; }
+.lg-soon { --c: #3c4870; }
+.lg-likely { --c: #6fe39a; }
+.lg-unlikely { --c: #ff7a59; margin-left: 6px; }
 .dot.other { transform: rotate(45deg) scale(0.85); }
 .table-wrap { overflow-x: auto; }
 .note { color: var(--ink-2); font-size: 18px; }

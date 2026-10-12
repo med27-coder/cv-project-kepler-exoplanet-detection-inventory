@@ -1,0 +1,68 @@
+# Security Policy
+
+## Reporting a vulnerability
+
+Please **don't open a public issue** for security problems. Instead, use GitHub's private
+reporting: **Security → Report a vulnerability** on this repository, or email
+franciscomed927@gmail.com with "Security" in the subject.
+
+Include what you found, how to reproduce it, and what an attacker could do with it. You'll get a
+reply within a week. This is a student project maintained by one person, so there is no bug
+bounty, but credit is given in the fix's commit message if you'd like.
+
+## What's in scope
+
+| Part | Where | Notes |
+|---|---|---|
+| Kepler Star Map | `web/`, published on GitHub Pages | Static site: no server code, no accounts, no cookies |
+| Star Gazer web demo | `app.py`, `scripts/make_hf_space.py` | Gradio app; runs locally or on a Hugging Face Space |
+| Encrypted model bundle | `secure/`, `scripts/secure_artifacts.py` | AES-256-GCM; the key is never committed |
+| CI workflows | `.github/workflows/` | |
+
+Out of scope: the NASA, MAST and CDS services the project downloads from, and the accuracy of
+model predictions (an educational model, not a scientific classification; see
+[TERMS_OF_USE.md](TERMS_OF_USE.md)).
+
+## Measures in place
+
+**Star map (web/)**
+- Strict Content Security Policy: only the site's own scripts, styles and fonts load; no inline
+  scripts, inline styles or `eval`. Images may also come from the CDS sky-survey service.
+- Every value written into the page is escaped; search input is length-limited; malformed links
+  are ignored.
+- Fonts are self-hosted, so no third party sees visitors' requests (only the optional sky photo
+  is fetched from CDS). No cookies, analytics or storage.
+- Tests (`tests/test_web_data.py`) fail if the policy is loosened or inline code comes back,
+  and validate the published data file.
+
+**Web demo (app.py)**
+- KOI names are checked against the NASA catalog before they reach a file path; manual inputs
+  must be finite and in range.
+- One prediction at a time with a short queue, no direct API access around the queue, and no
+  error tracebacks shown to visitors. Listens on localhost unless `--host` says otherwise.
+- Models are loaded with Keras `safe_mode=True` (files with embedded Python code are refused),
+  and NumPy files with `allow_pickle=False`.
+- A model trained on an older data recipe is refused (`StaleModelError`).
+
+**Secrets and the model**
+- The trained model and detailed results are committed only encrypted (`secure/*.enc`,
+  AES-256-GCM). The key lives in `.secrets/` (git-ignored) or the `STAR_GAZER_KEY`
+  environment variable / Hugging Face secret, never in the repository.
+- `.gitignore` blocks common secret files (`.env`, `*.key`, `*.pem`, ...). The full git
+  history was scanned for leaked keys and tokens (none found, October 2026).
+
+**Supply chain**
+- GitHub Actions are pinned to commit SHAs and run with the minimum permissions they need;
+  checkouts don't keep the token.
+- Dependabot opens weekly update PRs for the actions and Python dependencies.
+- `dependency-audit` checks the Python dependencies against the PyPA advisory database weekly.
+- CodeQL scans the Python, JavaScript and workflow code on every push and weekly.
+
+## Repository settings (maintainer checklist)
+
+These are GitHub settings, not files, so they're listed here to keep track of them:
+- Settings → Code security: **Secret scanning** and **Push protection** on,
+  **Private vulnerability reporting** on, **Dependabot alerts** and **security updates** on.
+- Settings → Rules: a ruleset for `main` that blocks force pushes and deletion.
+- Account: two-factor authentication on.
+- Keep an offline backup of `.secrets/star_gazer.key`; without it the encrypted bundle can't be opened.
