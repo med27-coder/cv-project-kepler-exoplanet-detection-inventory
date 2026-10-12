@@ -1,5 +1,5 @@
-# Dependabot (free): weekly pull requests that update the pinned GitHub Actions and flag
-# Python dependencies with security fixes. Review and merge them like any other change.
+# Dependabot (free): weekly pull requests that update the pinned GitHub Actions; Python
+# dependencies get security-fix PRs only. Review and merge them like any other change.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -9,8 +9,10 @@ updates:
     groups:
       actions:
         patterns: ['*']
+  # requirements.txt uses >= ranges, so routine version bumps add nothing. Limit 0 turns them
+  # off; security fixes still arrive as PRs via Dependabot security updates (repo setting).
   - package-ecosystem: pip
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
