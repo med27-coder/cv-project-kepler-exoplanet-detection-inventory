@@ -65,8 +65,26 @@ Status key: `[x]` done · `[ ]` to do · `[~]` started.
 - [x] Planets NASA lists that are not KOIs (radial velocity, timing, later transit searches), drawn as ◆
 - [x] Real sky: a 32×32 pixelated photo of the sky around each star (DSS2 via CDS hips2fits, fetched
       live, ~1 KB, nothing stored) + a "See the real sky" link to Aladin Lite
-- [ ] Zoom on the map
+- [x] Zoom on the map (see Phase 6b)
 - [ ] Retro sound toggle (off by default)
+
+## Phase 6b: Make it easier and more fun to explore ✅
+
+Ordered by value for visitors. Everything runs in the browser from the data already exported.
+
+- [x] **Map zoom and pan**: zoom buttons (1×, 2×, 4×) and mouse wheel; drag to pan; zoom follows the selected star
+- [x] **Type-ahead search**: suggestions as you type (names, KOI numbers), arrow keys + Enter to pick
+- [x] **Highlights**: toggles that light up matching stars on the map: *habitable zone*, *Earth-sized*,
+      *5+ planets*, *giant planets*; each shows how many systems match
+- [x] **Surprise me**: jump to a random drawn system
+- [x] **Share-ready**: favicon, and a social preview image (`og:image`) generated from the real map data
+- [x] **Guardrails**: CI checks the page's JavaScript syntax and validates the committed `systems.js`
+      (format, size budget), so a bad export can't break the live site
+
+After the Phase 2 pipeline (needs the rebuilt views and scores):
+
+- [ ] Light-curve sparkline per planet (the folded transit from the local view), lazy-loaded per system
+- [ ] Scheduled data refresh: a monthly workflow that re-exports from the NASA archive (dispositions change)
 
 ## Phase 7: More data (for a better model)
 
