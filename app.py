@@ -44,7 +44,8 @@ def _release(*figs):
 def make_predict_v3(models, pre, threshold, catalog):
     known_kois = set(catalog.kepoi_name)
 
-    def predict(agree, kepoi_name, kepler_id, period, t0, explain=False, progress=gr.Progress()):
+    # Gradio finds the gr.Progress() default and passes a live tracker per request (its documented API)
+    def predict(agree, kepoi_name, kepler_id, period, t0, explain=False, progress=gr.Progress()):  # noqa: B008
         if not agree:
             return 'Please read and accept the Terms of Use first.', None, None
         kepoi_name = (kepoi_name or '').strip().upper()
@@ -91,7 +92,7 @@ def check_manual_inputs(kepler_id, period, t0):
 
 
 def make_predict_cnn(model, df_koi):
-    def predict(agree, kepoi_name, kepler_id, period, t0, progress=gr.Progress()):
+    def predict(agree, kepoi_name, kepler_id, period, t0, progress=gr.Progress()):  # noqa: B008  Gradio injects it
         if not agree:
             return 'Please read and accept the Terms of Use first.', None
         kepoi_name = (kepoi_name or '').strip().upper()

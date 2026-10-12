@@ -1,0 +1,19 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [".venv", "data", "models", "build", "secure", "results", "web/data", "web/fonts", "**/*.ipynb", "**/*.pptx", "**/*.pdf"],
+  "words": [
+    "AstroNet", "ExoMiner", "Robovetter", "Gazer", "Kepler", "Gaia", "TESS", "Aladin", "VizieR", "hips2fits",
+    "KOI", "KOIs", "kois", "kepoi", "kepid", "kepmag", "BKJD", "KIC", "TOI", "TOIs", "MAST", "pscomppars",
+    "koi_prad", "koi_teq", "koi_steff", "koi_srad", "koi_smass", "koi_sma", "koi_insol", "koi_dor", "koi_ror",
+    "prad", "srad", "steff", "slogg", "smet", "smass", "srho", "insol", "teq", "sma", "dikco", "dicco", "fwm",
+    "oedp", "msky", "srao", "sdeco", "sngle", "Msini", "Msun", "Rsun", "exoplanet", "exoplanets", "Exoplanet",
+    "lightkurve", "astropy", "gradio", "Gradio", "keras", "Keras", "sklearn", "matplotlib", "pyplot", "seaborn",
+    "tqdm", "ipywidgets", "ipykernel", "pytest", "monkeypatch", "syspath", "venv", "numpy", "pandas", "dtype",
+    "ndarray", "argparse", "pathlib", "splitlines", "isfinite", "tracebacks", "noqa", "codeql", "Dependabot",
+    "saliency", "ablation", "detrend", "detrending", "Savitzky", "Golay", "centroid", "centroids", "Brier",
+    "Kopparapu", "Shallue", "Vanderburg", "parsec", "parsecs", "DSS2", "woff2", "OFL", "Hugging",
+    "cnn", "plt", "btn", "desc", "sal", "Agg", "fig", "figs", "prob", "thr", "feats", "keygen",
+    "starmap", "systems", "pixelated"
+  ]
+}
