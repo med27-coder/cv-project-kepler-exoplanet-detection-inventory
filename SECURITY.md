@@ -48,8 +48,15 @@ model predictions (an educational model, not a scientific classification; see
 
 **Secrets and the model**
 - The trained model and detailed results are committed only encrypted (`secure/*.enc`,
-  AES-256-GCM). The key lives in `.secrets/` (git-ignored) or the `STAR_GAZER_KEY`
-  environment variable / Hugging Face secret, never in the repository.
+  AES-256-GCM). The bundle is split into parts under GitHub's file limit. Each part is
+  authenticated together with the bundle id, creation time, its position and the part count,
+  so parts can't be swapped, dropped, reordered or mixed between bundles. `MANIFEST.json` lists
+  every part's SHA-256, checked before decrypting. Extraction only writes to `models/v3` and
+  `results/v3`.
+- The key lives in `.secrets/` (git-ignored, owner-only file permissions) or the
+  `STAR_GAZER_KEY` environment variable / Hugging Face secret, never in the repository. The key
+  file can be passphrase-protected (`secure_artifacts.py protect`, scrypt). `rotate`
+  re-encrypts with a new key.
 - `.gitignore` blocks common secret files (`.env`, `*.key`, `*.pem`, ...). The full git
   history was scanned for leaked keys and tokens (none found, October 2026).
 

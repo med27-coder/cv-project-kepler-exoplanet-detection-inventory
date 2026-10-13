@@ -12,11 +12,12 @@ In the Space's Settings > Variables and secrets add:
     secret   STAR_GAZER_KEY = <contents of .secrets/star_gazer.key>
     variable KEPLER_ACCEPT_TERMS = 1    (you, the operator, accept the Terms; visitors still tick the box)
 
-The trained model is uploaded only encrypted (secure/star_gazer_v3.enc) and decrypted
+The trained model is uploaded only encrypted (secure/*.enc + MANIFEST.json) and decrypted
 inside the Space at start-up with the secret key; the key itself is never uploaded.
 """
 
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -99,14 +100,15 @@ def check_bundle(bundle):
         sys.exit(f'{e}\nThe Space would crash on start-up with this model.')
     newest = max(p.stat().st_mtime for p in [*files, S.THRESHOLD_FILE] if p.exists())
     if bundle.stat().st_mtime < newest:
-        sys.exit('secure/star_gazer_v3.enc is older than the model in models/v3; '
+        sys.exit('The encrypted bundle (secure/MANIFEST.json) is older than the model in models/v3; '
                  'run scripts/secure_artifacts.py lock again.')
 
 
 def main():
-    bundle = ROOT / 'secure' / 'star_gazer_v3.enc'
+    bundle = ROOT / 'secure' / 'MANIFEST.json'   # written last by lock, so its time is the bundle's
     if not bundle.exists():
-        sys.exit('secure/star_gazer_v3.enc not found; run scripts/secure_artifacts.py lock first.')
+        sys.exit('secure/MANIFEST.json not found; run scripts/secure_artifacts.py lock first.')
+    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'secure_artifacts.py'), 'verify'], check=True)
     check_bundle(bundle)
     if OUT.exists():
         shutil.rmtree(OUT)

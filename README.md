@@ -239,7 +239,7 @@ The project evolved across four versions. V2 began as a Colab notebook titled "V
 | **Evaluation** | One model | Ablation of 5 variants on the same split, threshold tuned on validation | Shows what each input contributes |
 | **Speed** | ~30 min downloads | Resumable 6-worker build (`scripts/build_full_dataset.py`), raw FITS deleted after each star (~200 MB of views) | A full-catalog build takes a few hours on a laptop |
 | **Web app** | V2 CNN | Star Gazer by default (`--model v2` / `v1_5` still available), cached views, progress bar | Same app serves every version |
-| **Artifacts** | Model git-ignored | Model + detailed results committed only encrypted (`secure/star_gazer_v3.enc`) | Public repo, private trained model; headline metrics stay public |
+| **Artifacts** | Model git-ignored | Model + detailed results committed only encrypted (`secure/star_gazer_v3.partNN.enc` + `MANIFEST.json`) | Public repo, private trained model; headline metrics stay public |
 | **Tests** | — | `pytest` suite in `tests/` (views, model plumbing, project checks) | Catch regressions in the pipeline |
 
 ---
@@ -301,11 +301,11 @@ No data files are committed to this repository.
    Or use **Run and Debug ▸ "Gradio app (local)"**. Add `--share` for a temporary public link (see Terms §6). Tick **"Explain this prediction"** for a saliency map. The app refuses a model trained on an older view recipe than the current code builds; retrain it, or start the app with `--allow-stale`.
 8. **(Optional) Host the demo for free on Hugging Face Spaces** (CPU basic tier, no subscription): `scripts\make_hf_space.py` builds `build/hf_space/`. Its docstring lists the upload commands and the `STAR_GAZER_KEY` secret to set. The model is uploaded only in encrypted form.
 
-**Using the committed V3 model instead of retraining:** the trained model and detailed results are stored encrypted (AES-256-GCM) in `secure/star_gazer_v3.enc`. With the key (`.secrets/star_gazer.key` or the `STAR_GAZER_KEY` environment variable):
+**Using the committed V3 model instead of retraining:** the trained model and detailed results are stored encrypted (AES-256-GCM) in `secure/`: parts of up to 90 MB (GitHub's file limit is 100 MB), each authenticated together with its position in the bundle, plus a `MANIFEST.json` with every part's SHA-256. With the key (`.secrets/star_gazer.key` or the `STAR_GAZER_KEY` environment variable):
 ```powershell
 .venv\Scripts\python scripts\secure_artifacts.py unlock    # -> models/v3 + results/v3
 ```
-Without the key, retrain with step 4. After retraining, `secure_artifacts.py lock` re-encrypts.
+Without the key, retrain with step 4. After retraining, `secure_artifacts.py lock` re-encrypts. Other commands: `verify` (check the parts against the manifest), `rotate` (re-encrypt with a new key), `protect` (add a passphrase to the key file) and `status`.
 
 ### V2 (single-quarter CNN)
 
@@ -369,7 +369,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 ├── tests/                        ← pytest suite (run on every push by .github/workflows/tests.yml)
 ├── data/                         ← Local data cache (git-ignored); see data/README.md
 ├── models/                       ← models/<version>/ (git-ignored)
-├── secure/                       ← star_gazer_v3.enc (encrypted model + results) + MANIFEST.json
+├── secure/                       ← star_gazer_v3.partNN.enc (encrypted model + results) + MANIFEST.json
 ├── results/
 │   ├── version_progress*.png     ← Cross-version chart (added with the final V3 results)
 │   ├── v1_5/                     ← Figures from the V1.5 Colab run (reported metrics)
