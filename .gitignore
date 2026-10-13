@@ -39,3 +39,6 @@ build/
 *.pfx
 id_rsa*
 *token*.txt
+
+# Pipeline logs (scripts/run_pipeline.py)
+logs/

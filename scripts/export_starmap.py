@@ -29,6 +29,9 @@ from kepler_cnn import config as C
 CATALOG = C.RAW_DIR / 'koi_cumulative_full.csv'
 SCORES = C.PROJECT_ROOT / 'results' / 'v3' / 'candidates.csv'
 THRESHOLD = C.MODELS_DIR / 'v3' / 'threshold.json'   # Star Gazer's decision threshold
+# Public copies of the scores (scripts/scoreboard.py record): used when the private results/v3 is
+# absent, e.g. in the monthly refresh workflow, which has no access to the encrypted model.
+PUBLIC_SCORES = C.PROJECT_ROOT / 'results' / 'v3_public' / 'candidate_scores.csv'
 PLANETS = C.RAW_DIR / 'ps_kepler_planets.csv'
 # NASA's confirmed-planet table (one row per planet, best values) for the Kepler field:
 # masses, distances, discovery year, and planets found by other methods (RV, TTV).
@@ -329,10 +332,14 @@ def main():
 
     catalog = pd.read_csv(args.catalog, low_memory=False).replace([np.inf, -np.inf], np.nan)
     scores = load_scores(args.scores)
+    threshold_file = THRESHOLD
+    if not scores and args.scores == SCORES and PUBLIC_SCORES.exists():
+        scores, threshold_file = load_scores(PUBLIC_SCORES), PUBLIC_SCORES.with_suffix('.json')
+        print(f'Using the public scores in {C.rel(PUBLIC_SCORES)}')
     planets = load_planets(args.planets, download=not args.offline)
     tois = load_tois(download=not args.offline)
     gaia = load_gaia()
-    threshold = json.loads(THRESHOLD.read_text())['threshold'] if scores and THRESHOLD.exists() else 0.5
+    threshold = json.loads(threshold_file.read_text())['threshold'] if scores and threshold_file.exists() else 0.5
     data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia)
     if missing:
         print(f'Warning: spotlight systems not in the catalog: {", ".join(missing)}')

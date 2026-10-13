@@ -181,7 +181,7 @@ def download_lightcurves(df_dataset, workers=8, retry_failed=False):
             for r in todo.itertuples()
         }
         for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures),
-                           desc='Downloading light curves'):
+                           desc='Downloading light curves', disable=None):
             name = futures[future]
             flux = future.result()
             if flux is None:

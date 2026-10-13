@@ -247,3 +247,26 @@ def test_saliency_figures_skip_missing_class(keras, tmp_path, monkeypatch):
                                            n_average=4)
     assert (tmp_path / 'saliency_planet.png').exists()
     assert not (tmp_path / 'saliency_false_positive.png').exists()
+
+
+def test_training_resumes_from_checkpoints(keras, tmp_path, monkeypatch):
+    """A finished network is checkpointed; a rerun of the same setup reloads it instead of
+    training again, and a different setup (fingerprint) never reuses it."""
+    from pathlib import Path
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    import train_star_gazer as T
+    monkeypatch.setattr(T, 'CHECKPOINTS', tmp_path)
+    ds = fake_dataset()
+    feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])
+    tr, va = np.arange(30), np.arange(30, 40)
+    fp = T.run_fingerprint(ds, tr, va, 1, S.FEATURES)
+    calls = []
+    real_train = S.train
+    monkeypatch.setattr(S, 'train', lambda *a, **k: calls.append(1) or real_train(*a, **{**k, 'verbose': 0}))
+    model, hist = T.fit_one('features', ds, feats, tr, va, 1, 7, fp)
+    assert calls == [1] and (tmp_path / f'features_seed7_{fp}.json').exists()
+    again, hist2 = T.fit_one('features', ds, feats, tr, va, 1, 7, fp)
+    assert calls == [1] and hist2 == hist                       # reloaded, not retrained
+    x = S.model_inputs(again, ds, va, feats)
+    np.testing.assert_allclose(again.predict(x, verbose=0), model.predict(x, verbose=0), atol=1e-5)
+    assert T.run_fingerprint(ds, tr, va, 2, S.FEATURES) != fp   # other settings: other checkpoints

@@ -382,7 +382,8 @@ def load_views(names, keys=VIEW_KEYS, progress=True):
     """
     from tqdm.auto import tqdm
     stacks, kept = {k: [] for k in keys}, []
-    for n in tqdm(list(names), desc='Loading views', unit='KOI', disable=not progress):
+    # disable=None: the bar switches itself off when output goes to a log file instead of a terminal
+    for n in tqdm(list(names), desc='Loading views', unit='KOI', disable=None if progress else True):
         p = view_path(n)
         if not p.exists():
             continue
