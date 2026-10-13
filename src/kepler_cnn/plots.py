@@ -302,7 +302,7 @@ def v3_evaluation(y_true, y_prob, threshold, path=None):
                  fontsize=14, fontweight='bold')
     ax = axes[0, 0]
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
-    annot = np.array([[f'{v:,}\n{v / max(cm[i].sum(), 1):.0%}' for v in row] for i, row in enumerate(cm)])
+    annot = np.array([[f'{v:,}\n{v / max(row.sum(), 1):.0%}' for v in row] for row in cm])
     sns.heatmap(cm, annot=annot, fmt='', cmap='Blues', ax=ax, cbar=False,
                 xticklabels=['False Pos', 'Planet'], yticklabels=['False Pos', 'Planet'])
     ax.set(title='Confusion matrix (row %)', ylabel='True label', xlabel='Predicted label')

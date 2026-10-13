@@ -42,6 +42,7 @@ FEATURE_CLIP = 10.0   # standardised features are clipped to ±10 (a few catalog
 
 # Local-view channels, all centred on the transit (see views.py).
 LOCAL_CHANNELS = ('local_view', 'odd_view', 'even_view', 'centroid_view')
+N_FEATURES, N_LOCAL_CHANNELS = len(FEATURES), len(LOCAL_CHANNELS)
 
 FULL_CATALOG = C.RAW_DIR / 'koi_cumulative_full.csv'
 FULL_CATALOG_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?'
@@ -167,8 +168,8 @@ def _conv_tower(x, blocks, pool_size, name):
     return layers.Flatten(name=f'{name}_flat')(x)
 
 
-def build_model(n_features=len(FEATURES), use_global=True, use_local=True, use_secondary=True,
-                use_features=True, local_channels=len(LOCAL_CHANNELS), compile=True):
+def build_model(n_features=N_FEATURES, use_global=True, use_local=True, use_secondary=True,
+                use_features=True, local_channels=N_LOCAL_CHANNELS, compile=True):
     """AstroNet towers (Shallue & Vanderburg 2018), an ExoMiner-style secondary-eclipse
     tower, and an MLP for catalog features, merged by a fully connected head."""
     from tensorflow import keras
@@ -334,14 +335,13 @@ def agreement_with_nasa(prob, nasa_score, threshold):
 
 
 def metrics(y, prob, threshold=0.5):
-    from sklearn.metrics import (accuracy_score, brier_score_loss, precision_score, recall_score,
-                                 roc_auc_score)
+    from sklearn.metrics import accuracy_score, brier_score_loss, precision_score, recall_score, roc_auc_score
     pred = (prob >= threshold).astype(int)
     return {'accuracy': float(accuracy_score(y, pred)), 'auc': float(roc_auc_score(y, prob)),
             'brier': float(brier_score_loss(y, prob)),
             'recall_at_precision_0.99': recall_at_precision(y, prob, 0.99),
             'precision': float(precision_score(y, pred, zero_division=0)),
-            'recall': float(recall_score(y, pred)), 'threshold': float(threshold), 'n': int(len(y))}
+            'recall': float(recall_score(y, pred)), 'threshold': float(threshold), 'n': len(y)}
 
 
 def evaluate(models, ds, features, idx, threshold=0.5):

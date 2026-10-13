@@ -121,7 +121,7 @@ def _normalise(view):
 def _secondary_phase(g_raw, period, dur):
     """Phase (days) of the deepest duration-wide dip in the global view, away from the transit."""
     phase = np.linspace(-period / 2, period / 2, len(g_raw))
-    k = max(1, int(round(dur / (period / len(g_raw)))))
+    k = max(1, round(dur / (period / len(g_raw))))
     if 2 * k >= len(g_raw):   # transit ≥ half the orbit: the mask below would hide every phase anyway
         return None
     # Phase is circular: pad by wrapping, not with zeros (zero padding makes the ends of a
@@ -289,7 +289,7 @@ def process_star(kepid, kois, all_transits, tmp_root=None):
             return kepid, {}, {}, 'no usable quarters'
         result, skipped = views_for_lightcurve(lc, kois)
         return kepid, result, skipped, None
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - one bad star is logged, never stops the whole build
         return kepid, {}, {}, f'{type(e).__name__}: {e}'[:200]
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

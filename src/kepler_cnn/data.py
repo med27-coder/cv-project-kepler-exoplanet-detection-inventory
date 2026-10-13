@@ -40,7 +40,7 @@ def load_catalog(refresh=False):
             print(f'Downloading NASA KOI catalog from {url.split("?")[0]} ...')
             df = pd.read_csv(url, comment='#')
             break
-        except Exception as e:  # network / HTTP errors: try the next endpoint
+        except (OSError, ValueError) as e:  # network / HTTP / parse errors: try the next endpoint
             last_error = e
             print(f'  failed: {e}')
     else:
@@ -125,7 +125,7 @@ def download_and_fold(kepler_id, period, t0, bins=C.BINS):
         if len(flux) < bins:
             flux = np.pad(flux, (0, bins - len(flux)), constant_values=0)
         return np.asarray(flux[:bins], dtype=np.float64)
-    except Exception:
+    except Exception:  # noqa: BLE001 - any lightkurve failure just means "no usable curve"
         return None
 
 

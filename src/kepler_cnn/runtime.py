@@ -1,12 +1,13 @@
 """Keep long jobs (view building, training) from hogging the PC."""
 
+import contextlib
 import os
 import sys
 
 
 def low_priority():
-    """Run the current process at below-normal CPU priority. Safe to call anywhere."""
-    try:
+    """Run the current process at below-normal CPU priority. Safe to call anywhere (best effort)."""
+    with contextlib.suppress(OSError, AttributeError, ValueError):
         if sys.platform == 'win32':
             import ctypes
             from ctypes import wintypes
@@ -18,8 +19,6 @@ def low_priority():
             kernel32.SetPriorityClass(kernel32.GetCurrentProcess(), below_normal)
         else:
             os.nice(10)
-    except Exception:
-        pass
 
 
 def limit_tf_threads(n=None):

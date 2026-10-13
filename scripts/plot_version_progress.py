@@ -24,16 +24,16 @@ OUT = ROOT / 'results'
 
 # Test-set metrics at the 0.5 threshold, plus the number of usable light curves.
 COLAB_RUNS = {
-    'V1': dict(accuracy=0.5938, auc=0.573, precision=0.5957, recall=0.8000, n_curves=320),
-    'V1.5': dict(accuracy=0.7044, auc=0.771, precision=0.7273, recall=0.7356, n_curves=794),
+    'V1': {'accuracy': 0.5938, 'auc': 0.573, 'precision': 0.5957, 'recall': 0.8000, 'n_curves': 320},
+    'V1.5': {'accuracy': 0.7044, 'auc': 0.771, 'precision': 0.7273, 'recall': 0.7356, 'n_curves': 794},
 }
 TARGETS = {'percent': 80, 'auc': 0.85}
 
 THEMES = {
-    'light': dict(surface='#fcfcfb', ink='#0b0b0b', ink2='#52514e', muted='#898781', grid='#e1e0d9',
-                  axis='#c3c2b7', series=['#2a78d6', '#eb6834', '#1baf7a']),
-    'dark': dict(surface='#1a1a19', ink='#ffffff', ink2='#c3c2b7', muted='#898781', grid='#2c2c2a',
-                 axis='#383835', series=['#3987e5', '#d95926', '#199e70']),
+    'light': {'surface': '#fcfcfb', 'ink': '#0b0b0b', 'ink2': '#52514e', 'muted': '#898781', 'grid': '#e1e0d9',
+                  'axis': '#c3c2b7', 'series': ['#2a78d6', '#eb6834', '#1baf7a']},
+    'dark': {'surface': '#1a1a19', 'ink': '#ffffff', 'ink2': '#c3c2b7', 'muted': '#898781', 'grid': '#2c2c2a',
+                 'axis': '#383835', 'series': ['#3987e5', '#d95926', '#199e70']},
 }
 
 

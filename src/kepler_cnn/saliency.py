@@ -96,22 +96,22 @@ def _occlusions(available, used):
         for ch in channels:
             for a, b in _windows(x.shape[0], *WINDOWS[key]):
                 plans.append((key, ch, (a, b)))
-                for k in batch:
+                for k, rows in batch.items():
                     v = available[k][0].copy()
                     if k == key:
                         if ch is None:
                             v[a:b] = 0
                         else:
                             v[a:b, ch] = 0
-                    batch[k].append(v)
+                    rows.append(v)
     if 'features' in used:
         for j in range(available['features'].shape[-1]):
             plans.append(('features', None, j))
-            for k in batch:
+            for k, rows in batch.items():
                 v = available[k][0].copy()
                 if k == 'features':
                     v[j] = 0
-                batch[k].append(v)
+                rows.append(v)
     return plans, {k: np.stack(v) for k, v in batch.items()}
 
 
