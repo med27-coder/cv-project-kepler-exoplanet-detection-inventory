@@ -132,6 +132,10 @@ except one 18 KB backdrop):
       `#Sun`) draws it with the same engine (NASA Planetary Fact Sheet values, temperatures computed the
       Kepler-catalog way so colours compare). Left out of the type-ahead on purpose; the README only hints.
 
+- [x] **Power savers**: system view at 30 fps, map at ~8 fps; a canvas scrolled out of sight isn't drawn;
+      the loop stops when both are off-screen or after 3 idle minutes and wakes on any interaction.
+      Measured: ~0.6% of one CPU core while animating; ~295 KB to download on a first visit.
+
 Next ideas (not started):
 
 - [ ] **Real transit sparklines**: each planet's own folded Kepler light curve (the model's local
