@@ -34,4 +34,4 @@ jobs:
       - name: Audit the installed packages
         run: |
           pip install pip-audit==2.10.1
-          pip-audit --progress-spinner off --desc
+          pip-audit --progress-spinner off --desc --skip-editable   # our own package isn't on PyPI

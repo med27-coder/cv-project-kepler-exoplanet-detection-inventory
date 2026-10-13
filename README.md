@@ -267,6 +267,7 @@ No data files are committed to this repository.
    py -3.12 -m venv .venv
    .venv\Scripts\python -m pip install -r requirements.txt
    ```
+   This also installs the project's own package (`src/kepler_cnn`) in editable mode, so the scripts, app and notebooks can import it.
 2. **Accept the [Terms of Use](TERMS_OF_USE.md).** The notebooks ask in their first cell. Scripts prompt in the terminal, or you can set `KEPLER_ACCEPT_TERMS=1` for batch runs.
 
 ### V3 Star Gazer

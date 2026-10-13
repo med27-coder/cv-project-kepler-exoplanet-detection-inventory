@@ -20,8 +20,6 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-
 from kepler_cnn import config as C
 from kepler_cnn import data
 
@@ -46,7 +44,8 @@ def import_v2(source, args):
     n_before = len(X)
     X, y, _ = data.dedupe(X, y)
     print(f'  convert   X_raw.npy + y_raw.npy -> {C.rel(V2_X.parent)}  '
-          f'({n_before} rows -> {len(X)} unique: {int(y.sum())} planets, {int((y == 0).sum())} false positives)')
+          f'({n_before} rows -> {len(X)} unique: {int(y.sum())} planets, '
+          f'{int((y == 0).sum())} false positives)')
     if not args.dry_run:
         V2_X.parent.mkdir(parents=True, exist_ok=True)
         np.save(V2_X, X)

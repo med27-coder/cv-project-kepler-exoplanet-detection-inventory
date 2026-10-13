@@ -13,9 +13,6 @@ global/local views + NASA catalog features (scripts/train_star_gazer.py).
 import argparse
 import math
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent / 'src'))
 
 import gradio as gr
 import matplotlib

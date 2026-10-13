@@ -11,11 +11,8 @@ not discoveries or classifications (Terms of Use §2).
 
 import argparse
 import sys
-from pathlib import Path
 
 import numpy as np
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S

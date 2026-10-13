@@ -19,11 +19,8 @@ import argparse
 import concurrent.futures
 import sys
 import time
-from pathlib import Path
 
 from tqdm import tqdm
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S
@@ -50,7 +47,8 @@ def main():
     parser.add_argument('--retry-failed', action='store_true',
                         help='retry stars in _failed.txt and KOIs in _skipped.txt')
     parser.add_argument('--candidates', action='store_true',
-                        help='build views for the unlabelled CANDIDATE KOIs instead (scripts/score_candidates.py)')
+                        help='build views for the unlabelled CANDIDATE KOIs instead '
+                             '(scripts/score_candidates.py)')
     args = parser.parse_args()
 
     try:

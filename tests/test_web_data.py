@@ -65,6 +65,8 @@ def test_page_security_policy():
     for text in (html, js):
         assert not re.search(r'\sstyle="', text)
         assert not re.search(r'\son[a-z]+="', text)
+    # clickjacking guard (Pages can't send frame-ancestors): framed pages show only a link out
+    assert 'window.top !== window.self' in js and "target = '_top'" in js
     # every script and stylesheet is local
     assert not re.search(r'<script[^>]+src="https?:', html)
     assert not re.search(r'<link[^>]+rel="stylesheet"[^>]+href="https?:', html)

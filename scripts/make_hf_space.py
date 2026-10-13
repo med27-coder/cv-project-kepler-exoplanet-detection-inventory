@@ -20,8 +20,6 @@ import shutil
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-
 from kepler_cnn import star_gazer as S
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,6 +55,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+# The Space installs only requirements.txt, not this package, so src/ goes on the path here.
+# The imports below must also wait until the model is decrypted, hence the noqa: E402 markers.
 sys.path.insert(0, str(ROOT / 'src'))
 
 if not (ROOT / 'models' / 'v3' / 'star_gazer.keras').exists():
