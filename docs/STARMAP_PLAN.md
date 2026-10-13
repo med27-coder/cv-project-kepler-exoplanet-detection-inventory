@@ -131,6 +131,9 @@ except one 18 KB backdrop):
 - [x] **Easter egg: our Solar System.** Searching *Sun*, *Solar System*, *Earth* or *home* (or the link
       `#Sun`) draws it with the same engine (NASA Planetary Fact Sheet values, temperatures computed the
       Kepler-catalog way so colours compare). Left out of the type-ahead on purpose; the README only hints.
+      Hand-made pixel art per planet (Earth's continents and Moon, Jupiter's Great Red Spot, Saturn's and
+      Uranus' rings, Neptune's dark spot), asteroid and Kuiper belts, and a fact sheet (the Sun's names,
+      dwarf planets, belts, heliosphere, Oort Cloud) linked to NASA, JPL and IAU pages.
 
 - [x] **Power savers**: system view at 30 fps, map at ~8 fps; a canvas scrolled out of sight isn't drawn;
       the loop stops when both are off-screen or after 3 idle minutes and wakes on any interaction.
