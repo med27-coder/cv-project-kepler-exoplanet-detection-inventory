@@ -414,7 +414,7 @@
       spriteR, srad: detail.srad ?? 1,
       starColor: starColor(detail.teff),
       companion: (detail.nstars ?? 1) > 1,
-      hzAU: hz, hzLog: hz && hz.map(logR), earthLog: logR(1),
+      hzAU: hz, hzLog: hz && hz.map(logR), earthLog: logR(1), home: Boolean(detail.home),
       pxPerAU: rMax / reach,   // true scale at zoom 1: the farthest planet just fits
       curve: [],
       planets,
@@ -488,7 +488,7 @@
         if (y < H) c.fillRect(x, y, 1, 1);
       }
     };
-    if (visible(sc.earth, sc.earth) && sc.earth > sc.starR + 4) {   // Earth's orbit, for scale
+    if (!sc.home && visible(sc.earth, sc.earth) && sc.earth > sc.starR + 4) {   // Earth's orbit, for scale
       ring(sc.earth, 0, 1, 0, '#4f5d80', 2);
       const ly = Math.round(cy - sc.earth * TILT) - 7;
       if (ly > 1 && cx > 10 && cx < SW - 10) pixelText(c, 'EARTH', Math.round(cx - 9), ly, '#7f8fb0');
@@ -838,6 +838,7 @@
   }
 
   function statusText(p) {
+    if (p.note) return esc(p.note);
     if (p.status === 'other') return esc(p.method);
     if (p.status === 'candidate' && p.sg != null) {
       return `candidate · Star Gazer ${fmt(Math.round(p.sg * 100))}% ${p.sg_planet ? 'planet' : '(likely false positive)'}`;
@@ -845,12 +846,7 @@
     return esc(p.status);
   }
 
-  function showSystem(s, detail) {
-    title.textContent = s[COL.name].toUpperCase();
-    const count = k => detail.planets.filter(p => p.status === k).length;
-    const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
-    if (count('candidate')) parts.push(`${plural(count('candidate'), 'candidate')} (hollow)`);
-    if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
+  function planetTable(detail) {
     const rows = detail.planets.map(p => {
       const cls = `${planetClass(p.teq)} ${STATUSES.has(p.status) ? p.status : ''}`;
       const mass = p.mass == null ? '-' : (p.mass_kind === 'estimated' ? '~' : '') + fmt(p.mass, 1);
@@ -868,18 +864,28 @@
         <td class="num">${p.year == null ? '-' : esc(p.year)}</td>
       </tr>`;
     }).join('');
+    return `
+      <div class="table-wrap"><table>
+        <thead><tr><th>Planet</th><th class="num">Size (Earths)</th><th class="num">Mass (Earths)</th>
+          <th class="num">Year (days)</th><th class="num">Temp (K)</th><th class="num">Sunlight (vs Earth)</th>
+          <th>Status</th><th class="num">Found</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  function showSystem(s, detail) {
+    title.textContent = s[COL.name].toUpperCase();
+    const count = k => detail.planets.filter(p => p.status === k).length;
+    const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
+    if (count('candidate')) parts.push(`${plural(count('candidate'), 'candidate')} (hollow)`);
+    if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
     const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
     info.innerHTML = `
       <div class="head">${skyThumb(detail.ra, detail.dec)}<div>
         <p>Star: ${starLine(detail)}</p>
         <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
       </div></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Planet</th><th class="num">Size (Earths)</th><th class="num">Mass (Earths)</th>
-          <th class="num">Year (days)</th><th class="num">Temp (K)</th><th class="num">Sunlight (vs Earth)</th>
-          <th>Status</th><th class="num">Found</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>
+      ${planetTable(detail)}
       <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
         star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
         planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
@@ -910,6 +916,51 @@
     selected = null;
   }
 
+  // ---------------------------------------------------------------- easter egg: home
+  // Our own Solar System, drawn by the same engine. Not on the map (the map is the view from
+  // here) and not in the type-ahead: search "Sun", "Solar System", "Earth" or "home" to find it.
+  // Values: NASA Planetary Fact Sheet. Temperatures are equilibrium temperatures worked out the
+  // way the Kepler catalog does (Bond albedo 0.3: 255 K / sqrt(AU)), so colours compare fairly.
+  const HOME_QUERY = /^(the )?(sun|sol|solar system|earth|home|you are here)$/i;
+  const SOLAR = {
+    home: true, teff: 5772, srad: 1, smass: 1, age: 4.6, met: 0, spectype: 'G2 V',
+    planets: [
+      ['Mercury', 0.383, 0.0553, 87.97, 0.387, 0.206, 'antiquity'],
+      ['Venus', 0.949, 0.815, 224.7, 0.723, 0.007, 'antiquity'],
+      ['Earth', 1, 1, 365.25, 1, 0.017, 'here'],
+      ['Mars', 0.532, 0.107, 687.0, 1.524, 0.094, 'antiquity'],
+      ['Jupiter', 11.21, 317.8, 4331, 5.203, 0.049, 'antiquity'],
+      ['Saturn', 9.45, 95.2, 10747, 9.537, 0.052, 'antiquity'],
+      ['Uranus', 4.01, 14.5, 30589, 19.19, 0.047, 1781],
+      ['Neptune', 3.88, 17.1, 59800, 30.07, 0.010, 1846],
+    ].map(([name, radius, mass, period, sma, ecc, year]) => ({
+      name, koi: 'Sol ' + name, status: 'confirmed', radius, mass, mass_kind: 'measured', period, sma, ecc,
+      teq: Math.round(255 / Math.sqrt(sma)), insol: 1 / sma ** 2, year,
+      note: name === 'Earth' ? 'home ★' : 'planet',
+    })),
+  };
+
+  function showHome(updateHash = true) {
+    selected = null;
+    title.textContent = 'THE SOLAR SYSTEM';
+    info.innerHTML = `
+      <p class="big">★ YOU ARE HERE ★</p>
+      <p>Our own system, about 26,700 light-years from the centre of the Milky Way. It isn't a pixel on
+         the map because the map <em>is</em> the view from here: Kepler, trailing Earth around the Sun,
+         stared at one patch of Cygnus and Lyra, and every star you can click is hundreds to thousands of
+         light-years down that line of sight. Seen from Kepler-90, Earth would dim the Sun by just 0.008%
+         for 13 hours once a year, so small that a Kepler looking back at us would most likely miss it.</p>
+      <p>Star: ${starLine(SOLAR)} · <a href="https://science.nasa.gov/solar-system/" target="_blank"
+         rel="noopener noreferrer">NASA: our Solar System ↗</a></p>
+      ${planetTable(SOLAR)}
+      <p class="note">Found: known since antiquity, or the year it was discovered by telescope ·
+        temperatures as the Kepler catalog would list them (no greenhouse effect: Venus is really
+        ~737 K) · try TRUE SCALE to see how empty it really is · you found the easter egg!</p>`;
+    setScene(buildScene(SOLAR));
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#Sun');
+  }
+
   function select(s, updateHash = true) {
     selected = s;
     const detail = SYSTEMS[s[COL.name]];
@@ -922,6 +973,7 @@
   function lookup(query, updateHash = true) {
     query = String(query).slice(0, MAX_QUERY);
     if (!query.trim()) return;
+    if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
     const s = find(query);
     if (s) select(s, updateHash); else showUnknown(query);
   }

@@ -128,6 +128,10 @@ except one 18 KB backdrop):
       orbit and the whole habitable zone; *True scale* switches to real distances (and real star and
       planet sizes when zoomed in far enough), with a scale bar and Earth's orbit for comparison.
 
+- [x] **Easter egg: our Solar System.** Searching *Sun*, *Solar System*, *Earth* or *home* (or the link
+      `#Sun`) draws it with the same engine (NASA Planetary Fact Sheet values, temperatures computed the
+      Kepler-catalog way so colours compare). Left out of the type-ahead on purpose; the README only hints.
+
 Next ideas (not started):
 
 - [ ] **Real transit sparklines**: each planet's own folded Kepler light curve (the model's local
