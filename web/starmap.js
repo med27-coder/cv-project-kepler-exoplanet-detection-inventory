@@ -206,6 +206,8 @@
   let selected = null, hovered = null;
 
   function drawMap(t) {
+    mctx.fillStyle = '#070b1a';   // never rely on the cached layer alone (see refreshLayers)
+    mctx.fillRect(0, 0, MW, MH);
     mctx.drawImage(base, 0, 0);
     const spot = view.zoom >= 4 ? 3 : 2;
     spotIdx.forEach((i, k) => {
@@ -625,6 +627,8 @@
       return;
     }
     if (scene.mystery) return drawMystery(seconds);
+    sctx.fillStyle = '#070b1a';   // a blank (discarded) layer must not leave trails behind
+    sctx.fillRect(0, 0, SW, SH);
     sctx.drawImage(scene.layer, 0, 0);
     const t = REDUCED_MOTION ? 0 : seconds;
     for (let k = 0; k < 6; k++) {   // a few background stars twinkle
@@ -1253,7 +1257,20 @@
   for (const evt of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll', 'focusin']) {
     window.addEventListener(evt, wake, { passive: true, capture: true });
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+  // Browsers may throw away the pixels of off-screen canvases (our cached layers) while the tab is
+  // in the background or after a graphics reset; the cached layers are then blank. Redraw them
+  // whenever the page comes back, or the browser says it restored a canvas. Cheap: a few ms.
+  function refreshLayers() {
+    renderBase();
+    if (scene && !scene.mystery) layout();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    refreshLayers();
+    wake();
+  });
+  window.addEventListener('pageshow', e => { if (e.persisted) { refreshLayers(); wake(); } });
+  for (const canvas of [map, sys, base]) canvas.addEventListener('contextrestored', () => { refreshLayers(); wake(); });
   window.addEventListener('hashchange', wake);
   if ('IntersectionObserver' in window) {
     const watcher = new IntersectionObserver(entries => {
