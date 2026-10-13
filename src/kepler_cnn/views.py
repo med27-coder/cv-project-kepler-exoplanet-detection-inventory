@@ -164,7 +164,9 @@ def prepare_lightcurve(quarters, all_transits):
         t, f, cc, cr = t[ok], f[ok] / np.median(f[ok]), cc[ok], cr[ok]
         mask = _values(lk.LightCurve(time=t, flux=f).create_transit_mask(
             period=[p for p, _, _ in all_transits], transit_time=[t0 for _, t0, _ in all_transits],
-            duration=[1.5 * d for d in durs])).astype(bool)
+            # 1.5x the transit, but never the whole orbit (a few false positives list a "transit"
+            # longer than their period; masking all of it would leave nothing to detrend)
+            duration=[min(1.5 * d, 0.9 * p) for d, (p, _, _) in zip(durs, all_transits)])).astype(bool)
         F.append(_detrend(t, f, mask, window))
         for raw, out in ((cc, CC), (cr, CR)):
             good = np.isfinite(raw)
@@ -199,6 +201,9 @@ def views_for_lightcurve(lc, kois):
         period, t0, dur = float(period), float(t0), float(dur) / 24
         if not (np.isfinite(period) and np.isfinite(t0) and np.isfinite(dur)) or period <= 0 or dur <= 0:
             skipped[name] = 'missing period / epoch / duration'
+            continue
+        if dur >= period:
+            skipped[name] = 'catalog transit duration is longer than the orbit'
             continue
         n = np.floor((time - t0) / period + 0.5)
         t = time - t0 - n * period              # phase in days, transit at 0
