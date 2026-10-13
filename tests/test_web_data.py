@@ -87,3 +87,12 @@ def test_sky_backdrop():
     width, height = int.from_bytes(png[16:20], 'big'), int.from_bytes(png[20:24], 'big')
     assert (width, height) == (192, 192)
     assert "sky.src = 'sky.png'" in (WEB / 'starmap.js').read_text(encoding='utf-8')
+
+
+def test_starmap_js_is_built_from_src():
+    """web/starmap.js is generated from web/src/*.js by scripts/build_web.py; they must agree."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('build_web', WEB.parent / 'scripts' / 'build_web.py')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert (WEB / 'starmap.js').read_text(encoding='utf-8') == mod.build(), 'run scripts/build_web.py'

@@ -1,0 +1,70 @@
+"""Build web/starmap.js from the readable parts in web/src/.
+
+    .venv\\Scripts\\python scripts\\build_web.py            # write web/starmap.js
+    .venv\\Scripts\\python scripts\\build_web.py --check    # exit 1 if web/starmap.js is out of date (CI)
+
+The page loads one classic script so it also works opened straight from disk (file://), where
+ES modules are blocked. The parts are plain top-level JavaScript, joined in file-name order inside
+one function scope (shared variables, nothing leaks to the page), behind the clickjacking guard.
+Edit web/src/*.js, then run this script; tests fail if the two drift apart.
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / 'web' / 'src'
+OUT = ROOT / 'web' / 'starmap.js'
+
+HEADER = """// Kepler Star Map: pixel map of the Kepler field + pixel-art star systems.
+// Data comes from data/systems.js (scripts/export_starmap.py). Everything is drawn
+// procedurally on two small canvases, so a system costs a few numbers, not an image.
+// Built by scripts/build_web.py from web/src/*.js: edit those, not this file.
+(function () {
+  'use strict';
+
+  // Clickjacking guard. GitHub Pages can't send frame-ancestors / X-Frame-Options headers, and
+  // browsers block a framed page from navigating the top window without a click. So inside another
+  // site's frame, replace the page with a single link that opens the real one, and stop here.
+  if (window.top !== window.self) {
+    const link = document.createElement('a');
+    link.href = window.location.href;
+    link.target = '_top';
+    link.rel = 'noopener';
+    link.textContent = 'Open the Kepler Star Map ↗';
+    document.body.replaceChildren(link);
+    return;
+  }
+"""
+FOOTER = '})();\n'
+
+
+def indent(text):
+    return ''.join(('  ' + line if line.strip() else line) for line in text.splitlines(keepends=True))
+
+
+def build():
+    parts = sorted(SRC.glob('*.js'))
+    if not parts:
+        sys.exit(f'No parts in {SRC}')
+    body = '\n'.join(indent(p.read_text(encoding='utf-8').rstrip('\n') + '\n') for p in parts)
+    return HEADER + '\n' + body + FOOTER
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('--check', action='store_true', help='fail if web/starmap.js is out of date')
+    args = parser.parse_args()
+    js = build()
+    if args.check:
+        if OUT.read_text(encoding='utf-8') != js:
+            sys.exit('web/starmap.js is out of date: run scripts/build_web.py')
+        print('web/starmap.js is up to date')
+        return
+    OUT.write_text(js, encoding='utf-8', newline='\n')
+    print(f'Built {OUT.relative_to(ROOT)} from {len(list(SRC.glob("*.js")))} parts ({len(js) / 1024:.0f} KB)')
+
+
+if __name__ == '__main__':
+    main()
