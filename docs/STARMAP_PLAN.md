@@ -103,3 +103,32 @@ one at a time, and keep a change only if grouped CV improves.
       recipes (27-day sectors, different noise), so it's a V4-sized step: first test transfer
       (score TOIs with the Kepler model), then fine-tune.
 - [ ] **K2** (the Kepler mission's second phase): same telescope, shorter campaigns; a smaller step than TESS.
+
+## Phase 8: Real sky, richer data, better pixel art ✅ (October 2026)
+
+Everything here is from official, openly usable sources and stays light (no stored star images
+except one 18 KB backdrop):
+
+- [x] **Real Milky Way behind the map**: ESA Gaia DR3 colour map of the Kepler field, cut out by CDS
+      hips2fits in the map's own projection (`scripts/make_sky_backdrop.py` → `web/sky.png`), blurred and
+      reduced to 10 colours. Registration checked against δ Cygni on DSS2 (same pixel).
+- [x] **Sky photo switcher**: DSS2 / Pan-STARRS1 / 2MASS-infrared thumbnails per system (40×40,
+      fetched on demand from CDS; the CSP already allowed only that host).
+- [x] **More official data** in `export_starmap.py`: eccentricity, insolation, number of stars and
+      spectral type (NASA `pscomppars`); stellar mass, age, metallicity, gravity, Gaia distance
+      (Berger et al. 2020); **TESS re-detections** (NASA TOI table, period match within 1%:
+      94 Kepler planets). Link to each system's NASA Exoplanet Archive overview page.
+- [x] **Pixel art**: three-tone planets lit from the star's side; banded gas giants, ice caps, lava
+      glints; limb-darkened star with a sparkle; companion star in multi-star systems; eccentric
+      orbits that obey Kepler's equation; hatched habitable zone; static layer drawn once per system.
+- [x] **Live light curve**: a strip under each system showing the star's brightness as Kepler sees
+      it, dipping when a planet transits (exaggerated): how the planets were actually found.
+
+Next ideas (not started):
+
+- [ ] **Real transit sparklines**: each planet's own folded Kepler light curve (the model's local
+      view, 32 points, about 40 KB for all drawn planets) next to the pixel art. Needs the v3 view
+      rebuild to finish.
+- [ ] **Kepler CCD footprint** outline on the map (the 21 modules), from the mission's field definition.
+- [ ] **Monthly data refresh** workflow: re-download the NASA tables, re-export, open a PR if changed.
+- [ ] Planet orbit orientation from `pl_orblper` (argument of periastron) instead of a fixed random angle.

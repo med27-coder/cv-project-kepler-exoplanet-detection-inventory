@@ -155,8 +155,15 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .head { display: flex; gap: 12px; align-items: flex-start; }
 .head > div, .head > p { min-width: 0; }
 .sky { margin: 4px 0 0; flex: none; text-align: center; color: var(--ink-2); font-size: 16px; }
-.sky img { width: 72px; height: 72px; image-rendering: pixelated; border: 2px solid var(--edge); display: block;
+.sky img { width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--edge); display: block;
            background: var(--bg); }
+.surveys { display: flex; gap: 2px; margin-top: 2px; }
+.surveys button { font: inherit; font-size: 14px; padding: 0 3px; color: var(--ink-2); background: var(--bg);
+                  border: 1px solid var(--edge); cursor: pointer; }
+.surveys button[aria-pressed="true"] { color: var(--bg); background: var(--ink-2); }
+.surveys button:focus-visible { outline: 2px solid var(--accent); }
+.badge { font-size: 14px; padding: 0 3px; margin-left: 2px; border: 1px solid var(--edge); color: var(--ink-2);
+         text-decoration: none; cursor: help; white-space: nowrap; }
 
 .legend { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 4px 14px;
           color: var(--ink-2); font-size: 18px; }

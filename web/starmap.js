@@ -135,6 +135,12 @@
                                 Math.round((y - view.cy) * view.zoom + MH / 2)];
   const toMap = (sx, sy) => [(sx - MW / 2) / view.zoom + view.cx, (sy - MH / 2) / view.zoom + view.cy];
 
+  // The real Milky Way behind the stars: Gaia DR3, pixelated, made by scripts/make_sky_backdrop.py
+  // in this map's projection (it covers the map at zoom 1). The map works without it.
+  const sky = new Image();
+  sky.addEventListener('load', () => renderBase());
+  sky.src = 'sky.png';
+
   const base = document.createElement('canvas');   // all stars for the current view, redrawn on change
   base.width = MW; base.height = MH;
   function renderBase() {
@@ -145,6 +151,10 @@
     const b = base.getContext('2d');
     b.fillStyle = '#070b1a';
     b.fillRect(0, 0, MW, MH);
+    if (sky.complete && sky.naturalWidth) {
+      b.imageSmoothingEnabled = false;
+      b.drawImage(sky, MW / 2 - view.cx * view.zoom, MH / 2 - view.cy * view.zoom, MW * view.zoom, MH * view.zoom);
+    }
     const size = view.zoom >= 4 ? 2 : 1;
     const lit = highlight && highlightSets[highlight];
     STARS.forEach((s, i) => {
@@ -301,7 +311,8 @@
   // ---------------------------------------------------------------- system view
   const sys = document.getElementById('system');
   const sctx = sys.getContext('2d');
-  const SW = sys.width, SH = sys.height, CX = SW / 2, CY = SH / 2, TILT = 0.42;
+  const STRIP = 22;   // light-curve strip along the bottom
+  const SW = sys.width, SH = sys.height, CX = SW / 2, CY = Math.round((SH - STRIP) / 2), TILT = 0.42;
   let scene = null;
 
   // Deterministic "random" so a system always starts in the same pose.
@@ -313,12 +324,75 @@
     return (h >>> 0) / 4294967296;
   }
 
+  // '#rrggbb' scaled towards black (f < 1) or white (f > 1), as a CSS colour.
+  function shade(hex, f) {
+    const n = parseInt(hex.slice(1), 16);
+    const ch = v => Math.round(f <= 1 ? v * f : v + (255 - v) * (f - 1));
+    return `rgb(${ch(n >> 16)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
+  }
+
   // Approximate habitable zone (AU) from the star's luminosity: L = R² (T / 5772 K)⁴,
   // edges where the planet gets 1.1× and 0.36× Earth's sunlight (roughly Kopparapu et al. 2013).
   function habitableZone(detail) {
     if (detail.teff == null || detail.srad == null) return null;
     const lum = detail.srad ** 2 * (detail.teff / 5772) ** 4;
     return [Math.sqrt(lum / 1.1), Math.sqrt(lum / 0.36)];
+  }
+
+  // Planet look from size and temperature (the pixel art is a guess at the type, not a measurement).
+  function planetLook(p) {
+    if (p.radius != null && p.radius >= 6) return 'giant';      // banded gas giant
+    if (p.teq != null && p.teq >= 1500) return 'molten';         // lava glints
+    if (p.teq != null && p.teq < 180 && (p.radius ?? 1) < 2.5) return 'icy';   // polar caps
+    return 'plain';
+  }
+
+  // Position on a (possibly eccentric) orbit at mean anomaly m: Kepler's equation, star at a focus.
+  function orbitPoint(p, m) {
+    let E = m;
+    for (let k = 0; k < 6 && p.e; k++) E -= (E - p.e * Math.sin(E) - m) / (1 - p.e * Math.cos(E));
+    const x = p.rx * (Math.cos(E) - p.e), y = p.rx * Math.sqrt(1 - p.e * p.e) * Math.sin(E);
+    const X = x * p.cosw - y * p.sinw, Y = x * p.sinw + y * p.cosw;
+    return [X, Y];   // star-centred, before tilting
+  }
+
+  // Everything that doesn't move, drawn once per system: speckle, habitable zone, orbits.
+  function staticLayer(sc) {
+    const layer = document.createElement('canvas');
+    layer.width = SW; layer.height = SH;
+    const c = layer.getContext('2d');
+    c.fillStyle = '#070b1a';
+    c.fillRect(0, 0, SW, SH);
+    for (let k = 0; k < 70; k++) {
+      c.fillStyle = k % 7 === 0 ? '#4a5590' : k % 3 === 0 ? '#2e3768' : '#1e2550';
+      c.fillRect(Math.floor(hash('bg' + k) * SW), Math.floor(hash('y' + k) * (SH - STRIP)), 1, 1);
+    }
+    if (sc.hz) {   // green band between the two edges, hatched so orbits stay readable
+      const [h0, h1] = sc.hz;
+      c.fillStyle = '#1a5a3a';
+      for (let y = 0; y < SH - STRIP; y++) {
+        for (let x = (2 * y) % 5; x < SW; x += 5) {
+          const rho = Math.hypot(x - CX, (y - CY) / TILT);
+          if (rho > h0 && rho < h1 && rho > sc.starR + 3) c.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+    for (const p of sc.planets) {   // dotted orbits, sparser for candidates and other-method planets
+      c.fillStyle = p.kind === 'confirmed' ? '#3a4888' : '#2c3770';
+      const step = p.kind === 'confirmed' ? 2 : 3;
+      const n = Math.round(p.rx * 2.4);
+      for (let k = 0; k < n; k += step) {
+        const [X, Y] = orbitPoint(p, (k / n) * 2 * Math.PI);
+        c.fillRect(Math.round(CX + X), Math.round(CY + Y * TILT), 1, 1);
+      }
+    }
+    // light-curve strip: frame and the "full brightness" line
+    c.fillStyle = '#0b1230';
+    c.fillRect(0, SH - STRIP, SW, STRIP);
+    c.fillStyle = '#1e2a5a';
+    c.fillRect(0, SH - STRIP, SW, 1);
+    for (let x = 4; x < SW - 4; x += 3) c.fillRect(x, SH - STRIP + 4, 1, 1);
+    return layer;
   }
 
   function buildScene(detail) {
@@ -334,19 +408,31 @@
     const squeeze = radii.length ? Math.min(1, (rMax - rMin) / (radii[radii.length - 1] - rMin || 1)) : 1;
     radii = radii.map(r => rMin + (r - rMin) * squeeze);
     const hz = habitableZone(detail);
-    return {
+    const sc = {
       starR,
       starColor: starColor(detail.teff),
+      companion: (detail.nstars ?? 1) > 1,
       hz: hz && hz.map(a => rMin + (toR(a) - rMin) * squeeze),
-      planets: detail.planets.map((p, i) => ({
-        rx: radii[i],
-        size: planetSize(p.radius),
-        color: planetColor(p.teq),
-        kind: p.status,
-        speed: (2 * Math.PI) / (1.5 * Math.sqrt(p.period ?? 10)),   // radians per second
-        phase: hash(p.koi) * 2 * Math.PI,
-      })),
+      curve: [],
+      planets: detail.planets.map((p, i) => {
+        const w = hash(p.koi + 'w') * 2 * Math.PI;   // orbit orientation: not in the data, so fixed per planet
+        const color = planetColor(p.teq);
+        return {
+          rx: radii[i],
+          e: Math.min(p.ecc ?? 0, Math.max(0, 1 - (starR + 4) / radii[i])),   // closest pass stays off the star
+          cosw: Math.cos(w), sinw: Math.sin(w),
+          size: planetSize(p.radius),
+          look: planetLook(p),
+          pal: [shade(color, 0.45), color, shade(color, 1.45), shade(color, 0.75)],   // shadow, base, lit, band
+          kind: p.status,
+          speed: (2 * Math.PI) / (1.5 * Math.sqrt(p.period ?? 10)),   // radians per second
+          phase: hash(p.koi) * 2 * Math.PI,
+          seed: p.koi,
+        };
+      }),
     };
+    sc.layer = staticLayer(sc);
+    return sc;
   }
 
   function disc(ctx, cx, cy, r, color) {
@@ -374,51 +460,130 @@
     }
   }
 
-  function ellipse(rx, color, step) {
-    sctx.fillStyle = color;
-    const n = Math.round(rx * 2.2);
-    for (let k = 0; k < n; k += step) {
-      const a = (k / n) * 2 * Math.PI;
-      sctx.fillRect(Math.round(CX + rx * Math.cos(a)), Math.round(CY + rx * TILT * Math.sin(a)), 1, 1);
+  // A lit sphere in three tones: (lx, ly) points from the planet towards its star.
+  function shadedPlanet(ctx, x, y, p, lx, ly) {
+    const r = p.size, x0 = Math.round(x), y0 = Math.round(y);
+    for (let dy = -r; dy <= r; dy++) {
+      const w = Math.floor(Math.sqrt(r * r - dy * dy + r * 0.8));
+      for (let dx = -w; dx <= w; dx++) {
+        const lit = (dx * lx + dy * ly) / (r + 0.5);
+        let tone = lit > 0.3 ? 2 : lit < -0.35 ? 0 : 1;
+        if (p.look === 'giant' && tone === 1 && ((dy + r) % 3 === 1)) tone = 3;   // cloud bands
+        let color = p.pal[tone];
+        if (p.look === 'icy' && Math.abs(dy) === r) color = tone ? '#f2f8ff' : '#9fb0c8';   // polar caps
+        if (p.look === 'molten' && tone !== 0 && hash(`${p.seed}${dx},${dy}`) < 0.18) color = '#ffe08a';   // lava
+        ctx.fillStyle = color;
+        ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
+      }
     }
   }
 
-  function drawSystem(seconds) {
-    sctx.fillStyle = '#070b1a';
-    sctx.fillRect(0, 0, SW, SH);
-    sctx.fillStyle = '#28305a';   // fixed background speckle
-    for (let k = 0; k < 40; k++) sctx.fillRect(Math.floor(hash('bg' + k) * SW), Math.floor(hash('y' + k) * SH), 1, 1);
-    if (!scene) return;
-    if (scene.mystery) {   // not drawn yet: a dim star behind a slowly turning dashed ring
-      disc(sctx, CX, CY, 6, '#3a4366');
-      const a0 = REDUCED_MOTION ? 0 : seconds * 0.6;
-      sctx.fillStyle = '#ffd34d';
-      for (let k = 0; k < 24; k += 2) {
-        const a = a0 + (k / 24) * 2 * Math.PI;
-        sctx.fillRect(Math.round(CX + 30 * Math.cos(a)), Math.round(CY + 30 * TILT * Math.sin(a)), 1, 1);
+  // The star: dithered glow, limb darkening (edge darker than the middle), a slow sparkle.
+  function drawStar(t, dim) {
+    const r = scene.starR, c = scene.starColor;
+    sctx.fillStyle = shade(c, 0.35 * dim);
+    for (let dy = -r - 3; dy <= r + 3; dy++) {
+      for (let dx = -r - 3; dx <= r + 3; dx++) {
+        const d = Math.hypot(dx, dy);
+        if (d > r + 0.5 && d < r + 3.2 && ((dx + dy) & 1) === 0) sctx.fillRect(CX + dx, CY + dy, 1, 1);
       }
+    }
+    disc(sctx, CX, CY, r, shade(c, 0.78 * dim));
+    disc(sctx, CX, CY, Math.max(1, r - 1), shade(c, dim));
+    disc(sctx, CX - 1, CY - 1, Math.max(1, Math.round(r * 0.45)), shade(c, 1.35 * dim));
+    const len = REDUCED_MOTION ? 2 : 2 + Math.round(1.5 + 1.5 * Math.sin(t * 1.3));
+    sctx.fillStyle = shade(c, 1.2 * dim);
+    for (let k = 1; k <= len; k++) {
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) sctx.fillRect(CX + dx * (r + 1 + k), CY + dy * (r + 1 + k), 1, 1);
+    }
+  }
+
+  // Brightness Kepler would record: a planet passing in front of the star (seen edge-on, as from
+  // Earth) blocks light in proportion to its area. Depths are exaggerated to show in pixels.
+  function transitDepth(b) {
+    const r = scene.starR, s = b.p.size + 0.5;
+    if (b.behind || Math.abs(b.X) > r + s) return 0;
+    const cover = Math.min(1, (r + s - Math.abs(b.X)) / (2 * s));   // ingress / egress
+    return Math.min(1, (s / r) ** 2) * cover;
+  }
+
+  let lastSample = 0;
+  function drawCurve(seconds, flux) {
+    const curve = scene.curve, width = SW - 8;
+    if (!REDUCED_MOTION && seconds - lastSample > 0.05) {
+      curve.push(flux);
+      if (curve.length > width) curve.shift();
+      lastSample = seconds;
+    }
+    const top = SH - STRIP + 4;
+    sctx.fillStyle = '#6fe39a';
+    curve.forEach((f, i) => sctx.fillRect(4 + width - curve.length + i, top + Math.min(STRIP - 7, Math.round((1 - f) * 40)), 1, 1));
+  }
+
+  function drawSystem(seconds) {
+    if (!scene) {
+      sctx.fillStyle = '#070b1a';
+      sctx.fillRect(0, 0, SW, SH);
       return;
     }
-
-    // Habitable zone: two faint green ellipses (only the parts that land on the canvas show).
-    if (scene.hz && scene.hz[1] > 0) for (const r of scene.hz) if (r > scene.starR) ellipse(r, '#1f5a3a', 3);
-    // Orbits: dotted pixel ellipses, sparser for candidates and planets found by other methods.
-    for (const p of scene.planets) ellipse(p.rx, p.kind === 'confirmed' ? '#3a4888' : '#2c3770', p.kind === 'confirmed' ? 2 : 3);
-
+    if (scene.mystery) return drawMystery(seconds);
+    sctx.drawImage(scene.layer, 0, 0);
     const t = REDUCED_MOTION ? 0 : seconds;
+    for (let k = 0; k < 6; k++) {   // a few background stars twinkle
+      if (Math.sin(t * (0.7 + k * 0.23) + k * 2.1) > 0.6) {
+        sctx.fillStyle = '#c8d0ff';
+        sctx.fillRect(Math.floor(hash('tw' + k) * SW), Math.floor(hash('tv' + k) * (SH - STRIP)), 1, 1);
+      }
+    }
+    if (scene.companion) {   // another star in the system (true distance unknown here): top right
+      disc(sctx, SW - 14, 12, 2, '#ffd9a0');
+      sctx.fillStyle = '#ffd9a055';
+      sctx.fillRect(SW - 19, 12, 11, 1); sctx.fillRect(SW - 14, 7, 1, 11);
+    }
+
     const bodies = scene.planets.map(p => {
-      const a = p.phase + p.speed * t;
-      return { p, x: CX + p.rx * Math.cos(a), y: CY + p.rx * TILT * Math.sin(a), behind: Math.sin(a) < 0 };
+      const [X, Y] = orbitPoint(p, p.phase + p.speed * t);
+      return { p, X, x: CX + X, y: CY + Y * TILT, behind: Y < 0 };
     });
+    let flux = 1;
+    for (const b of bodies) { b.depth = transitDepth(b); flux -= b.depth; }
+    flux = Math.max(0, flux);
+
     const drawPlanet = b => {
-      if (b.p.kind === 'candidate') ring(sctx, b.x, b.y, b.p.size + 0.5, b.p.color);
-      else if (b.p.kind === 'other') diamond(sctx, b.x, b.y, b.p.size, b.p.color);
-      else disc(sctx, b.x, b.y, b.p.size, b.p.color);
+      const dx = CX - b.x, dy = CY - b.y, d = Math.hypot(dx, dy) || 1;
+      if (b.p.kind === 'candidate') ring(sctx, b.x, b.y, b.p.size + 0.5, b.p.pal[1]);
+      else if (b.p.kind === 'other') diamond(sctx, b.x, b.y, b.p.size, b.p.pal[1]);
+      else shadedPlanet(sctx, b.x, b.y, b.p, dx / d, dy / d);
+      if (b.depth > 0) {   // transiting: a white tick above the planet
+        sctx.fillStyle = '#ffffff';
+        sctx.fillRect(Math.round(b.x), Math.round(b.y) - b.p.size - 3, 1, 2);
+      }
     };
     bodies.filter(b => b.behind).forEach(drawPlanet);
-    disc(sctx, CX, CY, scene.starR + 2, scene.starColor + '33');   // glow
-    disc(sctx, CX, CY, scene.starR, scene.starColor);
+    drawStar(t, 0.75 + 0.25 * flux);
     bodies.filter(b => !b.behind).forEach(drawPlanet);
+    drawCurve(seconds, flux);
+  }
+
+  // Not drawn yet: a dim star, a slowly turning dashed ring and a blinking question mark.
+  const QUESTION = ['01110', '10001', '00001', '00110', '00100', '00000', '00100'];
+  function drawMystery(seconds) {
+    sctx.fillStyle = '#070b1a';
+    sctx.fillRect(0, 0, SW, SH);
+    sctx.fillStyle = '#28305a';
+    for (let k = 0; k < 40; k++) sctx.fillRect(Math.floor(hash('bg' + k) * SW), Math.floor(hash('y' + k) * SH), 1, 1);
+    disc(sctx, CX, CY, 6, '#3a4366');
+    const a0 = REDUCED_MOTION ? 0 : seconds * 0.6;
+    sctx.fillStyle = '#ffd34d';
+    for (let k = 0; k < 24; k += 2) {
+      const a = a0 + (k / 24) * 2 * Math.PI;
+      sctx.fillRect(Math.round(CX + 30 * Math.cos(a)), Math.round(CY + 30 * TILT * Math.sin(a)), 1, 1);
+    }
+    if (REDUCED_MOTION || Math.sin(seconds * 3) > -0.3) {
+      QUESTION.forEach((row, y) => [...row].forEach((bit, x) => {
+        if (bit === '1') sctx.fillRect(CX - 2 + x, CY - 22 + y, 1, 1);
+      }));
+    }
   }
 
   // ---------------------------------------------------------------- info panel
@@ -439,22 +604,59 @@
     return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">See the real sky here ↗</a>`;
   }
 
-  // A real photo of the sky around the star (Digitized Sky Survey, via CDS hips2fits), fetched on
-  // demand at 32×32 and shown pixelated: about 1 KB, nothing stored with the page.
+  // Real photos of the sky around the star, from three surveys (via CDS hips2fits), fetched on
+  // demand at 40×40 and shown pixelated: about 1 KB each, nothing stored with the page.
+  const SURVEYS = [
+    ['DSS2', 'CDS/P/DSS2/color', 'Digitized Sky Survey (visible light, photographic plates)'],
+    ['PS1', 'CDS/P/PanSTARRS/DR1/color-z-zg-g', 'Pan-STARRS DR1 (visible light, sharper and deeper)'],
+    ['2MASS', 'CDS/P/2MASS/color', '2MASS (infrared: cool stars and dust glow)'],
+  ];
+  let survey = 0;   // kept while browsing systems
+  function skyUrl(ra, dec, k) {
+    return 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=' + encodeURIComponent(SURVEYS[k][1]) +
+           `&width=40&height=40&fov=0.04&projection=TAN&coordsys=icrs&ra=${Number(ra)}&dec=${Number(dec)}&format=jpg`;
+  }
   function skyThumb(ra, dec) {
-    const url = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=' +
-                encodeURIComponent('CDS/P/DSS2/color') +
-                `&width=32&height=32&fov=0.04&projection=TAN&coordsys=icrs&ra=${Number(ra)}&dec=${Number(dec)}&format=jpg`;
-    return `<figure class="sky"><img src="${esc(url)}" width="32" height="32" loading="lazy"
-              referrerpolicy="no-referrer" alt="Real sky photo (DSS2) around the star">
-            <figcaption>real sky</figcaption></figure>`;
+    const buttons = SURVEYS.map(([name, , about], k) =>
+      `<button type="button" data-k="${k}" title="${esc(about)}" aria-pressed="${k === survey}">${esc(name)}</button>`).join('');
+    return `<figure class="sky" data-ra="${Number(ra)}" data-dec="${Number(dec)}">
+              <img src="${esc(skyUrl(ra, dec, survey))}" width="40" height="40" loading="lazy"
+                   referrerpolicy="no-referrer" alt="Real sky photo around the star (${esc(SURVEYS[survey][0])})">
+              <figcaption>real sky</figcaption><div class="surveys">${buttons}</div></figure>`;
   }
 
-  // Hide the sky photo if it can't load (offline, service down). A listener, not an inline
-  // onerror attribute, so the Content Security Policy can forbid inline scripts.
+  // Survey buttons swap the photo; it hides if it can't load (offline, service down). Listeners,
+  // not inline handlers, so the Content Security Policy can forbid inline scripts.
   function wireSkyThumbs() {
-    info.querySelectorAll('.sky img').forEach(img =>
-      img.addEventListener('error', () => { img.closest('figure').hidden = true; }));
+    info.querySelectorAll('.sky').forEach(fig => {
+      const img = fig.querySelector('img');
+      img.addEventListener('error', () => { fig.hidden = true; });
+      fig.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        survey = Number(b.dataset.k);
+        img.src = skyUrl(fig.dataset.ra, fig.dataset.dec, survey);
+        img.alt = `Real sky photo around the star (${SURVEYS[survey][0]})`;
+        fig.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      }));
+    });
+  }
+
+  // A sentence about the star from its numbers (NASA's tables, Gaia via Berger et al. 2020).
+  function starLine(d) {
+    const bits = [];
+    if (d.spectype) bits.push(`type ${esc(d.spectype)}`);
+    bits.push(`${fmt(d.teff)} K`, `${fmt(d.srad, 2)} × Sun's size`);
+    if (d.smass != null) bits.push(`${fmt(d.smass, 2)} × Sun's mass`);
+    if (d.age != null) bits.push(`~${fmt(d.age, 1)} billion years old`);
+    if (d.met != null) bits.push(d.met > 0.1 ? 'metal-rich' : d.met < -0.1 ? 'metal-poor' : 'Sun-like metals');
+    if (d.logg != null && d.logg < 3.9) bits.push(d.logg < 3.5 ? 'a giant star' : 'a subgiant (ageing)');
+    if (d.dist_pc != null) bits.push(`${fmt(d.dist_pc * LY_PER_PC)} light-years away`);
+    if (d.nstars > 1) bits.push(`one of ${fmt(d.nstars)} stars in the system`);
+    return bits.join(' · ');
+  }
+
+  function nasaLink(host) {
+    const url = 'https://exoplanetarchive.ipac.caltech.edu/overview/' + encodeURIComponent(host);
+    return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">NASA overview ↗</a>`;
   }
 
   function statusText(p) {
@@ -474,29 +676,35 @@
     const rows = detail.planets.map(p => {
       const cls = `${planetClass(p.teq)} ${STATUSES.has(p.status) ? p.status : ''}`;
       const mass = p.mass == null ? '-' : (p.mass_kind === 'estimated' ? '~' : '') + fmt(p.mass, 1);
+      const tess = p.toi ? ` <abbr class="badge" title="Seen again by NASA's TESS mission as ${esc(p.toi)}">TESS</abbr>` : '';
+      const ecc = p.ecc >= 0.1 ? ` <abbr class="badge" title="Oval orbit: eccentricity ${fmt(p.ecc, 2)}">e ${fmt(p.ecc, 2)}</abbr>` : '';
       return `
       <tr>
-        <td><span class="dot ${cls}"></span>${esc(p.name)}</td>
+        <td><span class="dot ${cls}"></span>${esc(p.name)}${tess}${ecc}</td>
         <td class="num">${fmt(p.radius, 1)}</td>
         <td class="num">${mass}</td>
         <td class="num">${fmt(p.period, 1)}</td>
         <td class="num">${fmt(p.teq)}</td>
+        <td class="num">${p.insol == null ? '-' : fmt(p.insol, p.insol < 10 ? 2 : 0)}</td>
         <td>${statusText(p)}</td>
         <td class="num">${p.year == null ? '-' : esc(p.year)}</td>
       </tr>`;
     }).join('');
-    const dist = detail.dist_pc != null ? ` · ${fmt(detail.dist_pc * LY_PER_PC)} light-years away` : '';
+    const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
     info.innerHTML = `
       <div class="head">${skyThumb(detail.ra, detail.dec)}<div>
-        <p>Star: ${fmt(detail.teff)} K · ${fmt(detail.srad, 2)} × Sun's radius${dist}</p>
-        <p>${parts.join(' + ')} · ${skyLink(detail.ra, detail.dec)}</p>
+        <p>Star: ${starLine(detail)}</p>
+        <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
       </div></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Planet</th><th class="num">Size (Earths)</th><th class="num">Mass (Earths)</th>
-          <th class="num">Year (days)</th><th class="num">Temp (K)</th><th>Status</th><th class="num">Found</th></tr></thead>
+          <th class="num">Year (days)</th><th class="num">Temp (K)</th><th class="num">Sunlight (vs Earth)</th>
+          <th>Status</th><th class="num">Found</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
-      <p class="note">~ mass estimated from size · green ring = habitable zone (approx.) · Kepler ID ${esc(detail.kepid)}</p>`;
+      <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
+        star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
+        planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
     wireSkyThumbs();
     scene = buildScene(detail);
   }

@@ -106,12 +106,13 @@ NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scr
 
 **[Open the star map](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/)** (or open `web/index.html` straight from disk).
 
-A pixel map of the Kepler field with every star that has a planet or planet candidate (3,600+). Search a system (`Kepler-90`, `KOI-351`, `K00351.01` or a Kepler ID), click a pixel or use the arrow keys, and the system pops up as pixel art: the star coloured by temperature, planets sized by radius and coloured by temperature, an approximate habitable zone, and a table with masses, orbits and discovery years. Systems whose only planets are unscored candidates show *"Soon to cross the stars"*; once Star Gazer has scored them, they are drawn and coloured by its verdict.
+A pixel map of the Kepler field with every star that has a planet or planet candidate (3,600+). Search a system (`Kepler-90`, `KOI-351`, `K00351.01` or a Kepler ID), click a pixel or use the arrow keys, and the system pops up as pixel art: a limb-darkened star coloured by temperature, shaded planets sized by radius and coloured by temperature (banded giants, icy caps, lava worlds), eccentric orbits that follow Kepler's equation, an approximate habitable zone, a companion star in multi-star systems, and a live light curve that dips whenever a planet crosses its star, the way Kepler found them. Behind the map is the real Milky Way (ESA Gaia DR3); each system has real sky photos (DSS2, Pan-STARRS, 2MASS infrared), star facts (mass, age, metals, distance), TESS re-detections, and a table with masses, orbits, sunlight and discovery years. Systems whose only planets are unscored candidates show *"Soon to cross the stars"*; once Star Gazer has scored them, they are drawn and coloured by its verdict.
 
-Everything is drawn from numbers on two small canvases (no images, about 1 MB of data for all systems) and hosted free on GitHub Pages. The data comes only from the NASA Exoplanet Archive (KOI table and confirmed-planet table) and Star Gazer's candidate scores:
+Everything is drawn from numbers on two small canvases (about 1.1 MB of data for all systems, plus one 18 KB sky backdrop) and hosted free on GitHub Pages. The data comes from the NASA Exoplanet Archive (KOI, confirmed-planet and TESS TOI tables), Berger et al. 2020 (Gaia stellar properties) and Star Gazer's candidate scores:
 
 ```powershell
 .venv\Scripts\python scripts\export_starmap.py      # -> web/data/systems.js
+.venv\Scripts\python scripts\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
 ```
 
 Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md).
@@ -251,8 +252,10 @@ No data files are committed to this repository.
 | 2 | NASA KOI Cumulative Table (all columns, V3) | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+cumulative&format=csv) | `scripts/build_full_dataset.py` → `data/raw/koi_cumulative_full.csv` |
 | 3 | Kepler Light Curves | [NASA MAST Archive](https://mast.stsci.edu/) via `lightkurve` (V1–V2) and direct MAST file downloads (V3) | `kepler_cnn.data` (V1–V2), `kepler_cnn.views` (V3) |
 | 4 | Confirmed planets in the Kepler field (`pscomppars`): masses, distances, discovery years, planets found by other methods | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) | `scripts/export_starmap.py` → `data/raw/ps_kepler_planets.csv` (star map) |
-| 5 | Gaia-based stellar properties for 186,301 Kepler stars ([Berger et al. 2020](https://ui.adsabs.harvard.edu/abs/2020AJ....159..280B)) | [VizieR J/AJ/159/280](https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=J/AJ/159/280) | `scripts/fetch_extra_data.py` (for a planned feature experiment) |
-| 6 | Sky photos around each star (Digitized Sky Survey) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | Fetched live by the star map, 32×32 pixels; nothing stored |
+| 5 | Gaia-based stellar properties for 186,301 Kepler stars ([Berger et al. 2020](https://ui.adsabs.harvard.edu/abs/2020AJ....159..280B)) | [VizieR J/AJ/159/280](https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=J/AJ/159/280) | `scripts/fetch_extra_data.py`; star mass, age and metals on the star map (feature experiment planned) |
+| 6 | Sky photos around each star (DSS2, Pan-STARRS1, 2MASS) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | Fetched live by the star map, 40×40 pixels; nothing stored |
+| 7 | TESS Objects of Interest in the Kepler field | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) (`toi` table) | `scripts/export_starmap.py` → `data/raw/toi_kepler_field.csv` (star map) |
+| 8 | Milky Way colour map (ESA Gaia DR3) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | `scripts/make_sky_backdrop.py` → `web/sky.png` (star map background) |
 
 ---
 
@@ -352,6 +355,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── make_hf_space.py          ← V3: builds a free Hugging Face Space for the web demo
 │   ├── export_starmap.py         ← Star map data: NASA tables + Star Gazer scores → web/data/systems.js
 │   ├── make_og_image.py          ← Star map social preview (web/og.png), run by export_starmap.py
+│   ├── make_sky_backdrop.py      ← Star map background: Gaia DR3 Milky Way in the map's projection
 │   ├── fetch_extra_data.py       ← Extra public datasets for later experiments (Gaia stellar properties)
 │   ├── plot_version_progress.py  ← The cross-version chart in this README
 │   └── import_colab_checkpoints.py  ← Moves your old Colab/Drive files into place

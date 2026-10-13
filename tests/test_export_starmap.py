@@ -107,6 +107,37 @@ def test_planet_table_adds_mass_distance_and_other_methods(export, catalog, plan
     assert 'dist_pc' not in data['systems'].get('KOI-7621', {})   # the far-away host matched nothing
 
 
+def test_tess_and_gaia_extras(export, catalog, planets):
+    planets['pl_orbeccen'] = [0.3, 0.0, np.nan]
+    planets['sy_snum'] = [2, 2, 1]
+    planets['st_spectype'] = ['G0 V', 'G0 V', np.nan]
+    tois = pd.DataFrame([   # TESS saw Kepler-90 h again, and a false alarm on the same star
+        {'toi': 1234.01, 'tid': 99, 'ra': 290.0001, 'dec': 44.0001, 'pl_orbper': 331.5, 'tfopwg_disp': 'KP'},
+        {'toi': 1234.02, 'tid': 99, 'ra': 290.0001, 'dec': 44.0001, 'pl_orbper': 7.0, 'tfopwg_disp': 'FA'},
+    ])
+    gaia = {1: pd.Series({'gaia_smass': 1.2, 'gaia_age': 3.14, 'gaia_smet': -0.2, 'gaia_slogg': 4.4,
+                          'gaia_dist_pc': 900.0})}
+    data, _ = export.build(catalog, spotlight=[], planets=planets, tois=tois, gaia=gaia)
+    system = data['systems']['Kepler-90']
+    by_name = {p['name']: p for p in system['planets']}
+    assert by_name['Kepler-90 h']['toi'] == 'TOI-1234.01' and by_name['Kepler-90 h']['ecc'] == 0.3
+    assert 'toi' not in by_name['Kepler-90 b']             # only TESS false alarm at that period
+    assert 'ecc' not in by_name['Kepler-90 z']             # circular orbits aren't exported
+    assert (system['nstars'], system['spectype'], system['host']) == (2, 'G0 V', 'KOI-351')
+    # KOI table first (smass 1.0), Gaia fills gaps; NASA's distance beats Gaia's
+    assert (system['smass'], system['age'], system['met'], system['dist_pc']) == (1.0, 3.1, -0.2, 840.0)
+
+
+def test_cached_table_redownloads_when_columns_are_missing(export, tmp_path, monkeypatch):
+    path = tmp_path / 'table.csv'
+    pd.DataFrame({'a': [1]}).to_csv(path, index=False)
+    monkeypatch.setattr(export.pd, 'read_csv',
+                        lambda src, **kw: pd.DataFrame({'a': [1], 'b': [2]}) if src == 'URL' else
+                        pd.io.parsers.readers.read_csv(src, **kw))
+    assert list(export._cached_table(path, 'URL', 'test', download=False, columns={'b'}).columns) == ['a']
+    assert list(export._cached_table(path, 'URL', 'test', columns={'b'}).columns) == ['a', 'b']
+
+
 def test_load_scores(export, tmp_path):
     assert export.load_scores(tmp_path / 'missing.csv') == {}
     path = tmp_path / 'candidates.csv'
