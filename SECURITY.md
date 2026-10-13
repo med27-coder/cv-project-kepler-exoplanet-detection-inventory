@@ -30,6 +30,8 @@ model predictions (an educational model, not a scientific classification; see
   scripts, inline styles or `eval`. Images may also come from the CDS sky-survey service.
 - Every value written into the page is escaped; search input is length-limited; malformed links
   are ignored.
+- Clickjacking guard: GitHub Pages can't send `frame-ancestors` headers, so when another site
+  frames the page it shows only a link that opens the real page.
 - Fonts are self-hosted, so no third party sees visitors' requests (only the optional sky photo
   is fetched from CDS). No cookies, analytics or storage.
 - Tests (`tests/test_web_data.py`) fail if the policy is loosened or inline code comes back,

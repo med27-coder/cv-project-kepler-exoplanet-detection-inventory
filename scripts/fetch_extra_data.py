@@ -14,13 +14,9 @@ Already-downloaded files are skipped unless --refresh.
 
 import argparse
 import io
-import sys
 import urllib.request
-from pathlib import Path
 
 import pandas as pd
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from kepler_cnn import config as C
 

@@ -11,19 +11,17 @@ is ever seen during training. Results go to results/v3/cv_metrics.json and cross
 import argparse
 import json
 import sys
-from pathlib import Path
 
 import numpy as np
 from sklearn.model_selection import StratifiedGroupKFold
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+from train_star_gazer import VARIANTS, fit_one
 
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S
 from kepler_cnn import terms
 from kepler_cnn.runtime import limit_tf_threads, low_priority
-from train_star_gazer import VARIANTS, fit_one
+
+SUMMARY_KEYS = ('accuracy', 'auc', 'precision', 'recall', 'brier', 'accuracy_val_threshold')
 
 
 def main():
@@ -72,7 +70,7 @@ def main():
     for name, rows in folds.items():
         summary[name] = {key: {'mean': float(np.mean([r[key] for r in rows])),
                                'std': float(np.std([r[key] for r in rows], ddof=1)) if len(rows) > 1 else 0.0}
-                         for key in ('accuracy', 'auc', 'precision', 'recall', 'brier', 'accuracy_val_threshold')}
+                         for key in SUMMARY_KEYS}
         a, u = summary[name]['accuracy'], summary[name]['auc']
         print(f'{name:10s} accuracy {a["mean"]:.4f} ± {a["std"]:.4f}   AUC {u["mean"]:.4f} ± {u["std"]:.4f}')
 

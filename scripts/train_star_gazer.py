@@ -18,11 +18,8 @@ import argparse
 import json
 import sys
 import time
-from pathlib import Path
 
 import numpy as np
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S

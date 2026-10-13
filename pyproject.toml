@@ -1,7 +1,7 @@
 [project]
 name = "kepler-cnn"
-version = "2.0.0"
-description = "AstroNet-style 1D CNN for Kepler exoplanet transit classification"
+version = "3.0.0"
+description = "Kepler exoplanet vetting: V2 1D CNN and V3 Star Gazer multi-view model"
 requires-python = ">=3.10"
 
 [build-system]

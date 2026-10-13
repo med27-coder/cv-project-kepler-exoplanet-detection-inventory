@@ -37,3 +37,7 @@ gradio>=6.30.0
 
 # Tests (.venv\Scripts\python -m pytest)
 pytest>=8
+
+# This project's own package (src/kepler_cnn), installed in editable mode so the scripts,
+# app and notebooks can `import kepler_cnn` from anywhere; edits to src/ apply immediately.
+-e .

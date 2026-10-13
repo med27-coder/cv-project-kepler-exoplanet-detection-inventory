@@ -46,7 +46,8 @@ def load_versions():
         sys.exit('results/v3/metrics.json not found: train V3 or run "secure_artifacts.py unlock" first.')
     v3 = json.loads(v3_file.read_text())
     m = v3['results']['hybrid']['threshold_0.5']
-    versions['V3'] = {k: m[k] for k in ('accuracy', 'auc', 'precision', 'recall')} | {'n_curves': v3['n_kois']}
+    versions['V3'] = {k: m[k] for k in ('accuracy', 'auc', 'precision', 'recall')}
+    versions['V3']['n_curves'] = v3['n_kois']
     return versions
 
 

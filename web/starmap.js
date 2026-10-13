@@ -4,6 +4,19 @@
 (function () {
   'use strict';
 
+  // Clickjacking guard. GitHub Pages can't send frame-ancestors / X-Frame-Options headers, and
+  // browsers block a framed page from navigating the top window without a click. So inside another
+  // site's frame, replace the page with a single link that opens the real one, and stop here.
+  if (window.top !== window.self) {
+    const link = document.createElement('a');
+    link.href = window.location.href;
+    link.target = '_top';
+    link.rel = 'noopener';
+    link.textContent = 'Open the Kepler Star Map ↗';
+    document.body.replaceChildren(link);
+    return;
+  }
+
   const DATA = window.STARMAP;
   const COL = Object.fromEntries(DATA.columns.map((c, i) => [c, i]));
   const STARS = DATA.stars;
