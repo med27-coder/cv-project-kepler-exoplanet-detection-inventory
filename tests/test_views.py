@@ -114,6 +114,16 @@ def test_bad_parameters_are_skipped_not_crashing():
     assert 'K1' in skipped and 'K2' in out
 
 
+def test_transit_longer_than_orbit_is_skipped_not_crashing():
+    """KOI K06549.01 lists a 13.9 h transit on a 13 h orbit: the star must still build."""
+    period, dur_h = 0.54, 13.93
+    transits = [(period, T0, dur_h), (PERIOD, T0, DUR_H)]
+    lc = views.prepare_lightcurve(make_quarters(n_quarters=1), transits)
+    assert lc is not None and np.isfinite(lc[1]).mean() > 0.9
+    out, skipped = views.views_for_lightcurve(lc, [('K2', period, T0, dur_h), ('K1', PERIOD, T0, DUR_H)])
+    assert skipped == {'K2': 'catalog transit duration is longer than the orbit'} and 'K1' in out
+
+
 def test_save_load_and_version(tmp_path, monkeypatch, planet):
     monkeypatch.setattr(views, 'VIEWS_DIR', tmp_path)
     views.save_views({'K00001.01': planet})
