@@ -187,3 +187,9 @@ a { color: var(--accent); }
 #system.interactive { cursor: grab; touch-action: none; }
 #system.interactive:active { cursor: grabbing; }
 #sys-hint { font-size: 18px; }
+
+/* Solar System fact sheet (easter egg) */
+.facts-title { font-family: var(--pixel); font-size: 12px; color: var(--accent); margin: 18px 0 6px; letter-spacing: 1px; }
+.facts { margin: 0; padding-left: 0; list-style: none; }
+.facts li { margin: 0 0 6px; padding-left: 18px; position: relative; }
+.facts li::before { content: '✦'; position: absolute; left: 0; color: var(--accent); }
