@@ -35,8 +35,15 @@ PLANETS = C.RAW_DIR / 'ps_kepler_planets.csv'
 # Hosts are matched to KOI stars by position (names differ: Kepler-90 is "KOI-351" there).
 PLANETS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
                'pl_name,hostname,ra,dec,discoverymethod,disc_year,sy_dist,pl_bmasse,pl_bmassprov,'
-               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt+from+pscomppars+where+'
-               'ra+between+279+and+303+and+dec+between+35+and+54&format=csv')
+               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt,pl_orbeccen,pl_insol,sy_snum,st_spectype'
+               '+from+pscomppars+where+ra+between+279+and+303+and+dec+between+35+and+54&format=csv')
+PLANET_COLUMNS = {'pl_orbeccen', 'pl_insol', 'sy_snum', 'st_spectype'}   # newest additions (re-download if missing)
+TOIS = C.RAW_DIR / 'toi_kepler_field.csv'
+# TESS Objects of Interest in the Kepler field: Kepler stars that TESS also flagged.
+TOIS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
+            'toi,tid,ra,dec,pl_orbper,tfopwg_disp+from+toi+where+'
+            'ra+between+279+and+303+and+dec+between+35+and+54&format=csv')
+GAIA = C.RAW_DIR / 'berger2020_gaia_kepler.csv'   # scripts/fetch_extra_data.py gaia_stars
 MATCH_ARCSEC = 3.0      # host star <-> KOI star position match
 MATCH_PERIOD = 0.01     # planet <-> KOI match: periods within 1%
 MEASURED_MASS = {'Mass', 'Msini', 'Msin(i)/sin(i)'}   # otherwise estimated from a mass-radius relation
@@ -88,25 +95,46 @@ def load_scores(path):
             zip(table['kepoi_name'], table['star_gazer_prob'], table['above_threshold'])}
 
 
-def load_planets(path=PLANETS, download=True):
-    """NASA confirmed-planet table for the Kepler field (downloaded once), or None."""
+def _cached_table(path, url, what, download=True, columns=()):
+    """A NASA table saved under data/raw (downloaded once, again if it lacks `columns`), or None."""
     path = Path(path)
-    if not path.exists():
-        if not download:
-            return None
-        print('Downloading the confirmed-planet table (pscomppars) for Kepler systems...')
-        path.parent.mkdir(parents=True, exist_ok=True)
-        pd.read_csv(PLANETS_URL).to_csv(path, index=False)
+    if path.exists() and not set(columns) - set(pd.read_csv(path, nrows=0).columns):
+        return pd.read_csv(path)
+    if not download:
+        return pd.read_csv(path) if path.exists() else None
+    print(f'Downloading {what}...')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.read_csv(url).to_csv(path, index=False)
     return pd.read_csv(path)
 
 
-def match_hosts(stars, planets, max_arcsec=MATCH_ARCSEC):
+def load_planets(path=PLANETS, download=True):
+    """NASA confirmed-planet table for the Kepler field, or None."""
+    return _cached_table(path, PLANETS_URL, 'the confirmed-planet table (pscomppars) for Kepler systems',
+                         download, PLANET_COLUMNS)
+
+
+def load_tois(path=TOIS, download=True):
+    """NASA's TESS Objects of Interest table for the Kepler field, or None."""
+    return _cached_table(path, TOIS_URL, 'the TESS Objects of Interest (TOI) table', download)
+
+
+def load_gaia(path=GAIA):
+    """{kepid: Berger et al. 2020 Gaia-based star row}, or {} if not downloaded."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    table = pd.read_csv(path).drop_duplicates('kepid').set_index('kepid')
+    return {int(k): row for k, row in table.iterrows()}
+
+
+def match_hosts(stars, planets, max_arcsec=MATCH_ARCSEC, key='hostname'):
     """{kepid: planet rows} pairing each planet's host with the nearest KOI star by position.
 
-    stars: one row per star with kepid, ra, dec (degrees)."""
+    stars: one row per star with kepid, ra, dec (degrees). `key`: the column naming each host."""
     if planets is None or planets.empty:
         return {}
-    hosts = planets.groupby('hostname')[['ra', 'dec']].first()
+    hosts = planets.groupby(key)[['ra', 'dec']].first()
     s_ra, s_dec = np.radians(stars['ra'].to_numpy()), np.radians(stars['dec'].to_numpy())
     out = {}
     for host, (ra, dec) in hosts.iterrows():
@@ -118,7 +146,7 @@ def match_hosts(stars, planets, max_arcsec=MATCH_ARCSEC):
         i = int(np.argmin(sep))
         if sep[i] <= max_arcsec:
             kepid = int(stars['kepid'].iloc[i])
-            rows = planets[planets['hostname'] == host]
+            rows = planets[planets[key] == host]
             out[kepid] = rows if kepid not in out else pd.concat([out[kepid], rows])
     return out
 
@@ -138,14 +166,55 @@ def _pop_match(extras, name, period):
 
 
 def _extra_fields(ps):
-    """Mass and discovery year from one pscomppars row."""
+    """Mass, discovery year, eccentricity and insolation from one pscomppars row."""
     out = {}
     if pd.notna(ps['pl_bmasse']):
         out['mass'] = round(float(ps['pl_bmasse']), 2)   # Earth masses
         out['mass_kind'] = 'measured' if ps['pl_bmassprov'] in MEASURED_MASS else 'estimated'
     if pd.notna(ps['disc_year']):
         out['year'] = int(ps['disc_year'])
+    if pd.notna(ps.get('pl_orbeccen')) and 0 < ps['pl_orbeccen'] < 1:
+        out['ecc'] = round(float(ps['pl_orbeccen']), 3)
+    if pd.notna(ps.get('pl_insol')):
+        out['insol'] = round(float(ps['pl_insol']), 2)   # sunlight relative to Earth
     return out
+
+
+TESS_KEEP = {'KP', 'CP', 'PC', 'APC'}   # TOI dispositions kept: known/confirmed planet, candidates
+
+
+def tess_matches(tois, period):
+    """'TOI-1161.01' for the TESS object on this star whose period is within 1% of `period`, else None."""
+    if tois is None or period is None:
+        return None
+    for _, t in tois.iterrows():
+        if t['tfopwg_disp'] in TESS_KEEP and pd.notna(t['pl_orbper']) \
+                and abs(t['pl_orbper'] - period) <= MATCH_PERIOD * period:
+            return f'TOI-{t["toi"]:.2f}'
+    return None
+
+
+def star_facts(star, extras, gaia_row):
+    """Star mass, age, metals, gravity, distance: NASA's tables first, Berger et al. 2020 (Gaia) after."""
+    def pick(*values, digits=2):
+        for v in values:
+            if v is not None and pd.notna(v):
+                return round(float(v), digits)
+        return None
+
+    g = gaia_row if gaia_row is not None else {}
+    ps = extras.iloc[0] if extras is not None and len(extras) else {}
+    facts = {'smass': pick(star.get('koi_smass'), g.get('gaia_smass')),
+             'age': pick(g.get('gaia_age'), digits=1),           # Gyr (Gaia isochrones; uncertain)
+             'met': pick(g.get('gaia_smet'), star.get('koi_smet')),   # [Fe/H], 0 = like the Sun
+             'logg': pick(g.get('gaia_slogg'), star.get('koi_slogg')),
+             'dist_pc': pick(ps.get('sy_dist'), g.get('gaia_dist_pc'), digits=1)}
+    if ps is not None and len(ps):
+        if pd.notna(ps.get('sy_snum')) and ps['sy_snum'] > 1:
+            facts['nstars'] = int(ps['sy_snum'])
+        if isinstance(ps.get('st_spectype'), str) and ps['st_spectype'].strip():
+            facts['spectype'] = ps['st_spectype'].strip()
+    return {k: v for k, v in facts.items() if v is not None}
 
 
 def _other_method_planet(ps, star_mass):
@@ -162,8 +231,9 @@ def _other_method_planet(ps, star_mass):
             **_extra_fields(ps)}
 
 
-def system_detail(rows, scores, extras=None):
-    """Star + planets for one system; `extras` = this system's rows of the pscomppars table."""
+def system_detail(rows, scores, extras=None, gaia_row=None, tois=None):
+    """Star + planets for one system. `extras`: this system's rows of the pscomppars table;
+    `gaia_row`: the star's Berger et al. 2020 row; `tois`: TESS objects on the same star."""
     star = rows.iloc[0]
     by_name = {} if extras is None else {r['pl_name']: r for _, r in extras.iterrows()}   # unmatched rows
     planets = []
@@ -177,12 +247,17 @@ def system_detail(rows, scores, extras=None):
             'sma': round(_sma(r), 4),                  # AU
             'teq': _num(r['koi_teq'], 0),              # K
         }
+        if pd.notna(r.get('koi_insol')):
+            planet['insol'] = round(float(r['koi_insol']), 2)   # replaced by NASA's value when matched
         if r['kepoi_name'] in scores:
             prob, above = scores[r['kepoi_name']]
             planet['sg'], planet['sg_planet'] = round(prob, 3), above
         ps = _pop_match(by_name, planet['name'], planet['period'])
         if ps is not None:
             planet.update(_extra_fields(ps))
+        toi = tess_matches(tois, planet['period'])
+        if toi:
+            planet['toi'] = toi
         planets.append(planet)
     smass = star.get('koi_smass')
     smass = float(smass) if pd.notna(smass) and smass > 0 else 1.0
@@ -191,19 +266,23 @@ def system_detail(rows, scores, extras=None):
     detail = {'kepid': int(star['kepid']), 'teff': _num(star['koi_steff'], 0),
               'srad': _num(star['koi_srad'], 3), 'kepmag': _num(star['koi_kepmag'], 2),
               'ra': round(float(star['ra']), 5), 'dec': round(float(star['dec']), 5)}
-    if extras is not None and len(extras) and pd.notna(extras['sy_dist'].iloc[0]):
-        detail['dist_pc'] = round(float(extras['sy_dist'].iloc[0]), 1)
+    detail.update(star_facts(star, extras, gaia_row))
+    if extras is not None and len(extras):
+        detail['host'] = str(extras['hostname'].iloc[0])   # NASA's name, for its overview page
     detail['planets'] = planets
     return detail
 
 
-def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5):
+def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5, tois=None, gaia=None):
     """Map pixels for every star with a non-false-positive KOI, full detail for drawn systems.
-    `planets` (optional) is NASA's confirmed-planet table, for masses, distances and non-KOI planets."""
-    scores = scores or {}
+    Optional extras: `planets` is NASA's confirmed-planet table (masses, distances, non-KOI planets),
+    `tois` NASA's TESS Objects of Interest table, `gaia` {kepid: Berger et al. 2020 star row}."""
+    scores, gaia = scores or {}, gaia or {}
     kois = catalog[catalog['koi_disposition'].isin(list(STATUS))]
     kois = kois.dropna(subset=['ra', 'dec', 'koi_period'])
-    hosts = match_hosts(kois.groupby('kepid', as_index=False)[['ra', 'dec']].first(), planets)
+    positions = kois.groupby('kepid', as_index=False)[['ra', 'dec']].first()
+    hosts = match_hosts(positions, planets)
+    tess = match_hosts(positions, tois, key='tid')
     stars, systems = [], {}
     wanted = set(spotlight)
     for kepid, rows in kois.groupby('kepid', sort=True):
@@ -212,7 +291,8 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
         cand_scores = [scores[k][0] for k in cand if k in scores]
         drawn = bool((rows['koi_disposition'] == 'CONFIRMED').any() or cand_scores)
         if drawn:
-            systems[name] = system_detail(rows, scores, hosts.get(int(kepid)))
+            systems[name] = system_detail(rows, scores, hosts.get(int(kepid)), gaia.get(int(kepid)),
+                                          tess.get(int(kepid)))
         mag = rows['koi_kepmag'].iloc[0]
         stars.append([name, int(kepid), koi_host(rows['kepoi_name'].iloc[0]),
                       round(float(rows['ra'].iloc[0]), 4), round(float(rows['dec'].iloc[0]), 4),
@@ -220,7 +300,8 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       len(rows), round(max(cand_scores), 3) if cand_scores else None])
     names = {s[0] for s in stars}
     missing = sorted(wanted - names)
-    return {'source': 'NASA Exoplanet Archive, KOI cumulative table',
+    return {'source': 'NASA Exoplanet Archive (KOI, confirmed-planet and TOI tables); '
+                      'Berger et al. 2020 (Gaia-Kepler stellar properties)',
             'exported': datetime.now(timezone.utc).date().isoformat(),
             'scored': bool(scores), 'sg_threshold': threshold,
             'columns': COLUMNS, 'spotlight': [n for n in spotlight if n in names],
@@ -249,8 +330,10 @@ def main():
     catalog = pd.read_csv(args.catalog, low_memory=False).replace([np.inf, -np.inf], np.nan)
     scores = load_scores(args.scores)
     planets = load_planets(args.planets, download=not args.offline)
+    tois = load_tois(download=not args.offline)
+    gaia = load_gaia()
     threshold = json.loads(THRESHOLD.read_text())['threshold'] if scores and THRESHOLD.exists() else 0.5
-    data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold)
+    data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia)
     if missing:
         print(f'Warning: spotlight systems not in the catalog: {", ".join(missing)}')
     args.out.parent.mkdir(parents=True, exist_ok=True)

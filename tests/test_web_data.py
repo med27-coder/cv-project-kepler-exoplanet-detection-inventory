@@ -77,3 +77,13 @@ def test_page_assets_exist():
     for ref in re.findall(r'(?:src|href)="([^":#]+)"', html):   # relative links only
         assert (WEB / ref).exists(), ref
     assert (WEB / 'og.png').exists()
+
+
+def test_sky_backdrop():
+    """web/sky.png (scripts/make_sky_backdrop.py) covers the 192-px map at 2 pixels per map pixel
+    and stays small; starmap.js loads it from the site itself (no third-party request)."""
+    png = (WEB / 'sky.png').read_bytes()
+    assert png[:8] == bytes.fromhex('89504e470d0a1a0a') and len(png) < 100_000
+    width, height = int.from_bytes(png[16:20], 'big'), int.from_bytes(png[20:24], 'big')
+    assert (width, height) == (384, 384)
+    assert "sky.src = 'sky.png'" in (WEB / 'starmap.js').read_text(encoding='utf-8')

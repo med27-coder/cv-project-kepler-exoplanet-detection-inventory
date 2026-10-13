@@ -126,8 +126,12 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 `scripts/export_starmap.py` builds `web/data/systems.js` (committed; it is what the web page loads) from:
 
 1. `koi_cumulative_full.csv`: every star with a CONFIRMED or CANDIDATE KOI becomes a map pixel.
-2. `ps_kepler_planets.csv`: NASA's confirmed-planet table (`pscomppars`) for every planet in the Kepler field, downloaded on first run and matched to KOI stars by position (NASA renamed some systems, e.g. Kepler-90 is "KOI-351" there): planet masses (measured, or estimated from a mass-radius relation), distances, discovery years, and planets found without a transit (radial velocity, timing variations).
-3. `results/v3/candidates.csv` (optional): Star Gazer's score for each candidate, from `scripts/score_candidates.py`. Only the scores are exported, never the model.
+2. `ps_kepler_planets.csv`: NASA's confirmed-planet table (`pscomppars`) for every planet in the Kepler field, downloaded on first run (again if columns were added) and matched to KOI stars by position (NASA renamed some systems, e.g. Kepler-90 is "KOI-351" there): planet masses, eccentricities, insolation, number of stars, spectral types (measured, or estimated from a mass-radius relation), distances, discovery years, and planets found without a transit (radial velocity, timing variations).
+3. `toi_kepler_field.csv`: NASA's TESS Objects of Interest in the Kepler field, downloaded on first run; a Kepler planet is marked as re-detected by TESS when a TOI on the same star (within 3") has a period within 1% (TESS false alarms and false positives are ignored).
+4. `berger2020_gaia_kepler.csv` (from `scripts/fetch_extra_data.py`, optional): star mass, age, metallicity, surface gravity and Gaia distance, used where NASA's tables have no value.
+5. `results/v3/candidates.csv` (optional): Star Gazer's score for each candidate, from `scripts/score_candidates.py`. Only the scores are exported, never the model.
+
+`scripts/make_sky_backdrop.py` draws the map background `web/sky.png` from the ESA Gaia DR3 colour map (via CDS hips2fits, in the map's projection). Re-run it only when the set of map stars changes.
 
 ## Extra data (not used for training yet)
 
