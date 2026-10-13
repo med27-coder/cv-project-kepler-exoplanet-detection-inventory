@@ -1,5 +1,7 @@
 # 🗺️ Star Map: roadmap
 
+> Project-wide improvement notes (data, security, encryption, code quality, testing): [IMPROVEMENTS.md](IMPROVEMENTS.md).
+
 **Goal:** a public web page with a pixelated map of the Kepler field. Visitors type a star system (or click a pixel) and the system pops up as small pixel art: the star, its planets and their orbits. Some systems are fully drawn; the rest show a *"Soon to cross the stars"* message until they are added.
 
 Constraints:
