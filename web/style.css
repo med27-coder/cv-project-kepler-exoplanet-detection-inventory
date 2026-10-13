@@ -177,3 +177,13 @@ a { color: var(--accent); }
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
 }
+
+/* System view controls */
+.panel-head { flex-wrap: wrap; gap: 6px; }
+.zoom[hidden] { display: none; }
+.zoom button.ghost { box-shadow: none; padding: 4px 6px; }
+.zoom button.ghost[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+#sys-level { min-width: 4ch; }
+#system.interactive { cursor: grab; touch-action: none; }
+#system.interactive:active { cursor: grabbing; }
+#sys-hint { font-size: 18px; }
