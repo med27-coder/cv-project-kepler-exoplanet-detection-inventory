@@ -61,8 +61,20 @@
     </section>
 
     <section class="panel" aria-live="polite" aria-labelledby="sys-title">
-      <h2 id="sys-title">PICK A STAR</h2>
-      <canvas id="system" width="256" height="160" aria-hidden="true"></canvas>
+      <div class="panel-head">
+        <h2 id="sys-title">PICK A STAR</h2>
+        <div class="zoom" id="sys-tools" hidden>
+          <button type="button" id="sys-scale" class="ghost" aria-pressed="false"
+                  title="Real distances and sizes instead of the spaced-out overview">TRUE SCALE</button>
+          <button type="button" id="sys-fit" class="ghost" title="Show every orbit and the whole habitable zone">FIT</button>
+          <button type="button" id="sys-out" aria-label="Zoom out of the system">−</button>
+          <span id="sys-level" aria-live="polite">1×</span>
+          <button type="button" id="sys-in" aria-label="Zoom into the system">+</button>
+        </div>
+      </div>
+      <canvas id="system" width="256" height="160" tabindex="0"
+              aria-label="The selected star system, animated. Scroll or use + and - to zoom, drag or arrow keys to move, 0 to fit."></canvas>
+      <p class="status" id="sys-hint"></p>
       <div id="info">
         <p>Type a system above, tap a chip, roll the 🎲, or click a pixel on the map.</p>
       </div>

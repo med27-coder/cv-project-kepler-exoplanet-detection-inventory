@@ -124,6 +124,10 @@ except one 18 KB backdrop):
 - [x] **Live light curve**: a strip under each system showing the star's brightness as Kepler sees
       it, dipping when a planet transits (exaggerated): how the planets were actually found.
 
+- [x] **Explorable systems**: zoom (scroll, +/−, keys) and drag around each system; *Fit* shows every
+      orbit and the whole habitable zone; *True scale* switches to real distances (and real star and
+      planet sizes when zoomed in far enough), with a scale bar and Earth's orbit for comparison.
+
 Next ideas (not started):
 
 - [ ] **Real transit sparklines**: each planet's own folded Kepler light curve (the model's local
