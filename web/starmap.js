@@ -1,6 +1,7 @@
 // Kepler Star Map: pixel map of the Kepler field + pixel-art star systems.
 // Data comes from data/systems.js (scripts/export_starmap.py). Everything is drawn
 // procedurally on two small canvases, so a system costs a few numbers, not an image.
+// Built by scripts/build_web.py from web/src/*.js: edit those, not this file.
 (function () {
   'use strict';
 
