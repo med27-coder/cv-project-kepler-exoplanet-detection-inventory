@@ -27,11 +27,11 @@ from kepler_cnn import terms
 from kepler_cnn.runtime import limit_tf_threads, low_priority
 
 VARIANTS = {
-    'cnn_basic': dict(use_global=True, use_local=True, use_secondary=False, use_features=False,
-                      local_channels=1),
-    'cnn': dict(use_global=True, use_local=True, use_secondary=True, use_features=False),
-    'features': dict(use_global=False, use_local=False, use_secondary=False, use_features=True),
-    'hybrid': dict(use_global=True, use_local=True, use_secondary=True, use_features=True),
+    'cnn_basic': {'use_global': True, 'use_local': True, 'use_secondary': False, 'use_features': False,
+                      'local_channels': 1},
+    'cnn': {'use_global': True, 'use_local': True, 'use_secondary': True, 'use_features': False},
+    'features': {'use_global': False, 'use_local': False, 'use_secondary': False, 'use_features': True},
+    'hybrid': {'use_global': True, 'use_local': True, 'use_secondary': True, 'use_features': True},
 }
 
 
@@ -165,8 +165,8 @@ def main():
         results['hybrid+diagnostics'], _ = score('hybrid+diagnostics', [model], ds, feats_d, va, te)
 
     S.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    summary = {'n_kois': int(len(y)), 'n_stars': int(len(set(groups))),
-               'split': {'train': int(len(tr)), 'val': int(len(va)), 'test': int(len(te))},
+    summary = {'n_kois': len(y), 'n_stars': len(set(groups)),
+               'split': {'train': len(tr), 'val': len(va), 'test': len(te)},
                'epochs_max': epochs, 'ensemble': args.ensemble, 'results': results}
     (S.RESULTS_DIR / 'metrics.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
     (S.RESULTS_DIR / 'histories.json').write_text(json.dumps(hists), encoding='utf-8')

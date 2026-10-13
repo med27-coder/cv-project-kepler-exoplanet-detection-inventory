@@ -41,6 +41,10 @@ def test_lock_unlock_roundtrip_in_parts(sa, tmp_path):
     manifest = json.loads(sa.MANIFEST.read_text())
     assert manifest['format'] == 2 and len(manifest['parts']) >= 3
     assert all(p['bytes'] < 5_000 for p in manifest['parts'])
+    joined = b''.join((sa.SECURE_DIR / p['file']).read_bytes() for p in manifest['parts'])
+    assert original[:64] not in joined                   # nothing readable in the parts
+    with pytest.raises(SystemExit, match='already exist'):
+        sa.unlock(args())                                # never overwrites without --force
     for rel in ('models', 'results'):
         import shutil
         shutil.rmtree(tmp_path / rel)

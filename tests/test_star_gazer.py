@@ -65,7 +65,7 @@ def test_augmentation_flips_views_not_features(keras):
     model = S.build_model(compile=False)
     x = S.model_inputs(model, ds, np.arange(40), feats)
     batches = S._batches(x, ds['y'], np.ones(40, np.float32), batch_size=40, seed=0, flip=True)
-    xb, yb, wb = batches[0]
+    xb, _yb, _wb = batches[0]
     np.testing.assert_array_equal(xb['features'], x['features'])
     flipped = [not np.array_equal(xb['local_view'][i], x['local_view'][i]) for i in range(40)]
     assert 0 < sum(flipped) < 40
@@ -159,9 +159,9 @@ def test_agreement_with_nasa_handles_missing_scores():
 def test_stale_model_is_refused(tmp_path, monkeypatch):
     monkeypatch.setattr(S, 'MODEL_DIR', tmp_path)
     monkeypatch.setattr(S, 'THRESHOLD_FILE', tmp_path / 'threshold.json')
-    (tmp_path / 'threshold.json').write_text('{"threshold": 0.4, "view_version": %d}' % views.VIEW_VERSION)
+    (tmp_path / 'threshold.json').write_text(f'{{"threshold": 0.4, "view_version": {views.VIEW_VERSION}}}')
     S.check_view_version()
-    (tmp_path / 'threshold.json').write_text('{"threshold": 0.4, "view_version": %d}' % (views.VIEW_VERSION - 1))
+    (tmp_path / 'threshold.json').write_text(f'{{"threshold": 0.4, "view_version": {views.VIEW_VERSION - 1}}}')
     with pytest.raises(S.StaleModelError):
         S.check_view_version()
     (tmp_path / 'threshold.json').write_text('{"threshold": 0.4}')   # saved before versions were recorded
@@ -196,10 +196,10 @@ def test_hf_space_refuses_stale_or_old_bundle(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match='No local model'):
         make_hf_space.check_bundle(bundle)
     S.MODEL_FILE.write_bytes(b'model')
-    S.THRESHOLD_FILE.write_text('{"threshold": 0.5, "view_version": %d}' % (views.VIEW_VERSION - 1))
+    S.THRESHOLD_FILE.write_text(f'{{"threshold": 0.5, "view_version": {views.VIEW_VERSION - 1}}}')
     with pytest.raises(SystemExit, match='crash on start-up'):
         make_hf_space.check_bundle(bundle)
-    S.THRESHOLD_FILE.write_text('{"threshold": 0.5, "view_version": %d}' % views.VIEW_VERSION)
+    S.THRESHOLD_FILE.write_text(f'{{"threshold": 0.5, "view_version": {views.VIEW_VERSION}}}')
     os.utime(bundle, (0, 0))                                    # bundle older than the model
     with pytest.raises(SystemExit, match='older than the model'):
         make_hf_space.check_bundle(bundle)

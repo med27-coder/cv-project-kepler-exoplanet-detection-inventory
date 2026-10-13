@@ -76,7 +76,7 @@ def main():
 
     S.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out = S.RESULTS_DIR / 'cv_metrics.json'
-    out.write_text(json.dumps({'folds': args.folds, 'epochs_max': epochs, 'n_kois': int(len(y)),
+    out.write_text(json.dumps({'folds': args.folds, 'epochs_max': epochs, 'n_kois': len(y),
                                'summary': summary, 'per_fold': folds}, indent=2), encoding='utf-8')
     import matplotlib
     matplotlib.use('Agg')
