@@ -15,6 +15,7 @@ Results go to results/v3/metrics.json. Runs at below-normal CPU priority.
 """
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -35,14 +36,39 @@ VARIANTS = {
 }
 
 
-def fit_one(name, ds, feats, tr, va, epochs, seed):
+CHECKPOINTS = C.DATA_DIR / 'interim' / 'train_checkpoints'   # outside models/v3: never encrypted or shipped
+
+
+def run_fingerprint(ds, tr, va, epochs, columns):
+    """Hash of everything a trained network depends on. Checkpoints are reused only when it matches,
+    so a resumed run can't mix networks trained on different data, splits or settings."""
+    from kepler_cnn import views
+    h = hashlib.sha256()
+    for part in (views.VIEW_VERSION, epochs, list(columns), list(map(str, ds['names'])),
+                 np.asarray(tr).tolist(), np.asarray(va).tolist(), C.SEED):
+        h.update(json.dumps(part).encode())
+    return h.hexdigest()[:16]
+
+
+def fit_one(name, ds, feats, tr, va, epochs, seed, fingerprint=None, tag=None):
+    """Train one network, or reload it from a checkpoint of the same run (see run_fingerprint).
+    Each finished network is checkpointed, so a stopped run resumes where it left off."""
     from tensorflow import keras
+    tag = tag or name
+    ckpt = CHECKPOINTS / f'{tag}_seed{seed}_{fingerprint}.keras' if fingerprint else None
+    hist_file = ckpt.with_suffix('.json') if ckpt else None
+    if ckpt and ckpt.exists() and hist_file.exists():   # history is written last: marks a complete checkpoint
+        print(f'  {tag} (seed {seed}): resumed from checkpoint', flush=True)
+        return keras.models.load_model(ckpt, safe_mode=True), json.loads(hist_file.read_text())
     keras.utils.set_random_seed(seed)
     model = S.build_model(n_features=feats.shape[1], **VARIANTS[name])
     start = time.time()
     hist = S.train(model, ds, feats, tr, va, epochs=epochs, seed=seed)
-    print(f'  {name} (seed {seed}): {len(hist["loss"])} epochs in {(time.time() - start) / 60:.1f} min',
+    print(f'  {tag} (seed {seed}): {len(hist["loss"])} epochs in {(time.time() - start) / 60:.1f} min',
           flush=True)
+    if ckpt:
+        S.save_model(model, ckpt)
+        hist_file.write_text(json.dumps(hist), encoding='utf-8')
     return model, hist
 
 
@@ -122,6 +148,10 @@ def main():
     parser.add_argument('--diagnostics', action='store_true',
                         help='also train a hybrid with NASA vetting diagnostics (ablation only)')
     parser.add_argument('--threads', type=int, default=None, help='TensorFlow CPU threads')
+    parser.add_argument('--fresh', action='store_true',
+                        help='ignore checkpoints from an earlier, interrupted run of the same setup')
+    parser.add_argument('--keep-checkpoints', action='store_true',
+                        help='keep data/interim/train_checkpoints after a successful run')
     args = parser.parse_args()
     epochs = 5 if args.quick else args.epochs
 
@@ -143,11 +173,18 @@ def main():
 
     pre = S.FeaturePreprocessor().fit(ds['table'].iloc[tr])
     feats = pre.transform(ds['table'])
+    fp = run_fingerprint(ds, tr, va, epochs, pre.columns)
+    if args.fresh:
+        for old in CHECKPOINTS.glob(f'*_{fp}.*'):
+            old.unlink()
+    CHECKPOINTS.mkdir(parents=True, exist_ok=True)
+    done = len(list(CHECKPOINTS.glob(f'*_{fp}.json')))
+    print(f'run {fp}: {done} network(s) already checkpointed' if done else f'run {fp}', flush=True)
 
     results, hists, hybrid = {}, {}, None
     for name in args.variants:
         n_models = args.ensemble if name == 'hybrid' else 1
-        fitted = [fit_one(name, ds, feats, tr, va, epochs, C.SEED + i) for i in range(n_models)]
+        fitted = [fit_one(name, ds, feats, tr, va, epochs, C.SEED + i, fp) for i in range(n_models)]
         models = [m for m, _ in fitted]
         hists[name] = fitted[0][1]
         label = name if n_models == 1 else f'{name} x{n_models}'
@@ -161,7 +198,8 @@ def main():
     if args.diagnostics:
         pre_d = S.FeaturePreprocessor(S.FEATURES + S.DIAGNOSTIC_FEATURES).fit(ds['table'].iloc[tr])
         feats_d = pre_d.transform(ds['table'])
-        model, _ = fit_one('hybrid', ds, feats_d, tr, va, epochs, C.SEED)
+        model, _ = fit_one('hybrid', ds, feats_d, tr, va, epochs, C.SEED,
+                           run_fingerprint(ds, tr, va, epochs, pre_d.columns), tag='hybrid+diagnostics')
         results['hybrid+diagnostics'], _ = score('hybrid+diagnostics', [model], ds, feats_d, va, te)
 
     S.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -180,6 +218,9 @@ def main():
         save_figures(ds, te, p_test, threshold, results, hists['hybrid'])
         save_saliency_figures(models, ds, feats, pre.columns, te, p_test, n_average=20 if args.quick else 150)
     print(f'Saved {C.rel(S.RESULTS_DIR / "metrics.json")}')
+    if not args.keep_checkpoints:   # the run finished: its checkpoints are no longer needed
+        for f in CHECKPOINTS.glob('*'):
+            f.unlink()
 
 
 if __name__ == '__main__':
