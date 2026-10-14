@@ -34,7 +34,7 @@ Status key: `[x]` done · `[ ]` to do · `[~]` started.
 - [~] Rebuild all views with recipe v3 (`build_full_dataset.py`, then `--candidates`), running
 - [ ] Full training: `train_star_gazer.py --diagnostics --ensemble 5`
 - [ ] Grouped 5-fold CV (`cross_validate.py`) and candidate scoring (`score_candidates.py`)
-- [ ] Encrypt the model and detailed results (`secure_artifacts.py`), back up the key
+- [x] Encrypt the model and detailed results (`secure_artifacts.py`, split format v2; 14 Oct 2026), back up the key
 - [ ] Fill in the README's V3 numbers and the version-progress chart
 
 ## Phase 3: Connect the model to the map
