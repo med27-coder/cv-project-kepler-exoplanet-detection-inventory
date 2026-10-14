@@ -4,3 +4,7 @@ pytest>=9.0
 ruff>=0.16
 playwright==1.55.0          # browser tests (tests/test_browser.py); then: python -m playwright install chromium
 K2fov==8.0.1                # scripts/make_ccd_footprint.py (Kepler CCD outlines)
+pytest-cov==7.0.0
+mypy==1.18.2
+jupytext==1.17.3
+uv==0.9.5                   # scripts/lock_requirements.py

@@ -52,7 +52,7 @@ def delta_e(a, b, vision=None):
 def pairs():
     for group, colours in GROUPS.items():
         items = list(colours.items())
-        combos = zip(items, items[1:]) if group in ORDERED else itertools.combinations(items, 2)
+        combos = itertools.pairwise(items) if group in ORDERED else itertools.combinations(items, 2)
         for (n1, c1), (n2, c2) in combos:
             yield pytest.param(c1, c2, id=f'{group}: {n1} vs {n2}')
 
