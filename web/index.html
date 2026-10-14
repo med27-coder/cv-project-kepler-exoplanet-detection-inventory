@@ -134,7 +134,13 @@
       <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
       <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
          doesn't follow you to other devices.</p>
-      <button type="button" id="set-reset" class="ghost">RESET PROGRESS</button>
+      <p class="status" id="set-storage" aria-live="polite"></p>
+      <div class="setting-buttons">
+        <button type="button" id="set-export" class="ghost">DOWNLOAD MY PROGRESS</button>
+        <button type="button" id="set-import" class="ghost">LOAD A PROGRESS FILE</button>
+        <input type="file" id="set-import-file" accept=".json,application/json" hidden>
+        <button type="button" id="set-reset" class="ghost">RESET PROGRESS</button>
+      </div>
       <p class="status" id="set-reset-note" aria-live="polite"></p>
     </section>
   </dialog>

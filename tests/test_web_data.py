@@ -193,3 +193,28 @@ def test_gallery_photos():
     egg_refs = re.findall(r"ref: '([\w-]+)'", (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8'))
     assert set(egg_refs) <= set(gallery), set(egg_refs) - set(gallery)
     assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 600_000
+
+
+# Every achievement and easter-egg id ever published. Visitors' saved progress refers to these, so they must
+# never be renamed or removed (add new ones here when they ship).
+SHIPPED_IDS = {
+    'eggs': {'sun', 'pluto', 'kepler', 'iss', 'voyager', 'newHorizons', 'jwst', 'euclid', 'soho', 'parker',
+             'solarOrbiter', 'bepi', 'juno', 'clipper', 'juice', 'lucy', 'psyche', 'apex', 'mro', 'odyssey', 'mex',
+             'tgo', 'curiosity', 'perseverance'},
+    'ach': {'first-light', 'star-hopper', 'census', 'dice', 'ghost', 'oracle', 'link', 'first-rock', 'eight-worlds',
+            'cousin', 'eden', 'puff', 'tiny', 'goldilocks', 'double', 'lava', 'ancient', 'flare', 'transit', 'scale',
+            'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
+            'curious', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'l2', 'interstellar',
+            'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
+            'launch-day'},
+}
+
+
+def test_progress_ids_are_stable():
+    """A site update must not orphan anyone's saved progress: the storage key and every shipped id stay."""
+    js = (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8')
+    assert "const PROGRESS_KEY = 'starmap.progress.v1';" in js
+    eggs = js[js.index('const EGGS = ['):js.index('const EGG = new Map')]
+    ach = js[js.index('const ACHIEVEMENTS = ['):js.index('const ACH = new Map')]
+    assert SHIPPED_IDS['eggs'] <= set(re.findall(r"\bid: '([\w-]+)'", eggs))
+    assert SHIPPED_IDS['ach'] <= set(re.findall(r"\bid: '([\w-]+)'", ach))
