@@ -90,6 +90,15 @@ function showSpacecraft(updateHash = true) {
   }, () => { if (token === selectToken) info.innerHTML = '<p>Spacecraft positions could not be loaded; check your connection.</p>'; });
 }
 
+// The station itself, 9 x 3 pixels centred on (x, y).
+function issSprite(ctx, x, y) {
+  x = Math.round(x); y = Math.round(y);
+  ctx.fillStyle = '#5d7bd6';                       // solar arrays
+  ctx.fillRect(x - 4, y - 1, 3, 3); ctx.fillRect(x + 2, y - 1, 3, 3);
+  ctx.fillStyle = '#e6e6e6';                       // truss and modules
+  ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3);
+}
+
 // The International Space Station: a pixel Earth with the station on a to-scale orbit (sped up).
 const EARTH_R_PX = 34, ISS_ALT_KM = 400, EARTH_KM = 6371, ISS_ORBIT_S = 12;   // 92-minute orbit in 12 s
 function drawISS(seconds) {
@@ -114,13 +123,7 @@ function drawISS(seconds) {
       if (back === behind && (!back || Math.hypot(x - cx, y - cy) > EARTH_R_PX + 0.5)) sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
     }
   };
-  const station = (x, y) => {
-    x = Math.round(x); y = Math.round(y);
-    sctx.fillStyle = '#5d7bd6';                       // solar arrays
-    sctx.fillRect(x - 4, y - 1, 3, 3); sctx.fillRect(x + 2, y - 1, 3, 3);
-    sctx.fillStyle = '#e6e6e6';                       // truss and modules
-    sctx.fillRect(x - 1, y, 3, 1); sctx.fillRect(x, y - 1, 1, 3);
-  };
+  const station = (x, y) => issSprite(sctx, x, y);
   const [ix, iy, behind] = at(theta);
   const hidden = behind && Math.hypot(ix - cx, iy - cy) <= EARTH_R_PX + 1;
   orbit(true);

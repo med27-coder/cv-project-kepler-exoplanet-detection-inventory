@@ -152,8 +152,10 @@ function layout() {
     p.rx = truth ? p.a * px : p.logR * z;
     const trueSize = (p.radius ?? 1) * AU_PER_REARTH * px;
     p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : Math.min(12, Math.round(p.sprite * grow(z)));
-    // overview: the closest pass stays off the star sprite; true scale: real eccentricity
-    p.e = truth ? p.ecc : Math.min(p.ecc, Math.max(0, 1 - (sc.starR + 4) / p.rx));
+    // overview: the closest pass lands where the real one would on the log scale (else Pluto's
+    // would reach Jupiter) and stays off the star sprite; true scale: real eccentricity
+    const logE = p.ecc ? clamp(1 - sc.logR(p.a * (1 - p.ecc)) / sc.logR(p.a), 0, p.ecc) : 0;
+    p.e = truth ? p.ecc : Math.min(logE, Math.max(0, 1 - (sc.starR + 4) / p.rx));
   }
   sc.layer = staticLayer(sc);
   document.getElementById('sys-hint').textContent = !truth

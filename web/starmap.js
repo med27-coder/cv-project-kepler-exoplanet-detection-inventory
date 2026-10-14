@@ -318,6 +318,7 @@
       mctx.fillStyle = on ? MAP_COLORS.spot : MAP_COLORS.spotDim;
       mctx.fillRect(screen[i][0] - 1, screen[i][1] - 1, spot, spot);
     });
+    drawKeplerOnMap(t);
     for (const [s, color] of [[hovered, '#9aa6d6'], [selected, '#ffd34d']]) {
       if (!s) continue;
       const [x, y] = screen[starIndex.get(s)];
@@ -379,17 +380,23 @@
       }
       return;
     }
-    hovered = starAt(e);
-    hoverLine.textContent = hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
+    const onKepler = overKepler(e);
+    map.classList.toggle('on-kepler', onKepler);
+    hovered = onKepler ? null : starAt(e);
+    hoverLine.textContent = onKepler ? '▸ The Kepler space telescope · click for its story'
+      : hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
     prefetch(hovered);   // details are usually loaded before the click
   });
   map.addEventListener('pointerup', e => {
     const wasDrag = drag && drag.moved;
     drag = null;
-    if (!wasDrag) { const s = starAt(e); if (s) select(s); }
+    if (wasDrag) return;
+    if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
+    const s = starAt(e);
+    if (s) select(s);
   });
   map.addEventListener('pointercancel', () => { drag = null; });
-  map.addEventListener('pointerleave', () => { hovered = null; hoverLine.textContent = HOVER_HINT; });
+  map.addEventListener('pointerleave', () => { hovered = null; map.classList.remove('on-kepler'); hoverLine.textContent = HOVER_HINT; });
   map.addEventListener('wheel', e => {
     const dir = e.deltaY < 0 ? 1 : -1;
     if (dir < 0 && view.zoom === 1) return;   // fully zoomed out: let the page scroll
@@ -583,8 +590,10 @@
       p.rx = truth ? p.a * px : p.logR * z;
       const trueSize = (p.radius ?? 1) * AU_PER_REARTH * px;
       p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : Math.min(12, Math.round(p.sprite * grow(z)));
-      // overview: the closest pass stays off the star sprite; true scale: real eccentricity
-      p.e = truth ? p.ecc : Math.min(p.ecc, Math.max(0, 1 - (sc.starR + 4) / p.rx));
+      // overview: the closest pass lands where the real one would on the log scale (else Pluto's
+      // would reach Jupiter) and stays off the star sprite; true scale: real eccentricity
+      const logE = p.ecc ? clamp(1 - sc.logR(p.a * (1 - p.ecc)) / sc.logR(p.a), 0, p.ecc) : 0;
+      p.e = truth ? p.ecc : Math.min(logE, Math.max(0, 1 - (sc.starR + 4) / p.rx));
     }
     sc.layer = staticLayer(sc);
     document.getElementById('sys-hint').textContent = !truth
@@ -1262,11 +1271,13 @@
       ['Saturn', 9.45, 95.2, 10747, 9.537, 0.052, 'antiquity', 5],
       ['Uranus', 4.01, 14.5, 30589, 19.19, 0.047, 1781, 4],
       ['Neptune', 3.88, 17.1, 59800, 30.07, 0.010, 1846, 4],
+      ['Pluto', 0.186, 0.0022, 90560, 39.48, 0.249, 1930, 2],   // a dwarf planet since 2006
     ].map(([name, radius, mass, period, sma, ecc, year, sprite]) => ({
       name, koi: 'Sol ' + name, status: 'confirmed', radius, mass, mass_kind: 'measured', period, sma, ecc,
       teq: Math.round(255 / Math.sqrt(sma)), insol: 1 / sma ** 2, year, sprite,
-      art: name.toLowerCase(), url: `${NASA_SCIENCE}${name.toLowerCase()}/`,
-      note: name === 'Earth' ? 'home ★' : 'planet',
+      art: name.toLowerCase(),
+      url: `${NASA_SCIENCE}${name === 'Pluto' ? 'dwarf-planets/' : ''}${name.toLowerCase()}/`,
+      note: name === 'Earth' ? 'home ★' : name === 'Pluto' ? 'dwarf planet' : 'planet',
     })),
     // drawn as drifting dots; edges are approximate
     belts: [
@@ -1301,6 +1312,13 @@
     },
     saturn: (dx, dy, r) => ['#eadcab', '#d3b77c', '#e6d09a', '#c9ab72'][Math.floor((dy + r) / (2 * r + 1) * 4)],
     uranus: (dx, dy, r) => (dy % 3 === 0 ? '#98d6dc' : '#ace6eb'),
+    pluto: (dx, dy, r, spin) => {   // the bright "heart" (Tombaugh Regio) next to dark Cthulhu
+      const P = 4 * r + 2, u = (((dx + spin + P / 2) % P) + P) % P - P / 2;   // longitude, turning with the planet
+      const h = r * 0.42, x = Math.abs(u) / h, y = dy / h - 0.15;      // heart: two lobes and a point
+      if ((x - 0.45) ** 2 + (y + 0.25) ** 2 < 0.36 || (y >= -0.25 && x + y * 0.75 < 0.8)) return '#f2ece2';
+      if (((u + h * 2.4) / (h * 1.2)) ** 2 + ((dy - r * 0.15) / (r * 0.3)) ** 2 < 1) return '#6e4f3c';   // Cthulhu
+      return hash(`pl${Math.floor((dx + spin) / 2)},${dy}`) < 0.2 ? '#bb9d78' : '#d1b48e';
+    },
     neptune: (dx, dy, r) => {
       if (Math.abs(dx + Math.round(r * 0.3)) <= 1 && dy === -Math.round(r * 0.3)) return '#1c357a';   // dark spot
       return dy % 2 === 0 ? '#3b6bd6' : '#335fc4';
@@ -1332,11 +1350,41 @@
       }
     }
     if (ring) planetRing(ctx, x0, y0, ring[0], ring[1], ring[2], true);
-    if (p.art === 'earth' && !p.noMoon) {   // the Moon, once every 27.3 days
-      const a = (REDUCED_MOTION ? 1 : t) * (2 * Math.PI) / (1.5 * Math.sqrt(27.3)) * 4;
-      ctx.fillStyle = '#c9c6c0';
-      ctx.fillRect(Math.round(x0 + (r + 3) * Math.cos(a)), Math.round(y0 + (r + 3) * TILT * Math.sin(a)), 1, 1);
-    }
+    if (!p.noMoon) solarMoons(ctx, x0, y0, r, p.art, t);
+  }
+
+  // The best-known moons, nearest first: [name, orbital period (days), colour]. A negative period
+  // orbits backwards (Triton). Drawn as 1-pixel dots, evenly spaced outside the planet (and its
+  // rings), turning at a compressed speed like the planets; Uranus's moons circle its sideways
+  // equator. Distances are not to scale.
+  const MOONS = {
+    earth: [['Moon', 27.32, '#c9c6c0']],
+    mars: [['Phobos', 0.319, '#8a7d70'], ['Deimos', 1.263, '#a39484']],
+    jupiter: [['Io', 1.769, '#e8d36a'], ['Europa', 3.551, '#efe6d2'], ['Ganymede', 7.155, '#a89e90'],
+              ['Callisto', 16.69, '#6f665c']],
+    saturn: [['Enceladus', 1.370, '#ffffff'], ['Rhea', 4.518, '#cfcac2'], ['Titan', 15.95, '#e0a84a'],
+             ['Iapetus', 79.33, '#9a8f80']],
+    uranus: [['Miranda', 1.413, '#b8b4ae'], ['Ariel', 2.520, '#c8c4bd'], ['Umbriel', 4.144, '#86827c'],
+             ['Titania', 8.706, '#bdb3a8'], ['Oberon', 13.46, '#a89c90']],
+    neptune: [['Triton', -5.877, '#e4c8c0']],
+    pluto: [['Charon', 6.387, '#9c958e']],
+  };
+  function solarMoons(ctx, x0, y0, r, art, t) {
+    const moons = MOONS[art];
+    if (!moons) return;
+    const start = art === 'saturn' ? Math.ceil(r * 2.2) + 1 : r + 2;   // Saturn's start outside the rings
+    const time = REDUCED_MOTION ? 1 : t;
+    moons.forEach(([name, period, color], k) => {
+      const d = start + 2 * k + (art === 'earth' ? 1 : 0);
+      const a = Math.sign(period) * time * (2 * Math.PI) / (1.5 * Math.sqrt(Math.abs(period))) * 4 + hash(name) * 6.3;
+      const [x, y] = art === 'uranus'
+        ? [x0 + d * 0.3 * Math.cos(a), y0 + d * Math.sin(a)]
+        : [x0 + d * Math.cos(a), y0 + d * TILT * Math.sin(a)];
+      const behind = (art === 'uranus' ? Math.cos(a) : Math.sin(a)) < 0;
+      if (behind && Math.hypot(x - x0, y - y0) < r + 0.5) return;   // hidden behind the planet
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    });
   }
 
   function homeFacts() {
@@ -1353,12 +1401,33 @@
         <li>About 150 million km from Earth: its light takes 8 minutes 20 seconds to reach us.</li>
         <li>Carries us once around the Milky Way every ~230 million years.</li>
       </ul>
+      <h3 class="facts-title">MOONS</h3>
+      <p>The coloured dots around the planets are their best-known moons (distances not to scale):</p>
+      <ul class="facts">
+        <li><b>Earth</b>: the Moon. <b>Mars</b>: Phobos and Deimos, small and potato-shaped.</li>
+        <li><b>Jupiter</b> (95+ moons): the four Galilean moons found by Galileo in 1610: volcanic <b>Io</b>,
+          <b>Europa</b> with an ocean under its ice, <b>Ganymede</b>, the largest moon in the Solar System, and
+          <b>Callisto</b>.</li>
+        <li><b>Saturn</b> (the most, 274): <b>Titan</b>, with a thick orange atmosphere and lakes of methane;
+          <b>Enceladus</b>, spraying water from its south pole; <b>Rhea</b>; and two-toned <b>Iapetus</b>.</li>
+        <li><b>Uranus</b> (29): <b>Miranda, Ariel, Umbriel, Titania and Oberon</b>, named after characters from
+          Shakespeare and Pope; they circle its sideways-tipped equator.</li>
+        <li><b>Neptune</b> (16): <b>Triton</b> orbits backwards, probably a captured Kuiper Belt object.</li>
+        <li><b>Pluto</b> (5): <b>Charon</b>, plus tiny Nix, Hydra, Kerberos and Styx.</li>
+        <li>Moon counts as listed by NASA in 2025; new small moons keep being found.
+          Mercury and Venus have none.</li>
+      </ul>
       <h3 class="facts-title">BEYOND THE PLANETS</h3>
       <ul class="facts">
         <li><b>Asteroid belt</b> (grey dots): between Mars and Jupiter. All asteroids together weigh less than
           our Moon; the largest asteroid, Vesta, is about 530 km across.</li>
         <li><b>Dwarf planets</b>: Ceres (in the asteroid belt, the only one in the inner Solar System), Pluto,
           Haumea, Makemake and Eris.</li>
+        <li><b>Pluto</b> (drawn, with its moon Charon): found by Clyde Tombaugh in 1930 and counted as the ninth
+          planet until 2006, when the IAU defined "planet" and Pluto became a dwarf planet: it hasn't cleared
+          its orbit of other Kuiper Belt objects. Smaller than our Moon, with a nitrogen-ice "heart" that
+          New Horizons photographed in July 2015. Charon is half Pluto's size, so the two circle a point
+          between them.</li>
         <li><b>Kuiper Belt</b> (blue dots, zoom out or FIT): a doughnut of icy worlds beyond Neptune, home to Pluto
           and most dwarf planets, possibly millions of objects. New Horizons flew past Arrokoth there on
           1 January 2019.</li>
@@ -1373,6 +1442,7 @@
         link('https://nssdc.gsfc.nasa.gov/planetary/factsheet/', 'NASA Planetary Fact Sheet'),
         link(`${NASA_SCIENCE}solar-system/asteroids/`, 'NASA: asteroids'),
         link(`${NASA_SCIENCE}dwarf-planets/`, 'NASA: dwarf planets'),
+        link(`${NASA_SCIENCE}solar-system/moons/`, 'NASA: moons'),
         link(`${NASA_SCIENCE}solar-system/kuiper-belt/`, 'NASA: Kuiper Belt'),
         link(`${NASA_SCIENCE}solar-system/oort-cloud/`, 'NASA: Oort Cloud'),
         link(`${NASA_SCIENCE}mission/voyager/`, 'NASA: Voyager'),
@@ -1424,6 +1494,7 @@
     if (!query.trim()) return;
     if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
     if (ISS_QUERY.test(query.trim())) { showISS(updateHash); return; }
+    if (KEPLER_QUERY.test(query.trim())) { showKepler(updateHash); return; }
     if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash); return; }
     const s = find(query);
     if (s) select(s, updateHash); else showUnknown(query);
@@ -1521,6 +1592,15 @@
     }, () => { if (token === selectToken) info.innerHTML = '<p>Spacecraft positions could not be loaded; check your connection.</p>'; });
   }
 
+  // The station itself, 9 x 3 pixels centred on (x, y).
+  function issSprite(ctx, x, y) {
+    x = Math.round(x); y = Math.round(y);
+    ctx.fillStyle = '#5d7bd6';                       // solar arrays
+    ctx.fillRect(x - 4, y - 1, 3, 3); ctx.fillRect(x + 2, y - 1, 3, 3);
+    ctx.fillStyle = '#e6e6e6';                       // truss and modules
+    ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3);
+  }
+
   // The International Space Station: a pixel Earth with the station on a to-scale orbit (sped up).
   const EARTH_R_PX = 34, ISS_ALT_KM = 400, EARTH_KM = 6371, ISS_ORBIT_S = 12;   // 92-minute orbit in 12 s
   function drawISS(seconds) {
@@ -1545,13 +1625,7 @@
         if (back === behind && (!back || Math.hypot(x - cx, y - cy) > EARTH_R_PX + 0.5)) sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
       }
     };
-    const station = (x, y) => {
-      x = Math.round(x); y = Math.round(y);
-      sctx.fillStyle = '#5d7bd6';                       // solar arrays
-      sctx.fillRect(x - 4, y - 1, 3, 3); sctx.fillRect(x + 2, y - 1, 3, 3);
-      sctx.fillStyle = '#e6e6e6';                       // truss and modules
-      sctx.fillRect(x - 1, y, 3, 1); sctx.fillRect(x, y - 1, 1, 3);
-    };
+    const station = (x, y) => issSprite(sctx, x, y);
     const [ix, iy, behind] = at(theta);
     const hidden = behind && Math.hypot(ix - cx, iy - cy) <= EARTH_R_PX + 1;
     orbit(true);
@@ -1586,6 +1660,175 @@
     setScene({ custom: drawISS });
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
     if (updateHash) history.replaceState(null, '', '#ISS');
+  }
+
+  // ---------------------------------------------------------------- easter egg: the Kepler telescope
+  // A tiny pixel Kepler sits in the map's empty top-left corner, looking at its field; click it (or
+  // search "Kepler" / "telescope" / "goodnight Kepler") for its story: the mission replayed on its
+  // Earth-trailing orbit around the Sun. Hand-drawn, not traced from a photo.
+  const KEPLER_QUERY = /^(the )?(kepler( space telescope| telescope| spacecraft| mission)?|space telescope|telescope|goodnight,? kepler)$/i;
+
+  // Side view, aperture to the right: solar array on the sun side (top), photometer tube with its
+  // slanted sunshade, gold-foil bus and antenna at the back.
+  const KEPLER_ART = [
+    '.....PPPPPPPPPPPPP....',
+    '.....pgpgpgpgpgpgpp...',
+    '..bb.ppppppppppppppp..',
+    '.bBBBwwwwwwwwwwwwwwwww',
+    '.bBBBwWWWwwwwwwwwwwwwk',
+    '.bBBBwwwwwwwwwwwwwwwkk',
+    '.bBBBssssssssssssssk..',
+    '..bb.sssssssssssssk...',
+    '..e...................',
+    '.eee..................',
+  ];
+  const KEPLER_INK = {
+    P: '#6f8fe8', p: '#2f4fae', g: '#1b2a66',     // solar array: lit edge, cells, cell gaps
+    w: '#d8dde8', W: '#ffffff', s: '#8f99b0',     // tube: lit side, glint, shaded side
+    k: '#141a33',                                 // inside the sunshade
+    b: '#c9a24a', B: '#8a6d1f', e: '#aab4c8',     // bus foil, foil shadow, antenna
+  };
+  const KEPLER_W = KEPLER_ART[0].length, KEPLER_H = KEPLER_ART.length;
+  const KEPLER_SPOT = { x: 5, y: 7 };   // map pixels at zoom 1: the field leaves this corner empty
+
+  // Draw the sprite at (x, y), `px` canvas pixels per art pixel; `glint` (0..1, or null) runs a
+  // highlight along the solar array.
+  function keplerSprite(ctx, x, y, px, glint) {
+    const gx = glint == null ? -9 : 5 + Math.round(glint * 13);
+    KEPLER_ART.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (ch === '.') return;
+      ctx.fillStyle = j < 2 && Math.abs(i - gx) < 1 ? '#e8f4ff' : KEPLER_INK[ch];
+      ctx.fillRect(x + i * px, y + j * px, px, px);
+    }));
+  }
+
+  const keplerOnMap = () => view.zoom === 1 && !depth;
+  function overKepler(evt) {
+    if (!keplerOnMap()) return false;
+    const [x, y] = canvasPoint(evt);
+    return x >= KEPLER_SPOT.x - 3 && x <= KEPLER_SPOT.x + KEPLER_W + 3 &&
+           y >= KEPLER_SPOT.y - 3 && y <= KEPLER_SPOT.y + KEPLER_H + 3;
+  }
+
+  // On the map (called from drawMap, ~8 fps): the sprite, a faint dotted view cone toward the
+  // field, and a glint across the panels every few seconds.
+  function drawKeplerOnMap(t) {
+    if (!keplerOnMap()) return;
+    const { x, y } = KEPLER_SPOT, ax = x + KEPLER_W, ay = y + 5;
+    mctx.fillStyle = '#2b3566';
+    for (const turn of [-0.22, 0.22]) {
+      const a = Math.atan2(MH / 2 - ay, MW / 2 - ax) + turn;
+      for (let d = 3; d <= 15; d += 3) mctx.fillRect(Math.round(ax + d * Math.cos(a)), Math.round(ay + d * Math.sin(a)), 1, 1);
+    }
+    const cycle = (t / 1000) % 5;   // a 1-second sweep every 5 seconds
+    keplerSprite(mctx, x, y, 1, REDUCED_MOTION || cycle > 1 ? null : cycle);
+  }
+
+  // The mission on its orbit. Kepler trailed Earth around the Sun and fell slowly behind, about
+  // 1 AU away by the end (NASA); the drift here is a steady rate that ends there (illustrative).
+  const MISSION = { start: 2009.18, end: 2018.87, wheels: 2013.37, k2: 2014.4 };
+  const DRIFT_PER_YEAR = 2 * Math.asin(0.5) / (MISSION.end - MISSION.start);   // chord 1 AU at the end
+  const KEPLER_LOOP_S = 22, KEPLER_HOLD_S = 4;   // replay speed, then a pause on the last frame
+
+  function missionYear(seconds) {
+    if (REDUCED_MOTION) return MISSION.end;
+    const s = seconds % (KEPLER_LOOP_S + KEPLER_HOLD_S);
+    return MISSION.start + (MISSION.end - MISSION.start) * Math.min(1, s / KEPLER_LOOP_S);
+  }
+
+  function drawKeplerStory(seconds) {
+    sctx.fillStyle = '#070b1a';
+    sctx.fillRect(0, 0, SW, SH);
+    for (let k = 0; k < 60; k++) {
+      sctx.fillStyle = k % 7 === 0 ? '#4a5590' : '#1e2550';
+      sctx.fillRect(Math.floor(hash('kb' + k) * SW), Math.floor(hash('ky' + k) * SH), 1, 1);
+    }
+    const year = missionYear(seconds), done = year >= MISSION.end;
+    const yrs = year - MISSION.start;
+
+    // Left: the Sun, Earth's orbit, Earth and Kepler (seen from above Earth's north pole).
+    const sx = 62, sy = 64, R = 46, squash = 0.62;
+    const at = a => [sx + R * Math.cos(a), sy - R * squash * Math.sin(a)];
+    sctx.fillStyle = '#3a4888';
+    for (let k = 0; k < 96; k += 2) {
+      const [x, y] = at((k / 96) * 2 * Math.PI);
+      sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    }
+    disc(sctx, sx, sy, 5, '#ffd34d');
+    const earthA = 2 * Math.PI * (yrs % 1) + 0.6, lag = DRIFT_PER_YEAR * yrs;
+    sctx.fillStyle = '#8a6d1f';   // how far behind Earth Kepler has fallen
+    for (let a = earthA - lag + 0.06; a < earthA - 0.06; a += 0.05) {
+      const [x, y] = at(a);
+      sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    }
+    const [ex, ey] = at(earthA), [kx, ky] = at(earthA - lag);
+    disc(sctx, ex, ey, 2, '#2f6fd0');
+    sctx.fillStyle = '#4f9a46';
+    sctx.fillRect(Math.round(ex), Math.round(ey) - 1, 1, 1);
+    sctx.fillStyle = done ? '#6f86a8' : '#e8f4ff';
+    for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) sctx.fillRect(Math.round(kx) + dx, Math.round(ky) + dy, 1, 1);
+    pixelText(sctx, 'EARTH', Math.round(ex) + 4, Math.round(ey) - 2, '#9fd8ff');
+    if (lag > 0.25) pixelText(sctx, 'KEPLER', Math.round(kx) + 4, Math.round(ky) - 2, '#ffd34d');
+    pixelText(sctx, 'SUN', sx - 5, sy + 8, '#8a6d1f');
+
+    // Right: the spacecraft itself, big, and what it was doing that year.
+    const bx = 146, by = 10;
+    keplerSprite(sctx, bx, by, 4, REDUCED_MOTION || done ? null : (seconds % 3) / 3);
+    const phase = year < MISSION.wheels ? ['STARING AT', 'CYGNUS AND LYRA']
+      : year < MISSION.k2 ? ['2 OF 4 WHEELS', 'FAILED. RETHINK']
+      : !done ? ['K2 MISSION', 'ALONG THE ECLIPTIC']
+      : ['OUT OF FUEL', 'GOODNIGHT KEPLER'];
+    const tx = 140;
+    pixelText(sctx, String(Math.floor(year)), tx, 56, '#ffd34d');
+    pixelText(sctx, phase[0], tx, 66, '#c8d0ff');
+    pixelText(sctx, phase[1], tx, 74, done ? '#ffd34d' : '#c8d0ff');
+    pixelText(sctx, `${fmt(2 * Math.sin(lag / 2), 1)} AU FROM EARTH`, tx, 88, '#5a6a8a');
+
+    // Bottom strip: the mission timeline.
+    const H = SH - STRIP, x0 = 8, x1 = SW - 8, toX = y => x0 + (y - MISSION.start) / (MISSION.end - MISSION.start) * (x1 - x0);
+    sctx.fillStyle = '#3a4888';
+    sctx.fillRect(x0, H + 8, x1 - x0, 1);
+    sctx.fillStyle = '#ff8c42';   // the second reaction wheel fails
+    sctx.fillRect(Math.round(toX(MISSION.wheels)), H + 6, 1, 5);
+    sctx.fillStyle = '#ffd34d';
+    sctx.fillRect(Math.round(toX(year)) - 1, H + 6, 3, 5);
+    pixelText(sctx, '2009', x0, H + 13, '#5a6a8a');
+    pixelText(sctx, 'K2', Math.round(toX(MISSION.k2)) - 3, H + 13, '#5a6a8a');
+    pixelText(sctx, '2018', x1 - textWidth('2018'), H + 13, '#5a6a8a');
+  }
+
+  function showKepler(updateHash = true) {
+    selected = null;
+    ++selectToken;
+    title.textContent = 'THE KEPLER SPACE TELESCOPE';
+    const confirmed = STARS.reduce((n, s) => n + (s[COL.nconf] || 0), 0);
+    const link = (u, t) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`;
+    info.innerHTML = `
+      <p class="big">★ THE PLANET HUNTER ★</p>
+      <p>Every star on this map was watched by one spacecraft. Kepler stared at the same patch of sky in Cygnus
+         and Lyra for four years, measuring the brightness of about <b>150,000 stars</b> every 30 minutes, waiting
+         for the tiny dips of planets passing in front of them. The drawing replays its mission on its orbit.</p>
+      <ul class="facts">
+        <li>Launched <b>7 March 2009</b> on a Delta II rocket from Cape Canaveral, Florida.</li>
+        <li>Its camera had <b>42 CCDs and 95 megapixels</b> behind a 1.4 m mirror; the squares on the map are
+            those chips (press CCDS).</li>
+        <li>It didn't orbit Earth: it <b>trailed Earth around the Sun</b>, slowly falling behind, about
+            151 million km (1 AU) from Earth by the end.</li>
+        <li>In <b>2013</b> the second of its four reaction wheels failed and it could no longer hold still. Engineers
+            balanced it against the pressure of sunlight instead: the <b>K2</b> mission (2014–2018) looked at fields
+            along the ecliptic.</li>
+        <li>Retired on <b>30 October 2018</b>, out of fuel. Its last commands were sent on 15 November 2018,
+            the anniversary of Johannes Kepler's death: <b>"Goodnight Kepler"</b>.</li>
+        <li>Thousands of planets confirmed from its data, ${fmt(confirmed)} of them around the stars on this map.</li>
+      </ul>
+      <p>${link(`${NASA_SCIENCE}mission/kepler/`, 'NASA: the Kepler mission')} ·
+         ${link('https://exoplanetarchive.ipac.caltech.edu/', 'NASA Exoplanet Archive')} ·
+         ${link('https://archive.stsci.edu/missions-and-data/kepler', 'Kepler data at MAST')}</p>
+      <p class="note">Sources: NASA Kepler mission pages · the orbit drawing is illustrative (Kepler's drift is
+        shown at a steady rate) · you found an easter egg!</p>`;
+    setScene({ custom: drawKeplerStory });
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#Kepler');
   }
 
   // ---------------------------------------------------------------- wiring

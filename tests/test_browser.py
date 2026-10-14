@@ -146,6 +146,27 @@ def test_spacecraft_and_iss_easter_eggs(browser, site):
     assert not errors, errors
 
 
+def test_kepler_telescope_and_pluto(browser, site):
+    """The Kepler easter egg opens from search and from its sprite on the map; Pluto joins the Sun's table."""
+    errors = []
+    page = open_page(browser, site + '#Kepler', errors)
+    page.wait_for_function("document.getElementById('sys-title').textContent === 'THE KEPLER SPACE TELESCOPE'")
+    assert 'Goodnight Kepler' in page.locator('#info').inner_text()
+    assert page.locator('#sys-tools').is_hidden()
+    page.goto(site + '#Kepler-90')
+    page.wait_for_function("document.getElementById('sys-title').textContent === 'KEPLER-90'")
+    box = page.locator('#map').bounding_box()
+    scale = box['width'] / 192                                  # the sprite sits at map pixel (5, 7), 22 x 10
+    page.mouse.click(box['x'] + 15 * scale, box['y'] + 11 * scale)
+    page.wait_for_function("location.hash === '#Kepler'")
+    page.goto(site + '#Sun')
+    page.wait_for_selector('#info table')
+    assert 'Pluto' in page.locator('#info tbody').inner_text()
+    assert 'dwarf planet' in page.locator('#info tbody').inner_text()
+    page.wait_for_timeout(300)
+    assert not errors, errors
+
+
 def test_view_links_kepler_view_and_pinch(browser, site):
     """A shared link restores zoom, true scale and Kepler's view; pinching zooms; the URL follows."""
     errors = []

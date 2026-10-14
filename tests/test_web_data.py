@@ -122,7 +122,7 @@ def test_spacecraft_snapshot():
     """data/spacecraft.js (scripts/starmap/fetch_spacecraft.py): spacecraft beyond Earth orbit only."""
     text = (WEB / 'data' / 'spacecraft.js').read_text(encoding='utf-8')
     data = json.loads(text[text.index('{'):text.rindex('}') + 1])
-    assert set(data['planets']) == {'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'}
+    assert set(data['planets']) == {'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'}
     assert 0.98 < data['planets']['Earth']['r_au'] < 1.02
     for c in data['spacecraft']:
         assert c['earth_au'] > 0.005, c['name']               # nothing in Earth orbit (L1/L2 are ~0.01 AU)

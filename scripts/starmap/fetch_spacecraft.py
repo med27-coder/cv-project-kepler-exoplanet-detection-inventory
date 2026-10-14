@@ -26,7 +26,8 @@ HORIZONS = 'https://ssd.jpl.nasa.gov/api/horizons.api'
 LIGHT_MIN_PER_AU = 8.3167
 
 PLANETS = {'Mercury': '199', 'Venus': '299', 'Earth': '399', 'Mars': '499',
-           'Jupiter': '599', 'Saturn': '699', 'Uranus': '799', 'Neptune': '899'}
+           'Jupiter': '599', 'Saturn': '699', 'Uranus': '799', 'Neptune': '899',
+           'Pluto': '999'}   # dwarf planet, drawn with the planets
 NASA = 'https://science.nasa.gov/mission/'
 ESA = 'https://www.esa.int/Science_Exploration/Space_Science/'
 # Horizons id, short label for the map, agency, launch year, where it works, official page
