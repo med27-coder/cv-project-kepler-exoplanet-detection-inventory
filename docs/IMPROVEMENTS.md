@@ -10,6 +10,33 @@ Priority: **P1** do next · **P2** worth it · **P3** nice to have
 
 *Written October 2026, during the V3 training run.*
 
+## Status (13 October 2026)
+
+**Done** (all items below unless listed under "Still open"): split, authenticated encryption with
+verify / rotate / passphrase keys; training checkpoints and resume; `scripts/run_pipeline.py`;
+catalog sanity report; prediction scoreboard; monthly data-refresh and weekly NASA schema workflows;
+every candidate drawn with case files and a "next planets" leaderboard; details loaded on demand;
+pre-made sky photos for the spotlight systems; zoom-scaled sprites, pinch zoom, shareable view links,
+Kepler's view, star types, tidally locked planets, depth view, CCD outlines, animation menu,
+colour-blind-safe palette (with a test); `web/src` split with a build step; mypy, coverage and the
+browser tests in CI; hash-locked dependencies; OpenSSF Scorecard; notebook mirrors; CONTRIBUTING.md
+and the data dictionary; Gaia ablation and TESS transfer scripts (run after training).
+
+**Still open**
+
+- *Needs you (GitHub / account settings):* the SECURITY.md checklist (secret scanning, push
+  protection, private vulnerability reporting, a ruleset on `main`, 2FA, allowing Actions to open
+  pull requests), signed commits (steps in SECURITY.md), and an offline backup of the key once it
+  exists.
+- *Needs a third party:* real security headers through a proxy such as Cloudflare (account and DNS
+  changes; trade-off described in section 5).
+- *Not feasible here:* training on Kepler DR25 simulated light curves. The injected, inverted and
+  scrambled light curves are a bulk archive far too large for this laptop, and NASA's small DR25
+  injection tables only record whether *NASA's* pipeline recovered each injected signal, so they
+  can't test Star Gazer. Revisit with a cloud machine or a curated subset.
+- *After the V3 run finishes:* README numbers and figures, encrypting the model, the Gaia ablation
+  and TESS transfer runs, the PPTX.
+
 ---
 
 ## ⚠️ Blocker found while writing these notes
