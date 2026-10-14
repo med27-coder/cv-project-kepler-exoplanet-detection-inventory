@@ -184,3 +184,19 @@ def test_depth_view_and_ccd_toggle(browser, site):
     assert page.get_attribute('#ccd', 'aria-pressed') == 'false'
     assert not page.locator('#zoom-in').is_disabled()
     assert not errors, errors
+
+
+def test_spotlight_sky_photos_are_local(browser, site):
+    """Featured systems use the photos stored with the site: no request to CDS."""
+    errors, outside = [], []
+    page = open_page(browser, site, errors)
+    page.on('request', lambda r: outside.append(r.url) if 'alasky' in r.url else None)
+    page.evaluate("document.getElementById('query').value = 'Kepler-90';"
+                  "document.getElementById('search').requestSubmit()")
+    page.wait_for_selector('#info .sky img')
+    page.wait_for_timeout(300)
+    assert page.get_attribute('#info .sky img', 'src') == 'sky/kepler-90_dss2.jpg'
+    page.click('#info .surveys button[data-k="2"]')
+    assert page.get_attribute('#info .sky img', 'src') == 'sky/kepler-90_2mass.jpg'
+    assert not outside, outside
+    assert not errors, errors
