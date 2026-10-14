@@ -31,7 +31,17 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (46, in groups)
+### Achievements (47, in groups), trophies, badges and your star
+
+Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
+star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
+(The Compass, The Ringed World, The Light Curve, The Crystal Ball, The Telescope, The Golden Satellite, The
+All-Seeing Eye). Your total grows **your star** in the page header: stardust → protostar (1) → young star (5) → red
+giant (10) → supergiant (18) → supernova (28) → pulsar (40) → **black hole** for the final mission, **TRUE STAR
+GAZER**: open every one of the map's 3,611 systems. Its card reveals itself after 100 systems (with an UNSEEN
+highlight under the map); earning it flashes the whole map violet. Afterwards Settings can show a white dwarf
+instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_MISSION.md](STAR_GAZER_MISSION.md).
+
 
 | Group | Achievement | How |
 |---|---|---|

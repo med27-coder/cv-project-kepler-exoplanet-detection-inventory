@@ -221,7 +221,7 @@ function showLeaderboard() {
     <p class="note">Educational ranking, not a scientific classification. Click a system to open it.</p>`;
   info.querySelectorAll('button[data-name]').forEach(b =>
     b.addEventListener('click', () => { const s = byName.get(b.dataset.name.toLowerCase()); if (s) choose(s); }));
-  setScene(null);
+  setScene({ custom: drawPodium });   // a podium of the top three, not an empty drawing (49-ranks.js)
 }
 
 function showUnknown(query) {

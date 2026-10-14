@@ -131,7 +131,17 @@ const ACHIEVEMENTS = [
   { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
   { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
   { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
+  { g: 'THE FINAL MISSION', id: 'star-gazer', title: 'TRUE STAR GAZER', how: 'Open every star system on the map.', secret: true },
 ];
+// Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
+const TIER_OF = {
+  rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish'],
+  epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour'],
+};
+for (const a of ACHIEVEMENTS) {
+  a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
+}
 // Visiting these systems earns a famous-world achievement.
 const FAMOUS = { 'Kepler-10': 'first-rock', 'Kepler-90': 'eight-worlds', 'Kepler-452': 'cousin', 'Kepler-186': 'eden',
                  'Kepler-51': 'puff', 'Kepler-37': 'tiny' };
@@ -152,7 +162,7 @@ const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 // version of the page always finds what an older one saved. Ids this version doesn't know are kept, not
 // dropped, so nothing earned is lost if a later version renames or retires something.
 const PROGRESS_KEY = 'starmap.progress.v1';
-const progress = { eggs: {}, ach: {}, systems: [], toasts: true };
+const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false };
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -167,6 +177,12 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
     progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60)])].slice(-200);
   }
   if (typeof saved.toasts === 'boolean') progress.toasts = saved.toasts;
+  if (typeof saved.seen === 'string' && /^[0-9a-z,]{0,80000}$/.test(saved.seen)) {   // TRUE STAR GAZER: Kepler IDs, base 36
+    progress.seen = [...new Set([...progress.seen.split(','), ...saved.seen.split(',')].filter(Boolean))].join(',');
+  }
+  if (Array.isArray(saved.viewed)) progress.viewed = [...new Set([...progress.viewed, ...saved.viewed.filter(v => ID.test(v))])].slice(0, 300);
+  if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
+  if (saved.whiteHole === true) progress.whiteHole = true;
   return true;
 }
 let storageOK = false;   // false in private windows or with site data blocked: progress lasts for this visit
@@ -183,13 +199,16 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 // ---- pop-ups in the corner (they never cover the drawing's controls and leave by themselves)
 const toastBox = document.getElementById('toasts');
-function toast(kind, title, text, egg) {
+function toast(kind, title, text, egg, art) {
   if (!progress.toasts) return;
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
-  el.innerHTML = `${egg ? '<canvas width="40" height="26" aria-hidden="true"></canvas>' : '<span class="trophy" aria-hidden="true">🏆</span>'}
+  const size = art === starGazerTrophy ? 24 : 16;
+  el.innerHTML = `${egg ? '<canvas width="40" height="26" aria-hidden="true"></canvas>'
+    : `<canvas class="toast-art" width="${size}" height="${size}" aria-hidden="true"></canvas>`}
     <div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
   if (egg) drawEggArt(el.querySelector('canvas'), egg, 0, false);
+  else if (art) drawArt(el.querySelector('canvas').getContext('2d'), art, 0, 0, 1, 1);
   toastBox.appendChild(el);
   while (toastBox.children.length > 3) toastBox.firstChild.remove();
   setTimeout(() => el.classList.add('leaving'), 4200);
@@ -205,10 +224,12 @@ function glow() {   // the drawing lights up for a moment
 
 function achieve(id) {
   if (progress.ach[id] || !ACH.has(id)) return;
+  const rankBefore = rankIndex(), badgesBefore = earnedBadges();
   progress.ach[id] = today();
   saveProgress();
   const a = ACH.get(id);
-  toast('ach', `ACHIEVEMENT: ${a.title}`, a.how);
+  if (id !== 'star-gazer') toast('ach', `${TIERS[a.tier].name} ACHIEVEMENT: ${a.title}`, a.how, null, trophyArt(a.tier));
+  afterAchievement(rankBefore, badgesBefore);
   refreshGallery();
 }
 
@@ -242,6 +263,7 @@ function eggForQuery(q) {
 
 function systemOpened(s) {   // from select(): counts systems for the achievements
   const name = s[COL.name];
+  starSeen(s);
   if (!progress.systems.includes(name)) {
     progress.systems.push(name);
     if (progress.systems.length > 200) progress.systems.shift();
@@ -261,6 +283,18 @@ function systemOpened(s) {   // from select(): counts systems for the achievemen
     if (sg <= 0.1) achieve('skeptic');
     if (sg >= 0.4 && sg <= 0.6) achieve('coin');
   }
+}
+
+// How far along a counting achievement is: [done, needed], or null.
+function achProgress(a) {
+  const craft = Object.keys(progress.eggs).filter(k => EGG.get(k)?.kind === 'craft' && k !== 'iss').length;
+  const counts = {
+    'star-hopper': [progress.systems.length, 10], census: [progress.systems.length, 50], 'mission-control': [craft, 5],
+    'grand-tour': [EGGS.filter(e => progress.eggs[e.id]).length, EGGS.length], cartographer: [session.hops, 25],
+    curator: [session.cards.size, 10], highlighter: [session.highlights.size, Object.keys(HIGHLIGHTS).length],
+  };
+  if (EGG_SETS[a.id]) return [EGG_SETS[a.id].filter(k => progress.eggs[k]).length, EGG_SETS[a.id].length];
+  return counts[a.id] || null;
 }
 
 // Small hooks from the rest of the page.
@@ -470,20 +504,41 @@ function planetStrip() {
 
 function renderAchievements() {
   const got = ACHIEVEMENTS.filter(a => progress.ach[a.id]).length;
-  const groups = [...new Set(ACHIEVEMENTS.map(a => a.g))];
+  const i = rankIndex(), next = nextStage(), badges = earnedBadges();
+  const groups = [...new Set(ACHIEVEMENTS.map(a => a.g))].filter(g => g !== 'THE FINAL MISSION');
+  const isNew = a => progress.ach[a.id] && !progress.viewed.includes(a.id);
+  const card = a => {
+    const on = progress.ach[a.id], hidden = a.secret && !on, prog = !on && !hidden && achProgress(a);
+    return `<li class="${on ? 'on' : ''} tier-${a.tier}">
+      <canvas width="16" height="16" data-trophy="${on ? a.tier : 'lock'}" aria-hidden="true"></canvas>
+      <div><b>${hidden ? '???' : esc(a.title)}${isNew(a) ? ' <em class="new">NEW</em>' : ''}</b>
+        <span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}</span>
+        ${prog ? `<span class="ach-bar"><span data-w="${Math.round(100 * Math.min(1, prog[0] / prog[1]))}"></span></span>
+          <span class="ach-progress">${fmt(Math.min(prog[0], prog[1]))} / ${fmt(prog[1])}</span>` : ''}
+        <span class="ach-meta">${hidden ? '' : TIERS[a.tier].name}${on ? ` · earned ${esc(niceDate(on))}` : ''}</span></div></li>`;
+  };
   panes.ach.innerHTML = `
-    <p class="gallery-progress"><b>${got} / ${ACHIEVEMENTS.length}</b> UNLOCKED</p>
+    <div class="rank-panel">
+      <canvas class="rank-big" width="16" height="16" data-stage="${i}" aria-hidden="true"></canvas>
+      <div><b>YOUR STAR: ${esc(rankName(i))}</b><span>${esc(STAGES[i].about)}</span>
+        <span class="ach-progress">${got} / ${ACHIEVEMENTS.length} achievements${next ? ` · next: ${esc(next.stage.name)} in ${plural(next.left, 'more')}` : ''}</span>
+        <ol class="ladder" aria-label="The life of your star">${STAGES.map((st, k) => `<li title="${esc(st.name)}: ${
+          Number.isFinite(st.at) ? `${st.at} achievements` : 'TRUE STAR GAZER'}"><canvas width="16" height="16" data-stage="${k}" data-locked="${k > i ? 1 : 0}"></canvas></li>`).join('')}</ol></div>
+    </div>
+    <h3 class="facts-title">BADGES <span class="ach-count">${badges.length} / ${Object.keys(BADGES).length}</span></h3>
+    <ul class="badge-shelf">${Object.entries(BADGES).map(([g, b]) => `<li class="${badges.includes(g) ? 'on' : ''}">
+      <canvas width="16" height="16" data-badge="${esc(g)}" data-locked="${badges.includes(g) ? 0 : 1}" aria-hidden="true"></canvas>
+      <b>${badges.includes(g) ? esc(b.name) : '? ? ?'}</b><span>complete ${esc(g.toLowerCase())}</span></li>`).join('')}</ul>
+    ${gazeCard()}
     ${groups.map(g => {
       const list = ACHIEVEMENTS.filter(a => a.g === g);
       return `<h3 class="facts-title">${esc(g)} <span class="ach-count">${list.filter(a => progress.ach[a.id]).length} / ${list.length}</span></h3>
-      <ul class="ach-list">${list.map(a => {
-        const on = progress.ach[a.id];
-        const hidden = a.secret && !on;
-        return `<li class="${on ? 'on' : ''}"><span class="ach-icon" aria-hidden="true">${on ? '🏆' : '🔒'}</span>
-          <div><b>${hidden ? '???' : esc(a.title)}</b><span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}${
-            on ? ` · ${esc(on)}` : ''}</span></div></li>`;
-      }).join('')}</ul>`;
+      <ul class="ach-list">${list.map(card).join('')}</ul>`;
     }).join('')}`;
+  panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
+  paintRankArt(panes.ach);
+  const earned = ACHIEVEMENTS.filter(a => progress.ach[a.id]).map(a => a.id);
+  if (earned.some(id => !progress.viewed.includes(id))) { progress.viewed = earned; saveProgress(); }
 }
 
 function refreshGallery() {
@@ -500,6 +555,8 @@ async function renderSettings() {
       'blocked). It will be lost when you close the page: download it below to keep it.';
     return;
   }
+  document.getElementById('set-final').hidden = !progress.ach['star-gazer'];
+  document.getElementById('set-final-emblem').value = progress.finalEmblem;
   let kept = '';
   try { kept = (await navigator.storage?.persisted?.()) ? ' Protected from automatic clean-up.' : ''; } catch { /* older browser */ }
   storageNote.textContent = `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
@@ -523,7 +580,7 @@ importInput.addEventListener('change', async () => {
   if (!file) return;
   let ok = false;
   try { ok = file.size < 200_000 && mergeProgress(JSON.parse(await file.text())); } catch { ok = false; }
-  if (ok) saveProgress();
+  if (ok) { syncSeen(); saveProgress(); renderHeaderRank(); }
   resetNote.textContent = ok ? 'Progress loaded and merged with what you had.' : 'That file isn\'t a star map progress file.';
 });
 
@@ -569,17 +626,25 @@ resetButton.addEventListener('click', () => {
     resetNote.textContent = 'This forgets every easter egg and achievement you found in this browser.';
     return;
   }
-  Object.assign(progress, { eggs: {}, ach: {}, systems: [] });
+  const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
+  Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished });
+  syncSeen();
   saveProgress();
+  renderHeaderRank();
   resetButton.dataset.armed = '';
   resetButton.textContent = 'RESET PROGRESS';
   resetNote.textContent = 'Progress reset. Happy hunting!';
 });
 
-// Anniversaries: visiting on Kepler's launch day or the day it was switched off.
-{
+// Anniversaries: visiting on Kepler's launch day or the day it was switched off (after the page has loaded).
+queueMicrotask(() => {
   const d = new Date();
   if (d.getMonth() === 2 && d.getDate() === 7) achieve('launch-day');
   if (d.getMonth() === 10 && d.getDate() === 15) achieve('goodnight');
-}
+});
+document.getElementById('set-final-emblem').addEventListener('change', e => {
+  progress.finalEmblem = e.target.value === 'white-dwarf' ? 'white-dwarf' : 'black-hole';
+  saveProgress();
+  renderHeaderRank();
+});
 info.addEventListener('click', e => { if (e.target.closest('a[href*="aladin"]')) achieve('sky'); });

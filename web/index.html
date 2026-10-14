@@ -21,8 +21,16 @@
 </head>
 <body>
   <header>
-    <button type="button" id="open-gallery" class="ghost gear" aria-haspopup="dialog"
-            title="Galleria, achievements and settings">⚙<span class="visually-hidden"> Galleria, achievements and settings</span></button>
+    <div class="header-right">
+      <span id="rank-badges" aria-label="Your badges"></span>
+      <button type="button" id="rank" class="ghost rank" aria-haspopup="dialog">
+        <canvas id="rank-emblem" width="16" height="16" aria-hidden="true"></canvas>
+        <span class="rank-text"><span id="rank-name">STARDUST</span><span class="rank-track"><span id="rank-bar"></span></span></span>
+        <span id="rank-count">0</span><span class="visually-hidden"> achievements: open them</span>
+      </button>
+      <button type="button" id="open-gallery" class="ghost gear" aria-haspopup="dialog"
+              title="Galleria, achievements and settings">⚙<span class="visually-hidden"> Galleria, achievements and settings</span></button>
+    </div>
     <h1>KEPLER STAR MAP</h1>
     <p class="sub">3,600+ stars with planets or planet candidates, from NASA's Kepler mission. Pick one and watch its planets orbit.</p>
   </header>
@@ -134,6 +142,11 @@
       <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
       <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
          doesn't follow you to other devices.</p>
+      <label class="setting" id="set-final" hidden>Final emblem
+        <select id="set-final-emblem">
+          <option value="black-hole">black hole</option>
+          <option value="white-dwarf">white dwarf (the Sun's real fate)</option>
+        </select></label>
       <p class="status" id="set-storage" aria-live="polite"></p>
       <div class="setting-buttons">
         <button type="button" id="set-export" class="ghost">DOWNLOAD MY PROGRESS</button>

@@ -204,6 +204,7 @@ function drawMap(t) {
     mctx.fillRect(screen[i][0] - 1, screen[i][1] - 1, spot, spot);
   });
   drawKeplerOnMap(t);
+  drawGazeWave(t);
   for (const [s, color] of [[hovered, '#9aa6d6'], [selected, '#ffd34d']]) {
     if (!s) continue;
     const [x, y] = screen[starIndex.get(s)];

@@ -24,7 +24,7 @@ function frame(now) {
     running = false;
     return;
   }
-  if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); lastMap = now; }
+  if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); drawHeaderEmblem(now); lastMap = now; }
   if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) {
     drawSystem(now / 1000);
     lastSys = now;

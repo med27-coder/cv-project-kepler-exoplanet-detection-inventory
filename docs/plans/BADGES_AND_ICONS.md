@@ -1,6 +1,6 @@
 # Plan: set badges, pixel icons, progress counters, and the star-life rank
 
-**Status: plan only (local branch).** Builds on docs/STAR_GAZER_MISSION.md and docs/plans/TATOOINE_AND_PROPHET.md.
+**Status: built (October 2026):** trophies by difficulty, space locks, set badges, counters, the star-life rank and badges in the page header, the final mission, and the next-planets podium (web/src/49-ranks.js). Still open: the Two suns and Predictions sets (TATOOINE_AND_PROPHET.md). Builds on docs/STAR_GAZER_MISSION.md and docs/plans/TATOOINE_AND_PROPHET.md.
 
 ## 1. Total achievements -> the life of a star (replaces bronze/silver/gold)
 One rank for *all* achievements, shown as the header emblem and at the top of the Achievements tab:

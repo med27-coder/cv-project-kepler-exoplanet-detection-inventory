@@ -295,3 +295,56 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 .ach-count { color: var(--ink-2); font-size: 10px; margin-left: 6px; }
 .setting-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .setting input[type="checkbox"] { flex: none; width: 18px; height: 18px; }
+
+/* ---- rank in the header (49-ranks.js): emblem, name, bar, badges */
+button.gear { position: static; }
+.header-right { position: absolute; top: 4px; right: 0; display: flex; gap: 8px; align-items: center; }
+#rank-badges { display: flex; gap: 4px; }
+#rank-badges canvas { width: 24px; height: 24px; background: transparent; border: 0; }
+button.rank { display: flex; align-items: center; gap: 8px; padding: 4px 10px; font-size: 10px; height: 40px; }
+button.rank canvas { width: 32px; height: 32px; background: transparent; border: 0; }
+.rank-text { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+#rank-name { color: var(--accent); white-space: nowrap; }
+.rank-track { width: 110px; height: 6px; border: 1px solid var(--edge); background: var(--bg); }
+#rank-bar { display: block; height: 100%; width: 0; background: var(--accent); }
+#rank-count { color: var(--ink-2); }
+button.rank.pulse { animation: found-glow 1.6s ease-out; }
+@media (max-width: 900px) {
+  .header-right { position: static; justify-content: flex-end; margin-bottom: 6px; }
+}
+@media (max-width: 600px) {
+  .rank-text, #rank-badges { display: none; }
+}
+/* ---- achievements tab */
+.rank-panel { display: flex; gap: 14px; align-items: center; padding: 10px; border: 2px solid var(--accent); margin-bottom: 8px; }
+.rank-panel canvas.rank-big { width: 96px; height: 96px; background: transparent; border: 0; flex: none; }
+.rank-panel b { display: block; font: 12px var(--pixel); color: var(--accent); letter-spacing: 1px; }
+.rank-panel span { display: block; }
+.ladder { list-style: none; display: flex; gap: 6px; padding: 0; margin: 6px 0 0; flex-wrap: wrap; }
+.ladder canvas { width: 32px; height: 32px; background: transparent; border: 0; }
+.badge-shelf { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.badge-shelf li { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 6px; border: 2px solid var(--edge); color: var(--ink-2); font-size: 15px; }
+.badge-shelf li.on { border-color: var(--accent); color: var(--ink); }
+.badge-shelf canvas { width: 48px; height: 48px; background: transparent; border: 0; }
+.badge-shelf b { font: 8px var(--pixel); color: var(--accent); letter-spacing: 1px; margin: 4px 0 2px; }
+.ach-list canvas, .gaze-card canvas { width: 32px; height: 32px; background: transparent; border: 0; flex: none; }
+.gaze-card canvas { width: 48px; height: 48px; }
+.ach-list span { display: block; }
+.ach-bar { display: block; width: 100%; max-width: 180px; height: 6px; border: 1px solid var(--edge); background: var(--bg); margin-top: 4px; }
+.ach-bar span { display: block; height: 100%; width: 0; background: var(--accent); }
+.ach-progress { color: var(--ink-2); font-size: 16px; }
+.ach-meta { color: var(--ink-2); font-size: 14px; letter-spacing: 1px; }
+.ach-list li.tier-secret { border-color: #3d2470; }
+.ach-list li.tier-secret.on { border-color: #b56cff; }
+.ach-list li.tier-secret.on b { color: #b56cff; }
+em.new { font: 8px var(--pixel); font-style: normal; color: var(--bg); background: #4fd17a; padding: 1px 4px; margin-left: 4px; }
+.gaze-card { display: flex; gap: 12px; align-items: center; padding: 10px; margin: 10px 0; border: 2px solid #3d2470;
+             background: linear-gradient(135deg, rgba(106, 63, 176, 0.25), rgba(7, 11, 26, 0)); }
+.gaze-card b { display: block; font: 11px var(--pixel); color: #b56cff; letter-spacing: 1px; }
+.gaze-card span { display: block; }
+.gaze-card.on { border-color: #b56cff; box-shadow: 0 0 16px rgba(181, 108, 255, 0.45); }
+.toast canvas.toast-art { width: 40px; height: 40px; }
+.toast.rank, .toast.badge { border-color: #9fd8ff; }
+.toast.legend { border-color: #b56cff; box-shadow: 0 0 20px rgba(181, 108, 255, 0.6); }
+.toast.legend b { color: #b56cff; }
+.chip.unseen { border-color: #b56cff; }

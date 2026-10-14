@@ -8,6 +8,7 @@ Skipped when Playwright or its Chromium isn't installed:
 
 import functools
 import http.server
+import json
 import threading
 from pathlib import Path
 
@@ -221,6 +222,65 @@ def test_galleria_game(browser, site):
     page.click('#tab-eggs')
     assert page.locator('.egg-card.found').count() == 1               # restored from the file
     assert not errors, errors
+
+
+def test_rank_header_badges_and_podium(browser, site):
+    """The rank (a star's life) and earned badges show in the page header; next planets draws a podium."""
+    errors = []
+    page = open_page(browser, site, errors)
+    ids = ['first-light', 'star-hopper', 'dice', 'ghost', 'oracle', 'link', 'first-rock', 'eight-worlds', 'cousin',
+           'eden', 'puff', 'tiny']
+    page.evaluate("ids => localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, systems: [],"
+                  " ach: Object.fromEntries(ids.map(i => [i, '2026-10-14']))}))", ids)
+    page.reload()
+    page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
+    assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
+    assert page.locator('#rank-count').inner_text() == '12/47'
+    page.click('#rank')                                                                           # opens the tab
+    assert page.locator('#pane-ach .rank-panel').is_visible()
+    assert page.locator('.badge-shelf li.on').count() == 1
+    assert page.locator('.ach-list canvas[data-trophy="lock"]').count() > 0                      # space locks
+    page.click('#gallery-close')
+    page.click('button.chip:has-text("next planets")')
+    page.wait_for_timeout(300)
+    lit = page.evaluate("""() => { const c = document.getElementById('system'), d = c.getContext('2d')
+        .getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 300) n++; return n; }""")
+    assert lit > 500                                                                              # the podium, not a blank
+    assert page.locator('#sys-hint').inner_text() == ''                                          # no stale hint
+    assert not errors, errors
+
+
+def test_final_mission(browser, site):
+    """TRUE STAR GAZER: open the last unseen system -> achievement, black hole; a reset afterwards -> white hole."""
+    text = (Path(__file__).resolve().parents[1] / 'web' / 'data' / 'systems.js').read_text(encoding='utf-8')
+    data = json.loads(text[text.index('{'):text.rindex('}') + 1])
+    col = {c: i for i, c in enumerate(data['columns'])}
+    seen = ','.join(_base36(s[col['kepid']]) for s in data['stars'] if s[col['name']] != 'Kepler-90')
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("seen => localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, ach: {}, systems: [], seen}))", seen)
+    page.reload()
+    page.wait_for_selector('#highlights .chip.unseen')                                            # revealed: UNSEEN chip
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.toast.legend')
+    assert 'true Star Gazers' in page.locator('.toast.legend').inner_text()
+    page.wait_for_function("document.getElementById('rank-name').textContent.startsWith('BLACK HOLE')")
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    assert page.locator('#set-final').is_visible()                                                # white dwarf option
+    page.click('#set-reset')
+    page.click('#set-reset')
+    page.wait_for_function("document.getElementById('rank-name').textContent === 'WHITE HOLE'")   # new game +
+    assert not errors, errors
+
+
+def _base36(n):
+    digits, n, out = '0123456789abcdefghijklmnopqrstuvwxyz', int(n), ''
+    while n:
+        n, r = divmod(n, 36)
+        out = digits[r] + out
+    return out or '0'
 
 
 def test_view_links_kepler_view_and_pinch(browser, site):
