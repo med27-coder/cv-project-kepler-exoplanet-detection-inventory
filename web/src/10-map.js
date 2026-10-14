@@ -149,7 +149,7 @@ function drawStars(b, size) {
     const [x, y] = screen[i];
     if (x < -2 || y < -2 || x > MW + 2 || y > MH + 2) return;
     if (lit && lit.has(s)) {
-      b.fillStyle = '#5ce1e6';
+      b.fillStyle = '#b56cff';   // highlight: violet, distinct for every colour vision
       b.fillRect(x - 1, y - 1, size + 1, size + 1);
     } else {
       b.fillStyle = starColors[i];

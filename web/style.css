@@ -89,7 +89,7 @@ button.ghost:hover { border-color: var(--accent); }
 
 .label { color: var(--ink-2); font-size: 18px; margin: 10px 0 4px; }
 .highlights { display: flex; flex-wrap: wrap; gap: 6px; }
-.highlights .chip[aria-pressed="true"] { border-color: #5ce1e6; color: #5ce1e6; }
+.highlights .chip[aria-pressed="true"] { border-color: #b56cff; color: #c99bff; }
 
 #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .chip {
@@ -137,17 +137,17 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c, #c0c6e0); }
 .dot.candidate { background: transparent; border: 2px solid var(--c, #c0c6e0); }
 /* Planet temperature bands (same colours as the canvas, starmap.js PLANET_BANDS) */
-.t-molten { --c: #ff5a36; }
-.t-scorching { --c: #ffa64d; }
-.t-hot { --c: #e8d27a; }
-.t-temperate { --c: #4fd17a; }
+.t-molten { --c: #e8402a; }
+.t-scorching { --c: #ff9a3c; }
+.t-hot { --c: #f7e7a1; }
+.t-temperate { --c: #3a8f5c; }
 .t-icy { --c: #8fd3ff; }
 /* Map legend */
 .lg-spot { --c: #ffd34d; }
 .lg-drawn { --c: #c8d6ff; }
 .lg-soon { --c: #3c4870; }
-.lg-likely { --c: #6fe39a; }
-.lg-unlikely { --c: #ff7a59; margin-left: 6px; }
+.lg-likely { --c: #6cb4ff; }
+.lg-unlikely { --c: #ff8c42; margin-left: 6px; }
 .dot.other { transform: rotate(45deg) scale(0.85); }
 .table-wrap { overflow-x: auto; }
 .note { color: var(--ink-2); font-size: 18px; }
