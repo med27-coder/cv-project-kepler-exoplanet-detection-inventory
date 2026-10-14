@@ -75,10 +75,10 @@ function starColor(teff) {
 }
 
 const PLANET_BANDS = [   // equilibrium temperature (K) -> canvas colour, CSS class (style.css)
-  [1500, '#ff5a36', 't-molten'],
-  [700, '#ffa64d', 't-scorching'],
-  [350, '#e8d27a', 't-hot'],
-  [180, '#4fd17a', 't-temperate'],
+  [1500, '#e8402a', 't-molten'],
+  [700, '#ff9a3c', 't-scorching'],
+  [350, '#f7e7a1', 't-hot'],
+  [180, '#3a8f5c', 't-temperate'],
   [-Infinity, '#8fd3ff', 't-icy'],
 ];
 const band = teq => (teq == null ? null : PLANET_BANDS.find(([t]) => teq >= t));
@@ -92,4 +92,4 @@ function planetSize(radius) {   // Earth radii -> pixel radius
   return 4;
 }
 
-const MAP_COLORS = { spot: '#ffd34d', spotDim: '#8a6d1f', likely: '#6fe39a', unlikely: '#ff7a59' };
+const MAP_COLORS = { spot: '#ffd34d', spotDim: '#8a6d1f', likely: '#6cb4ff', unlikely: '#ff8c42' };   // blue / orange: safe for colour blindness (tests/test_palette.py)
