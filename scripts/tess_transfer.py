@@ -1,6 +1,7 @@
 """Does Star Gazer still recognise Kepler planets in data from a different telescope? (TESS)
 
     .venv\\Scripts\\python scripts\\tess_transfer.py [--limit 40] [--sectors 4]
+    (add --prefetch to only download the light curves; no model needed)
 
 NASA's TESS satellite re-observed part of the Kepler field. For each Kepler planet that TESS saw
 again (TOI disposition KP = known planet, period within 1% of the KOI's), this downloads TESS
@@ -14,9 +15,7 @@ results/v3/tess_transfer.json and .csv. Network-heavy (a few hundred MB), CPU-li
 import argparse
 import json
 import sys
-import tempfile
 import warnings
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -29,6 +28,7 @@ TOI_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+toi,
            'pl_tranmid,pl_trandurh,tfopwg_disp+from+toi+where+ra+between+279+and+303+and+dec+between+35+and+54'
            "+and+tfopwg_disp='KP'&format=csv")
 BJD_TO_BTJD = 2457000.0
+CACHE = C.RAW_DIR / 'tess'   # downloaded light curves, kept between runs (git-ignored)
 MATCH_ARCSEC, MATCH_PERIOD = 3.0, 0.01
 
 
@@ -70,36 +70,46 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--limit', type=int, default=40, help='at most this many planets')
     parser.add_argument('--sectors', type=int, default=4, help='at most this many TESS sectors per star')
+    parser.add_argument('--prefetch', action='store_true', help='only download the light curves, then stop')
     args = parser.parse_args()
     warnings.filterwarnings('ignore')
+    catalog = S.load_catalog()
+    matched = pairs(catalog, pd.read_csv(TOI_URL))[:args.limit]
+    print(f'{len(matched)} Kepler planets re-detected by TESS (KP) to test', flush=True)
+    CACHE.mkdir(parents=True, exist_ok=True)
+    if args.prefetch:   # download only (no model needed), so the test itself runs from the cache
+        for i, (koi, toi) in enumerate(matched, 1):
+            try:
+                got = f'{len(tess_quarters(int(toi.tid), args.sectors, CACHE))} sectors'
+            except Exception as e:   # noqa: BLE001 - keep going; the test run reports it again
+                got = f'failed ({type(e).__name__})'
+            print(f'  [{i}/{len(matched)}] {koi.kepoi_name}: {got}', flush=True)
+        return
     try:
         models, pre, threshold = S.load_trained()
     except (FileNotFoundError, S.StaleModelError) as e:
         sys.exit(f'Needs the trained V3 model: {e}')
-    catalog = S.load_catalog()
-    matched = pairs(catalog, pd.read_csv(TOI_URL))[:args.limit]
-    print(f'{len(matched)} Kepler planets re-detected by TESS (KP) to test', flush=True)
     rows = []
-    with tempfile.TemporaryDirectory() as tmp:
-        for koi, toi in matched:
-            name = koi.kepoi_name
-            try:
-                quarters = tess_quarters(int(toi.tid), args.sectors, Path(tmp))
-                t0, dur_h = toi.pl_tranmid - BJD_TO_BTJD, toi.pl_trandurh
-                lc = views.prepare_lightcurve(quarters, [(toi.pl_orbper, t0, dur_h)]) if quarters else None
-                built, skipped = views.views_for_lightcurve(lc, [(name, toi.pl_orbper, t0, dur_h)]) if lc else ({}, {})
-            except Exception as e:   # noqa: BLE001 - one target failing (download, odd file) must not stop the test
-                print(f'  {name}: {type(e).__name__}: {e}'[:160], flush=True)
-                continue
-            if name not in built:
-                print(f'  {name}: no usable TESS views ({skipped.get(name, "no light curves")})', flush=True)
-                continue
-            row = catalog[catalog.kepoi_name == name]
-            p_tess = S.predict_views(models, pre, row, built[name])
-            p_kepler = S.predict_koi(models, pre, catalog, name)[0] if views.is_current(name) else np.nan
-            rows.append({'kepoi_name': name, 'toi': f'{toi.toi:.2f}', 'disposition': koi.koi_disposition,
-                         'sectors': len(quarters), 'p_tess': round(p_tess, 4), 'p_kepler': round(p_kepler, 4)})
-            print(f'  {name} (TOI-{toi.toi:.2f}, {len(quarters)} sectors): Kepler {p_kepler:.2f} -> TESS {p_tess:.2f}', flush=True)
+    for koi, toi in matched:
+        name = koi.kepoi_name
+        try:
+            quarters = tess_quarters(int(toi.tid), args.sectors, CACHE)
+            t0, dur_h = toi.pl_tranmid - BJD_TO_BTJD, toi.pl_trandurh
+            lc = views.prepare_lightcurve(quarters, [(toi.pl_orbper, t0, dur_h)]) if quarters else None
+            built, skipped = views.views_for_lightcurve(lc, [(name, toi.pl_orbper, t0, dur_h)]) if lc else ({}, {})
+        except Exception as e:   # noqa: BLE001 - one target failing (download, odd file) must not stop the test
+            print(f'  {name}: {type(e).__name__}: {e}'[:160], flush=True)
+            continue
+        if name not in built:
+            print(f'  {name}: no usable TESS views ({skipped.get(name, "no light curves")})', flush=True)
+            continue
+        row = catalog[catalog.kepoi_name == name]
+        p_tess = S.predict_views(models, pre, row, built[name])
+        p_kepler = S.predict_koi(models, pre, catalog, name)[0] if views.is_current(name) else np.nan
+        rows.append({'kepoi_name': name, 'toi': f'{toi.toi:.2f}', 'disposition': koi.koi_disposition,
+                     'sectors': len(quarters), 'p_tess': round(p_tess, 4), 'p_kepler': round(p_kepler, 4)})
+        print(f'  {name} (TOI-{toi.toi:.2f}, {len(quarters)} sectors): Kepler {p_kepler:.2f} -> TESS {p_tess:.2f}',
+              flush=True)
     if not rows:
         sys.exit('No TESS views could be built.')
     df = pd.DataFrame(rows)
