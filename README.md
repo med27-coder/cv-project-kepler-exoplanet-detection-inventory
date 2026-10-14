@@ -7,6 +7,7 @@
 [![star map](https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/actions/workflows/pages.yml/badge.svg)](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/)
 [![CodeQL](https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/actions/workflows/codeql.yml/badge.svg)](https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/actions/workflows/codeql.yml)
 [![dependency audit](https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/actions/workflows/dependency-audit.yml/badge.svg)](https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/actions/workflows/dependency-audit.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/badge)](https://scorecard.dev/viewer/?uri=github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory)
 
 **🗺️ [Explore the Kepler Star Map](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/)**: search any Kepler system and watch its planets orbit, in pixels.
 
@@ -117,7 +118,7 @@ Everything is drawn from numbers on two small canvases (about 1.1 MB of data for
 
 One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are a few more: try looking for the robots we've sent out there, or where people live in space. 🛰️
 
-Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md).
+Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
