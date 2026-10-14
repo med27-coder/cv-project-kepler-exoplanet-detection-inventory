@@ -6,7 +6,7 @@
     .venv\\Scripts\\python scripts\\pipeline\\run_pipeline.py --list
 
 Steps: check (catalog sanity) -> views (labelled) -> candidates (unlabelled views) -> train ->
-score -> export (star map) -> scoreboard -> cv (cross-validation). It stops at the first failing
+score -> export (star map) -> scoreboard -> cv (cross-validation) -> analyze (error analysis). It stops at the first failing
 step. The slow steps resume on their own when re-run: view building skips finished views, and
 training reloads finished networks from checkpoints. Logs: logs/pipeline/<step>.log (git-ignored).
 """
@@ -29,6 +29,7 @@ STEPS = {
     'export': ['scripts/starmap/export_starmap.py'],
     'scoreboard': ['scripts/pipeline/scoreboard.py', 'record'],
     'cv': ['scripts/pipeline/cross_validate.py'],
+    'analyze': ['scripts/experiments/analyze_results.py'],
 }
 THREADED = {'train', 'cv'}   # get --threads
 

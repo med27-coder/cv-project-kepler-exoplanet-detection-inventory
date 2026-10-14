@@ -1,4 +1,4 @@
-"""Terms gate, dataset de-duplication and artifact encryption."""
+"""Terms of Use gate and dataset de-duplication (encryption: test_secure_artifacts.py)."""
 
 import json
 from pathlib import Path

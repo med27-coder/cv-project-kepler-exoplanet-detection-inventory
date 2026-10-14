@@ -399,7 +399,8 @@ def load_trained(allow_stale=False):
     from tensorflow import keras
     files = model_files()
     if not files:
-        raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; run scripts/pipeline/train_star_gazer.py')
+        raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; '
+                                'run scripts/pipeline/train_star_gazer.py')
     if not allow_stale:
         check_view_version()
     models = [keras.models.load_model(p, safe_mode=True) for p in files]   # no embedded Python code
