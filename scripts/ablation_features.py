@@ -78,13 +78,25 @@ def main():
     variant, _ = T.score(f'hybrid {args.variant}', [model], ds, feats, va, te)
 
     baseline = json.loads(metrics_file.read_text())['results']['hybrid']
-    base = baseline['members'][0] if 'members' in baseline else baseline   # same seed, standard features
+    members = baseline.get('members', [baseline])   # single networks with the standard features
+    base = members[0]                                # same seed as the variant
     d_auc = variant['threshold_0.5']['auc'] - base['threshold_0.5']['auc']
     d_acc = variant['threshold_0.5']['accuracy'] - base['threshold_0.5']['accuracy']
-    verdict = ('within seed noise' if abs(d_acc) <= NOISE and abs(d_auc) <= NOISE
-               else 'better' if d_acc > 0 else 'worse')
+    # Judge against the spread of all the standard networks, not one seed: a variant only counts
+    # as different when it lands outside that range (and even then, confirm with cross-validation).
+    accs = [m['threshold_0.5']['accuracy'] for m in members]
+    aucs = [m['threshold_0.5']['auc'] for m in members]
+    acc, auc = variant['threshold_0.5']['accuracy'], variant['threshold_0.5']['auc']
+    if acc > max(accs) + NOISE / 2 and auc >= max(aucs):
+        verdict = 'better than every standard network'
+    elif acc < min(accs) - NOISE / 2 or auc < min(aucs) - NOISE / 2:
+        verdict = 'worse than every standard network'
+    else:
+        verdict = 'within the range of the standard networks (no clear difference)'
     out = {'variant': args.variant, 'note': note, 'features': columns,
            'baseline_same_seed': base, 'variant_result': variant,
+           'standard_range': {'accuracy': [round(min(accs), 4), round(max(accs), 4)],
+                              'auc': [round(min(aucs), 4), round(max(aucs), 4)]},
            'delta_auc': round(d_auc, 4), 'delta_accuracy': round(d_acc, 4), 'verdict': verdict}
     path = S.RESULTS_DIR / f'ablation_{args.variant.replace("-", "_")}.json'
     path.write_text(json.dumps(out, indent=2), encoding='utf-8')

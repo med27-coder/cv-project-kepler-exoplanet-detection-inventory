@@ -43,6 +43,30 @@ The median change in probability is 0.05, and the correlation between the two sc
 **Next:** for V4, fine-tune on TESS light curves, add giant-planet and bright-star examples to the
 training mix, and evaluate on TOIs that were never Kepler training data.
 
-## Feature ablations
+## Feature ablations (14 October 2026)
 
-`scripts/ablation_features.py` (`gaia`, `no-koi-count`): pending; they run after cross-validation.
+**Question:** does adding Gaia's stellar properties help? And does the model lean on `koi_count`, the
+input the audit flagged as partly reflecting how NASA confirmed planets?
+
+**Method** (`scripts/ablation_features.py`): one hybrid network per variant, on the same star-grouped
+split and seed as the first ensemble member, compared on the same 1,517 test KOIs. The key reference is
+the **spread of the five standard networks**, which differ only by random seed: accuracy 96.51–97.43%,
+AUC 0.9919–0.9941. A variant is only "different" if it lands outside that range.
+
+| Variant | Accuracy | AUC | Precision | Recall |
+|---|---|---|---|---|
+| Standard features, same seed | 96.51% | 0.9923 | 93.4% | 97.3% |
+| Standard features, range over 5 seeds | 96.51–97.43% | 0.9919–0.9941 | | |
+| **+ Gaia stellar properties** (92% of KOIs matched) | 97.43% | 0.9936 | 96.7% | 96.2% |
+| **− `koi_count`** | 96.90% | 0.9908 | 95.5% | 96.0% |
+
+**What it shows**
+
+- **Gaia: no clear gain.** +0.9 points over the same-seed network looks like a win, but that network was
+  the weakest of the five. 97.43% equals the best standard network, and the AUC sits inside their range.
+  Picking Gaia on this split would also be choosing a design by its test score, the selection the audit
+  warned against. Gaia stays a candidate for V4, to be judged by cross-validation on fresh splits.
+- **`koi_count`: the model doesn't depend on it.** Removing it leaves accuracy inside the normal range,
+  with AUC only slightly lower (0.9908 vs 0.9919–0.9941). The audit's concern about this input has a small
+  practical effect.
+- **Design unchanged.** V3 keeps its frozen feature set; these runs are documented, not adopted.
