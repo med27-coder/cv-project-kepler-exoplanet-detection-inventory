@@ -100,7 +100,10 @@ A single test split can be lucky. `scripts/cross_validate.py` repeats training 5
 
 | Variant | Accuracy (mean ± std) | AUC (mean ± std) |
 |---|---|---|
-| *(cross-validation is running; results will appear here)* | | |
+| Global + local view (AstroNet baseline) | 92.95% ± 0.60 | 0.976 ± 0.004 |
+| **Star Gazer** (single network) | 97.09% ± 0.42 | 0.993 ± 0.002 |
+
+**Main estimate:** a single Star Gazer network scores **97.1% ± 0.4** across the 5 folds, in line with the headline split (fold 1 *is* the headline split; the other four are new). The 5-network ensemble adds roughly half a point on top. Cross-validation here trains single networks, not the ensemble.
 
 **Independently audited:** a separate review rebuilt the split, recomputed every metric and checked for leakage, test-set tuning and repeated re-runs; verdict, caveats and baselines in [docs/AUDIT_V3.md](docs/AUDIT_V3.md). In short: genuine (95% interval for accuracy ≈ 96.4–98.1%), measured on already-resolved KOIs, not on brand-new signals.
 
