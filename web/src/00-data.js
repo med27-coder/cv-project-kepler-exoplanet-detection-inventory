@@ -1,7 +1,34 @@
 const DATA = window.STARMAP;
 const COL = Object.fromEntries(DATA.columns.map((c, i) => [c, i]));
 const STARS = DATA.stars;
-const SYSTEMS = DATA.systems;
+const TAGS = DATA.tags;
+
+// System details (star facts, planets) live in data/details/NN.js and load on demand, one chunk of
+// ~100 systems at a time. A <script> rather than fetch(), so the page also works from file://.
+const DETAILS = new Map();       // system name -> details
+const chunkLoads = new Map();    // chunk number -> Promise
+window.STARMAP_DETAILS = (k, systems) => {
+  for (const [name, d] of Object.entries(systems)) DETAILS.set(name, d);
+};
+function loadChunk(k) {
+  if (!chunkLoads.has(k)) {
+    chunkLoads.set(k, new Promise((resolve, reject) => {
+      const tag = document.createElement('script');
+      tag.src = `data/details/${String(k).padStart(2, '0')}.js`;
+      tag.addEventListener('load', resolve);
+      tag.addEventListener('error', () => { chunkLoads.delete(k); tag.remove(); reject(new Error('offline')); });
+      document.head.appendChild(tag);
+    }));
+  }
+  return chunkLoads.get(k);
+}
+// Calls done(details) right away when the chunk is already loaded (no flicker), else after loading.
+function withDetail(s, done, failed) {
+  const name = s[COL.name];
+  if (DETAILS.has(name)) { done(DETAILS.get(name)); return; }
+  loadChunk(s[COL.chunk]).then(() => done(DETAILS.get(name)), failed);
+}
+const prefetch = s => { if (s && !DETAILS.has(s[COL.name])) loadChunk(s[COL.chunk]).catch(() => {}); };
 const SPOTLIGHT = [...DATA.spotlight].sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
 const SG_THRESHOLD = DATA.sg_threshold ?? 0.5;
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

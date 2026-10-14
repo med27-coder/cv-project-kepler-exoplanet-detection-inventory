@@ -107,6 +107,34 @@ function planetTable(detail) {
     </table></div>`;
 }
 
+// Plain-language reasons a candidate might not be a planet (same rules as the export's leaderboard).
+function redFlags(p) {
+  const flags = [...(p.flags || [])];
+  if (p.snr != null && p.snr < 10) flags.push('weak signal');
+  if (p.radius != null && p.radius > 20) flags.push('too big for a planet');
+  if (p.nasa != null && p.nasa < 0.5) flags.push("NASA's vetting score is low");
+  return flags;
+}
+
+// One "case file" per candidate: the evidence for and against it being a real planet.
+function caseFiles(detail) {
+  const cands = detail.planets.filter(p => p.status === 'candidate');
+  if (!cands.length) return '';
+  const pct = v => (v == null ? 'not scored yet' : `${fmt(Math.round(v * 100))}%`);
+  const items = cands.map(p => {
+    const flags = redFlags(p);
+    const good = [];
+    if (p.toi) good.push(`seen again by TESS (${esc(p.toi)})`);
+    if (p.snr != null && p.snr >= 20) good.push('strong, clear signal');
+    return `
+      <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · Star Gazer ${pct(p.sg)}${
+        p.snr != null ? ` · signal strength ${fmt(p.snr)}` : ''}
+        <br>${good.length ? `<span class="pro">✔ ${good.join(' · ')}</span> ` : ''}${
+        flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}</li>`;
+  }).join('');
+  return `<h3 class="facts-title">CASE FILES</h3><ul class="facts cases">${items}</ul>`;
+}
+
 function showSystem(s, detail) {
   title.textContent = s[COL.name].toUpperCase();
   const count = k => detail.planets.filter(p => p.status === k).length;
@@ -120,6 +148,7 @@ function showSystem(s, detail) {
       <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
     </div></div>
     ${planetTable(detail)}
+    ${caseFiles(detail)}
     <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
       star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
       planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
@@ -127,17 +156,64 @@ function showSystem(s, detail) {
   setScene(buildScene(detail));
 }
 
-function showSoon(s) {
+// Only unscored candidates orbit this star: drawn as ghosts, with their case files.
+function showUnconfirmed(s, detail) {
   title.textContent = s[COL.name].toUpperCase();
   const line = SOON[Math.floor(hash(s[COL.name]) * SOON.length)];
   info.innerHTML = `
     <p class="big">✦ ${esc(line.toUpperCase())} ✦</p>
+    <div class="head">${skyThumb(detail.ra, detail.dec)}<div>
+      <p>Star: ${starLine(detail)}</p>
+      <p>${plural(detail.planets.length, 'unconfirmed candidate')}, drawn as ghosts until Star Gazer scores them
+         and NASA decides · ${skyLink(detail.ra, detail.dec)}</p>
+    </div></div>
+    ${planetTable(detail)}
+    ${caseFiles(detail)}
+    <p class="note">Candidates are signals that look like transits but haven't been confirmed or ruled out ·
+      Kepler ID ${esc(detail.kepid)}</p>`;
+  wireSkyThumbs();
+  const scene = buildScene(detail);
+  scene.ghost = true;
+  setScene(scene);
+}
+
+// Details couldn't load (offline): the old "still in the hangar" card, from the index alone.
+function showSoon(s) {
+  title.textContent = s[COL.name].toUpperCase();
+  info.innerHTML = `
+    <p class="big">✦ SOON TO CROSS THE STARS ✦</p>
     <div class="head">${skyThumb(s[COL.ra], s[COL.dec])}
-    <p>${esc(label(s))}. Only unconfirmed candidates orbit this star, so its pixel portrait is still in the hangar
-       until Star Gazer has scored them.</p></div>
-    <p>${skyLink(s[COL.ra], s[COL.dec])} · ${fmt(Object.keys(SYSTEMS).length)} systems are already drawn; try one above.</p>`;
+    <p>${esc(label(s))}. This system's details couldn't be loaded right now; check your connection and try again.</p></div>
+    <p>${skyLink(s[COL.ra], s[COL.dec])}</p>`;
   wireSkyThumbs();
   setScene({ mystery: true });
+}
+
+// "Next planets": the candidates most likely to be real (worked out by the export).
+function showLeaderboard() {
+  selected = null;
+  title.textContent = 'NEXT PLANETS';
+  const pct = v => (v == null ? '-' : `${fmt(Math.round(v * 100))}%`);
+  const table = (rows, caption) => !rows.length ? '' : `
+    <h3 class="facts-title">${esc(caption)}</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Candidate</th><th>System</th><th class="num">Size (Earths)</th>
+        <th class="num">NASA vetting</th><th class="num">Star Gazer</th></tr></thead>
+      <tbody>${rows.map(r => `<tr>
+        <td>${esc(r.planet)}</td>
+        <td><button type="button" class="linkish" data-name="${esc(r.system)}">${esc(r.system)}</button></td>
+        <td class="num">${fmt(r.radius, 1)}</td><td class="num">${pct(r.nasa)}</td><td class="num">${pct(r.sg)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  info.innerHTML = `
+    <p>Unconfirmed candidates most likely to be real planets: NASA's own vetting and Star Gazer agree, and
+       nothing in their case file looks wrong (no weak signal, not too big, no NASA warning flags).</p>
+    ${table(DATA.leaderboard.top, 'TOP CANDIDATES')}
+    ${table(DATA.leaderboard.hz, 'IN THE HABITABLE ZONE')}
+    <p class="note">Educational ranking, not a scientific classification. Click a system to open it.</p>`;
+  info.querySelectorAll('button[data-name]').forEach(b =>
+    b.addEventListener('click', () => { const s = byName.get(b.dataset.name.toLowerCase()); if (s) choose(s); }));
+  setScene(null);
 }
 
 function showUnknown(query) {

@@ -74,8 +74,11 @@ def test_build_skips_false_positive_only_stars(export, catalog):
 def test_confirmed_systems_are_drawn_candidates_wait_for_scores(export, catalog):
     data, _ = export.build(catalog, spotlight=[])
     assert column(data, 'drawn') == [1, 0]
-    assert list(data['systems']) == ['Kepler-90']
+    assert list(data['systems']) == ['Kepler-90', 'KOI-7621']   # every system has details now
     assert column(data, 'sg') == [None, None]
+    tags = data['tags']
+    assert column(data, 'tags')[1] & tags['unscored'] and not column(data, 'tags')[0] & tags['unscored']
+    assert column(data, 'np') == [2, 1] and column(data, 'nconf') == [2, 0]
 
     data, _ = export.build(catalog, spotlight=[], scores={'K07621.01': (0.87, True)})
     assert column(data, 'drawn') == [1, 1]
@@ -150,4 +153,34 @@ def test_to_js_is_loadable_json(export, catalog):
     data, _ = export.build(catalog, spotlight=['Kepler-90'])
     js = export.to_js(data)
     assert js.startswith('//') and 'window.STARMAP = ' in js
-    assert json.loads(js[js.index('{'):js.rindex('}') + 1]) == json.loads(json.dumps(data))
+    index = json.loads(js[js.index('{'):js.rindex('}') + 1])
+    assert 'systems' not in index                         # details live in the chunk files
+    assert index == json.loads(json.dumps({k: v for k, v in data.items() if k != 'systems'}))
+
+
+def test_details_chunks_hold_every_system_once(export, catalog, tmp_path):
+    data, _ = export.build(catalog, spotlight=[])
+    export.write_outputs(data, tmp_path / 'systems.js')
+    files = sorted((tmp_path / 'details').glob('*.js'))
+    assert len(files) == data['chunks']
+    found = {}
+    for f in files:
+        text = f.read_text(encoding='utf-8')
+        k = int(f.stem)
+        assert text.split('\n')[1].startswith(f'window.STARMAP_DETAILS({k},')
+        found.update(json.loads(text[text.index('{'):text.rindex('}') + 1]))
+    assert found == json.loads(json.dumps(data['systems']))
+    chunk = data['columns'].index('chunk')
+    assert all(export.chunk_of(s[0]) == s[chunk] for s in data['stars'])
+
+
+def test_leaderboard_skips_red_flags(export):
+    def system(**planet):
+        return {'teff': 5772, 'srad': 1.0, 'planets': [{'status': 'candidate', 'name': 'K1', 'sma': 1.0, **planet}]}
+    systems = {'A': system(nasa=0.95, sg=0.9, radius=1.2, snr=30),
+               'B': system(nasa=0.99, radius=25, snr=50),                # too big
+               'C': system(nasa=0.9, snr=5),                             # weak signal
+               'D': system(nasa=0.9, flags=['centroid offset'], snr=40)}  # NASA flag
+    board = export.leaderboard(systems)
+    assert [r['system'] for r in board['top']] == ['A']
+    assert board['hz'][0]['system'] == 'A' and board['top'][0]['score'] == 0.925

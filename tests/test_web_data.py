@@ -10,8 +10,10 @@ from pathlib import Path
 import pytest
 
 WEB = Path(__file__).resolve().parents[1] / 'web'
-MAX_BYTES = 1_500_000   # same budget as scripts/export_starmap.py
-COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg']
+MAX_BYTES = 400_000   # same budget as scripts/export_starmap.py (the index loaded up front)
+COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg',
+           'np', 'nconf', 'tags', 'chunk']
+CHUNK_MAX_BYTES = 150_000
 STATUSES = {'confirmed', 'candidate', 'other'}
 
 
@@ -36,11 +38,29 @@ def test_structure(data):
     assert set(data['spotlight']) <= set(names)
     for s in data['stars']:
         assert 279 < s[col['ra']] < 303 and 35 < s[col['dec']] < 54, s[col['name']]   # Kepler field
-        assert (s[col['name']] in data['systems']) == bool(s[col['drawn']]), s[col['name']]
+        assert 0 <= s[col['chunk']] < data['chunks'] and s[col['np']] >= 1, s[col['name']]
 
 
-def test_systems(data):
-    for name, system in data['systems'].items():
+@pytest.fixture(scope='module')
+def details(data):
+    out = {}
+    for f in sorted((WEB / 'data' / 'details').glob('*.js')):
+        assert f.stat().st_size < CHUNK_MAX_BYTES, f.name
+        text = f.read_text(encoding='utf-8')
+        out.update(json.loads(text[text.index('{'):text.rindex('}') + 1]))
+    return out
+
+
+def test_every_star_has_details(data, details):
+    col = {c: i for i, c in enumerate(COLUMNS)}
+    assert len(list((WEB / 'data' / 'details').glob('*.js'))) == data['chunks']
+    for s in data['stars']:
+        d = details[s[col['name']]]
+        assert len(d['planets']) == s[col['np']], s[col['name']]
+
+
+def test_systems(details):
+    for name, system in details.items():
         assert system['planets'], name
         for p in system['planets']:
             assert p['status'] in STATUSES, (name, p)

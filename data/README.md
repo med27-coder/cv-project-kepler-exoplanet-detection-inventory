@@ -123,7 +123,7 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 
 ## Star map data
 
-`scripts/export_starmap.py` builds `web/data/systems.js` (committed; it is what the web page loads) from:
+`scripts/export_starmap.py` builds the star map's data (committed; it is what the web page loads): `web/data/systems.js`, a small index loaded up front (one row per star with highlight tags, plus the "next planets" leaderboard), and `web/data/details/NN.js`, 32 files with every system's star facts, planets and candidate case-file data, loaded only when a system is opened. Sources:
 
 1. `koi_cumulative_full.csv`: every star with a CONFIRMED or CANDIDATE KOI becomes a map pixel.
 2. `ps_kepler_planets.csv`: NASA's confirmed-planet table (`pscomppars`) for every planet in the Kepler field, downloaded on first run (again if columns were added) and matched to KOI stars by position (NASA renamed some systems, e.g. Kepler-90 is "KOI-351" there): planet masses, eccentricities, insolation, number of stars, spectral types (measured, or estimated from a mass-radius relation), distances, discovery years, and planets found without a transit (radial velocity, timing variations).

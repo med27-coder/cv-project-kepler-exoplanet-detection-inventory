@@ -34,6 +34,8 @@ const GLYPHS = {
   8: '111101111101111', 9: '111101111001111', '.': '000000000000010', ' ': '000000000000000',
   A: '010101111101101', U: '101101101101111', E: '111100111100111', R: '110101110101101',
   T: '111010010010010', H: '101101111101101', K: '101101110101101', M: '101111111101101',
+  N: '110101101101101', C: '011100100100011', O: '010101101101010', F: '111100110100100',
+  I: '111010010010111', D: '110101101101110',
 };
 function pixelText(ctx, text, x, y, color) {
   ctx.fillStyle = color;
@@ -362,9 +364,14 @@ function drawSystem(seconds) {
       sctx.fillRect(Math.round(b.x), Math.round(b.y) - s - 3, 1, 2);
     }
   };
+  if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);   // unconfirmed: faint, flickering
   bodies.filter(b => b.behind).forEach(drawPlanet);
+  sctx.globalAlpha = 1;
   drawStar(t, 0.75 + 0.25 * flux);
+  if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);
   bodies.filter(b => !b.behind).forEach(drawPlanet);
+  sctx.globalAlpha = 1;
+  if (scene.ghost) pixelText(sctx, 'UNCONFIRMED', 4, 4, '#ffd34d');
   sctx.fillStyle = '#070b1a';   // keep anything big out of the light-curve strip
   sctx.fillRect(0, H + 1, SW, STRIP - 1);
   sctx.drawImage(scene.layer, 0, H + 1, SW, STRIP - 1, 0, H + 1, SW, STRIP - 1);

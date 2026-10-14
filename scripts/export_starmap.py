@@ -2,11 +2,13 @@
 
     .venv\\Scripts\\python scripts\\export_starmap.py
 
-Every star with at least one CONFIRMED or CANDIDATE KOI becomes a pixel on the map.
-A system is *drawn* (exported in full, star + planets) when it has a confirmed planet or
-a candidate that Star Gazer has scored (results/v3/candidates.csv, from
-scripts/score_candidates.py). The rest are listed by name only, so the page can answer
-"soon to cross the stars". SPOTLIGHT systems twinkle on the map and get a quick-pick button.
+Every star with at least one CONFIRMED or CANDIDATE KOI becomes a pixel on the map, and every
+one gets full details (star + planets), loaded by the page only when the system is opened:
+web/data/systems.js is a small index (one row per star, highlight tags, the "next planets"
+leaderboard) and web/data/details/NN.js hold the details in CHUNKS files. A system is *drawn*
+when it has a confirmed planet or a candidate Star Gazer has scored (results/v3/candidates.csv);
+systems with only unscored candidates are shown as unconfirmed ("soon to cross the stars").
+SPOTLIGHT systems twinkle on the map and get a quick-pick button.
 
 Reads data/raw/koi_cumulative_full.csv (downloaded by scripts/build_full_dataset.py).
 The output is a .js file (not .json) so web/index.html also works opened straight from disk.
@@ -15,6 +17,7 @@ never the model itself.
 """
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -38,9 +41,9 @@ PLANETS = C.RAW_DIR / 'ps_kepler_planets.csv'
 # Hosts are matched to KOI stars by position (names differ: Kepler-90 is "KOI-351" there).
 PLANETS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
                'pl_name,hostname,ra,dec,discoverymethod,disc_year,sy_dist,pl_bmasse,pl_bmassprov,'
-               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt,pl_orbeccen,pl_insol,sy_snum,st_spectype'
+               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt,pl_orbeccen,pl_orblper,pl_insol,sy_snum,st_spectype'
                '+from+pscomppars+where+ra+between+279+and+303+and+dec+between+35+and+54&format=csv')
-PLANET_COLUMNS = {'pl_orbeccen', 'pl_insol', 'sy_snum', 'st_spectype'}   # newest additions (re-download if missing)
+PLANET_COLUMNS = {'pl_orbeccen', 'pl_orblper', 'pl_insol', 'sy_snum', 'st_spectype'}   # newest additions (re-download if missing)
 TOIS = C.RAW_DIR / 'toi_kepler_field.csv'
 # TESS Objects of Interest in the Kepler field: Kepler stars that TESS also flagged.
 TOIS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
@@ -51,7 +54,9 @@ MATCH_ARCSEC = 3.0      # host star <-> KOI star position match
 MATCH_PERIOD = 0.01     # planet <-> KOI match: periods within 1%
 MEASURED_MASS = {'Mass', 'Msini', 'Msin(i)/sin(i)'}   # otherwise estimated from a mass-radius relation
 OUT_FILE = C.PROJECT_ROOT / 'web' / 'data' / 'systems.js'
-MAX_BYTES = 1_500_000   # keep the page light; warn above this
+MAX_BYTES = 400_000      # the index the page loads up front; warn above this
+CHUNK_MAX_BYTES = 150_000   # each details file
+CHUNKS = 32
 
 # Well-known multi-planet and habitable-zone systems: twinkle on the map, quick-pick buttons.
 SPOTLIGHT = ['Kepler-90', 'Kepler-11', 'Kepler-186', 'Kepler-22', 'Kepler-452', 'Kepler-62',
@@ -60,7 +65,13 @@ SPOTLIGHT = ['Kepler-90', 'Kepler-11', 'Kepler-186', 'Kepler-22', 'Kepler-452', 
 
 STATUS = {'CONFIRMED': 'confirmed', 'CANDIDATE': 'candidate'}
 KOI_NAME = re.compile(r'K(\d{5})\.(\d{2})')
-COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg']
+COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg',
+           'np', 'nconf', 'tags', 'chunk']
+# Highlight tags (bit flags in the 'tags' column), worked out here so the page can light them up
+# without loading every system's details. Same rules as the page's highlight buttons.
+TAGS = {'hz': 1, 'earth': 2, 'multi': 4, 'giant': 8, 'tess': 16, 'unscored': 32}
+FLAG_NAMES = {'koi_fpflag_nt': 'not transit-like', 'koi_fpflag_ss': 'stellar eclipse',
+              'koi_fpflag_co': 'centroid offset', 'koi_fpflag_ec': 'ephemeris match'}
 
 
 def koi_host(kepoi_name):
@@ -180,6 +191,8 @@ def _extra_fields(ps):
         out['ecc'] = round(float(ps['pl_orbeccen']), 3)
     if pd.notna(ps.get('pl_insol')):
         out['insol'] = round(float(ps['pl_insol']), 2)   # sunlight relative to Earth
+    if out.get('ecc') and pd.notna(ps.get('pl_orblper')):
+        out['w'] = round(float(ps['pl_orblper']), 1)     # argument of periastron (deg): orbit orientation
     return out
 
 
@@ -255,6 +268,14 @@ def system_detail(rows, scores, extras=None, gaia_row=None, tois=None):
         if r['kepoi_name'] in scores:
             prob, above = scores[r['kepoi_name']]
             planet['sg'], planet['sg_planet'] = round(prob, 3), above
+        if planet['status'] == 'candidate':   # NASA's own vetting, for the candidate's case file
+            if pd.notna(r.get('koi_score')):
+                planet['nasa'] = round(float(r['koi_score']), 3)
+            if pd.notna(r.get('koi_model_snr')):
+                planet['snr'] = round(float(r['koi_model_snr']), 1)
+            flags = [label for col, label in FLAG_NAMES.items() if r.get(col) == 1]
+            if flags:
+                planet['flags'] = flags
         ps = _pop_match(by_name, planet['name'], planet['period'])
         if ps is not None:
             planet.update(_extra_fields(ps))
@@ -276,6 +297,74 @@ def system_detail(rows, scores, extras=None, gaia_row=None, tois=None):
     return detail
 
 
+def habitable_zone(detail):
+    """(inner, outer) AU, same approximation as the page: L = R^2 (T/5772)^4, 1.1 and 0.36 x Earth's sunlight."""
+    if detail.get('teff') is None or detail.get('srad') is None:
+        return None
+    lum = detail['srad'] ** 2 * (detail['teff'] / 5772) ** 4
+    return (lum / 1.1) ** 0.5, (lum / 0.36) ** 0.5
+
+
+def counts_as_planet(p):
+    """Confirmed or other-method planets, and candidates Star Gazer calls planets."""
+    return p['status'] != 'candidate' or p.get('sg_planet') is True
+
+
+def tags(detail, drawn):
+    planets = [p for p in detail['planets'] if counts_as_planet(p)]
+    hz = habitable_zone(detail)
+    bits = 0
+    if hz and any(hz[0] <= p['sma'] <= hz[1] for p in planets):
+        bits |= TAGS['hz']
+    if any(p.get('radius') is not None and 0.7 <= p['radius'] <= 1.5 for p in planets):
+        bits |= TAGS['earth']
+    if len(planets) >= 5:
+        bits |= TAGS['multi']
+    if any(p.get('radius') is not None and p['radius'] >= 6 for p in planets):
+        bits |= TAGS['giant']
+    if any(p.get('toi') for p in detail['planets']):
+        bits |= TAGS['tess']
+    if not drawn:
+        bits |= TAGS['unscored']
+    return bits
+
+
+def chunk_of(name):
+    """Which details file holds this system (stable across exports)."""
+    return int(hashlib.sha1(name.encode()).hexdigest()[:8], 16) % CHUNKS
+
+
+def red_flags(p):
+    """Plain-language reasons a candidate might not be a planet."""
+    flags = list(p.get('flags', []))
+    if p.get('snr') is not None and p['snr'] < 10:
+        flags.append('weak signal')
+    if p.get('radius') is not None and p['radius'] > 20:
+        flags.append('too big for a planet')
+    if p.get('nasa') is not None and p['nasa'] < 0.5:
+        flags.append("NASA's vetting score is low")
+    return flags
+
+
+def leaderboard(systems, n=15):
+    """Candidates most likely to be real planets (Star Gazer and NASA's vetting score agreeing, no
+    red flags), and the same for habitable-zone candidates."""
+    rows = []
+    for name, d in systems.items():
+        hz = habitable_zone(d)
+        for p in d['planets']:
+            if p['status'] != 'candidate' or red_flags(p):
+                continue
+            votes = [v for v in (p.get('sg'), p.get('nasa')) if v is not None]
+            if not votes:
+                continue
+            rows.append({'system': name, 'planet': p['name'], 'score': round(sum(votes) / len(votes), 3),
+                         'sg': p.get('sg'), 'nasa': p.get('nasa'), 'radius': p.get('radius'),
+                         'snr': p.get('snr'), 'hz': bool(hz and hz[0] <= p['sma'] <= hz[1])})
+    rows.sort(key=lambda r: (-r['score'], -(r['snr'] or 0), r['planet']))   # ties: stronger signal first
+    return {'top': rows[:n], 'hz': [r for r in rows if r['hz']][:n]}
+
+
 def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5, tois=None, gaia=None):
     """Map pixels for every star with a non-false-positive KOI, full detail for drawn systems.
     Optional extras: `planets` is NASA's confirmed-planet table (masses, distances, non-KOI planets),
@@ -293,28 +382,61 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
         cand = rows[rows['koi_disposition'] == 'CANDIDATE']['kepoi_name']
         cand_scores = [scores[k][0] for k in cand if k in scores]
         drawn = bool((rows['koi_disposition'] == 'CONFIRMED').any() or cand_scores)
-        if drawn:
-            systems[name] = system_detail(rows, scores, hosts.get(int(kepid)), gaia.get(int(kepid)),
-                                          tess.get(int(kepid)))
+        detail = system_detail(rows, scores, hosts.get(int(kepid)), gaia.get(int(kepid)), tess.get(int(kepid)))
+        systems[name] = detail
         mag = rows['koi_kepmag'].iloc[0]
         stars.append([name, int(kepid), koi_host(rows['kepoi_name'].iloc[0]),
                       round(float(rows['ra'].iloc[0]), 4), round(float(rows['dec'].iloc[0]), 4),
                       None if pd.isna(mag) else round(float(mag), 1), int(name in wanted), int(drawn),
-                      len(rows), round(max(cand_scores), 3) if cand_scores else None])
+                      len(rows), round(max(cand_scores), 3) if cand_scores else None,
+                      len(detail['planets']), sum(p['status'] == 'confirmed' for p in detail['planets']),
+                      tags(detail, drawn), chunk_of(name)])
     names = {s[0] for s in stars}
     missing = sorted(wanted - names)
     return {'source': 'NASA Exoplanet Archive (KOI, confirmed-planet and TOI tables); '
                       'Berger et al. 2020 (Gaia-Kepler stellar properties)',
             'exported': datetime.now(timezone.utc).date().isoformat(),
             'scored': bool(scores), 'sg_threshold': threshold,
-            'columns': COLUMNS, 'spotlight': [n for n in spotlight if n in names],
-            'stars': stars, 'systems': systems}, missing
+            'columns': COLUMNS, 'tags': TAGS, 'chunks': CHUNKS,
+            'spotlight': [n for n in spotlight if n in names],
+            'leaderboard': leaderboard(systems), 'stars': stars, 'systems': systems}, missing
+
+
+def _json(obj):
+    return json.dumps(obj, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
 
 
 def to_js(data):
-    body = json.dumps(data, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+    """The index file: everything except the per-system details."""
+    index = {k: v for k, v in data.items() if k != 'systems'}
     return ('// Generated by scripts/export_starmap.py from the NASA Exoplanet Archive. Do not edit.\n'
-            f'window.STARMAP = {body};\n')
+            f'window.STARMAP = {_json(index)};\n')
+
+
+def chunk_files(data):
+    """{chunk number: file text} for the per-system details (loaded on demand by the page)."""
+    col = {c: i for i, c in enumerate(data['columns'])}
+    groups = {k: {} for k in range(data['chunks'])}
+    for star in data['stars']:
+        groups[star[col['chunk']]][star[col['name']]] = data['systems'][star[col['name']]]
+    return {k: ('// Generated by scripts/export_starmap.py. Do not edit.\n'
+                f'window.STARMAP_DETAILS({k},{_json(v)});\n') for k, v in groups.items()}
+
+
+def write_outputs(data, out):
+    """Write the index to `out` and the details to out.parent/details/NN.js; returns sizes."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    index = to_js(data)
+    out.write_text(index, encoding='utf-8')
+    details = out.parent / 'details'
+    details.mkdir(exist_ok=True)
+    for old in details.glob('*.js'):
+        old.unlink()
+    sizes = []
+    for k, text in chunk_files(data).items():
+        (details / f'{k:02d}.js').write_text(text, encoding='utf-8')
+        sizes.append(len(text.encode('utf-8')))
+    return len(index.encode('utf-8')), sizes
 
 
 def main():
@@ -343,14 +465,13 @@ def main():
     data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia)
     if missing:
         print(f'Warning: spotlight systems not in the catalog: {", ".join(missing)}')
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    js = to_js(data)
-    args.out.write_text(js, encoding='utf-8')
-    size = len(js.encode('utf-8'))
-    print(f'Saved {C.rel(args.out)}: {len(data["stars"])} stars, {len(data["systems"])} drawn systems, '
-          f'{len(scores)} Star Gazer scores, {size / 1024:.0f} KB')
-    if size > MAX_BYTES:
-        print(f'Warning: over {MAX_BYTES / 1e6:.1f} MB; consider lazy-loading system details.')
+    size, chunk_sizes = write_outputs(data, args.out)
+    n_drawn = sum(s[COLUMNS.index('drawn')] for s in data['stars'])
+    print(f'Saved {C.rel(args.out)}: {len(data["stars"])} stars ({n_drawn} drawn, the rest unconfirmed), '
+          f'{len(scores)} Star Gazer scores, index {size / 1024:.0f} KB + {len(chunk_sizes)} detail files '
+          f'({sum(chunk_sizes) / 1024:.0f} KB, largest {max(chunk_sizes) / 1024:.0f} KB)')
+    if size > MAX_BYTES or max(chunk_sizes) > CHUNK_MAX_BYTES:
+        print('Warning: over the size budget; raise CHUNKS or trim fields.')
     if args.out == OUT_FILE:   # keep the social preview image in step with the published data
         import make_og_image
         make_og_image.main()
