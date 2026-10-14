@@ -63,9 +63,14 @@ model predictions (an educational model, not a scientific classification; see
 **Supply chain**
 - GitHub Actions are pinned to commit SHAs and run with the minimum permissions they need;
   checkouts don't keep the token.
-- Dependabot opens weekly update PRs for the actions and Python dependencies.
-- `dependency-audit` checks the Python dependencies against the PyPA advisory database weekly.
+- Python dependencies are locked with SHA-256 hashes (`requirements.lock`,
+  `requirements-dev.lock`, made by `scripts/lock_requirements.py`); CI installs with
+  `--require-hashes`, so a tampered or swapped package file is refused.
+- Dependabot opens weekly update PRs for the actions and security fixes for Python dependencies.
+- `dependency-audit` checks the locked versions against the PyPA advisory database weekly.
 - CodeQL scans the Python, JavaScript and workflow code on every push and weekly.
+- OpenSSF Scorecard rates the repository's security practices weekly (Security tab).
+- The monthly `data-refresh` workflow only opens a pull request; nothing is merged automatically.
 
 ## Repository settings (maintainer checklist)
 
@@ -73,5 +78,14 @@ These are GitHub settings, not files, so they're listed here to keep track of th
 - Settings → Code security: **Secret scanning** and **Push protection** on,
   **Private vulnerability reporting** on, **Dependabot alerts** and **security updates** on.
 - Settings → Rules: a ruleset for `main` that blocks force pushes and deletion.
+- Settings → Actions → General → Workflow permissions: allow GitHub Actions to create pull
+  requests (needed by the monthly `data-refresh` workflow; leave the default token read-only).
 - Account: two-factor authentication on.
+- Signed commits (optional, recommended): create an SSH signing key
+  (`ssh-keygen -t ed25519 -f ~/.ssh/github_signing`), add the `.pub` file on GitHub under
+  Settings → SSH and GPG keys → New SSH key → type *Signing key*, then
+  `git config gpg.format ssh`, `git config user.signingkey ~/.ssh/github_signing.pub` and
+  `git config commit.gpgsign true`. Commits then show as *Verified*.
 - Keep an offline backup of `.secrets/star_gazer.key`; without it the encrypted bundle can't be opened.
+- Hugging Face Space (if deployed): start it as *Private*, set `STAR_GAZER_KEY` only as a Space
+  secret (never a variable), and make it public after a look at the running app.

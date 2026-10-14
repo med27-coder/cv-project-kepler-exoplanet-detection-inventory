@@ -42,3 +42,7 @@ id_rsa*
 
 # Pipeline logs (scripts/run_pipeline.py)
 logs/
+
+# Test coverage output
+.coverage
+coverage.xml

@@ -438,6 +438,12 @@ def koi_inputs(pre, catalog_rows, v):
             'features': pre.transform(catalog_rows)}
 
 
+def predict_views(models, pre, catalog_rows, v):
+    """Planet probability for one KOI from views built elsewhere (e.g. another telescope's light curve)."""
+    available = koi_inputs(pre, catalog_rows, v)
+    return float(predict(models, lambda m: _inputs(m, available))[0])
+
+
 def predict_koi(models, pre, catalog, kepoi_name, threshold=0.5, return_inputs=False):
     """Planet probability for one KOI by name. Returns (prob, verdict, views dict, catalog row),
     plus the model inputs it built (for saliency.explain) when return_inputs=True."""
