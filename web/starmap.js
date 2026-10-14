@@ -344,7 +344,9 @@
   const sys = document.getElementById('system');
   const sctx = sys.getContext('2d');
   const STRIP = 22;   // light-curve strip along the bottom
-  const SW = sys.width, SH = sys.height, CX = SW / 2, CY = Math.round((SH - STRIP) / 2), TILT = 0.42;
+  const SW = sys.width, SH = sys.height, CX = SW / 2, CY = Math.round((SH - STRIP) / 2);
+  const TILT_SKY = 0.42, TILT_KEPLER = 0.05;   // orbit tilt on screen; Kepler saw these systems almost edge-on
+  let TILT = TILT_SKY;
   const AU_PER_RSUN = 0.00465047, AU_PER_REARTH = 4.2635e-5;
   let scene = null;
 
@@ -438,6 +440,7 @@
         a: p.sma, ecc: p.ecc ?? 0, logR: radii[i], radius: p.radius,
         cosw: Math.cos(w), sinw: Math.sin(w),
         sprite: p.sprite ?? planetSize(p.radius),
+        locked: (p.period ?? Infinity) < 10 && (p.teq ?? 0) >= 700,   // tidally locked: one hot face to its star
         art: p.art,
         look: planetLook(p),
         pal: [shade(color, 0.45), color, shade(color, 1.45), shade(color, 0.75)],   // shadow, base, lit, band
@@ -457,7 +460,7 @@
       }),
     }));
     return {
-      belts, logR,
+      belts, logR, teff: detail.teff, logg: detail.logg, seed: String(detail.kepid ?? 'sun'),
       spriteR, srad: detail.srad ?? 1,
       starColor: starColor(detail.teff),
       companion: (detail.nstars ?? 1) > 1,
@@ -467,6 +470,9 @@
       planets,
     };
   }
+
+  // Overview sprites grow gently when zoomed in (up to 3x), so detail shows up close.
+  const grow = z => Math.min(3, Math.max(1, Math.sqrt(z)));
 
   // Pixel positions and sizes for the current view.
   function layout() {
@@ -479,7 +485,7 @@
       sc.hz = sc.hzAU && sc.hzAU.map(a => a * px);
       sc.earth = px;
     } else {
-      sc.starR = sc.spriteR;
+      sc.starR = Math.round(sc.spriteR * grow(z));
       sc.hz = sc.hzLog && sc.hzLog.map(r => r * z);
       sc.earth = sc.earthLog * z;
     }
@@ -487,7 +493,7 @@
     for (const p of sc.planets) {
       p.rx = truth ? p.a * px : p.logR * z;
       const trueSize = (p.radius ?? 1) * AU_PER_REARTH * px;
-      p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : p.sprite;
+      p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : Math.min(12, Math.round(p.sprite * grow(z)));
       // overview: the closest pass stays off the star sprite; true scale: real eccentricity
       p.e = truth ? p.ecc : Math.min(p.ecc, Math.max(0, 1 - (sc.starR + 4) / p.rx));
     }
@@ -499,6 +505,7 @@
         : 'True scale: real distances and real sizes.';
     const level = document.getElementById('sys-level');
     level.textContent = z >= 10 ? `${Math.round(z)}×` : `${+z.toFixed(2)}×`;
+    rememberView();
   }
 
   // Everything that doesn't move, drawn once per view: speckle, habitable zone, orbits, scale.
@@ -538,8 +545,13 @@
     };
     if (!sc.home && visible(sc.earth, sc.earth) && sc.earth > sc.starR + 4) {   // Earth's orbit, for scale
       ring(sc.earth, 0, 1, 0, '#4f5d80', 2);
-      const ly = Math.round(cy - sc.earth * TILT) - 7;
-      if (ly > 1 && cx > 10 && cx < SW - 10) pixelText(c, 'EARTH', Math.round(cx - 9), ly, '#7f8fb0');
+      if (TILT === TILT_KEPLER) {   // flat ring: label its right end, off the star
+        const lx = Math.round(cx + sc.earth + 3);
+        if (lx < SW - 20 && cy > 4) pixelText(c, 'EARTH', lx, Math.round(cy) - 2, '#7f8fb0');
+      } else {
+        const ly = Math.round(cy - sc.earth * TILT) - 7;
+        if (ly > 1 && cx > 10 && cx < SW - 10) pixelText(c, 'EARTH', Math.round(cx - 9), ly, '#7f8fb0');
+      }
     }
     for (const p of sc.planets) {   // dotted orbits, sparser for candidates and other-method planets
       if (!visible(p.rx * (1 - p.e), p.rx * (1 + p.e))) continue;
@@ -607,24 +619,43 @@
         ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
       }
     }
+    if (p.locked && r >= 2) {   // the point right under its star: always day there
+      ctx.fillStyle = '#fff1c4';
+      ctx.fillRect(x0 + Math.round(lx * r * 0.5), y0 + Math.round(ly * r * 0.5), 1, 1);
+    }
   }
 
   // The star: dithered glow, limb darkening (edge darker than the middle), a slow sparkle.
   function drawStar(t, dim) {
     const r = Math.round(scene.starR), c = scene.starColor, cx = scene.cx, cy = scene.cy;
     if (cx + r < -4 || cx - r > SW + 4 || cy + r < -4 || cy - r > SH - STRIP + 4) return;
+    // Star types: red dwarfs are spotty and flare now and then; giants and hot stars glow wider.
+    const cool = scene.teff != null && scene.teff < 3900;
+    const wide = (scene.logg != null && scene.logg < 3.5) || (scene.teff != null && scene.teff >= 6500);
+    const halo = wide ? 5.2 : 3.2;
     if (r <= 40) {
       sctx.fillStyle = shade(c, 0.35 * dim);
-      for (let dy = -r - 3; dy <= r + 3; dy++) {
-        for (let dx = -r - 3; dx <= r + 3; dx++) {
+      for (let dy = -r - 6; dy <= r + 6; dy++) {
+        for (let dx = -r - 6; dx <= r + 6; dx++) {
           const d = Math.hypot(dx, dy);
-          if (d > r + 0.5 && d < r + 3.2 && ((dx + dy) & 1) === 0) sctx.fillRect(cx + dx, cy + dy, 1, 1);
+          if (d > r + 0.5 && d < r + halo && ((dx + dy) & 1) === 0) sctx.fillRect(cx + dx, cy + dy, 1, 1);
         }
       }
     }
     disc(sctx, cx, cy, r, shade(c, 0.78 * dim));
     disc(sctx, cx, cy, Math.max(1, r - 1 - Math.floor(r / 12)), shade(c, dim));
     disc(sctx, cx - 1, cy - 1, Math.max(1, Math.round(r * 0.45)), shade(c, 1.35 * dim));
+    if (cool && r >= 4) {   // starspots, slowly turning with the star
+      sctx.fillStyle = shade(c, 0.5 * dim);
+      for (let k = 0; k < 3; k++) {
+        const a = hash(scene.seed + 's' + k) * 2 * Math.PI + t * 0.15, rho = (0.2 + 0.5 * hash(scene.seed + 'r' + k)) * r;
+        if (Math.cos(a) > -0.2) sctx.fillRect(Math.round(cx + rho * Math.sin(a)), Math.round(cy + rho * (hash(scene.seed + 'y' + k) - 0.5)), 2, 1);
+      }
+      if (((t + hash(scene.seed) * 23) % 23) < 0.7) {   // a flare: a brief bright arc on the edge
+        sctx.fillStyle = '#ffffff';
+        for (let k = -3; k <= 3; k++) sctx.fillRect(Math.round(cx + k), Math.round(cy - r - 1 - (k * k < 4 ? 1 : 0)), 1, 1);
+      }
+    }
     if (r > 40) return;
     const len = REDUCED_MOTION ? 2 : 2 + Math.round(1.5 + 1.5 * Math.sin(t * 1.3));
     sctx.fillStyle = shade(c, 1.2 * dim);
@@ -758,8 +789,49 @@
     const live = liveScene();
     sysTools.hidden = !live;
     sys.classList.toggle('interactive', live);
-    if (live) layout();
+    if (live) {
+      layout();
+      if (pendingView) applyView(pendingView);
+    }
+    pendingView = null;
   }
+
+  // Shareable views: the URL remembers zoom, true scale and Kepler's view (#Kepler-90?view=true&zoom=4).
+  let pendingView = null, hashTimer = 0;
+  function applyView(v) {
+    if (v.view === 'true' || v.view === 'overview') {
+      sview.mode = v.view;
+      scaleButton.setAttribute('aria-pressed', String(sview.mode === 'true'));
+    }
+    setEdge(v.edge === '1');
+    const zoom = Number(v.zoom);
+    if (Number.isFinite(zoom) && zoom > 0) sview.zoom = clamp(zoom, ...SVIEW_ZOOM[sview.mode]);
+    layout();
+  }
+  function rememberView() {
+    clearTimeout(hashTimer);
+    hashTimer = setTimeout(() => {
+      const name = location.hash.slice(1).split('?')[0];
+      if (!name || !liveScene()) return;
+      const params = new URLSearchParams();
+      if (sview.mode === 'true') params.set('view', 'true');
+      if (Math.abs(sview.zoom - 1) > 0.01) params.set('zoom', String(+sview.zoom.toPrecision(3)));
+      if (TILT === TILT_KEPLER) params.set('edge', '1');
+      const extra = params.toString();
+      history.replaceState(null, '', '#' + name + (extra ? '?' + extra : ''));
+    }, 400);
+  }
+
+  // Kepler's view: nearly edge-on, so planets visibly cross the star when the light curve dips.
+  const edgeButton = document.getElementById('sys-edge');
+  function setEdge(on) {
+    TILT = on ? TILT_KEPLER : TILT_SKY;
+    edgeButton.setAttribute('aria-pressed', String(on));
+  }
+  edgeButton.addEventListener('click', () => {
+    setEdge(TILT !== TILT_KEPLER);
+    if (liveScene()) layout();
+  });
 
   function setSysZoom(zoom, anchor) {   // anchor: canvas point that stays put (default: the star)
     if (!liveScene()) return;
@@ -790,20 +862,36 @@
     return [(evt.clientX - r.left) * SW / r.width, (evt.clientY - r.top) * SH / r.height];
   }
 
-  let sysDrag = null;
+  let sysDrag = null, pinch = null;
+  const touches = new Map();   // pointerId -> [x, y] in canvas pixels, for two-finger pinch zoom
+  const spread = () => { const [a, b] = [...touches.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]) || 1; };
+  const middle = () => { const [a, b] = [...touches.values()]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
   sys.addEventListener('pointerdown', e => {
     if (!liveScene()) return;
+    touches.set(e.pointerId, sysPoint(e));
+    try { sys.setPointerCapture(e.pointerId); } catch { /* pointer already gone: nothing to capture */ }
+    if (touches.size === 2) {   // second finger: pinch instead of drag
+      sysDrag = null;
+      pinch = { dist: spread(), zoom: sview.zoom };
+      return;
+    }
     sysDrag = { x: e.clientX, y: e.clientY, panX: sview.panX, panY: sview.panY };
-    sys.setPointerCapture(e.pointerId);
   });
   sys.addEventListener('pointermove', e => {
+    if (touches.has(e.pointerId)) touches.set(e.pointerId, sysPoint(e));
+    if (pinch && touches.size === 2) { setSysZoom(pinch.zoom * spread() / pinch.dist, middle()); return; }
     if (!sysDrag) return;
     const r = sys.getBoundingClientRect();
     sview.panX = sysDrag.panX + (e.clientX - sysDrag.x) * SW / r.width;
     sview.panY = sysDrag.panY + (e.clientY - sysDrag.y) * SH / r.height;
     layout();
   });
-  const endSysDrag = () => { sysDrag = null; };
+  const endSysDrag = e => {
+    touches.delete(e.pointerId);
+    if (touches.size < 2) pinch = null;
+    sysDrag = null;
+    rememberView();
+  };
   sys.addEventListener('pointerup', endSysDrag);
   sys.addEventListener('pointercancel', endSysDrag);
   sys.addEventListener('dblclick', fitAll);
@@ -1525,7 +1613,10 @@
     } catch {
       return;   // malformed %-escape in a hand-edited link: ignore it
     }
-    if (q) { input.value = q; lookup(q, false); }
+    const [name, query = ''] = q.split('?');
+    const params = new URLSearchParams(query);
+    pendingView = { view: params.get('view'), zoom: params.get('zoom'), edge: params.get('edge') };
+    if (name) { input.value = name; lookup(name, false); }
   }
   window.addEventListener('hashchange', fromHash);
   renderBase();
@@ -1536,13 +1627,26 @@
   // a canvas scrolled out of sight isn't drawn; with both out of sight, or after a few idle minutes,
   // the loop stops completely and the last frame stays on screen. Any interaction wakes it.
   // (Browsers already pause it in hidden tabs.)
-  const SYSTEM_MS = 1000 / 30, MAP_MS = 120, IDLE_MS = 3 * 60 * 1000;
+  const MAP_MS = 120, IDLE_MS = 3 * 60 * 1000;
+  let SYSTEM_MS = 1000 / 30;   // Animation menu: 60 / 30 / 15 fps, or off (one still frame per change)
+  const fpsMenu = document.getElementById('fps');
+  fpsMenu.addEventListener('change', () => {
+    const fps = Number(fpsMenu.value);
+    SYSTEM_MS = fps ? 1000 / fps : Infinity;
+    wake();
+  });
   const onScreen = new Map([[map, true], [sys, true]]);
   let lastMap = 0, lastSys = 0, lastActive = performance.now(), running = false;
 
   function frame(now) {
     const visible = onScreen.get(map) || onScreen.get(sys);
     if (!visible || now - lastActive > IDLE_MS) { running = false; return; }
+    if (SYSTEM_MS === Infinity) {   // animation off: draw the current state once, then sleep until something changes
+      drawMap(now);
+      drawSystem(0);
+      running = false;
+      return;
+    }
     if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); lastMap = now; }
     if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) { drawSystem(now / 1000); lastSys = now; }
     requestAnimationFrame(frame);

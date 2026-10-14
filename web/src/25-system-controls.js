@@ -10,8 +10,49 @@ function setScene(next) {   // a new system: reset the view, keep the chosen sca
   const live = liveScene();
   sysTools.hidden = !live;
   sys.classList.toggle('interactive', live);
-  if (live) layout();
+  if (live) {
+    layout();
+    if (pendingView) applyView(pendingView);
+  }
+  pendingView = null;
 }
+
+// Shareable views: the URL remembers zoom, true scale and Kepler's view (#Kepler-90?view=true&zoom=4).
+let pendingView = null, hashTimer = 0;
+function applyView(v) {
+  if (v.view === 'true' || v.view === 'overview') {
+    sview.mode = v.view;
+    scaleButton.setAttribute('aria-pressed', String(sview.mode === 'true'));
+  }
+  setEdge(v.edge === '1');
+  const zoom = Number(v.zoom);
+  if (Number.isFinite(zoom) && zoom > 0) sview.zoom = clamp(zoom, ...SVIEW_ZOOM[sview.mode]);
+  layout();
+}
+function rememberView() {
+  clearTimeout(hashTimer);
+  hashTimer = setTimeout(() => {
+    const name = location.hash.slice(1).split('?')[0];
+    if (!name || !liveScene()) return;
+    const params = new URLSearchParams();
+    if (sview.mode === 'true') params.set('view', 'true');
+    if (Math.abs(sview.zoom - 1) > 0.01) params.set('zoom', String(+sview.zoom.toPrecision(3)));
+    if (TILT === TILT_KEPLER) params.set('edge', '1');
+    const extra = params.toString();
+    history.replaceState(null, '', '#' + name + (extra ? '?' + extra : ''));
+  }, 400);
+}
+
+// Kepler's view: nearly edge-on, so planets visibly cross the star when the light curve dips.
+const edgeButton = document.getElementById('sys-edge');
+function setEdge(on) {
+  TILT = on ? TILT_KEPLER : TILT_SKY;
+  edgeButton.setAttribute('aria-pressed', String(on));
+}
+edgeButton.addEventListener('click', () => {
+  setEdge(TILT !== TILT_KEPLER);
+  if (liveScene()) layout();
+});
 
 function setSysZoom(zoom, anchor) {   // anchor: canvas point that stays put (default: the star)
   if (!liveScene()) return;
@@ -42,20 +83,36 @@ function sysPoint(evt) {
   return [(evt.clientX - r.left) * SW / r.width, (evt.clientY - r.top) * SH / r.height];
 }
 
-let sysDrag = null;
+let sysDrag = null, pinch = null;
+const touches = new Map();   // pointerId -> [x, y] in canvas pixels, for two-finger pinch zoom
+const spread = () => { const [a, b] = [...touches.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]) || 1; };
+const middle = () => { const [a, b] = [...touches.values()]; return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
 sys.addEventListener('pointerdown', e => {
   if (!liveScene()) return;
+  touches.set(e.pointerId, sysPoint(e));
+  try { sys.setPointerCapture(e.pointerId); } catch { /* pointer already gone: nothing to capture */ }
+  if (touches.size === 2) {   // second finger: pinch instead of drag
+    sysDrag = null;
+    pinch = { dist: spread(), zoom: sview.zoom };
+    return;
+  }
   sysDrag = { x: e.clientX, y: e.clientY, panX: sview.panX, panY: sview.panY };
-  sys.setPointerCapture(e.pointerId);
 });
 sys.addEventListener('pointermove', e => {
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, sysPoint(e));
+  if (pinch && touches.size === 2) { setSysZoom(pinch.zoom * spread() / pinch.dist, middle()); return; }
   if (!sysDrag) return;
   const r = sys.getBoundingClientRect();
   sview.panX = sysDrag.panX + (e.clientX - sysDrag.x) * SW / r.width;
   sview.panY = sysDrag.panY + (e.clientY - sysDrag.y) * SH / r.height;
   layout();
 });
-const endSysDrag = () => { sysDrag = null; };
+const endSysDrag = e => {
+  touches.delete(e.pointerId);
+  if (touches.size < 2) pinch = null;
+  sysDrag = null;
+  rememberView();
+};
 sys.addEventListener('pointerup', endSysDrag);
 sys.addEventListener('pointercancel', endSysDrag);
 sys.addEventListener('dblclick', fitAll);

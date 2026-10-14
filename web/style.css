@@ -200,3 +200,8 @@ a { color: var(--accent); }
 .con { color: #ff7a59; }
 button.linkish { background: none; border: none; box-shadow: none; padding: 0; color: var(--accent);
                  font: inherit; text-decoration: underline; cursor: pointer; letter-spacing: 0; }
+
+/* Animation speed menu */
+.fps { display: block; color: var(--ink-2); font-size: 18px; margin: 2px 0 8px; }
+.fps select { font: inherit; font-size: 18px; color: var(--ink); background: var(--bg); border: 1px solid var(--edge); }
+.fps select:focus-visible { outline: 2px solid var(--accent); }

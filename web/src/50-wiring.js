@@ -116,7 +116,10 @@ function fromHash() {
   } catch {
     return;   // malformed %-escape in a hand-edited link: ignore it
   }
-  if (q) { input.value = q; lookup(q, false); }
+  const [name, query = ''] = q.split('?');
+  const params = new URLSearchParams(query);
+  pendingView = { view: params.get('view'), zoom: params.get('zoom'), edge: params.get('edge') };
+  if (name) { input.value = name; lookup(name, false); }
 }
 window.addEventListener('hashchange', fromHash);
 renderBase();

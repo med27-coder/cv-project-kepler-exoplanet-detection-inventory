@@ -2,7 +2,9 @@
 const sys = document.getElementById('system');
 const sctx = sys.getContext('2d');
 const STRIP = 22;   // light-curve strip along the bottom
-const SW = sys.width, SH = sys.height, CX = SW / 2, CY = Math.round((SH - STRIP) / 2), TILT = 0.42;
+const SW = sys.width, SH = sys.height, CX = SW / 2, CY = Math.round((SH - STRIP) / 2);
+const TILT_SKY = 0.42, TILT_KEPLER = 0.05;   // orbit tilt on screen; Kepler saw these systems almost edge-on
+let TILT = TILT_SKY;
 const AU_PER_RSUN = 0.00465047, AU_PER_REARTH = 4.2635e-5;
 let scene = null;
 
@@ -96,6 +98,7 @@ function buildScene(detail) {
       a: p.sma, ecc: p.ecc ?? 0, logR: radii[i], radius: p.radius,
       cosw: Math.cos(w), sinw: Math.sin(w),
       sprite: p.sprite ?? planetSize(p.radius),
+      locked: (p.period ?? Infinity) < 10 && (p.teq ?? 0) >= 700,   // tidally locked: one hot face to its star
       art: p.art,
       look: planetLook(p),
       pal: [shade(color, 0.45), color, shade(color, 1.45), shade(color, 0.75)],   // shadow, base, lit, band
@@ -115,7 +118,7 @@ function buildScene(detail) {
     }),
   }));
   return {
-    belts, logR,
+    belts, logR, teff: detail.teff, logg: detail.logg, seed: String(detail.kepid ?? 'sun'),
     spriteR, srad: detail.srad ?? 1,
     starColor: starColor(detail.teff),
     companion: (detail.nstars ?? 1) > 1,
@@ -125,6 +128,9 @@ function buildScene(detail) {
     planets,
   };
 }
+
+// Overview sprites grow gently when zoomed in (up to 3x), so detail shows up close.
+const grow = z => Math.min(3, Math.max(1, Math.sqrt(z)));
 
 // Pixel positions and sizes for the current view.
 function layout() {
@@ -137,7 +143,7 @@ function layout() {
     sc.hz = sc.hzAU && sc.hzAU.map(a => a * px);
     sc.earth = px;
   } else {
-    sc.starR = sc.spriteR;
+    sc.starR = Math.round(sc.spriteR * grow(z));
     sc.hz = sc.hzLog && sc.hzLog.map(r => r * z);
     sc.earth = sc.earthLog * z;
   }
@@ -145,7 +151,7 @@ function layout() {
   for (const p of sc.planets) {
     p.rx = truth ? p.a * px : p.logR * z;
     const trueSize = (p.radius ?? 1) * AU_PER_REARTH * px;
-    p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : p.sprite;
+    p.size = truth ? Math.min(40, Math.max(p.sprite, Math.round(trueSize))) : Math.min(12, Math.round(p.sprite * grow(z)));
     // overview: the closest pass stays off the star sprite; true scale: real eccentricity
     p.e = truth ? p.ecc : Math.min(p.ecc, Math.max(0, 1 - (sc.starR + 4) / p.rx));
   }
@@ -157,6 +163,7 @@ function layout() {
       : 'True scale: real distances and real sizes.';
   const level = document.getElementById('sys-level');
   level.textContent = z >= 10 ? `${Math.round(z)}×` : `${+z.toFixed(2)}×`;
+  rememberView();
 }
 
 // Everything that doesn't move, drawn once per view: speckle, habitable zone, orbits, scale.
@@ -196,8 +203,13 @@ function staticLayer(sc) {
   };
   if (!sc.home && visible(sc.earth, sc.earth) && sc.earth > sc.starR + 4) {   // Earth's orbit, for scale
     ring(sc.earth, 0, 1, 0, '#4f5d80', 2);
-    const ly = Math.round(cy - sc.earth * TILT) - 7;
-    if (ly > 1 && cx > 10 && cx < SW - 10) pixelText(c, 'EARTH', Math.round(cx - 9), ly, '#7f8fb0');
+    if (TILT === TILT_KEPLER) {   // flat ring: label its right end, off the star
+      const lx = Math.round(cx + sc.earth + 3);
+      if (lx < SW - 20 && cy > 4) pixelText(c, 'EARTH', lx, Math.round(cy) - 2, '#7f8fb0');
+    } else {
+      const ly = Math.round(cy - sc.earth * TILT) - 7;
+      if (ly > 1 && cx > 10 && cx < SW - 10) pixelText(c, 'EARTH', Math.round(cx - 9), ly, '#7f8fb0');
+    }
   }
   for (const p of sc.planets) {   // dotted orbits, sparser for candidates and other-method planets
     if (!visible(p.rx * (1 - p.e), p.rx * (1 + p.e))) continue;
@@ -265,24 +277,43 @@ function shadedPlanet(ctx, x, y, p, lx, ly) {
       ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
     }
   }
+  if (p.locked && r >= 2) {   // the point right under its star: always day there
+    ctx.fillStyle = '#fff1c4';
+    ctx.fillRect(x0 + Math.round(lx * r * 0.5), y0 + Math.round(ly * r * 0.5), 1, 1);
+  }
 }
 
 // The star: dithered glow, limb darkening (edge darker than the middle), a slow sparkle.
 function drawStar(t, dim) {
   const r = Math.round(scene.starR), c = scene.starColor, cx = scene.cx, cy = scene.cy;
   if (cx + r < -4 || cx - r > SW + 4 || cy + r < -4 || cy - r > SH - STRIP + 4) return;
+  // Star types: red dwarfs are spotty and flare now and then; giants and hot stars glow wider.
+  const cool = scene.teff != null && scene.teff < 3900;
+  const wide = (scene.logg != null && scene.logg < 3.5) || (scene.teff != null && scene.teff >= 6500);
+  const halo = wide ? 5.2 : 3.2;
   if (r <= 40) {
     sctx.fillStyle = shade(c, 0.35 * dim);
-    for (let dy = -r - 3; dy <= r + 3; dy++) {
-      for (let dx = -r - 3; dx <= r + 3; dx++) {
+    for (let dy = -r - 6; dy <= r + 6; dy++) {
+      for (let dx = -r - 6; dx <= r + 6; dx++) {
         const d = Math.hypot(dx, dy);
-        if (d > r + 0.5 && d < r + 3.2 && ((dx + dy) & 1) === 0) sctx.fillRect(cx + dx, cy + dy, 1, 1);
+        if (d > r + 0.5 && d < r + halo && ((dx + dy) & 1) === 0) sctx.fillRect(cx + dx, cy + dy, 1, 1);
       }
     }
   }
   disc(sctx, cx, cy, r, shade(c, 0.78 * dim));
   disc(sctx, cx, cy, Math.max(1, r - 1 - Math.floor(r / 12)), shade(c, dim));
   disc(sctx, cx - 1, cy - 1, Math.max(1, Math.round(r * 0.45)), shade(c, 1.35 * dim));
+  if (cool && r >= 4) {   // starspots, slowly turning with the star
+    sctx.fillStyle = shade(c, 0.5 * dim);
+    for (let k = 0; k < 3; k++) {
+      const a = hash(scene.seed + 's' + k) * 2 * Math.PI + t * 0.15, rho = (0.2 + 0.5 * hash(scene.seed + 'r' + k)) * r;
+      if (Math.cos(a) > -0.2) sctx.fillRect(Math.round(cx + rho * Math.sin(a)), Math.round(cy + rho * (hash(scene.seed + 'y' + k) - 0.5)), 2, 1);
+    }
+    if (((t + hash(scene.seed) * 23) % 23) < 0.7) {   // a flare: a brief bright arc on the edge
+      sctx.fillStyle = '#ffffff';
+      for (let k = -3; k <= 3; k++) sctx.fillRect(Math.round(cx + k), Math.round(cy - r - 1 - (k * k < 4 ? 1 : 0)), 1, 1);
+    }
+  }
   if (r > 40) return;
   const len = REDUCED_MOTION ? 2 : 2 + Math.round(1.5 + 1.5 * Math.sin(t * 1.3));
   sctx.fillStyle = shade(c, 1.2 * dim);
