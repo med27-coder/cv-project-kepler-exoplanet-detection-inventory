@@ -113,13 +113,18 @@ def main():
     if not rows:
         sys.exit('No TESS views could be built.')
     df = pd.DataFrame(rows)
+    preds = S.RESULTS_DIR / 'test_predictions.npz'   # which planets were never seen in training
+    if preds.exists():
+        with np.load(preds, allow_pickle=False) as z:
+            df['in_test_split'] = df.kepoi_name.isin(set(z['names'].astype(str)))
     both = df.dropna(subset=['p_kepler'])
     same = float(((both.p_tess >= threshold) == (both.p_kepler >= threshold)).mean()) if len(both) else float('nan')
     confirmed = df[df.disposition == 'CONFIRMED']
     summary = {'n': len(df), 'threshold': threshold,
                'same_verdict_as_kepler': round(same, 3),
                'confirmed_called_planet_with_tess_data': round(float((confirmed.p_tess >= threshold).mean()), 3) if len(confirmed) else None,
-               'mean_abs_difference': round(float((both.p_tess - both.p_kepler).abs().mean()), 3) if len(both) else None}
+               'mean_abs_difference': round(float((both.p_tess - both.p_kepler).abs().mean()), 3) if len(both) else None,
+               'n_in_test_split': int(df['in_test_split'].sum()) if 'in_test_split' in df else None}
     S.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(S.RESULTS_DIR / 'tess_transfer.csv', index=False)
     (S.RESULTS_DIR / 'tess_transfer.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
