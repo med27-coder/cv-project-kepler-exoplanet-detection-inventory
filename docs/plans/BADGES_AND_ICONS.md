@@ -49,3 +49,14 @@ legendary, set by us); secret cards purple even when locked.
 2. Build: badge shelf, icons, counters, polish, rank emblem + ladder in the tab.
 3. Header emblem + rank-up pop-up ("YOUR STAR EVOLVED").
 4. Later, with the Tatooine and PROPHET work: the two extra sets.
+
+## 7. On the front page, not just in the tab (requirement)
+The rank emblem **and** the earned set badges sit in the page header, next to the title and the ⚙ button,
+so progress is visible at a glance:
+- the star-life emblem (animated a little: the pulsar sweeps, the black hole's disk turns), its stage name,
+  and the achievements bar (`11/46`); mock-up: pixel-art/emblems/draft_header.png;
+- a row of the earned set badges beside it (only the earned ones, so the row grows);
+- hover or tap any of them for its name and how it was earned; clicking opens the Achievements tab;
+- on phones: just the emblem and the count, badges in the tab;
+- when a stage or badge is earned, it pulses once in the header as well as in the pop-up.
+Step 3 of the order above becomes "header emblem + badge row + rank-up pop-up".
