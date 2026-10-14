@@ -106,7 +106,7 @@ def split_by_star(y, groups, seed=C.SEED):
 def split_train_val(y, groups, idx, seed=C.SEED):
     """Split the rows `idx` into train / validation (~80 / 20), grouped by star.
 
-    Shared by split_by_star() and scripts/cross_validate.py so both use the same protocol.
+    Shared by split_by_star() and scripts/pipeline/cross_validate.py so both use the same protocol.
     """
     inner = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=seed)
     tr, va = next(inner.split(np.zeros(len(idx)), y[idx], groups[idx]))
@@ -387,11 +387,11 @@ def check_view_version():
             f'The Star Gazer model in {C.rel(MODEL_DIR)} was trained on view recipe '
             f'v{trained if trained is not None else "?"}, but views are now built with recipe '
             f'v{views.VIEW_VERSION}; its predictions would not be reliable. Rebuild the views '
-            '(scripts/build_full_dataset.py) and retrain (scripts/train_star_gazer.py).')
+            '(scripts/pipeline/build_full_dataset.py) and retrain (scripts/pipeline/train_star_gazer.py).')
 
 
 def load_trained(allow_stale=False):
-    """(models, preprocessor, threshold) saved by scripts/train_star_gazer.py.
+    """(models, preprocessor, threshold) saved by scripts/pipeline/train_star_gazer.py.
 
     `models` is a list (one entry, or several for an ensemble); predict() averages them.
     Raises StaleModelError if the model predates the current view recipe, unless allow_stale.
@@ -399,7 +399,7 @@ def load_trained(allow_stale=False):
     from tensorflow import keras
     files = model_files()
     if not files:
-        raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; run scripts/train_star_gazer.py')
+        raise FileNotFoundError(f'No Star Gazer model in {C.rel(MODEL_DIR)}; run scripts/pipeline/train_star_gazer.py')
     if not allow_stale:
         check_view_version()
     models = [keras.models.load_model(p, safe_mode=True) for p in files]   # no embedded Python code
