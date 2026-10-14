@@ -16,7 +16,7 @@
 # | **Train / val / test split by star** | KOIs on the same star share systematics, so they never appear in both training and testing |
 # | **Decision threshold chosen on validation** | Not tuned on the test set |
 #
-# The data comes from `scripts/build_full_dataset.py`, which downloads every quarter from MAST, builds the views and deletes the raw FITS files (a few hours for the full catalog).
+# The data comes from `scripts/pipeline/build_full_dataset.py`, which downloads every quarter from MAST, builds the views and deletes the raw FITS files (a few hours for the full catalog).
 #
 # **What is *not* used as input:** NASA's dispositions, `koi_score`, the `koi_fpflag_*` flags, `kepler_name` and comments. These are the label, or are derived from it. NASA's own Robovetter diagnostics are excluded too (they are the values NASA uses to assign the label) and only appear in an ablation; Star Gazer's odd/even, secondary and centroid views are its own measurements.
 #
@@ -67,7 +67,7 @@ ENSEMBLE = 1       # number of networks to average (each adds roughly 15-30 min 
 import tensorflow as tf
 
 print('TensorFlow', tf.__version__)
-print('Views cached :', len(list(views.VIEWS_DIR.glob('*.npz'))), '(run scripts/build_full_dataset.py to build them)')
+print('Views cached :', len(list(views.VIEWS_DIR.glob('*.npz'))), '(run scripts/pipeline/build_full_dataset.py to build them)')
 from kepler_cnn.runtime import limit_tf_threads
 
 print('TF threads   :', limit_tf_threads(), '(a third of the cores stay free)')
@@ -208,10 +208,10 @@ display(summary)
 
 # %% [markdown]
 # ### Ablation: which inputs matter?
-# `scripts/train_star_gazer.py --diagnostics` trains every variant on this same split and writes `results/v3/metrics.json`.
+# `scripts/pipeline/train_star_gazer.py --diagnostics` trains every variant on this same split and writes `results/v3/metrics.json`.
 
 # %%
-# --- Cell 4.4: Ablation table (from scripts/train_star_gazer.py) ---
+# --- Cell 4.4: Ablation table (from scripts/pipeline/train_star_gazer.py) ---
 mfile = S.RESULTS_DIR / 'metrics.json'
 if mfile.exists():
     res = json.loads(mfile.read_text())['results']
@@ -228,7 +228,7 @@ if mfile.exists():
     plots.v3_ablation(res, labels={k: v.replace(' (', '\n(') for k, v in labels.items()})
     plt.show()
 else:
-    print('Run scripts/train_star_gazer.py to produce the ablation table.')
+    print('Run scripts/pipeline/train_star_gazer.py to produce the ablation table.')
 
 # %% [markdown]
 # ## 🔮 Step 5: Predictions

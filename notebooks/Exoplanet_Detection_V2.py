@@ -13,7 +13,7 @@
 # | No Google Drive or `!pip`. Paths come from `src/kepler_cnn/config.py` | Runs from any local clone |
 # | Real parallel downloads with a per-KOI cache in `data/interim/flux/` | V1.5 waited on each download before starting the next. V2 runs in parallel, and an interrupted run resumes where it stopped |
 # | 3,576-curve dataset by default (`DATASET = 'v2'`), with duplicate rows removed | More data. The Colab arrays contained 624 repeated rows; a repeat can fall in both train and test and inflate the score |
-# | Reuses Colab files (`X_raw.npy` → v2, `X_lightcurves.npy` + `.keras` model → v1_5) | No need to download everything again (see `scripts/import_colab_checkpoints.py`) |
+# | Reuses Colab files (`X_raw.npy` → v2, `X_lightcurves.npy` + `.keras` model → v1_5) | No need to download everything again (see `scripts/data/import_colab_checkpoints.py`) |
 # | Decision-threshold analysis (from the Colab draft) | Shows how precision and recall trade off as the cut-off changes from 0.5 |
 # | Example KOIs are looked up in the NASA catalog | V1.5 hard-coded period/epoch values that did not match the catalog, and two "false positive" examples were actually confirmed planets |
 # | Evaluation plots use the same filtered test set as the metrics | Fixes a mismatch between `y_test` and `y_test_eval` in V1.5 |
@@ -137,7 +137,7 @@ plt.show()
 # ## 📊 Step 4: Build the Training Dataset
 #
 # The cell checks these sources in order:
-# 1. `data/processed/<DATASET>/X_lightcurves.npy` + `y_labels.npy`. These can be your arrays from Colab, imported with `scripts/import_colab_checkpoints.py`.
+# 1. `data/processed/<DATASET>/X_lightcurves.npy` + `y_labels.npy`. These can be your arrays from Colab, imported with `scripts/data/import_colab_checkpoints.py`.
 # 2. The per-KOI cache in `data/interim/flux/`. Only missing KOIs are downloaded.
 # 3. NASA MAST. Expect roughly 10–30 min for `v1_5` and about 1 hour for `v2`. If you interrupt it, re-running resumes where it stopped.
 

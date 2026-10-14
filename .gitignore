@@ -27,7 +27,7 @@ flagged/
 results/v3/
 .secrets/
 
-# Hugging Face Space bundle (scripts/make_hf_space.py)
+# Hugging Face Space bundle (scripts/tools/make_hf_space.py)
 build/
 
 # Never commit secrets (the Star Gazer key lives in .secrets/ or the STAR_GAZER_KEY env var)
@@ -40,7 +40,7 @@ build/
 id_rsa*
 *token*.txt
 
-# Pipeline logs (scripts/run_pipeline.py)
+# Pipeline logs (scripts/pipeline/run_pipeline.py)
 logs/
 
 # Test coverage output

@@ -186,7 +186,7 @@ def test_explain_many_matches_explain(keras, monkeypatch):
 def test_hf_space_refuses_stale_or_old_bundle(tmp_path, monkeypatch):
     import os
     from pathlib import Path
-    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts' / 'tools'))
     import make_hf_space
     monkeypatch.setattr(S, 'MODEL_DIR', tmp_path)
     monkeypatch.setattr(S, 'MODEL_FILE', tmp_path / 'star_gazer.keras')
@@ -236,7 +236,7 @@ def test_saliency_figures_skip_missing_class(keras, tmp_path, monkeypatch):
 
     import matplotlib
     matplotlib.use('Agg')
-    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))   # undone after the test
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts' / 'pipeline'))   # undone after the test
     import train_star_gazer
     monkeypatch.setattr(S, 'RESULTS_DIR', tmp_path)
     ds = fake_dataset()
@@ -252,9 +252,7 @@ def test_saliency_figures_skip_missing_class(keras, tmp_path, monkeypatch):
 def test_training_resumes_from_checkpoints(keras, tmp_path, monkeypatch):
     """A finished network is checkpointed; a rerun of the same setup reloads it instead of
     training again, and a different setup (fingerprint) never reuses it."""
-    from pathlib import Path
-    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / 'scripts'))
-    import train_star_gazer as T
+    from kepler_cnn import training as T
     monkeypatch.setattr(T, 'CHECKPOINTS', tmp_path)
     ds = fake_dataset()
     feats = S.FeaturePreprocessor().fit(ds['table']).transform(ds['table'])

@@ -1,7 +1,7 @@
 // Kepler Star Map: pixel map of the Kepler field + pixel-art star systems.
-// Data comes from data/systems.js (scripts/export_starmap.py). Everything is drawn
+// Data comes from data/systems.js (scripts/starmap/export_starmap.py). Everything is drawn
 // procedurally on two small canvases, so a system costs a few numbers, not an image.
-// Built by scripts/build_web.py from web/src/*.js: edit those, not this file.
+// Built by scripts/starmap/build_web.py from web/src/*.js: edit those, not this file.
 (function () {
   'use strict';
 
@@ -135,7 +135,7 @@
   const home = STARS.map((s, i) => [offX + (xs[i] - xMin) * scale, offY + (ys[i] - yMin) * scale]);
   const toHome = (ra, dec) => [offX + (-ra * cosd - xMin) * scale, offY + (-dec - yMin) * scale];
 
-  // Kepler's 21 CCD modules (data/ccd.js, scripts/make_ccd_footprint.py): why the stars sit in squares.
+  // Kepler's 21 CCD modules (data/ccd.js, scripts/starmap/make_ccd_footprint.py): why the stars sit in squares.
   const CCD = (window.STARMAP_CCD || []).map(poly => poly.map(([ra, dec]) => toHome(ra, dec)));
   let showCcd = true;
 
@@ -186,7 +186,7 @@
                                 Math.round((y - view.cy) * view.zoom + MH / 2)];
   const toMap = (sx, sy) => [(sx - MW / 2) / view.zoom + view.cx, (sy - MH / 2) / view.zoom + view.cy];
 
-  // The real Milky Way behind the stars: Gaia DR3, pixelated, made by scripts/make_sky_backdrop.py
+  // The real Milky Way behind the stars: Gaia DR3, pixelated, made by scripts/starmap/make_sky_backdrop.py
   // in this map's projection (it covers the map at zoom 1). The map works without it.
   const sky = new Image();
   sky.addEventListener('load', () => renderBase());
@@ -1036,7 +1036,7 @@
     ['2MASS', 'CDS/P/2MASS/color', '2MASS (infrared: cool stars and dust glow)'],
   ];
   let survey = 0;   // kept while browsing systems
-  // Spotlight systems' photos ship with the site (scripts/make_sky_thumbs.py): no third-party request.
+  // Spotlight systems' photos ship with the site (scripts/starmap/make_sky_thumbs.py): no third-party request.
   const LOCAL_SKY = new Set(DATA.spotlight);
   const skySlug = name => name.toLowerCase().replace(/[^a-z0-9-]/g, '_');
   function skyUrl(ra, dec, k, name) {
@@ -1432,7 +1432,7 @@
   // ---------------------------------------------------------------- easter eggs: spacecraft and the ISS
   // "spacecraft" / "JWST" / "Voyager" / "rovers"...: the Solar System frozen on one real date, with
   // the planets and humanity's spacecraft beyond Earth orbit where NASA JPL Horizons puts them
-  // (scripts/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
+  // (scripts/starmap/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
   // are left out on purpose; "ISS" / "space station" opens the International Space Station instead.
   const CRAFT_QUERY = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|jwst|james webb( space telescope)?|webb|voyager( ?[12])?|new horizons|parker( solar probe)?|juno|europa clipper|rovers?|mars rovers?|curiosity|perseverance)$/i;
   const ISS_QUERY = /^(the )?(iss|international space station|space station)$/i;

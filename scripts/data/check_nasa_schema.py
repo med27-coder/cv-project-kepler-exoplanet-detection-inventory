@@ -1,6 +1,6 @@
 """Check that NASA's tables still have every column this project reads (weekly in CI).
 
-    .venv\\Scripts\\python scripts\\check_nasa_schema.py
+    .venv\\Scripts\\python scripts\\data\\check_nasa_schema.py
 
 Asks the NASA Exoplanet Archive TAP service for one row of each table with exactly the columns
 the pipeline and the star map use. If NASA renames or drops one, this fails with the column

@@ -4,7 +4,7 @@ The files the Kepler Star Map loads from `web/data/`. All are generated; never e
 
 ## `systems.js`: the index (loaded up front, ~260 KB)
 
-`window.STARMAP = {...}`, written by `scripts/export_starmap.py`.
+`window.STARMAP = {...}`, written by `scripts/starmap/export_starmap.py`.
 
 | Key | Meaning |
 |---|---|
@@ -65,8 +65,8 @@ The files the Kepler Star Map loads from `web/data/`. All are generated; never e
 
 | File | Content | Written by |
 |---|---|---|
-| `spacecraft.js` | `window.STARMAP_SPACECRAFT`: date, planets' and spacecraft's heliocentric ecliptic positions (AU, longitude), distance and light time from Earth, mission facts, Mars rover landing sites | `scripts/fetch_spacecraft.py` (JPL Horizons) |
-| `ccd.js` | `window.STARMAP_CCD`: 21 polygons (RA, Dec corners) of Kepler's CCD modules | `scripts/make_ccd_footprint.py` (K2fov) |
-| `../sky.png` | Map background: Gaia DR3 colour map in the map's projection, 192×192, 9-colour palette | `scripts/make_sky_backdrop.py` |
-| `../sky/*.jpg` | 40×40 DSS2 / Pan-STARRS1 / 2MASS photos for the 14 spotlight systems | `scripts/make_sky_thumbs.py` |
-| `../og.png` | Social preview image | `scripts/make_og_image.py` |
+| `spacecraft.js` | `window.STARMAP_SPACECRAFT`: date, planets' and spacecraft's heliocentric ecliptic positions (AU, longitude), distance and light time from Earth, mission facts, Mars rover landing sites | `scripts/starmap/fetch_spacecraft.py` (JPL Horizons) |
+| `ccd.js` | `window.STARMAP_CCD`: 21 polygons (RA, Dec corners) of Kepler's CCD modules | `scripts/starmap/make_ccd_footprint.py` (K2fov) |
+| `../sky.png` | Map background: Gaia DR3 colour map in the map's projection, 192×192, 9-colour palette | `scripts/starmap/make_sky_backdrop.py` |
+| `../sky/*.jpg` | 40×40 DSS2 / Pan-STARRS1 / 2MASS photos for the 14 spotlight systems | `scripts/starmap/make_sky_thumbs.py` |
+| `../og.png` | Social preview image | `scripts/starmap/make_og_image.py` |

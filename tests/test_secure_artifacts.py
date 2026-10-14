@@ -1,4 +1,4 @@
-"""Tests for scripts/secure_artifacts.py: split, authenticated, tamper-evident bundles."""
+"""Tests for scripts/tools/secure_artifacts.py: split, authenticated, tamper-evident bundles."""
 
 import importlib
 import json
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
+SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts' / 'tools'
 
 
 @pytest.fixture

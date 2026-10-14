@@ -55,7 +55,7 @@ An automated exoplanet vetting pipeline that outputs a probability (0–1) that 
   <img alt="Line charts of test accuracy, precision, recall and ROC AUC for V1, V1.5, V2 and V3, and a bar chart of usable light curves per version. Accuracy rises from 59.4% (V1) to 70.4%, 73.3% and 97.23% (V3); AUC from 0.573 to 0.771, 0.830 and 0.994." src="results/version_progress.png">
 </picture>
 
-*Regenerate with `.venv\Scripts\python scripts\plot_version_progress.py` (reads `results/v2/metrics.json` and `results/v3/metrics.json`).*
+*Regenerate with `.venv\Scripts\python scripts\experiments\plot_version_progress.py` (reads `results/v2/metrics.json` and `results/v3/metrics.json`).*
 
 | Metric | Target | V1 | V1.5 | V2 | V3 Star Gazer |
 |---|---|---|---|---|---|
@@ -96,7 +96,7 @@ The final model is an **ensemble of 5 networks** (same architecture, different r
 
 ### Cross-validation: how stable is the result?
 
-A single test split can be lucky. `scripts/cross_validate.py` repeats training 5 times so that every star is in the test set exactly once (still grouped by star):
+A single test split can be lucky. `scripts/pipeline/cross_validate.py` repeats training 5 times so that every star is in the test set exactly once (still grouped by star):
 
 | Variant | Accuracy (mean ± std) | AUC (mean ± std) |
 |---|---|---|
@@ -131,7 +131,7 @@ The label sets differ (TCEs vs KOIs, Autovetter vs archive dispositions), so thi
 
 ### Scoring the unlabelled candidates
 
-NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scripts/score_candidates.py` scores the 1,976 that have usable views: **737 (37%)** score above the threshold, and Star Gazer agrees with NASA's own Robovetter score (`koi_score`, never a model input) on 61% of them. The ten most planet-like:
+NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scripts/pipeline/score_candidates.py` scores the 1,976 that have usable views: **737 (37%)** score above the threshold, and Star Gazer agrees with NASA's own Robovetter score (`koi_score`, never a model input) on 61% of them. The ten most planet-like:
 
 | KOI | Period (d) | Radius (R⊕) | Star Gazer P(planet) | NASA `koi_score` |
 |---|---|---|---|---|
@@ -159,8 +159,8 @@ A pixel map of the Kepler field with every star that has a planet or planet cand
 Everything is drawn from numbers on two small canvases (about 1.1 MB of data for all systems, plus one 18 KB sky backdrop) and hosted free on GitHub Pages. The data comes from the NASA Exoplanet Archive (KOI, confirmed-planet and TESS TOI tables), Berger et al. 2020 (Gaia stellar properties) and Star Gazer's candidate scores:
 
 ```powershell
-.venv\Scripts\python scripts\export_starmap.py      # -> web/data/systems.js
-.venv\Scripts\python scripts\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
+.venv\Scripts\python scripts\starmap\export_starmap.py      # -> web/data/systems.js
+.venv\Scripts\python scripts\starmap\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
 ```
 
 One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are a few more: try looking for the robots we've sent out there, or where people live in space. 🛰️
@@ -266,7 +266,7 @@ The project evolved across four versions. V2 began as a Colab notebook titled "V
 | **Code layout** | Everything in one notebook | Shared package `src/kepler_cnn/` (config, data, model, plots, terms) used by the notebook and the app | One source of truth; the app no longer depends on notebook state |
 | **Downloads** | Each job was submitted and then awaited before the next one, so they ran one at a time | Truly parallel (`as_completed`), one cached `.npy` per KOI, resumable, failed KOIs remembered | Faster, and an interrupted run resumes where it stopped |
 | **Dataset** | 794 curves (500 sampled per class) | 3,576 unique curves (2,000 sampled per class), from the Colab draft. `DATASET = 'v1_5'` still reproduces V1.5 | More data; the Colab arrays held 624 repeated rows, which are removed to avoid train/test leakage |
-| **Reusing old runs** | Drive folder only | `scripts/import_colab_checkpoints.py` moves Colab files into `data/processed/<dataset>/` and `models/<dataset>/` | Avoid re-downloading ~4,000 light curves |
+| **Reusing old runs** | Drive folder only | `scripts/data/import_colab_checkpoints.py` moves Colab files into `data/processed/<dataset>/` and `models/<dataset>/` | Avoid re-downloading ~4,000 light curves |
 | **Threshold analysis** | — | Precision / recall / F1 vs. decision threshold (ported from the Colab draft) | 0.5 is arbitrary; shows the trade-off |
 | **Example KOIs** | Hard-coded IDs/period/epoch | Looked up by KOI name in the catalog | The V1.5 values did not match the catalog: "Kepler-90g" used P=14.45 d (the catalog lists 210.6 d), and the "KOI-189" and "KOI-203" false-positive examples are confirmed planets (Kepler-13 b, Kepler-428 b). This explains the "inconsistent" KOI-203 results |
 | **Evaluation plots** | Plotted `y_test` against predictions from the NaN-filtered `y_test_eval` | One consistent test set | Prevents misaligned confusion matrix / ROC |
@@ -285,7 +285,7 @@ The project evolved across four versions. V2 began as a Colab notebook titled "V
 | **Model** | Single 1D CNN | Multi-branch CNN + MLP (`src/kepler_cnn/star_gazer.py`) | Mirrors AstroNet / ExoMiner |
 | **Split** | Random, stratified | Grouped by star | KOIs on the same star share a light curve, which would leak between splits |
 | **Evaluation** | One model | Ablation of 5 variants on the same split, threshold tuned on validation | Shows what each input contributes |
-| **Speed** | ~30 min downloads | Resumable 6-worker build (`scripts/build_full_dataset.py`), raw FITS deleted after each star (~200 MB of views) | A full-catalog build takes a few hours on a laptop |
+| **Speed** | ~30 min downloads | Resumable 6-worker build (`scripts/pipeline/build_full_dataset.py`), raw FITS deleted after each star (~200 MB of views) | A full-catalog build takes a few hours on a laptop |
 | **Web app** | V2 CNN | Star Gazer by default (`--model v2` / `v1_5` still available), cached views, progress bar | Same app serves every version |
 | **Artifacts** | Model git-ignored | Model + detailed results committed only encrypted (`secure/star_gazer_v3.partNN.enc` + `MANIFEST.json`) | Public repo, private trained model; headline metrics stay public |
 | **Tests** | — | `pytest` suite in `tests/` (views, model plumbing, project checks) | Catch regressions in the pipeline |
@@ -299,13 +299,13 @@ No data files are committed to this repository.
 | # | Dataset | Source | How It's Loaded |
 |---|---|---|---|
 | 1 | NASA KOI Cumulative Table (V1–V2 columns) | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+kepid,kepoi_name,koi_disposition,koi_period,koi_time0bk+from+cumulative&format=csv) | `kepler_cnn.data.load_catalog()` |
-| 2 | NASA KOI Cumulative Table (all columns, V3) | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+cumulative&format=csv) | `scripts/build_full_dataset.py` → `data/raw/koi_cumulative_full.csv` |
+| 2 | NASA KOI Cumulative Table (all columns, V3) | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+cumulative&format=csv) | `scripts/pipeline/build_full_dataset.py` → `data/raw/koi_cumulative_full.csv` |
 | 3 | Kepler Light Curves | [NASA MAST Archive](https://mast.stsci.edu/) via `lightkurve` (V1–V2) and direct MAST file downloads (V3) | `kepler_cnn.data` (V1–V2), `kepler_cnn.views` (V3) |
-| 4 | Confirmed planets in the Kepler field (`pscomppars`): masses, distances, discovery years, planets found by other methods | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) | `scripts/export_starmap.py` → `data/raw/ps_kepler_planets.csv` (star map) |
-| 5 | Gaia-based stellar properties for 186,301 Kepler stars ([Berger et al. 2020](https://ui.adsabs.harvard.edu/abs/2020AJ....159..280B)) | [VizieR J/AJ/159/280](https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=J/AJ/159/280) | `scripts/fetch_extra_data.py`; star mass, age and metals on the star map (feature experiment planned) |
+| 4 | Confirmed planets in the Kepler field (`pscomppars`): masses, distances, discovery years, planets found by other methods | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) | `scripts/starmap/export_starmap.py` → `data/raw/ps_kepler_planets.csv` (star map) |
+| 5 | Gaia-based stellar properties for 186,301 Kepler stars ([Berger et al. 2020](https://ui.adsabs.harvard.edu/abs/2020AJ....159..280B)) | [VizieR J/AJ/159/280](https://vizier.cds.unistra.fr/viz-bin/VizieR?-source=J/AJ/159/280) | `scripts/data/fetch_extra_data.py`; star mass, age and metals on the star map (feature experiment planned) |
 | 6 | Sky photos around each star (DSS2, Pan-STARRS1, 2MASS) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | Fetched live by the star map, 40×40 pixels; nothing stored |
-| 7 | TESS Objects of Interest in the Kepler field | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) (`toi` table) | `scripts/export_starmap.py` → `data/raw/toi_kepler_field.csv` (star map) |
-| 8 | Milky Way colour map (ESA Gaia DR3) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | `scripts/make_sky_backdrop.py` → `web/sky.png` (star map background) |
+| 7 | TESS Objects of Interest in the Kepler field | [NASA Exoplanet Archive TAP API](https://exoplanetarchive.ipac.caltech.edu/) (`toi` table) | `scripts/starmap/export_starmap.py` → `data/raw/toi_kepler_field.csv` (star map) |
+| 8 | Milky Way colour map (ESA Gaia DR3) | [CDS hips2fits](https://alasky.cds.unistra.fr/hips-image-services/hips2fits) | `scripts/starmap/make_sky_backdrop.py` → `web/sky.png` (star map background) |
 
 ---
 
@@ -327,18 +327,18 @@ No data files are committed to this repository.
 
 3. **Build the dataset** (a few hours; resumable, so you can stop and re-run):
    ```powershell
-   .venv\Scripts\python scripts\build_full_dataset.py            # add --limit 20 for a quick test
+   .venv\Scripts\python scripts\pipeline\build_full_dataset.py            # add --limit 20 for a quick test
    ```
 4. **Train** all ablation variants and the final 5-network ensemble (CPU, a few hours):
    ```powershell
-   .venv\Scripts\python scripts\train_star_gazer.py --diagnostics --ensemble 5
+   .venv\Scripts\python scripts\pipeline\train_star_gazer.py --diagnostics --ensemble 5
    ```
    This writes `models/v3/` and `results/v3/` (metrics, figures, saliency maps, test predictions). Use `--variants hybrid --quick` for a 5-epoch plumbing test.
 5. **(Optional) Cross-validate and score the candidates:**
    ```powershell
-   .venv\Scripts\python scripts\cross_validate.py                      # 5 folds, a few hours
-   .venv\Scripts\python scripts\build_full_dataset.py --candidates     # views for the CANDIDATE KOIs
-   .venv\Scripts\python scripts\score_candidates.py                    # -> results/v3/candidates.csv
+   .venv\Scripts\python scripts\pipeline\cross_validate.py                      # 5 folds, a few hours
+   .venv\Scripts\python scripts\pipeline\build_full_dataset.py --candidates     # views for the CANDIDATE KOIs
+   .venv\Scripts\python scripts\pipeline\score_candidates.py                    # -> results/v3/candidates.csv
    ```
 6. **Explore** `notebooks/Exoplanet_Detection_V3_StarGazer.ipynb` (`.venv` kernel): views, features, evaluation, ablation and predictions.
 7. **Web demo:**
@@ -347,11 +347,11 @@ No data files are committed to this repository.
    .venv\Scripts\python app.py --model v2   # the V2 CNN
    ```
    Or use **Run and Debug ▸ "Gradio app (local)"**. Add `--share` for a temporary public link (see Terms §6). Tick **"Explain this prediction"** for a saliency map. The app refuses a model trained on an older view recipe than the current code builds; retrain it, or start the app with `--allow-stale`.
-8. **(Optional) Host the demo for free on Hugging Face Spaces** (CPU basic tier, no subscription): `scripts\make_hf_space.py` builds `build/hf_space/`. Its docstring lists the upload commands and the `STAR_GAZER_KEY` secret to set. The model is uploaded only in encrypted form.
+8. **(Optional) Host the demo for free on Hugging Face Spaces** (CPU basic tier, no subscription): `scripts\tools\make_hf_space.py` builds `build/hf_space/`. Its docstring lists the upload commands and the `STAR_GAZER_KEY` secret to set. The model is uploaded only in encrypted form.
 
 **Using the committed V3 model instead of retraining:** the trained model and detailed results are stored encrypted (AES-256-GCM) in `secure/`: parts of up to 90 MB (GitHub's file limit is 100 MB), each authenticated together with its position in the bundle, plus a `MANIFEST.json` with every part's SHA-256. With the key (`.secrets/star_gazer.key` or the `STAR_GAZER_KEY` environment variable):
 ```powershell
-.venv\Scripts\python scripts\secure_artifacts.py unlock    # -> models/v3 + results/v3
+.venv\Scripts\python scripts\tools\secure_artifacts.py unlock    # -> models/v3 + results/v3
 ```
 Without the key, retrain with step 4. After retraining, `secure_artifacts.py lock` re-encrypts. Other commands: `verify` (check the parts against the manifest), `rotate` (re-encrypt with a new key), `protect` (add a passphrase to the key file) and `status`.
 
@@ -359,7 +359,7 @@ Without the key, retrain with step 4. After retraining, `secure_artifacts.py loc
 
 1. **(Optional) Reuse your Colab files.** Download the `exoplanet_checkpoints` folder from Google Drive, then:
    ```powershell
-   .venv\Scripts\python scripts\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints"
+   .venv\Scripts\python scripts\data\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints"
    ```
    - `X_raw.npy` + `y_raw.npy` become the **v2** dataset, with duplicates removed.
    - `X_lightcurves.npy`, `y_labels.npy` and `exoplanet_cnn_model.keras` become the **v1_5** dataset and model.

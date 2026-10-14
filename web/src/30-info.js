@@ -24,7 +24,7 @@ const SURVEYS = [
   ['2MASS', 'CDS/P/2MASS/color', '2MASS (infrared: cool stars and dust glow)'],
 ];
 let survey = 0;   // kept while browsing systems
-// Spotlight systems' photos ship with the site (scripts/make_sky_thumbs.py): no third-party request.
+// Spotlight systems' photos ship with the site (scripts/starmap/make_sky_thumbs.py): no third-party request.
 const LOCAL_SKY = new Set(DATA.spotlight);
 const skySlug = name => name.toLowerCase().replace(/[^a-z0-9-]/g, '_');
 function skyUrl(ra, dec, k, name) {

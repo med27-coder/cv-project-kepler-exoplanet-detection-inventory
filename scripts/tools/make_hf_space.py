@@ -1,7 +1,7 @@
 """Assemble a Hugging Face Space (free CPU tier) that serves the Star Gazer web app.
 
-    .venv\\Scripts\\python scripts\\secure_artifacts.py lock      # make sure the bundle is current
-    .venv\\Scripts\\python scripts\\make_hf_space.py              # -> build/hf_space/
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py lock      # make sure the bundle is current
+    .venv\\Scripts\\python scripts\\tools\\make_hf_space.py              # -> build/hf_space/
 
 Then, with a free Hugging Face account (https://huggingface.co/join):
     .venv\\Scripts\\pip install huggingface_hub
@@ -23,7 +23,7 @@ from pathlib import Path
 
 from kepler_cnn import star_gazer as S
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'build' / 'hf_space'
 
 SPACE_README = """---
@@ -101,14 +101,14 @@ def check_bundle(bundle):
     newest = max(p.stat().st_mtime for p in [*files, S.THRESHOLD_FILE] if p.exists())
     if bundle.stat().st_mtime < newest:
         sys.exit('The encrypted bundle (secure/MANIFEST.json) is older than the model in models/v3; '
-                 'run scripts/secure_artifacts.py lock again.')
+                 'run scripts/tools/secure_artifacts.py lock again.')
 
 
 def main():
     bundle = ROOT / 'secure' / 'MANIFEST.json'   # written last by lock, so its time is the bundle's
     if not bundle.exists():
-        sys.exit('secure/MANIFEST.json not found; run scripts/secure_artifacts.py lock first.')
-    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'secure_artifacts.py'), 'verify'], check=True)
+        sys.exit('secure/MANIFEST.json not found; run scripts/tools/secure_artifacts.py lock first.')
+    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'tools' / 'secure_artifacts.py'), 'verify'], check=True)
     check_bundle(bundle)
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -118,7 +118,7 @@ def main():
     shutil.copytree(ROOT / 'secure', OUT / 'secure')
     for f in ('app.py', 'TERMS_OF_USE.md', 'pyproject.toml'):
         shutil.copy2(ROOT / f, OUT / f)
-    shutil.copy2(ROOT / 'scripts' / 'secure_artifacts.py', OUT / 'scripts' / 'secure_artifacts.py')
+    shutil.copy2(ROOT / 'scripts' / 'tools' / 'secure_artifacts.py', OUT / 'scripts' / 'secure_artifacts.py')   # flat in the Space
     (OUT / 'README.md').write_text(SPACE_README, encoding='utf-8')
     (OUT / 'space_app.py').write_text(SPACE_APP, encoding='utf-8')
     (OUT / 'requirements.txt').write_text(SPACE_REQUIREMENTS, encoding='utf-8')

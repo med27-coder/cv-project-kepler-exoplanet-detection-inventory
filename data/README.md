@@ -12,7 +12,7 @@ data/
 │   ├── nasa_koi_catalog.csv      ← KOI cumulative table (labels, period, epoch), V2
 │   ├── koi_cumulative_full.csv   ← the same table with all 150+ columns, V3
 │   ├── ps_kepler_planets.csv     ← confirmed-planet table (pscomppars) for the Kepler field, star map
-│   └── berger2020_gaia_kepler.csv ← Gaia-based stellar properties (scripts/fetch_extra_data.py)
+│   └── berger2020_gaia_kepler.csv ← Gaia-based stellar properties (scripts/data/fetch_extra_data.py)
 ├── interim/
 │   ├── views/                    ← V3: one .npz of views per KOI (see below)
 │   └── flux/
@@ -33,8 +33,8 @@ Trained models live in `models/<dataset>/`: `exoplanet_cnn_model.keras` and `tra
 The Colab notebooks saved their checkpoints to Google Drive in `MyDrive/exoplanet_checkpoints/`. Download that folder, then run:
 
 ```powershell
-.venv\Scripts\python scripts\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints" --dry-run   # preview
-.venv\Scripts\python scripts\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints"
+.venv\Scripts\python scripts\data\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints" --dry-run   # preview
+.venv\Scripts\python scripts\data\import_colab_checkpoints.py "C:\path\to\exoplanet_checkpoints"
 ```
 
 | Colab file | Goes to |
@@ -98,7 +98,7 @@ In the V1.5 run, 794 of 1,000 sampled KOIs survived these steps. The V2 dataset 
 
 ## V3 Star Gazer data
 
-Built by `scripts/build_full_dataset.py` (resumable; a few hours for all ~6,600 stars):
+Built by `scripts/pipeline/build_full_dataset.py` (resumable; a few hours for all ~6,600 stars):
 
 1. **Catalog:** the full KOI cumulative table (`select * from cumulative`), saved as `data/raw/koi_cumulative_full.csv`. Every CONFIRMED and FALSE POSITIVE KOI is used (7,587), not a sample.
 2. **Light curves:** every long-cadence quarter of each star (up to 18, about 4 years) is downloaded straight from MAST (`mast.stsci.edu/api/v0.1/Download/file?uri=mast:KEPLER/...`), using AstroNet's fixed per-quarter file names. Quarters a star was not observed in return 404 and are skipped; network errors are retried with backoff.
@@ -115,7 +115,7 @@ Built by `scripts/build_full_dataset.py` (resumable; a few hours for all ~6,600 
 
 The raw FITS files are deleted after each star, so the whole cache is about 200 MB.
 
-KOIs that could not be folded (no usable data at their period) are listed in `views/_skipped.txt`, and stars that could not be downloaded in `views/_failed.txt`; `--retry-failed` retries both. The `--candidates` build (unlabelled CANDIDATE KOIs, for `scripts/score_candidates.py`) keeps its own `_skipped_candidates.txt` / `_failed_candidates.txt`, so the two runs never hide or erase each other's records.
+KOIs that could not be folded (no usable data at their period) are listed in `views/_skipped.txt`, and stars that could not be downloaded in `views/_failed.txt`; `--retry-failed` retries both. The `--candidates` build (unlabelled CANDIDATE KOIs, for `scripts/pipeline/score_candidates.py`) keeps its own `_skipped_candidates.txt` / `_failed_candidates.txt`, so the two runs never hide or erase each other's records.
 
 Each view file records its recipe version (`views.VIEW_VERSION`), and files from an older recipe are rebuilt automatically. The trained model records the recipe it was trained on too: the app and `score_candidates.py` refuse a model whose recipe doesn't match the current views (retrain it, or pass `--allow-stale` to the app).
 
@@ -123,19 +123,19 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 
 ## Star map data
 
-`scripts/export_starmap.py` builds the star map's data (committed; it is what the web page loads): `web/data/systems.js`, a small index loaded up front (one row per star with highlight tags, plus the "next planets" leaderboard), and `web/data/details/NN.js`, 32 files with every system's star facts, planets and candidate case-file data, loaded only when a system is opened. Sources:
+`scripts/starmap/export_starmap.py` builds the star map's data (committed; it is what the web page loads): `web/data/systems.js`, a small index loaded up front (one row per star with highlight tags, plus the "next planets" leaderboard), and `web/data/details/NN.js`, 32 files with every system's star facts, planets and candidate case-file data, loaded only when a system is opened. Sources:
 
 1. `koi_cumulative_full.csv`: every star with a CONFIRMED or CANDIDATE KOI becomes a map pixel.
 2. `ps_kepler_planets.csv`: NASA's confirmed-planet table (`pscomppars`) for every planet in the Kepler field, downloaded on first run (again if columns were added) and matched to KOI stars by position (NASA renamed some systems, e.g. Kepler-90 is "KOI-351" there): planet masses, eccentricities, insolation, number of stars, spectral types (measured, or estimated from a mass-radius relation), distances, discovery years, and planets found without a transit (radial velocity, timing variations).
 3. `toi_kepler_field.csv`: NASA's TESS Objects of Interest in the Kepler field, downloaded on first run; a Kepler planet is marked as re-detected by TESS when a TOI on the same star (within 3") has a period within 1% (TESS false alarms and false positives are ignored).
-4. `berger2020_gaia_kepler.csv` (from `scripts/fetch_extra_data.py`, optional): star mass, age, metallicity, surface gravity and Gaia distance, used where NASA's tables have no value.
-5. `results/v3/candidates.csv` (optional): Star Gazer's score for each candidate, from `scripts/score_candidates.py`. Only the scores are exported, never the model.
+4. `berger2020_gaia_kepler.csv` (from `scripts/data/fetch_extra_data.py`, optional): star mass, age, metallicity, surface gravity and Gaia distance, used where NASA's tables have no value.
+5. `results/v3/candidates.csv` (optional): Star Gazer's score for each candidate, from `scripts/pipeline/score_candidates.py`. Only the scores are exported, never the model.
 
-`scripts/make_sky_backdrop.py` draws the map background `web/sky.png` from the ESA Gaia DR3 colour map (via CDS hips2fits, in the map's projection). Re-run it only when the set of map stars changes.
+`scripts/starmap/make_sky_backdrop.py` draws the map background `web/sky.png` from the ESA Gaia DR3 colour map (via CDS hips2fits, in the map's projection). Re-run it only when the set of map stars changes.
 
 ## Extra data (not used for training yet)
 
-`scripts/fetch_extra_data.py` downloads public datasets for later experiments (see [docs/STARMAP_PLAN.md](../docs/STARMAP_PLAN.md), Phase 7):
+`scripts/data/fetch_extra_data.py` downloads public datasets for later experiments (see [docs/STARMAP_PLAN.md](../docs/STARMAP_PLAN.md), Phase 7):
 
 | Source | File | What it is |
 |---|---|---|
@@ -143,4 +143,4 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 
 ## Spacecraft positions (star map easter egg)
 
-`scripts/fetch_spacecraft.py` asks NASA JPL's [Horizons system](https://ssd.jpl.nasa.gov/horizons/) for the heliocentric positions of the planets and of spacecraft beyond Earth orbit on one date and writes `web/data/spacecraft.js`. Spacecraft without a published ephemeris for that date are skipped, never guessed. Re-run it to update the snapshot.
+`scripts/starmap/fetch_spacecraft.py` asks NASA JPL's [Horizons system](https://ssd.jpl.nasa.gov/horizons/) for the heliocentric positions of the planets and of spacecraft beyond Earth orbit on one date and writes `web/data/spacecraft.js`. Spacecraft without a published ephemeris for that date are skipped, never guessed. Re-run it to update the snapshot.

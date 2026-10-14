@@ -1,6 +1,6 @@
 # Runs the checks on every push and pull request: lint, types, the pytest suite (synthetic data,
 # no NASA downloads) with coverage, and the star map in a real headless browser.
-# Dependencies install from the hash-locked requirements-dev.lock (scripts/lock_requirements.py).
+# Dependencies install from the hash-locked requirements-dev.lock (scripts/tools/lock_requirements.py).
 # Actions are pinned to commit SHAs (tag in the comment); Dependabot keeps them up to date.
 name: tests
 
@@ -39,5 +39,5 @@ jobs:
         run: python -m pytest -q --cov=kepler_cnn --cov-report=term --cov-report=xml
       - name: Check the star map's JavaScript syntax
         run: |
-          python scripts/build_web.py --check
+          python scripts/starmap/build_web.py --check
           node --check web/starmap.js && node --check web/data/systems.js

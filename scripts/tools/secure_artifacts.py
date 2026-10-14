@@ -4,13 +4,13 @@ The repository is public, but the trained V3 model and its detailed results are 
 encrypted, as secure/star_gazer_v3.partNN.enc (AES-256-GCM) plus secure/MANIFEST.json.
 Headline metrics stay public in the README.
 
-    .venv\\Scripts\\python scripts\\secure_artifacts.py keygen [--passphrase]   # once: .secrets/star_gazer.key
-    .venv\\Scripts\\python scripts\\secure_artifacts.py lock       # models/v3 + results/v3 -> secure/
-    .venv\\Scripts\\python scripts\\secure_artifacts.py unlock     # secure/ -> models/v3 + results/v3
-    .venv\\Scripts\\python scripts\\secure_artifacts.py verify     # check the bundle against the manifest
-    .venv\\Scripts\\python scripts\\secure_artifacts.py rotate     # re-encrypt with a new key
-    .venv\\Scripts\\python scripts\\secure_artifacts.py protect    # add a passphrase to the key file
-    .venv\\Scripts\\python scripts\\secure_artifacts.py status
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py keygen [--passphrase]   # once: .secrets/star_gazer.key
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py lock       # models/v3 + results/v3 -> secure/
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py unlock     # secure/ -> models/v3 + results/v3
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py verify     # check the bundle against the manifest
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py rotate     # re-encrypt with a new key
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py protect    # add a passphrase to the key file
+    .venv\\Scripts\\python scripts\\tools\\secure_artifacts.py status
 
 Format (MANIFEST "format": 2):
 - The artifacts are packed as one tar.gz, cut into parts of at most PART_BYTES (GitHub rejects
@@ -25,7 +25,7 @@ The key is read from the STAR_GAZER_KEY environment variable if set (e.g. as a s
 server), otherwise from .secrets/star_gazer.key (git-ignored, owner-only permissions). The key file
 may be passphrase-protected (scrypt + AES-GCM); the passphrase comes from STAR_GAZER_PASSPHRASE
 or a prompt. BACK UP THE KEY (password manager + one offline copy). Without it the bundle cannot
-be opened; the only fallback is retraining with scripts/train_star_gazer.py.
+be opened; the only fallback is retraining with scripts/pipeline/train_star_gazer.py.
 """
 
 import argparse
@@ -41,7 +41,7 @@ import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 KEY_FILE = ROOT / '.secrets' / 'star_gazer.key'
 ENV_VAR = 'STAR_GAZER_KEY'
 PASS_VAR = 'STAR_GAZER_PASSPHRASE'

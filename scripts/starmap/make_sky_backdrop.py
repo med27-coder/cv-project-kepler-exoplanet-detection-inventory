@@ -1,6 +1,6 @@
 """Draw the star map's background (web/sky.png): the real Milky Way in the Kepler field, pixelated.
 
-    .venv\\Scripts\\python scripts\\make_sky_backdrop.py
+    .venv\\Scripts\\python scripts\\starmap\\make_sky_backdrop.py
 
 Source: ESA Gaia DR3 colour flux map, cut out by the CDS hips2fits service. The cutout uses a
 plate carrée WCS built from the same projection as web/starmap.js (RA scaled by cos(dec), east
@@ -22,7 +22,7 @@ import numpy as np
 from make_og_image import DATA, MAP_PX, load
 from PIL import Image, ImageFilter
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'web' / 'sky.png'
 HIPS = 'CDS/P/DM/flux-color-Rp-G-Bp/I/355/gaiadr3'   # ESA/Gaia/DPAC, via CDS
 HIPS2FITS = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits'

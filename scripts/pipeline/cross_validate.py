@@ -1,7 +1,7 @@
 """Grouped k-fold cross-validation for Star Gazer: mean ± std test metrics instead of one split.
 
-    .venv\\Scripts\\python scripts\\cross_validate.py                         # hybrid + cnn_basic, 5 folds
-    .venv\\Scripts\\python scripts\\cross_validate.py --variants hybrid --folds 3 --quick
+    .venv\\Scripts\\python scripts\\pipeline\\cross_validate.py                         # hybrid + cnn_basic, 5 folds
+    .venv\\Scripts\\python scripts\\pipeline\\cross_validate.py --variants hybrid --folds 3 --quick
 
 Every star is in exactly one test fold. Inside each fold, a star-grouped validation split
 (for early stopping and the threshold) is taken from the remaining stars, so no test star
@@ -14,12 +14,12 @@ import sys
 
 import numpy as np
 from sklearn.model_selection import StratifiedGroupKFold
-from train_star_gazer import VARIANTS, fit_one
 
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S
 from kepler_cnn import terms
 from kepler_cnn.runtime import limit_tf_threads, low_priority
+from kepler_cnn.training import VARIANTS, fit_one
 
 SUMMARY_KEYS = ('accuracy', 'auc', 'precision', 'recall', 'brier', 'accuracy_val_threshold')
 
@@ -45,7 +45,7 @@ def main():
     ds = S.load_dataset()
     y, groups = ds['y'], ds['groups']
     if len(y) == 0:
-        sys.exit('No current-version views found; run scripts/build_full_dataset.py first.')
+        sys.exit('No current-version views found; run scripts/pipeline/build_full_dataset.py first.')
     outer = StratifiedGroupKFold(n_splits=args.folds, shuffle=True, random_state=C.SEED)
     folds = {name: [] for name in args.variants}
     for k, (trainval, te) in enumerate(outer.split(np.zeros(len(y)), y, groups)):

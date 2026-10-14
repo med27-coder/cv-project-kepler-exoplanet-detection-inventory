@@ -1,7 +1,7 @@
 """Sanity report on the NASA KOI catalog before building views or training.
 
-    .venv\\Scripts\\python scripts\\check_catalog.py            # print the report
-    .venv\\Scripts\\python scripts\\check_catalog.py --strict   # exit 1 if a blocking problem is found
+    .venv\\Scripts\\python scripts\\pipeline\\check_catalog.py            # print the report
+    .venv\\Scripts\\python scripts\\pipeline\\check_catalog.py --strict   # exit 1 if a blocking problem is found
 
 Finds catalog rows the pipeline can't use, or should treat with care, before they surface as a
 crash or a silently skipped KOI (K06549.01, with a 13.9 h transit on a 13 h orbit, was found
@@ -61,7 +61,7 @@ def main():
     parser.add_argument('--strict', action='store_true', help='exit 1 on a blocking problem')
     args = parser.parse_args()
     if not CATALOG.exists():
-        sys.exit(f'{C.rel(CATALOG)} not found; run scripts/build_full_dataset.py first.')
+        sys.exit(f'{C.rel(CATALOG)} not found; run scripts/pipeline/build_full_dataset.py first.')
     cat = pd.read_csv(CATALOG, low_memory=False).replace([np.inf, -np.inf], np.nan)
     rep = report(cat)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
