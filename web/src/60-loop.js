@@ -3,13 +3,26 @@
 // a canvas scrolled out of sight isn't drawn; with both out of sight, or after a few idle minutes,
 // the loop stops completely and the last frame stays on screen. Any interaction wakes it.
 // (Browsers already pause it in hidden tabs.)
-const SYSTEM_MS = 1000 / 30, MAP_MS = 120, IDLE_MS = 3 * 60 * 1000;
+const MAP_MS = 120, IDLE_MS = 3 * 60 * 1000;
+let SYSTEM_MS = 1000 / 30;   // Animation menu: 60 / 30 / 15 fps, or off (one still frame per change)
+const fpsMenu = document.getElementById('fps');
+fpsMenu.addEventListener('change', () => {
+  const fps = Number(fpsMenu.value);
+  SYSTEM_MS = fps ? 1000 / fps : Infinity;
+  wake();
+});
 const onScreen = new Map([[map, true], [sys, true]]);
 let lastMap = 0, lastSys = 0, lastActive = performance.now(), running = false;
 
 function frame(now) {
   const visible = onScreen.get(map) || onScreen.get(sys);
   if (!visible || now - lastActive > IDLE_MS) { running = false; return; }
+  if (SYSTEM_MS === Infinity) {   // animation off: draw the current state once, then sleep until something changes
+    drawMap(now);
+    drawSystem(0);
+    running = false;
+    return;
+  }
   if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); lastMap = now; }
   if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) { drawSystem(now / 1000); lastSys = now; }
   requestAnimationFrame(frame);

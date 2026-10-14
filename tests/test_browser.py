@@ -144,3 +144,28 @@ def test_spacecraft_and_iss_easter_eggs(browser, site):
     assert page.locator('#sys-tools').is_hidden()             # nothing to zoom on the ISS card
     page.wait_for_timeout(300)                                 # a few animation frames: no errors
     assert not errors, errors
+
+
+def test_view_links_kepler_view_and_pinch(browser, site):
+    """A shared link restores zoom, true scale and Kepler's view; pinching zooms; the URL follows."""
+    errors = []
+    page = open_page(browser, site + '#Kepler-90?view=true&zoom=4&edge=1', errors)
+    page.wait_for_selector('#info table')
+    assert page.get_attribute('#sys-scale', 'aria-pressed') == 'true'
+    assert page.get_attribute('#sys-edge', 'aria-pressed') == 'true'
+    assert page.locator('#sys-level').inner_text() == '4×'
+    page.click('#sys-in')
+    page.wait_for_timeout(600)                                  # the URL update is debounced
+    assert 'zoom=6' in page.evaluate('location.hash') and 'edge=1' in page.evaluate('location.hash')
+    page.evaluate("""() => {
+      const c = document.getElementById('system'), r = c.getBoundingClientRect();
+      const ev = (type, id, x) => c.dispatchEvent(new PointerEvent(type, {pointerId: id, bubbles: true,
+        clientX: r.left + x, clientY: r.top + r.height / 3}));
+      ev('pointerdown', 11, 200); ev('pointerdown', 12, 300);      // two fingers...
+      ev('pointermove', 12, 400);                                   // ...spread apart: zoom in
+      ev('pointerup', 11, 200); ev('pointerup', 12, 400);
+    }""")
+    assert float(page.locator('#sys-level').inner_text().rstrip('×')) > 6
+    page.select_option('#fps', '0')                             # animation off: still draws, no errors
+    page.wait_for_timeout(200)
+    assert not errors, errors

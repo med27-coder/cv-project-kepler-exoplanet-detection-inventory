@@ -66,6 +66,8 @@
         <div class="zoom" id="sys-tools" hidden>
           <button type="button" id="sys-scale" class="ghost" aria-pressed="false"
                   title="Real distances and sizes instead of the spaced-out overview">TRUE SCALE</button>
+          <button type="button" id="sys-edge" class="ghost" aria-pressed="false"
+                  title="Tilt the system edge-on, the way Kepler saw it: planets cross the star when the light dips">KEPLER'S VIEW</button>
           <button type="button" id="sys-fit" class="ghost" title="Show every orbit and the whole habitable zone">FIT</button>
           <button type="button" id="sys-out" aria-label="Zoom out of the system">−</button>
           <span id="sys-level" aria-live="polite">1×</span>
@@ -75,6 +77,14 @@
       <canvas id="system" width="256" height="160" tabindex="0"
               aria-label="The selected star system, animated. Scroll or use + and - to zoom, drag or arrow keys to move, 0 to fit."></canvas>
       <p class="status" id="sys-hint"></p>
+      <label class="fps">Animation
+        <select id="fps">
+          <option value="60">smooth (60 fps)</option>
+          <option value="30" selected>normal (30 fps)</option>
+          <option value="15">battery saver (15 fps)</option>
+          <option value="0">off</option>
+        </select>
+      </label>
       <div id="info">
         <p>Type a system above, tap a chip, roll the 🎲, or click a pixel on the map.</p>
       </div>
