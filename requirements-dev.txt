@@ -1,0 +1,6 @@
+# Development-only tools (not needed to run the app or the star map)
+-r requirements.txt
+pytest>=9.0
+ruff>=0.16
+playwright==1.55.0          # browser tests (tests/test_browser.py); then: python -m playwright install chromium
+K2fov==8.0.1                # scripts/make_ccd_footprint.py (Kepler CCD outlines)

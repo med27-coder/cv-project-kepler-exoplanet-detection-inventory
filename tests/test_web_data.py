@@ -12,7 +12,7 @@ import pytest
 WEB = Path(__file__).resolve().parents[1] / 'web'
 MAX_BYTES = 400_000   # same budget as scripts/export_starmap.py (the index loaded up front)
 COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg',
-           'np', 'nconf', 'tags', 'chunk']
+           'np', 'nconf', 'tags', 'chunk', 'dist']
 CHUNK_MAX_BYTES = 150_000
 STATUSES = {'confirmed', 'candidate', 'other'}
 
@@ -128,3 +128,11 @@ def test_spacecraft_snapshot():
         assert c['earth_au'] > 0.005, c['name']               # nothing in Earth orbit (L1/L2 are ~0.01 AU)
         assert c['url'].startswith('https://') and 1950 < c['launched'] <= 2030
     assert {r['name'] for r in data['rovers']} >= {'Curiosity', 'Perseverance'}
+
+
+def test_ccd_footprint():
+    text = (WEB / 'data' / 'ccd.js').read_text(encoding='utf-8')
+    modules = json.loads(text[text.index('['):text.rindex(']') + 1])
+    assert len(modules) == 21                                   # Kepler's science CCD modules
+    for poly in modules:
+        assert len(poly) >= 4 and all(279 < ra < 303 and 35 < dec < 54 for ra, dec in poly)
