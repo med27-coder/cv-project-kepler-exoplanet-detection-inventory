@@ -8,6 +8,7 @@ let SYSTEM_MS = 1000 / 30;   // Animation menu: 60 / 30 / 15 fps, or off (one st
 const fpsMenu = document.getElementById('fps');
 fpsMenu.addEventListener('change', () => {
   const fps = Number(fpsMenu.value);
+  if (fps === 15) achieve('eco');
   SYSTEM_MS = fps ? 1000 / fps : Infinity;
   wake();
 });

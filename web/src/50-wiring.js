@@ -89,6 +89,7 @@ for (const [key, [name]] of Object.entries(HIGHLIGHTS)) {
   b.addEventListener('click', () => {
     highlight = highlight === key ? null : key;
     if (highlight === 'hz') achieve('goldilocks');
+    if (highlight) highlightTried(highlight);
     highlightBox.querySelectorAll('button').forEach(x =>
       x.setAttribute('aria-pressed', String(x.dataset.key === highlight)));
     renderBase();

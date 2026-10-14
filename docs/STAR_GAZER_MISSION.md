@@ -62,11 +62,11 @@ Your emblem is a star that grows up as you collect achievements. It sits at the 
 |---|---|---|---|---|
 | 0 | STARDUST | start | A cold cloud of gas and dust: every star begins in one | Carina Nebula pillars (Spitzer) |
 | 1 | PROTOSTAR | 1 achievement | A ball of gas collapsing and heating up, wrapped in a dusty disk, firing jets from its poles | A flaring protostar in Orion (Spitzer) |
-| 2 | YOUNG STAR | 3 | Hydrogen fusion has begun: a main-sequence star like the Sun, where stars spend 90% of their lives | The Sun (SDO) |
-| 3 | RED GIANT | 6 | The core's hydrogen runs low and the star swells up to hundreds of times its size | Mira and its 13-light-year tail (GALEX) |
-| 4 | SUPERGIANT | 10 | A massive star, swollen even more, shedding dust (like Betelgeuse) | (same family as Mira) |
-| 5 | SUPERNOVA | 14 | The core collapses and the star explodes, briefly outshining its galaxy | **Kepler's Supernova**, seen by Johannes Kepler in 1604 (Chandra) |
-| 6 | PULSAR | all 18 achievements | What's left: a city-sized neutron star spinning many times a second, sweeping beams across space | Pulsar (artist concept) |
+| 2 | YOUNG STAR | 5 | Hydrogen fusion has begun: a main-sequence star like the Sun, where stars spend 90% of their lives | The Sun (SDO) |
+| 3 | RED GIANT | 10 | The core's hydrogen runs low and the star swells up to hundreds of times its size | Mira and its 13-light-year tail (GALEX) |
+| 4 | SUPERGIANT | 18 | A massive star, swollen even more, shedding dust (like Betelgeuse) | (same family as Mira) |
+| 5 | SUPERNOVA | 28 | The core collapses and the star explodes, briefly outshining its galaxy | **Kepler's Supernova**, seen by Johannes Kepler in 1604 (Chandra) |
+| 6 | PULSAR | 40 achievements | What's left: a city-sized neutron star spinning many times a second, sweeping beams across space | Pulsar (artist concept) |
 | 7 | BLACK HOLE | TRUE STAR GAZER | Gravity wins: not even light escapes. The ring of light around the shadow is real: the Event Horizon Telescope photographed one in 2019 | Black hole disk (artist concept); M87 with the first black-hole image |
 
 **Rank-up moment:** a pop-up like *"YOUR STAR EVOLVED · RED GIANT → SUPERGIANT"*, with the new emblem
@@ -90,23 +90,16 @@ for the heaviest, a **black hole**. The ladder follows the heavy road so it can 
 
 ## 3. The achievements bar
 
-A thin bar in the header, beside the emblem: the rank's name above it, `7/19` after it. Clicking it opens the
+A thin bar in the header, beside the emblem: the rank's name above it, `11/46` after it. Clicking it opens the
 Galleria on the ACHIEVEMENTS tab. On phones it shrinks to the emblem and the count. Inside the Achievements
 tab, a bigger version shows how many achievements are left until the next stage, and the whole ladder with
 the stages still to come as silhouettes (like the easter eggs).
 
-## 4. New achievements to smooth the ladder (proposals)
+## 4. Achievements
 
-| Achievement | How |
-|---|---|
-| PHOTO FINISH | Slide a Galleria photo all the way into pixel art |
-| TATOOINE | Visit Kepler-16, a planet with two suns |
-| EARTH'S COUSIN | Visit Kepler-452 |
-| EIGHT WORLDS | Visit Kepler-90, the system with as many planets as ours |
-| LAVA WORLD | Visit a planet hotter than 1,500 K |
-| CURATOR | Open ten Galleria cards |
-
-With these the ladder could run on 24 regular achievements instead of 18 (thresholds 1, 3, 6, 10, 15, 20, all).
+There are now 46 (built; the full list is in [EASTER_EGGS.md](EASTER_EGGS.md)), so the ladder's thresholds
+are 1, 5, 10, 18, 28 and 40; the last six can be any, so the secret ones are a bonus rather than a wall.
+TATOOINE (Kepler-16) and PROPHET (a candidate NASA later confirms) are still ideas.
 
 ## 5. Decisions for you
 
@@ -115,7 +108,7 @@ With these the ladder could run on 24 regular achievements instead of 18 (thresh
 3. **Reward:** black hole emblem + title (recommended), plus the certificate and/or Gaze mode?
 4. **Ladder:** the heavy-star road to a black hole (recommended), with the white dwarf and/or white hole as
    alternative ends?
-5. **New achievements:** add the six above?
+5. **Thresholds:** 1, 5, 10, 18, 28, 40 as above, or should secrets count?
 6. **Emblem size:** 16 × 16 pixels as drafted (the black hole is tight at that size), or 24 × 24?
 
 ## Files

@@ -314,6 +314,7 @@ function drawStar(t, dim) {
     if (((t + hash(scene.seed) * 23) % 23) < 0.7) {   // a flare: a brief bright arc on the edge
       sctx.fillStyle = '#ffffff';
       for (let k = -3; k <= 3; k++) sctx.fillRect(Math.round(cx + k), Math.round(cy - r - 1 - (k * k < 4 ? 1 : 0)), 1, 1);
+      if (!REDUCED_MOTION) achieve('flare');   // caught it (48-gallery.js)
     }
   }
   if (r > 40) return;

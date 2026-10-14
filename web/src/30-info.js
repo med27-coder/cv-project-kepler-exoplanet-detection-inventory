@@ -140,6 +140,7 @@ function caseFiles(detail) {
 }
 
 function showSystem(s, detail) {
+  systemDetailShown(detail);
   title.textContent = s[COL.name].toUpperCase();
   const count = k => detail.planets.filter(p => p.status === k).length;
   const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
@@ -163,6 +164,7 @@ function showSystem(s, detail) {
 // Only unscored candidates orbit this star: drawn as ghosts, with their case files.
 function showUnconfirmed(s, detail) {
   achieve('ghost');
+  systemDetailShown(detail);
   title.textContent = s[COL.name].toUpperCase();
   const line = SOON[Math.floor(hash(s[COL.name]) * SOON.length)];
   info.innerHTML = `
@@ -223,6 +225,7 @@ function showLeaderboard() {
 }
 
 function showUnknown(query) {
+  noSignal();
   title.textContent = 'NO SIGNAL';
   info.innerHTML = `
     <p class="big alert">✖ NO SIGNAL</p>

@@ -291,3 +291,5 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 .morph canvas { width: 240px; height: auto; border: 2px solid var(--edge); background: var(--bg); }
 .morph input[type="range"] { display: block; width: 240px; margin: 6px 0 0; accent-color: var(--accent); }
 .morph-ends { display: flex; justify-content: space-between; width: 240px; font: 9px var(--pixel); color: var(--ink-2); }
+#pane-ach .facts-title { margin: 14px 0 6px; }
+.ach-count { color: var(--ink-2); font-size: 10px; margin-left: 6px; }

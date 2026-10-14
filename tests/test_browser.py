@@ -193,8 +193,14 @@ def test_galleria_game(browser, site):
     page.click('.egg-card[data-egg="lucy"]')
     page.wait_for_selector('.morph canvas')                        # the real photo, with the pixelation slider
     assert 'Lucy' in page.locator('#pane-eggs').inner_text()
+    page.click('#gallery-close')
+    page.fill('#query', 'Kepler-90')                                # a famous world
+    page.press('#query', 'Enter')
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('eight-worlds')")
+    page.click('#open-gallery')
     page.click('#tab-ach')
-    assert 'CURIOUS MIND' in page.locator('.ach-list li.on').inner_text()
+    earned = page.locator('.ach-list li.on').all_inner_texts()
+    assert any('CURIOUS MIND' in a for a in earned) and any('EIGHT WORLDS' in a for a in earned)
     page.click('#tab-set')
     page.click('#set-reset')
     page.click('#set-reset')                                        # asks twice

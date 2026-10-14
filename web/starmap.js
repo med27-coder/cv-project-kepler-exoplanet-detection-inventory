@@ -394,7 +394,7 @@
     if (wasDrag) return;
     if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
     const s = starAt(e);
-    if (s) select(s);
+    if (s) { session.hops = 0; select(s); }
   });
   map.addEventListener('pointercancel', () => { drag = null; });
   map.addEventListener('pointerleave', () => { hovered = null; map.classList.remove('on-kepler'); hoverLine.textContent = HOVER_HINT; });
@@ -411,7 +411,7 @@
     if (!dir) return;
     e.preventDefault();
     const s = neighbour(selected, ...dir);
-    if (s) { select(s); hoverLine.textContent = `▸ ${label(s)}`; }
+    if (s) { select(s); arrowHop(); hoverLine.textContent = `▸ ${label(s)}`; }
   });
   document.getElementById('zoom-in').addEventListener('click', () => stepZoom(1));
   const ccdButton = document.getElementById('ccd'), depthButton = document.getElementById('depth');
@@ -755,6 +755,7 @@
       if (((t + hash(scene.seed) * 23) % 23) < 0.7) {   // a flare: a brief bright arc on the edge
         sctx.fillStyle = '#ffffff';
         for (let k = -3; k <= 3; k++) sctx.fillRect(Math.round(cx + k), Math.round(cy - r - 1 - (k * k < 4 ? 1 : 0)), 1, 1);
+        if (!REDUCED_MOTION) achieve('flare');   // caught it (48-gallery.js)
       }
     }
     if (r > 40) return;
@@ -1168,6 +1169,7 @@
   }
 
   function showSystem(s, detail) {
+    systemDetailShown(detail);
     title.textContent = s[COL.name].toUpperCase();
     const count = k => detail.planets.filter(p => p.status === k).length;
     const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
@@ -1191,6 +1193,7 @@
   // Only unscored candidates orbit this star: drawn as ghosts, with their case files.
   function showUnconfirmed(s, detail) {
     achieve('ghost');
+    systemDetailShown(detail);
     title.textContent = s[COL.name].toUpperCase();
     const line = SOON[Math.floor(hash(s[COL.name]) * SOON.length)];
     info.innerHTML = `
@@ -1251,6 +1254,7 @@
   }
 
   function showUnknown(query) {
+    noSignal();
     title.textContent = 'NO SIGNAL';
     info.innerHTML = `
       <p class="big alert">✖ NO SIGNAL</p>
@@ -2237,26 +2241,68 @@
   const EGG = new Map(EGGS.map(e => [e.id, e]));
   const CRAFT_EGGS = EGGS.filter(e => e.kind === 'craft' && e.id !== 'iss').length;
 
+  // Achievements, by group (the Achievements tab shows them in this order). Secret ones show "???" until earned.
   const ACHIEVEMENTS = [
-    { id: 'first-light', title: 'FIRST LIGHT', how: 'Open your first star system.' },
-    { id: 'star-hopper', title: 'STAR HOPPER', how: 'Open 10 different star systems.' },
-    { id: 'census', title: 'GALACTIC CENSUS', how: 'Open 50 different star systems.' },
-    { id: 'dice', title: 'ROLL OF THE DICE', how: 'Let the 🎲 pick a system for you.' },
-    { id: 'ghost', title: 'GHOST HUNTER', how: 'Visit a system that has only unconfirmed planets.' },
-    { id: 'oracle', title: 'FORTUNE TELLER', how: 'Open the 🏆 next-planets list.' },
-    { id: 'goldilocks', title: 'GOLDILOCKS', how: 'Light up the habitable-zone systems on the map.' },
-    { id: 'depth', title: 'DEPTH PERCEPTION', how: 'Turn the map sideways with DEPTH.' },
-    { id: 'chips', title: 'CHIP CHECK', how: 'Switch Kepler\'s camera chips (CCDS) off or on.' },
-    { id: 'eagle', title: 'EAGLE EYE', how: 'Zoom the map all the way in.' },
-    { id: 'transit', title: 'TRANSIT WITNESS', how: 'Watch a system edge-on with KEPLER\'S VIEW.' },
-    { id: 'scale', title: 'MIND THE GAP', how: 'Switch a system to TRUE SCALE.' },
-    { id: 'link', title: 'SIGNAL RECEIVED', how: 'Open a shared view link.' },
-    { id: 'curious', title: 'CURIOUS MIND', how: 'Find your first easter egg.' },
-    { id: 'mission-control', title: 'MISSION CONTROL', how: 'Find five spacecraft.' },
-    { id: 'grand-tour', title: 'GRAND TOUR', how: 'Find every easter egg, like the Voyagers\' tour of the planets.' },
-    { id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
-    { id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
+    { g: 'EXPLORER', id: 'first-light', title: 'FIRST LIGHT', how: 'Open your first star system.' },
+    { g: 'EXPLORER', id: 'star-hopper', title: 'STAR HOPPER', how: 'Open 10 different star systems.' },
+    { g: 'EXPLORER', id: 'census', title: 'GALACTIC CENSUS', how: 'Open 50 different star systems.' },
+    { g: 'EXPLORER', id: 'dice', title: 'ROLL OF THE DICE', how: 'Let the 🎲 pick a system for you.' },
+    { g: 'EXPLORER', id: 'ghost', title: 'GHOST HUNTER', how: 'Visit a system that has only unconfirmed planets.' },
+    { g: 'EXPLORER', id: 'oracle', title: 'FORTUNE TELLER', how: 'Open the 🏆 next-planets list.' },
+    { g: 'EXPLORER', id: 'link', title: 'SIGNAL RECEIVED', how: 'Open a shared view link.' },
+    { g: 'FAMOUS WORLDS', id: 'first-rock', title: 'FIRST ROCK', how: 'Visit Kepler-10, home of the first rocky planet Kepler found.' },
+    { g: 'FAMOUS WORLDS', id: 'eight-worlds', title: 'EIGHT WORLDS', how: 'Visit Kepler-90: eight planets, as many as our Solar System.' },
+    { g: 'FAMOUS WORLDS', id: 'cousin', title: "EARTH'S COUSIN", how: 'Visit Kepler-452, a Sun-like star with a world on a 385-day orbit.' },
+    { g: 'FAMOUS WORLDS', id: 'eden', title: 'FIRST EDEN', how: 'Visit Kepler-186, where the first Earth-size planet in a habitable zone was found.' },
+    { g: 'FAMOUS WORLDS', id: 'puff', title: 'SUPER PUFF', how: 'Visit Kepler-51, whose planets are about as dense as cotton candy.' },
+    { g: 'FAMOUS WORLDS', id: 'tiny', title: 'TINY WORLD', how: 'Visit Kepler-37, home of a planet smaller than Mercury.' },
+    { g: 'SCIENCE', id: 'goldilocks', title: 'GOLDILOCKS', how: 'Light up the habitable-zone systems on the map.' },
+    { g: 'SCIENCE', id: 'double', title: 'DOUBLE TROUBLE', how: 'Visit a system with more than one star.' },
+    { g: 'SCIENCE', id: 'lava', title: 'LAVA WORLD', how: 'Visit a planet hotter than 1,500 K.' },
+    { g: 'SCIENCE', id: 'ancient', title: 'ANCIENT LIGHT', how: 'Open a star so far away its light left before the Great Pyramid was built.' },
+    { g: 'SCIENCE', id: 'flare', title: 'FLARE WATCHER', how: 'Catch a red dwarf flaring.' },
+    { g: 'SCIENCE', id: 'transit', title: 'TRANSIT WITNESS', how: "Watch a system edge-on with KEPLER'S VIEW." },
+    { g: 'SCIENCE', id: 'scale', title: 'MIND THE GAP', how: 'Switch a system to TRUE SCALE.' },
+    { g: "STAR GAZER'S GUESSES", id: 'believer', title: 'BELIEVER', how: 'Open a candidate Star Gazer rates 90% likely or more.' },
+    { g: "STAR GAZER'S GUESSES", id: 'skeptic', title: 'SKEPTIC', how: 'Open a candidate Star Gazer rates 10% or less.' },
+    { g: "STAR GAZER'S GUESSES", id: 'coin', title: 'COIN FLIP', how: "Open a candidate Star Gazer can't decide on (40 to 60%)." },
+    { g: 'MAP AND TOOLS', id: 'depth', title: 'DEPTH PERCEPTION', how: 'Turn the map sideways with DEPTH.' },
+    { g: 'MAP AND TOOLS', id: 'chips', title: 'CHIP CHECK', how: "Switch Kepler's camera chips (CCDS) off or on." },
+    { g: 'MAP AND TOOLS', id: 'eagle', title: 'EAGLE EYE', how: 'Zoom the map all the way in.' },
+    { g: 'MAP AND TOOLS', id: 'cartographer', title: 'CARTOGRAPHER', how: 'Hop across 25 stars in a row with the arrow keys.' },
+    { g: 'MAP AND TOOLS', id: 'highlighter', title: 'HIGHLIGHTER', how: 'Try every highlight filter under the map in one visit.' },
+    { g: 'MAP AND TOOLS', id: 'sky', title: 'SKY PHOTOGRAPHER', how: 'Open the real sky photo of a star.' },
+    { g: 'MAP AND TOOLS', id: 'eco', title: 'ECO MODE', how: 'Switch the animation to battery saver.' },
+    { g: 'EASTER EGGS', id: 'curious', title: 'CURIOUS MIND', how: 'Find your first easter egg.' },
+    { g: 'EASTER EGGS', id: 'mission-control', title: 'MISSION CONTROL', how: 'Find five spacecraft.' },
+    { g: 'EASTER EGGS', id: 'red-fleet', title: 'RED PLANET FLEET', how: 'Find every mission at Mars: four orbiters and two rovers.' },
+    { g: 'EASTER EGGS', id: 'jupiter-crew', title: "JUPITER'S ENTOURAGE", how: 'Find Juno, Europa Clipper, JUICE and Lucy.' },
+    { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
+    { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
+    { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find the two missions heading out of the Solar System.' },
+    { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
+    { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
+    { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
+    { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
+    { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
+    { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
+    { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
+    { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
+    { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
   ];
+  // Visiting these systems earns a famous-world achievement.
+  const FAMOUS = { 'Kepler-10': 'first-rock', 'Kepler-90': 'eight-worlds', 'Kepler-452': 'cousin', 'Kepler-186': 'eden',
+                   'Kepler-51': 'puff', 'Kepler-37': 'tiny' };
+  // Finding every easter egg in a set earns a collection.
+  const EGG_SETS = {
+    'red-fleet': ['mro', 'odyssey', 'mex', 'tgo', 'curiosity', 'perseverance'],
+    'jupiter-crew': ['juno', 'clipper', 'juice', 'lucy'],
+    'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
+    l2: ['jwst', 'euclid'],
+    interstellar: ['voyager', 'newHorizons'],
+  };
+  const PYRAMID_LY = 4600;   // the Great Pyramid of Giza is about 4,600 years old
+  const session = { unknown: 0, hops: 0, highlights: new Set(), cards: new Set(), unlocks: [] };   // this visit only
   const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 
   // ---- progress (this browser only; the page works the same without storage)
@@ -2318,6 +2364,10 @@
     achieve('curious');
     if (found.filter(k => EGG.get(k).kind === 'craft' && k !== 'iss').length >= 5) achieve('mission-control');
     if (found.length === EGGS.length) achieve('grand-tour');
+    for (const [set, ids] of Object.entries(EGG_SETS)) if (ids.every(k => progress.eggs[k])) achieve(set);
+    const now = Date.now();
+    session.unlocks = [...session.unlocks.filter(t => now - t < 60_000), now];
+    if (session.unlocks.length >= 3) achieve('speedrun');
     refreshGallery();
   }
 
@@ -2344,6 +2394,26 @@
     if (n >= 50) achieve('census');
     const hour = new Date().getHours();
     if (hour < 4) achieve('night');
+    if (FAMOUS[name]) achieve(FAMOUS[name]);
+    if (s[COL.dist] != null && s[COL.dist] * LY_PER_PC > PYRAMID_LY) achieve('ancient');
+    const sg = s[COL.sg];
+    if (sg != null) {
+      if (sg >= 0.9) achieve('believer');
+      if (sg <= 0.1) achieve('skeptic');
+      if (sg >= 0.4 && sg <= 0.6) achieve('coin');
+    }
+  }
+
+  // Small hooks from the rest of the page.
+  function systemDetailShown(detail) {   // showSystem / showUnconfirmed, once the details are loaded
+    if ((detail.nstars ?? 1) > 1) achieve('double');
+    if (detail.planets.some(p => (p.teq ?? 0) >= 1500)) achieve('lava');
+  }
+  function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
+  function arrowHop() { if (++session.hops >= 25) achieve('cartographer'); }
+  function highlightTried(key) {
+    session.highlights.add(key);
+    if (session.highlights.size >= Object.keys(HIGHLIGHTS).length) achieve('highlighter');
   }
 
   // ---- drawing an easter egg on a small canvas, in colour or as a silhouette with a "?"
@@ -2415,7 +2485,11 @@
     panes.eggs.querySelectorAll('.egg-card').forEach(b => {
       const egg = EGG.get(b.dataset.egg);
       drawEggArt(b.querySelector('canvas'), egg, 1, !progress.eggs[egg.id]);
-      b.addEventListener('click', () => { detailEgg = egg; renderDetail(egg); });
+      b.addEventListener('click', () => {
+        detailEgg = egg;
+        if (progress.eggs[egg.id]) { session.cards.add(egg.id); if (session.cards.size >= 10) achieve('curator'); }
+        renderDetail(egg);
+      });
     });
   }
 
@@ -2519,7 +2593,7 @@
       draw();
     });
     photo.src = src;
-    slider.addEventListener('input', draw);
+    slider.addEventListener('input', () => { draw(); if (slider.value === slider.max) achieve('photo-finish'); });
     draw();
   }
 
@@ -2537,15 +2611,20 @@
 
   function renderAchievements() {
     const got = ACHIEVEMENTS.filter(a => progress.ach[a.id]).length;
+    const groups = [...new Set(ACHIEVEMENTS.map(a => a.g))];
     panes.ach.innerHTML = `
       <p class="gallery-progress"><b>${got} / ${ACHIEVEMENTS.length}</b> UNLOCKED</p>
-      <ul class="ach-list">${ACHIEVEMENTS.map(a => {
-        const on = progress.ach[a.id];
-        const hidden = a.secret && !on;
-        return `<li class="${on ? 'on' : ''}"><span class="ach-icon" aria-hidden="true">${on ? '🏆' : '🔒'}</span>
-          <div><b>${hidden ? '???' : esc(a.title)}</b><span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}${
-            on ? ` · ${esc(on)}` : ''}</span></div></li>`;
-      }).join('')}</ul>`;
+      ${groups.map(g => {
+        const list = ACHIEVEMENTS.filter(a => a.g === g);
+        return `<h3 class="facts-title">${esc(g)} <span class="ach-count">${list.filter(a => progress.ach[a.id]).length} / ${list.length}</span></h3>
+        <ul class="ach-list">${list.map(a => {
+          const on = progress.ach[a.id];
+          const hidden = a.secret && !on;
+          return `<li class="${on ? 'on' : ''}"><span class="ach-icon" aria-hidden="true">${on ? '🏆' : '🔒'}</span>
+            <div><b>${hidden ? '???' : esc(a.title)}</b><span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}${
+              on ? ` · ${esc(on)}` : ''}</span></div></li>`;
+        }).join('')}</ul>`;
+      }).join('')}`;
   }
 
   function refreshGallery() {
@@ -2601,6 +2680,14 @@
     resetButton.textContent = 'RESET PROGRESS';
     resetNote.textContent = 'Progress reset. Happy hunting!';
   });
+
+  // Anniversaries: visiting on Kepler's launch day or the day it was switched off.
+  {
+    const d = new Date();
+    if (d.getMonth() === 2 && d.getDate() === 7) achieve('launch-day');
+    if (d.getMonth() === 10 && d.getDate() === 15) achieve('goodnight');
+  }
+  info.addEventListener('click', e => { if (e.target.closest('a[href*="aladin"]')) achieve('sky'); });
 
   // ---------------------------------------------------------------- wiring
   const input = document.getElementById('query');
@@ -2693,6 +2780,7 @@
     b.addEventListener('click', () => {
       highlight = highlight === key ? null : key;
       if (highlight === 'hz') achieve('goldilocks');
+      if (highlight) highlightTried(highlight);
       highlightBox.querySelectorAll('button').forEach(x =>
         x.setAttribute('aria-pressed', String(x.dataset.key === highlight)));
       renderBase();
@@ -2742,6 +2830,7 @@
   const fpsMenu = document.getElementById('fps');
   fpsMenu.addEventListener('change', () => {
     const fps = Number(fpsMenu.value);
+    if (fps === 15) achieve('eco');
     SYSTEM_MS = fps ? 1000 / fps : Infinity;
     wake();
   });
