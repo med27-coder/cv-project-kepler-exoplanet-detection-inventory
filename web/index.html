@@ -42,6 +42,10 @@
       <div class="panel-head">
         <h2 id="map-title">THE KEPLER FIELD</h2>
         <div class="zoom" aria-label="Map zoom">
+          <button type="button" id="ccd" class="ghost" aria-pressed="true"
+                  title="Outline Kepler's 21 camera chips (CCD modules)">CCDS</button>
+          <button type="button" id="depth" class="ghost" aria-pressed="false"
+                  title="Side view: Earth on the left, each star at its real distance">DEPTH</button>
           <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
           <span id="zoom-level" aria-live="polite">1×</span>
           <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
@@ -105,6 +109,7 @@
   </footer>
 
   <script src="data/systems.js"></script>
+  <script src="data/ccd.js"></script>
   <script src="starmap.js"></script>
 </body>
 </html>

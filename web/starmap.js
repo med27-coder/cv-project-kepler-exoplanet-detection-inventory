@@ -133,6 +133,28 @@
   const offX = (MW - (Math.max(...xs) - xMin) * scale) / 2;
   const offY = (MH - (Math.max(...ys) - yMin) * scale) / 2;
   const home = STARS.map((s, i) => [offX + (xs[i] - xMin) * scale, offY + (ys[i] - yMin) * scale]);
+  const toHome = (ra, dec) => [offX + (-ra * cosd - xMin) * scale, offY + (-dec - yMin) * scale];
+
+  // Kepler's 21 CCD modules (data/ccd.js, scripts/make_ccd_footprint.py): why the stars sit in squares.
+  const CCD = (window.STARMAP_CCD || []).map(poly => poly.map(([ra, dec]) => toHome(ra, dec)));
+  let showCcd = true;
+
+  // Depth view: the field seen from the side. Earth on the left, each star at its distance (NASA /
+  // Gaia); its height is its angle from the field's centre times its distance, so the field opens
+  // out as the cone Kepler looked down. Stars without a distance are left out.
+  let depth = false;
+  const DEPTH = (() => {
+    const dists = STARS.map(s => s[COL.dist]).filter(d => d != null).sort((a, b) => a - b);
+    const far = dists[Math.floor(dists.length * 0.98)] || 1;   // the farthest 2% sit at the edge
+    const x0 = PAD + 12, w = MW - x0 - PAD;
+    const pos = STARS.map((s, i) => {
+      const d = s[COL.dist];
+      if (d == null) return [-99, -99];
+      const f = Math.min(1, d / far);
+      return [x0 + f * w, MH / 2 + (home[i][1] - MH / 2) * f * 0.95];
+    });
+    return { far, x0, w, pos };
+  })();
   const starIndex = new Map(STARS.map((s, i) => [s, i]));
 
   // Colour of each star: drawn systems bright, "soon" systems dim, scored candidates by verdict.
@@ -172,7 +194,54 @@
 
   const base = document.createElement('canvas');   // all stars for the current view, redrawn on change
   base.width = MW; base.height = MH;
+  function renderDepth(b) {
+    screen = DEPTH.pos.map(([x, y]) => [Math.round(x), Math.round(y)]);
+    b.fillStyle = '#070b1a';
+    b.fillRect(0, 0, MW, MH);
+    const ex = PAD + 4, ey = MH / 2;
+    b.fillStyle = '#1e2550';   // the cone Kepler looked down
+    for (let x = DEPTH.x0; x < MW - PAD; x += 2) {
+      const f = (x - DEPTH.x0) / DEPTH.w, half = (MH / 2 - PAD) * 0.95 * f;
+      b.fillRect(x, Math.round(ey - half), 1, 1);
+      b.fillRect(x, Math.round(ey + half), 1, 1);
+    }
+    const lyPerPx = DEPTH.far * LY_PER_PC / DEPTH.w;
+    const step = lyPerPx * DEPTH.w > 6000 ? 2000 : 1000;
+    for (let ly = step; ly / LY_PER_PC < DEPTH.far; ly += step) {   // distance ticks
+      const x = Math.round(DEPTH.x0 + ly / lyPerPx);
+      b.fillStyle = '#3a4888';
+      b.fillRect(x, MH - PAD - 6, 1, 3);
+      pixelText(b, `${ly / 1000}K LY`, x - 8, MH - PAD - 1 - 5 + 6, '#5a6aa0');
+    }
+    b.fillStyle = '#4f9a46';   // Earth, with a label
+    b.fillRect(ex - 1, ey - 1, 3, 3);
+    b.fillStyle = '#2f6fd0';
+    b.fillRect(ex, ey - 1, 1, 1);
+    pixelText(b, 'EARTH', ex - 1, ey - 9, '#9fd8ff');
+    pixelText(b, 'SIDE VIEW', MW - PAD - textWidth('SIDE VIEW'), PAD, '#5a6aa0');
+  }
+
+  function drawCcd(b) {
+    b.fillStyle = '#2b3566';
+    for (const poly of CCD) {
+      for (let k = 0; k < poly.length; k++) {
+        const [ax, ay] = poly[k], [bx, by] = poly[(k + 1) % poly.length];
+        const n = Math.ceil(Math.hypot(bx - ax, by - ay) * view.zoom);
+        for (let j = 0; j <= n; j++) {
+          const [x, y] = toCanvas([ax + (bx - ax) * j / n, ay + (by - ay) * j / n]);
+          if (x >= 0 && y >= 0 && x < MW && y < MH) b.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+  }
+
   function renderBase() {
+    const b0 = base.getContext('2d');
+    if (depth) {
+      renderDepth(b0);
+      drawStars(b0, 1);
+      return;
+    }
     const half = MW / 2 / view.zoom;
     view.cx = clamp(view.cx, half, MW - half);
     view.cy = clamp(view.cy, half, MH - half);
@@ -184,7 +253,13 @@
       b.imageSmoothingEnabled = false;
       b.drawImage(sky, MW / 2 - view.cx * view.zoom, MH / 2 - view.cy * view.zoom, MW * view.zoom, MH * view.zoom);
     }
-    const size = view.zoom >= 4 ? 2 : 1;
+    if (showCcd) drawCcd(b);
+    drawStars(b, view.zoom >= 4 ? 2 : 1);
+    document.getElementById('zoom-level').textContent = `${view.zoom}×`;
+    map.classList.toggle('zoomed', view.zoom > 1);
+  }
+
+  function drawStars(b, size) {
     const lit = highlight && highlightSets[highlight];
     STARS.forEach((s, i) => {
       const [x, y] = screen[i];
@@ -199,8 +274,6 @@
         b.globalAlpha = 1;
       }
     });
-    document.getElementById('zoom-level').textContent = `${view.zoom}×`;
-    map.classList.toggle('zoomed', view.zoom > 1);
   }
 
   function setZoom(zoom, anchor) {   // anchor: canvas point that stays put (default: centre)
@@ -215,6 +288,7 @@
   }
   // Buttons and keys zoom around the selected star when it's on screen, else the centre.
   function stepZoom(dir, anchor) {
+    if (depth) return;
     if (!anchor && selected) {
       const [x, y] = toCanvas(home[starIndex.get(selected)]);
       if (x >= 0 && y >= 0 && x <= MW && y <= MH) anchor = [x, y];
@@ -223,7 +297,7 @@
   }
 
   function keepInView(s) {   // when zoomed in, re-centre on a star that's near or past the edge
-    if (view.zoom === 1) return;
+    if (view.zoom === 1 || depth) return;
     const [x, y] = toCanvas(home[starIndex.get(s)]);
     if (x < 16 || y < 16 || x > MW - 16 || y > MH - 16) {
       [view.cx, view.cy] = home[starIndex.get(s)];
@@ -332,12 +406,27 @@
     if (s) { select(s); hoverLine.textContent = `▸ ${label(s)}`; }
   });
   document.getElementById('zoom-in').addEventListener('click', () => stepZoom(1));
+  const ccdButton = document.getElementById('ccd'), depthButton = document.getElementById('depth');
+  ccdButton.addEventListener('click', () => {
+    showCcd = !showCcd;
+    ccdButton.setAttribute('aria-pressed', String(showCcd));
+    renderBase();
+  });
+  depthButton.addEventListener('click', () => {
+    depth = !depth;
+    if (depth) { view.zoom = 1; view.cx = MW / 2; view.cy = MH / 2; }
+    depthButton.setAttribute('aria-pressed', String(depth));
+    for (const id of ['zoom-in', 'zoom-out']) document.getElementById(id).disabled = depth;
+    map.closest('.panel').querySelector('h2').textContent = depth ? 'SIDE VIEW FROM EARTH' : 'THE KEPLER FIELD';
+    renderBase();
+  });
   document.getElementById('zoom-out').addEventListener('click', () => stepZoom(-1));
 
   function label(s) {
     const koi = s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? ` · KOI-${s[COL.koi]}` : '';
     const state = s[COL.drawn] ? '' : ' · unconfirmed';
-    return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}`;
+    const far = s[COL.dist] != null ? ` · ${fmt(s[COL.dist] * LY_PER_PC)} ly` : '';
+    return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}${far}`;
   }
 
   // ---------------------------------------------------------------- system view

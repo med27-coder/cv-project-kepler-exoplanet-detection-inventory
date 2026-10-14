@@ -66,7 +66,7 @@ SPOTLIGHT = ['Kepler-90', 'Kepler-11', 'Kepler-186', 'Kepler-22', 'Kepler-452', 
 STATUS = {'CONFIRMED': 'confirmed', 'CANDIDATE': 'candidate'}
 KOI_NAME = re.compile(r'K(\d{5})\.(\d{2})')
 COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg',
-           'np', 'nconf', 'tags', 'chunk']
+           'np', 'nconf', 'tags', 'chunk', 'dist']   # dist: parsecs (NASA / Gaia), for the depth view
 # Highlight tags (bit flags in the 'tags' column), worked out here so the page can light them up
 # without loading every system's details. Same rules as the page's highlight buttons.
 TAGS = {'hz': 1, 'earth': 2, 'multi': 4, 'giant': 8, 'tess': 16, 'unscored': 32}
@@ -390,7 +390,8 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       None if pd.isna(mag) else round(float(mag), 1), int(name in wanted), int(drawn),
                       len(rows), round(max(cand_scores), 3) if cand_scores else None,
                       len(detail['planets']), sum(p['status'] == 'confirmed' for p in detail['planets']),
-                      tags(detail, drawn), chunk_of(name)])
+                      tags(detail, drawn), chunk_of(name),
+                      round(detail['dist_pc']) if detail.get('dist_pc') else None])
     names = {s[0] for s in stars}
     missing = sorted(wanted - names)
     return {'source': 'NASA Exoplanet Archive (KOI, confirmed-planet and TOI tables); '

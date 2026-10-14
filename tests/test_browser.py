@@ -169,3 +169,18 @@ def test_view_links_kepler_view_and_pinch(browser, site):
     page.select_option('#fps', '0')                             # animation off: still draws, no errors
     page.wait_for_timeout(200)
     assert not errors, errors
+
+
+def test_depth_view_and_ccd_toggle(browser, site):
+    errors = []
+    page = open_page(browser, site, errors)
+    page.click('#depth')
+    assert page.locator('#map').locator('xpath=ancestor::section').locator('h2').inner_text() == 'SIDE VIEW FROM EARTH'
+    assert page.locator('#zoom-in').is_disabled()
+    box = page.locator('#map').bounding_box()
+    page.mouse.click(box['x'] + box['width'] * 0.4, box['y'] + box['height'] / 2)   # stars are clickable in depth too
+    page.click('#depth')
+    page.click('#ccd')
+    assert page.get_attribute('#ccd', 'aria-pressed') == 'false'
+    assert not page.locator('#zoom-in').is_disabled()
+    assert not errors, errors
