@@ -86,3 +86,7 @@ Suggested tiers: COMMON = one action (dice, depth, chips, eco...); RARE = a sear
 first egg, collections of 2-3, believer/skeptic); EPIC = long or large (census 50, red planet fleet, grand
 tour, cartographer, mission control); SECRET = the six secret ones; TRUE STAR GAZER gets its own (black hole).
 The total count still drives the star-life emblem (stardust -> black hole), separately from these colours.
+Update: SECRET is now a **galaxy cup** (a two-armed violet spiral galaxy fills the bowl, bright core, a few
+stars around it), and locked achievements use a **space lock** instead of the padlock emoji: the shackle is a
+planet's ring, the body a small dark planet with the ring crossing it and a star-shaped keyhole
+(`draft_lock_space.png`; all five on `draft_trophy_tiers.png`).
