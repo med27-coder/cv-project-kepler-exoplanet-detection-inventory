@@ -75,6 +75,7 @@ suggest.addEventListener('mousedown', e => {   // mousedown fires before the inp
 // Surprise me: a random drawn system.
 const drawnStars = STARS.filter(s => s[COL.drawn]);
 document.getElementById('random').addEventListener('click', () => {
+  achieve('dice');
   choose(drawnStars[Math.floor(Math.random() * drawnStars.length)]);
 });
 
@@ -87,6 +88,7 @@ for (const [key, [name]] of Object.entries(HIGHLIGHTS)) {
   b.textContent = `${name} (${fmt(highlightSets[key].size)})`;
   b.addEventListener('click', () => {
     highlight = highlight === key ? null : key;
+    if (highlight === 'hz') achieve('goldilocks');
     highlightBox.querySelectorAll('button').forEach(x =>
       x.setAttribute('aria-pressed', String(x.dataset.key === highlight)));
     renderBase();
@@ -119,6 +121,7 @@ function fromHash() {
   const [name, query = ''] = q.split('?');
   const params = new URLSearchParams(query);
   pendingView = { view: params.get('view'), zoom: params.get('zoom'), edge: params.get('edge') };
+  if (query) achieve('link');
   if (name) { input.value = name; lookup(name, false); }
 }
 window.addEventListener('hashchange', fromHash);

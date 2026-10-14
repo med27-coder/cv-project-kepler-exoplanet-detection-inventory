@@ -4,8 +4,10 @@ const scaleButton = document.getElementById('sys-scale');
 // A scene with orbits to lay out, zoom and pan (not the "mystery" card or a custom one like the ISS).
 const liveScene = () => Boolean(scene && !scene.mystery && !scene.custom);
 
+let sceneSince = 0;
 function setScene(next) {   // a new system: reset the view, keep the chosen scale mode
   scene = next;
+  sceneSince = performance.now();   // for the Patient Observer achievement
   Object.assign(sview, { zoom: 1, panX: 0, panY: 0 });
   const live = liveScene();
   sysTools.hidden = !live;
@@ -51,6 +53,7 @@ function setEdge(on) {
 }
 edgeButton.addEventListener('click', () => {
   setEdge(TILT !== TILT_KEPLER);
+  if (TILT === TILT_KEPLER) achieve('transit');
   if (liveScene()) layout();
 });
 
@@ -139,5 +142,6 @@ document.getElementById('sys-fit').addEventListener('click', fitAll);
 scaleButton.addEventListener('click', () => {
   sview.mode = sview.mode === 'true' ? 'overview' : 'true';
   scaleButton.setAttribute('aria-pressed', String(sview.mode === 'true'));
+  if (sview.mode === 'true') achieve('scale');
   if (liveScene()) { Object.assign(sview, { zoom: 1, panX: 0, panY: 0 }); layout(); }
 });

@@ -88,7 +88,7 @@ function craftTable(data, focus) {
       <td class="num">${delay(c.light_min)}</td><td class="num">${esc(c.launched)}</td><td>${esc(c.agency)}</td></tr>`).join('');
   return `
     <div class="table-wrap"><table>
-      <thead><tr><th><span class="sr-only">Picture</span></th><th>Spacecraft</th><th>Where</th><th class="num">From the Sun (AU)</th>
+      <thead><tr><th><span class="visually-hidden">Picture</span></th><th>Spacecraft</th><th>Where</th><th class="num">From the Sun (AU)</th>
         <th class="num">Signal delay</th><th class="num">Launched</th><th>Agency</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;

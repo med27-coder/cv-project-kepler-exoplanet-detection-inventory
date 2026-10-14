@@ -21,6 +21,8 @@
 </head>
 <body>
   <header>
+    <button type="button" id="open-gallery" class="ghost gear" aria-haspopup="dialog"
+            title="Galleria, achievements and settings">⚙<span class="visually-hidden"> Galleria, achievements and settings</span></button>
     <h1>KEPLER STAR MAP</h1>
     <p class="sub">3,600+ stars with planets or planet candidates, from NASA's Kepler mission. Pick one and watch its planets orbit.</p>
   </header>
@@ -111,14 +113,37 @@
        <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory">source code</a>
        (part of the Star Gazer exoplanet-detection project) ·
        <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/issues">report a problem</a></p>
-    <p>Privacy: no cookies, no analytics, nothing stored. The only outside request is the sky photo you pick (except for the 14 featured systems, whose photos are stored here),
+    <p>Privacy: no cookies, no analytics. Your Galleria progress stays in this browser only (reset it under ⚙). The only outside request is the sky photo you pick (except for the 14 featured systems, whose photos are stored here),
        loaded from <a href="https://alasky.cds.unistra.fr/">CDS</a> (Strasbourg) when you open a system.
        Fonts: Press Start 2P and VT323 (<a href="fonts/OFL-PressStart2P.txt">SIL OFL</a>).</p>
   </footer>
 
+  <dialog id="gallery" aria-labelledby="gallery-title">
+    <div class="gallery-head">
+      <h2 id="gallery-title">⚙ GALLERIA</h2>
+      <button type="button" id="gallery-close" class="ghost" aria-label="Close">✕</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Galleria sections">
+      <button type="button" role="tab" id="tab-eggs" aria-controls="pane-eggs" aria-selected="true">EASTER EGGS</button>
+      <button type="button" role="tab" id="tab-ach" aria-controls="pane-ach" aria-selected="false" tabindex="-1">ACHIEVEMENTS</button>
+      <button type="button" role="tab" id="tab-set" aria-controls="pane-set" aria-selected="false" tabindex="-1">SETTINGS</button>
+    </div>
+    <section id="pane-eggs" role="tabpanel" aria-labelledby="tab-eggs"></section>
+    <section id="pane-ach" role="tabpanel" aria-labelledby="tab-ach" hidden></section>
+    <section id="pane-set" role="tabpanel" aria-labelledby="tab-set" hidden>
+      <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
+      <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
+         doesn't follow you to other devices.</p>
+      <button type="button" id="set-reset" class="ghost">RESET PROGRESS</button>
+      <p class="status" id="set-reset-note" aria-live="polite"></p>
+    </section>
+  </dialog>
+  <div id="toasts" aria-live="polite"></div>
+
   <script src="data/systems.js"></script>
   <script src="data/ccd.js"></script>
   <script src="data/earth.js"></script>
+  <script src="data/gallery.js"></script>
   <script src="starmap.js"></script>
 </body>
 </html>

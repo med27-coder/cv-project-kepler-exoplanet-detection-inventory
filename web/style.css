@@ -212,4 +212,79 @@ button.linkish { background: none; border: none; box-shadow: none; padding: 0; c
 canvas.craft-icon { display: inline-block; width: 50px; height: 22px; border: 0; vertical-align: middle; background: transparent; }
 tr.focus td { background: rgba(255, 211, 77, 0.12); }
 tr.focus td a, li.focus a { color: var(--accent); }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---- Galleria (48-gallery.js): the easter-egg game behind the ⚙ button */
+header { position: relative; }
+button.gear { position: absolute; top: 4px; right: 0; font-size: 20px; padding: 4px 9px; line-height: 1; }
+dialog#gallery {
+  width: min(920px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 14px;
+  background: var(--panel); color: var(--ink); border: 2px solid var(--accent);
+}
+dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
+.gallery-head { display: flex; justify-content: space-between; align-items: center; }
+.gallery-head h2 { color: var(--accent); margin: 0; }
+.tabs { display: flex; gap: 6px; margin: 10px 0; flex-wrap: wrap; }
+.tabs [role="tab"] { background: var(--bg); color: var(--ink-2); border: 2px solid var(--edge); box-shadow: none; }
+.tabs [role="tab"][aria-selected="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.gallery-progress { font-family: var(--pixel); font-size: 12px; display: flex; gap: 10px; align-items: center; }
+.gallery-progress .bar { flex: 1; max-width: 240px; height: 10px; border: 2px solid var(--edge); background: var(--bg); }
+.gallery-progress .bar span { display: block; height: 100%; width: 0; background: var(--accent); }
+.egg-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.egg-card {
+  width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--bg); color: var(--ink-2); border: 2px solid var(--edge); box-shadow: none;
+  padding: 8px; font: 17px/1.15 var(--body); letter-spacing: 0; text-align: center;
+}
+.egg-card:hover { border-color: var(--ink-2); }
+.egg-card canvas, .egg-detail canvas { width: 128px; height: 80px; background: transparent; }
+.egg-card .egg-name { font-family: var(--pixel); font-size: 10px; color: var(--ink); letter-spacing: 2px; }
+.egg-card.found { border-color: var(--accent); box-shadow: 0 0 12px rgba(255, 211, 77, 0.35); }
+.egg-card.found .egg-name, .egg-card.found .egg-clue { color: var(--accent); }
+.egg-detail { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; margin-top: 10px; }
+.egg-detail figure { margin: 0; }
+.egg-detail figcaption { font-size: 16px; color: var(--ink-2); max-width: 240px; }
+.egg-detail canvas { width: 256px; height: 160px; border: 2px solid var(--edge); }
+.egg-detail.found canvas { border-color: var(--accent); box-shadow: 0 0 18px rgba(255, 211, 77, 0.45); }
+.egg-detail img { display: block; width: 240px; height: auto; border: 2px solid var(--edge); }
+.egg-badge { color: var(--accent); }
+.big-clue { font-size: 24px; color: var(--ink); }
+.planet-strip { list-style: none; padding: 0; margin: 12px 0 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.planet-strip a { display: flex; flex-direction: column; align-items: center; font-size: 14px; color: var(--ink-2); text-decoration: none; }
+.planet-strip img { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--edge); }
+.ach-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.ach-list li { display: flex; gap: 10px; align-items: center; padding: 6px 8px; border: 2px solid var(--edge); color: var(--ink-2); }
+.ach-list li.on { border-color: var(--accent); color: var(--ink); }
+.ach-list b { display: block; font: 10px var(--pixel); letter-spacing: 1px; color: inherit; }
+.ach-list li.on b { color: var(--accent); }
+.ach-icon { font-size: 22px; }
+.setting { display: flex; gap: 8px; align-items: center; }
+
+/* Pop-ups: bottom right, small, gone after a few seconds */
+#toasts { position: fixed; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px;
+          z-index: 10; pointer-events: none; max-width: min(360px, calc(100vw - 24px)); }
+.toast { display: flex; gap: 8px; align-items: center; padding: 8px 10px; background: var(--panel);
+         border: 2px solid var(--accent); box-shadow: 0 0 14px rgba(255, 211, 77, 0.4);
+         animation: toast-in 0.35s ease-out; transition: opacity 0.5s; }
+.toast.leaving { opacity: 0; }
+.toast canvas { width: 80px; height: 52px; background: transparent; border: 0; flex: none; }
+.toast b { display: block; font: 10px var(--pixel); color: var(--accent); letter-spacing: 1px; }
+.toast span { font-size: 17px; color: var(--ink); }
+.toast .trophy { font-size: 26px; }
+@keyframes toast-in { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* The drawing glows when something is found */
+#system.glow { animation: found-glow 2.4s ease-out; }
+@keyframes found-glow {
+  0% { box-shadow: 0 0 0 rgba(255, 211, 77, 0); }
+  20% { box-shadow: 0 0 28px 6px rgba(255, 211, 77, 0.85); }
+  100% { box-shadow: 0 0 0 rgba(255, 211, 77, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; transition: none; }
+  #system.glow { animation: none; outline: 3px solid var(--accent); }
+}
+#gallery button { padding: 8px 14px; line-height: 1.2; }
+#gallery button.ghost { font-size: 12px; }
+#gallery #gallery-close { font-size: 18px; padding: 2px 10px; }
+#gallery .egg-card { padding: 8px; }

@@ -162,6 +162,7 @@ function showSystem(s, detail) {
 
 // Only unscored candidates orbit this star: drawn as ghosts, with their case files.
 function showUnconfirmed(s, detail) {
+  achieve('ghost');
   title.textContent = s[COL.name].toUpperCase();
   const line = SOON[Math.floor(hash(s[COL.name]) * SOON.length)];
   info.innerHTML = `
@@ -195,6 +196,7 @@ function showSoon(s) {
 
 // "Next planets": the candidates most likely to be real (worked out by the export).
 function showLeaderboard() {
+  achieve('oracle');
   selected = null;
   title.textContent = 'NEXT PLANETS';
   const pct = v => (v == null ? '-' : `${fmt(Math.round(v * 100))}%`);
