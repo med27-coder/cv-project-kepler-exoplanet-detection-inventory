@@ -7,4 +7,4 @@ K2fov==8.0.1                # scripts/starmap/make_ccd_footprint.py (Kepler CCD 
 pytest-cov==7.0.0
 mypy==1.18.2
 jupytext==1.17.3
-uv==0.9.5                   # scripts/tools/lock_requirements.py
+uv==0.11.15                 # scripts/tools/lock_requirements.py
