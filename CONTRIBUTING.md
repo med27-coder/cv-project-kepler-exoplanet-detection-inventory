@@ -26,13 +26,13 @@ flowchart LR
 
 | Stage | Script | Output |
 |---|---|---|
-| Catalog check | `scripts/check_catalog.py` | `data/interim/catalog_report.json` |
-| Light-curve views | `scripts/build_full_dataset.py` (`--candidates` for unlabelled KOIs) | `data/interim/views/` |
-| Training | `scripts/train_star_gazer.py` (resumes from checkpoints) | `models/v3/`, `results/v3/` |
-| Candidate scores | `scripts/score_candidates.py`, then `scripts/scoreboard.py record` | `results/v3/candidates.csv`, public copies in `results/v3_public/` |
-| Star map data | `scripts/export_starmap.py`, `fetch_spacecraft.py`, `make_sky_backdrop.py`, `make_sky_thumbs.py`, `make_ccd_footprint.py` | `web/data/`, `web/sky*` |
-| Cross-validation | `scripts/cross_validate.py` | `results/v3/cv_metrics.json` |
-| Everything, in order | `scripts/run_pipeline.py` (`--from <step>` to resume) | logs in `logs/pipeline/` |
+| Catalog check | `scripts/pipeline/check_catalog.py` | `data/interim/catalog_report.json` |
+| Light-curve views | `scripts/pipeline/build_full_dataset.py` (`--candidates` for unlabelled KOIs) | `data/interim/views/` |
+| Training | `scripts/pipeline/train_star_gazer.py` (resumes from checkpoints) | `models/v3/`, `results/v3/` |
+| Candidate scores | `scripts/pipeline/score_candidates.py`, then `scripts/pipeline/scoreboard.py record` | `results/v3/candidates.csv`, public copies in `results/v3_public/` |
+| Star map data | `scripts/starmap/export_starmap.py`, `fetch_spacecraft.py`, `make_sky_backdrop.py`, `make_sky_thumbs.py`, `make_ccd_footprint.py` | `web/data/`, `web/sky*` |
+| Cross-validation | `scripts/pipeline/cross_validate.py` | `results/v3/cv_metrics.json` |
+| Everything, in order | `scripts/pipeline/run_pipeline.py` (`--from <step>` to resume) | logs in `logs/pipeline/` |
 
 The star map's data files are described in [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md).
 
@@ -46,7 +46,7 @@ py -3.12 -m venv .venv
 ```
 
 `requirements.txt` lists what the project needs; the `.lock` files pin exact, hash-checked versions
-(regenerate them with `scripts/lock_requirements.py` after changing a requirements file).
+(regenerate them with `scripts/tools/lock_requirements.py` after changing a requirements file).
 
 ## Before opening a pull request
 
@@ -60,7 +60,7 @@ CI runs the same checks (plus the star map in headless Chromium).
 
 ## Working on the star map
 
-- Edit `web/src/*.js`, never `web/starmap.js`: run `scripts/build_web.py` to rebuild it (a test fails if
+- Edit `web/src/*.js`, never `web/starmap.js`: run `scripts/starmap/build_web.py` to rebuild it (a test fails if
   they drift apart). The page is one classic script so it also works opened straight from disk.
 - The page has a strict Content Security Policy: no inline scripts or styles, no external scripts.
   Write values into the page through `esc()` / `fmt()`.

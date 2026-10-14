@@ -13,7 +13,7 @@ Priority: **P1** do next · **P2** worth it · **P3** nice to have
 ## Status (13 October 2026)
 
 **Done** (all items below unless listed under "Still open"): split, authenticated encryption with
-verify / rotate / passphrase keys; training checkpoints and resume; `scripts/run_pipeline.py`;
+verify / rotate / passphrase keys; training checkpoints and resume; `scripts/pipeline/run_pipeline.py`;
 catalog sanity report; prediction scoreboard; monthly data-refresh and weekly NASA schema workflows;
 every candidate drawn with case files and a "next planets" leaderboard; details loaded on demand;
 pre-made sky photos for the spotlight systems; zoom-scaled sprites, pinch zoom, shareable view links,
@@ -52,7 +52,7 @@ and the data dictionary; Gaia ablation and TESS transfer scripts (run after trai
 | | Idea | Why | Effort |
 |---|---|---|---|
 | **P1** | **Checkpoint and resume training**: save each ensemble member and each diagnostic run as it finishes, and skip finished ones on restart. | A PC restart on 2026-10-13 threw away a partly finished run; the trainer always starts from zero. | 🟡 |
-| **P1** | **Commit the pipeline script** (`build/readme/pipeline.sh`, which is git-ignored) as `scripts/run_pipeline.py`: train → score → export → CV, with logs. | Makes a full V3 rebuild reproducible for anyone, not just this PC. | 🟢 |
+| **P1** | **Commit the pipeline script** (`build/readme/pipeline.sh`, which is git-ignored) as `scripts/pipeline/run_pipeline.py`: train → score → export → CV, with logs. | Makes a full V3 rebuild reproducible for anyone, not just this PC. | 🟢 |
 | **P2** | **Gaia features ablation**: add Berger 2020 radius, mass, density and luminosity (already in `data/raw/berger2020_gaia_kepler.csv`, matching 92.7% of KOIs) as model inputs; keep them only if grouped CV improves. | Better stellar parameters help separate eclipsing binaries from planets. | 🟡 |
 | **P2** | **Prediction scoreboard**: save each run's candidate scores with a date. When NASA later confirms or rejects a candidate, record whether Star Gazer was right. | An honest test on planets the model never saw. | 🟡 |
 | **P2** | **Monthly data refresh** (scheduled GitHub Action): re-download the NASA tables, re-export the map, open a PR if anything changed. | Keeps the map current without manual work; feeds the scoreboard. | 🟡 |
@@ -108,7 +108,7 @@ The current measures are listed in [SECURITY.md](../SECURITY.md): strict CSP, es
 
 ## 6. Encryption and secrets
 
-The current design (`scripts/secure_artifacts.py`) is sound: AES-256-GCM with a random 96-bit nonce, a magic header as associated data, and extraction limited to `models/v3` / `results/v3` with Python's `data` filter (no path tricks).
+The current design (`scripts/tools/secure_artifacts.py`) is sound: AES-256-GCM with a random 96-bit nonce, a magic header as associated data, and extraction limited to `models/v3` / `results/v3` with Python's `data` filter (no path tricks).
 
 | | Idea | Why | Effort |
 |---|---|---|---|

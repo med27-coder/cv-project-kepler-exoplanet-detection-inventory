@@ -1,6 +1,6 @@
 """Draw the star map's social preview image (web/og.png, 1200×630) from web/data/systems.js.
 
-    .venv\\Scripts\\python scripts\\make_og_image.py
+    .venv\\Scripts\\python scripts\\starmap\\make_og_image.py
 
 Run it after export_starmap.py. Uses the same projection and colours as web/starmap.js, so the
 preview shows the real map: every star is a pixel, spotlight systems in gold.
@@ -14,7 +14,7 @@ from pathlib import Path
 import matplotlib
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / 'web' / 'data' / 'systems.js'
 OUT = ROOT / 'web' / 'og.png'
 W, H = 1200, 630
@@ -84,7 +84,7 @@ def draw(data):
 
 def main():
     if not DATA.exists():
-        sys.exit('web/data/systems.js not found; run scripts/export_starmap.py first.')
+        sys.exit('web/data/systems.js not found; run scripts/starmap/export_starmap.py first.')
     img = draw(load())
     img.save(OUT, optimize=True)
     print(f'Saved {OUT.relative_to(ROOT)} ({OUT.stat().st_size / 1024:.0f} KB)')

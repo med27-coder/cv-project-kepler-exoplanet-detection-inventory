@@ -6,7 +6,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / 'scripts' / 'pipeline'
 
 
 @pytest.fixture
@@ -55,7 +56,7 @@ def test_pipeline_runner_steps_and_stop_on_failure(scripts, tmp_path, monkeypatc
     run = scripts('run_pipeline')
     assert list(run.STEPS)[:4] == ['check', 'views', 'candidates', 'train']
     for cmd in run.STEPS.values():
-        assert (SCRIPTS.parent / cmd[0]).exists(), cmd
+        assert (ROOT / cmd[0]).exists(), cmd
     monkeypatch.setattr(run, 'LOGS', tmp_path)
     monkeypatch.setattr(run, 'STEPS', {'ok': ['-c', 'print("fine")'], 'bad': ['-c', 'raise SystemExit(3)'],
                                        'never': ['-c', 'print("not reached")']})

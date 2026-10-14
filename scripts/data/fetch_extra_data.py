@@ -1,7 +1,7 @@
 """Download extra public datasets for later Star Gazer experiments (roadmap Phase 7).
 
-    .venv\\Scripts\\python scripts\\fetch_extra_data.py            # all sources below
-    .venv\\Scripts\\python scripts\\fetch_extra_data.py gaia_stars
+    .venv\\Scripts\\python scripts\\data\\fetch_extra_data.py            # all sources below
+    .venv\\Scripts\\python scripts\\data\\fetch_extra_data.py gaia_stars
 
 gaia_stars: Berger et al. 2020 (AJ 159, 280), stellar properties of ~186,000 Kepler stars
             derived with Gaia DR2 parallaxes: radius, mass, Teff, logg, [Fe/H], density,

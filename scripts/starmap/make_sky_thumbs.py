@@ -1,6 +1,6 @@
 """Pre-made sky photos for the star map's spotlight systems (web/sky/*.jpg).
 
-    .venv\\Scripts\\python scripts\\make_sky_thumbs.py
+    .venv\\Scripts\\python scripts\\starmap\\make_sky_thumbs.py
 
 The page shows a 40x40 photo of the sky around each system, fetched live from the CDS hips2fits
 service. For the spotlight systems (the quick-pick buttons, where most visits start) the same
@@ -16,7 +16,7 @@ from pathlib import Path
 
 from make_og_image import DATA, load
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'web' / 'sky'
 HIPS2FITS = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits'
 SURVEYS = {'dss2': 'CDS/P/DSS2/color', 'ps1': 'CDS/P/PanSTARRS/DR1/color-z-zg-g', '2mass': 'CDS/P/2MASS/color'}

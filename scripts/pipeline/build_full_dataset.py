@@ -2,10 +2,10 @@
 from ALL Kepler quarters for every labelled KOI (CONFIRMED + FALSE POSITIVE) in the
 NASA cumulative catalog.
 
-    .venv\\Scripts\\python scripts\\build_full_dataset.py                # all ~6,600 stars
-    .venv\\Scripts\\python scripts\\build_full_dataset.py --limit 20     # quick test
-    .venv\\Scripts\\python scripts\\build_full_dataset.py --workers 4
-    .venv\\Scripts\\python scripts\\build_full_dataset.py --candidates   # unlabelled CANDIDATE KOIs
+    .venv\\Scripts\\python scripts\\pipeline\\build_full_dataset.py                # all ~6,600 stars
+    .venv\\Scripts\\python scripts\\pipeline\\build_full_dataset.py --limit 20     # quick test
+    .venv\\Scripts\\python scripts\\pipeline\\build_full_dataset.py --workers 4
+    .venv\\Scripts\\python scripts\\pipeline\\build_full_dataset.py --candidates   # unlabelled CANDIDATE KOIs
 
 Resumable: KOIs that already have a current-version view in data/interim/views/ are
 skipped. Stars that could not be downloaded are listed in _failed.txt and KOIs that could
@@ -48,7 +48,7 @@ def main():
                         help='retry stars in _failed.txt and KOIs in _skipped.txt')
     parser.add_argument('--candidates', action='store_true',
                         help='build views for the unlabelled CANDIDATE KOIs instead '
-                             '(scripts/score_candidates.py)')
+                             '(scripts/pipeline/score_candidates.py)')
     args = parser.parse_args()
 
     try:

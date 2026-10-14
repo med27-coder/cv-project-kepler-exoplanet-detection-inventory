@@ -1,7 +1,7 @@
 """Score the unlabelled CANDIDATE KOIs with the trained Star Gazer model.
 
-    .venv\\Scripts\\python scripts\\build_full_dataset.py --candidates   # once: views for the candidates
-    .venv\\Scripts\\python scripts\\score_candidates.py
+    .venv\\Scripts\\python scripts\\pipeline\\build_full_dataset.py --candidates   # once: views for the candidates
+    .venv\\Scripts\\python scripts\\pipeline\\score_candidates.py
 
 Writes results/v3/candidates.csv (every candidate, most planet-like first), candidates.png
 (score distribution and agreement with NASA's Robovetter koi_score, which is NOT a model
@@ -49,7 +49,7 @@ def main():
         sys.exit(str(e))
     ds = S.load_dataset(dispositions=['CANDIDATE'])
     if len(ds['names']) == 0:
-        sys.exit('No candidate views found; run scripts/build_full_dataset.py --candidates first.')
+        sys.exit('No candidate views found; run scripts/pipeline/build_full_dataset.py --candidates first.')
     feats = pre.transform(ds['table'])
     idx = np.arange(len(ds['names']))
     prob = S.predict(models, lambda m: S.model_inputs(m, ds, idx, feats))

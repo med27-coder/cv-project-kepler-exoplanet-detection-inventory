@@ -1,4 +1,4 @@
-"""Tests for scripts/export_starmap.py (the data behind the web/ pixel star map)."""
+"""Tests for scripts/starmap/export_starmap.py (the data behind the web/ pixel star map)."""
 
 import importlib
 import json
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
+SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts' / 'starmap'
 
 
 @pytest.fixture

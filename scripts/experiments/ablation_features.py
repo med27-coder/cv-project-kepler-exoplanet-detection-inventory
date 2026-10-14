@@ -1,7 +1,7 @@
 """Feature ablations for Star Gazer (run after training): what changes if inputs are added or removed?
 
-    .venv\\Scripts\\python scripts\\ablation_features.py gaia            [--threads 10]
-    .venv\\Scripts\\python scripts\\ablation_features.py no-koi-count    [--threads 10]
+    .venv\\Scripts\\python scripts\\experiments\\ablation_features.py gaia            [--threads 10]
+    .venv\\Scripts\\python scripts\\experiments\\ablation_features.py no-koi-count    [--threads 10]
 
 gaia:          adds Berger et al. 2020's Gaia-based stellar properties (radius, mass, density,
                luminosity, temperature, gravity, metallicity, age, distance).
@@ -26,6 +26,7 @@ import pandas as pd
 from kepler_cnn import config as C
 from kepler_cnn import star_gazer as S
 from kepler_cnn import terms
+from kepler_cnn import training as T
 from kepler_cnn.runtime import limit_tf_threads, low_priority
 
 GAIA_FILE = C.RAW_DIR / 'berger2020_gaia_kepler.csv'
@@ -44,7 +45,7 @@ def variant_columns(variant, ds):
     """(feature columns, a note) for the variant; may add columns to ds['table']."""
     if variant == 'gaia':
         if not GAIA_FILE.exists():
-            sys.exit('Gaia table missing: run scripts/fetch_extra_data.py gaia_stars')
+            sys.exit('Gaia table missing: run scripts/data/fetch_extra_data.py gaia_stars')
         ds['table'] = add_gaia(ds['table'], pd.read_csv(GAIA_FILE))
         coverage = float(ds['table'][GAIA_FEATURES[0]].notna().mean())
         return S.FEATURES + GAIA_FEATURES, f'Gaia matched for {coverage:.0%} of KOIs'
@@ -66,7 +67,6 @@ def main():
         sys.exit('Needs results/v3/metrics.json: train first.')
     low_priority()
     limit_tf_threads(args.threads)
-    import train_star_gazer as T  # same folder; reuses fit_one (checkpointed) and score
 
     ds = S.load_dataset()
     columns, note = variant_columns(args.variant, ds)

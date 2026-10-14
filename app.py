@@ -6,7 +6,7 @@
     python app.py --host 0.0.0.0                 # listen on all interfaces (e.g. a Hugging Face Space)
 
 --model v3 (default when trained) is the Star Gazer hybrid model: all-quarter
-global/local views + NASA catalog features (scripts/train_star_gazer.py).
+global/local views + NASA catalog features (scripts/pipeline/train_star_gazer.py).
 --model v2 / v1_5 serve the single-quarter 1D CNN (notebooks/Exoplanet_Detection_V2.ipynb).
 """
 
@@ -181,7 +181,7 @@ def main():
     if args.model == 'v3':
         if not S.MODEL_FILE.exists():
             sys.exit(f'No Star Gazer model at {C.rel(S.MODEL_FILE)}. '
-                     'Run scripts/train_star_gazer.py first.')
+                     'Run scripts/pipeline/train_star_gazer.py first.')
         try:
             models, pre, threshold = S.load_trained(allow_stale=args.allow_stale)
         except S.StaleModelError as e:

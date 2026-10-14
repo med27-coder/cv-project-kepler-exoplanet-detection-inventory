@@ -1,8 +1,8 @@
 """Copy files saved by the Colab notebooks (Drive folder `exoplanet_checkpoints`)
 into the project layout, so nothing has to be downloaded again.
 
-    .venv\\Scripts\\python scripts\\import_colab_checkpoints.py "C:\\path\\to\\exoplanet_checkpoints"
-    .venv\\Scripts\\python scripts\\import_colab_checkpoints.py <folder> --dry-run
+    .venv\\Scripts\\python scripts\\data\\import_colab_checkpoints.py "C:\\path\\to\\exoplanet_checkpoints"
+    .venv\\Scripts\\python scripts\\data\\import_colab_checkpoints.py <folder> --dry-run
 
 Recognised top-level files (anything else is listed and left alone):
     X_raw.npy, y_raw.npy            -> data/processed/v2/    (Colab "V3" run; duplicates removed)

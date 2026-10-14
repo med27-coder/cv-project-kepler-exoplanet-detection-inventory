@@ -1,7 +1,7 @@
 """Prediction scoreboard: was Star Gazer right about the candidates NASA has since decided?
 
-    .venv\\Scripts\\python scripts\\scoreboard.py record    # after score_candidates.py
-    .venv\\Scripts\\python scripts\\scoreboard.py check     # any time later (downloads NASA's table)
+    .venv\\Scripts\\python scripts\\pipeline\\scoreboard.py record    # after score_candidates.py
+    .venv\\Scripts\\python scripts\\pipeline\\scoreboard.py check     # any time later (downloads NASA's table)
 
 record: saves the current candidate scores as public files (the same numbers the star map shows,
 never the model): results/v3_public/candidate_scores.csv + .json (latest; the star map export
@@ -35,7 +35,7 @@ DISPOSITIONS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=se
 
 def record(_args):
     if not SCORES.exists():
-        sys.exit(f'{C.rel(SCORES)} not found; run scripts/score_candidates.py first.')
+        sys.exit(f'{C.rel(SCORES)} not found; run scripts/pipeline/score_candidates.py first.')
     scores = pd.read_csv(SCORES)[COLUMNS]
     threshold = json.loads(S.THRESHOLD_FILE.read_text())
     today = datetime.now(timezone.utc).date().isoformat()

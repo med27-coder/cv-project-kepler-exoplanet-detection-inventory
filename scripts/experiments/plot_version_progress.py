@@ -1,6 +1,6 @@
 """Draw the README chart comparing test metrics across project versions (V1 -> V3).
 
-    .venv\\Scripts\\python scripts\\plot_version_progress.py
+    .venv\\Scripts\\python scripts\\experiments\\plot_version_progress.py
 
 V1 and V1.5 numbers come from the original Colab runs (no metrics file survives);
 V2 and V3 are read from results/v2/metrics.json and results/v3/metrics.json
@@ -19,7 +19,7 @@ matplotlib.use('Agg')
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'results'
 
 # Test-set metrics at the 0.5 threshold, plus the number of usable light curves.

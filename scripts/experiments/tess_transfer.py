@@ -1,6 +1,6 @@
 """Does Star Gazer still recognise Kepler planets in data from a different telescope? (TESS)
 
-    .venv\\Scripts\\python scripts\\tess_transfer.py [--limit 40] [--sectors 4]
+    .venv\\Scripts\\python scripts\\experiments\\tess_transfer.py [--limit 40] [--sectors 4]
     (add --prefetch to only download the light curves; no model needed)
 
 NASA's TESS satellite re-observed part of the Kepler field. For each Kepler planet that TESS saw

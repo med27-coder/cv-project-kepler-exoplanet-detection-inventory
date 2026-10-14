@@ -19,7 +19,7 @@ const offY = (MH - (Math.max(...ys) - yMin) * scale) / 2;
 const home = STARS.map((s, i) => [offX + (xs[i] - xMin) * scale, offY + (ys[i] - yMin) * scale]);
 const toHome = (ra, dec) => [offX + (-ra * cosd - xMin) * scale, offY + (-dec - yMin) * scale];
 
-// Kepler's 21 CCD modules (data/ccd.js, scripts/make_ccd_footprint.py): why the stars sit in squares.
+// Kepler's 21 CCD modules (data/ccd.js, scripts/starmap/make_ccd_footprint.py): why the stars sit in squares.
 const CCD = (window.STARMAP_CCD || []).map(poly => poly.map(([ra, dec]) => toHome(ra, dec)));
 let showCcd = true;
 
@@ -70,7 +70,7 @@ const toCanvas = ([x, y]) => [Math.round((x - view.cx) * view.zoom + MW / 2),
                               Math.round((y - view.cy) * view.zoom + MH / 2)];
 const toMap = (sx, sy) => [(sx - MW / 2) / view.zoom + view.cx, (sy - MH / 2) / view.zoom + view.cy];
 
-// The real Milky Way behind the stars: Gaia DR3, pixelated, made by scripts/make_sky_backdrop.py
+// The real Milky Way behind the stars: Gaia DR3, pixelated, made by scripts/starmap/make_sky_backdrop.py
 // in this map's projection (it covers the map at zoom 1). The map works without it.
 const sky = new Image();
 sky.addEventListener('load', () => renderBase());

@@ -40,14 +40,14 @@ jobs:
       - name: Download the NASA catalog and Gaia stellar properties
         run: |
           python -c "from kepler_cnn import star_gazer as S; S.load_catalog()"
-          python scripts/fetch_extra_data.py gaia_stars
+          python scripts/data/fetch_extra_data.py gaia_stars
       - name: Re-export the star map (downloads the planet and TESS tables)
-        run: python scripts/export_starmap.py
+        run: python scripts/starmap/export_starmap.py
       - name: Update spacecraft positions
-        run: python scripts/fetch_spacecraft.py
+        run: python scripts/starmap/fetch_spacecraft.py
       - name: Check the prediction scoreboard
         run: |
-          if ls results/scoreboard/scores_*.csv >/dev/null 2>&1; then python scripts/scoreboard.py check; fi
+          if ls results/scoreboard/scores_*.csv >/dev/null 2>&1; then python scripts/pipeline/scoreboard.py check; fi
       - name: Open a pull request with the changes
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
         with:

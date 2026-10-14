@@ -1,5 +1,5 @@
 # Weekly check that NASA's Exoplanet Archive tables still have every column this project reads
-# (scripts/check_nasa_schema.py), so a renamed column is caught before a refresh or rebuild breaks.
+# (scripts/data/check_nasa_schema.py), so a renamed column is caught before a refresh or rebuild breaks.
 name: nasa-schema
 
 on:
@@ -22,4 +22,4 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check the NASA tables
-        run: python scripts/check_nasa_schema.py   # standard library only
+        run: python scripts/data/check_nasa_schema.py   # standard library only

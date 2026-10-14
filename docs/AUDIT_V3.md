@@ -48,6 +48,6 @@ planets vs false positives, on stars never seen in training.
 
 Design choices are now frozen (features, architecture, ensemble of 5, view version 3, threshold rule).
 The cleanest test is KOIs NASA decides *after* the 6 October 2026 catalog snapshot, which no run has ever
-seen. `scripts/scoreboard.py` records every candidate's score with a date and checks them against
+seen. `scripts/pipeline/scoreboard.py` records every candidate's score with a date and checks them against
 NASA's later dispositions; the monthly `data-refresh` workflow runs that check. On 14 October none had
 been decided yet.

@@ -15,8 +15,8 @@ bounty, but credit is given in the fix's commit message if you'd like.
 | Part | Where | Notes |
 |---|---|---|
 | Kepler Star Map | `web/`, published on GitHub Pages | Static site: no server code, no accounts, no cookies |
-| Star Gazer web demo | `app.py`, `scripts/make_hf_space.py` | Gradio app; runs locally or on a Hugging Face Space |
-| Encrypted model bundle | `secure/`, `scripts/secure_artifacts.py` | AES-256-GCM; the key is never committed |
+| Star Gazer web demo | `app.py`, `scripts/tools/make_hf_space.py` | Gradio app; runs locally or on a Hugging Face Space |
+| Encrypted model bundle | `secure/`, `scripts/tools/secure_artifacts.py` | AES-256-GCM; the key is never committed |
 | CI workflows | `.github/workflows/` | |
 
 Out of scope: the NASA, MAST and CDS services the project downloads from, and the accuracy of
@@ -64,7 +64,7 @@ model predictions (an educational model, not a scientific classification; see
 - GitHub Actions are pinned to commit SHAs and run with the minimum permissions they need;
   checkouts don't keep the token.
 - Python dependencies are locked with SHA-256 hashes (`requirements.lock`,
-  `requirements-dev.lock`, made by `scripts/lock_requirements.py`); CI installs with
+  `requirements-dev.lock`, made by `scripts/tools/lock_requirements.py`); CI installs with
   `--require-hashes`, so a tampered or swapped package file is refused.
 - Dependabot opens weekly update PRs for the actions and security fixes for Python dependencies.
 - `dependency-audit` checks the locked versions against the PyPA advisory database weekly.

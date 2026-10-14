@@ -17,7 +17,7 @@ Status key: `[x]` done · `[ ]` to do · `[~]` started.
 ## Phase 1: Foundations (static page, real data) ✅
 
 - [x] Roadmap (this file)
-- [x] `scripts/export_starmap.py`: NASA tables → `web/data/systems.js`
+- [x] `scripts/starmap/export_starmap.py`: NASA tables → `web/data/systems.js`
 - [x] `web/index.html` + `web/starmap.js` + `web/style.css`
   - pixel map of the Kepler field (RA/Dec); spotlight systems twinkle
   - search: `Kepler-90`, `KOI-351`, `K00351.01` or a Kepler ID; shareable links (`#Kepler-90`)
@@ -95,7 +95,7 @@ one at a time, and keep a change only if grouped CV improves.
 
 - [x] NASA confirmed-planet table (`pscomppars`), used by the map (`data/raw/ps_kepler_planets.csv`)
 - [~] **Gaia-based stellar properties** (Berger et al. 2020, VizieR J/AJ/159/280): downloaded by
-      `scripts/fetch_extra_data.py` to `data/raw/berger2020_gaia_kepler.csv` (186,301 stars; 92.7% of KOIs
+      `scripts/data/fetch_extra_data.py` to `data/raw/berger2020_gaia_kepler.csv` (186,301 stars; 92.7% of KOIs
       match). Next: add them as features (radius, mass, density, luminosity) next to the KOI-table
       values and re-run the ablation.
 - [ ] **Kepler DR25 simulated light curves** (injected transits, inverted and scrambled light curves,
@@ -112,7 +112,7 @@ Everything here is from official, openly usable sources and stays light (no stor
 except one 18 KB backdrop):
 
 - [x] **Real Milky Way behind the map**: ESA Gaia DR3 colour map of the Kepler field, cut out by CDS
-      hips2fits in the map's own projection (`scripts/make_sky_backdrop.py` → `web/sky.png`), blurred and
+      hips2fits in the map's own projection (`scripts/starmap/make_sky_backdrop.py` → `web/sky.png`), blurred and
       reduced to 10 colours. Registration checked against δ Cygni on DSS2 (same pixel).
 - [x] **Sky photo switcher**: DSS2 / Pan-STARRS1 / 2MASS-infrared thumbnails per system (40×40,
       fetched on demand from CDS; the CSP already allowed only that host).
@@ -143,7 +143,7 @@ except one 18 KB backdrop):
 
 - [x] **Easter eggs: spacecraft and the ISS.** *spacecraft*, *JWST*, *Voyager*, *rovers*... freezes the Solar
       System on one real date with the planets and 19 spacecraft beyond Earth orbit where NASA JPL Horizons
-      puts them (`scripts/fetch_spacecraft.py` → `web/data/spacecraft.js`), plus the Mars rovers' landing
+      puts them (`scripts/starmap/fetch_spacecraft.py` → `web/data/spacecraft.js`), plus the Mars rovers' landing
       sites. *ISS* / *space station*: a pixel Earth with the station on a to-scale orbit and NASA's facts.
       Earth-orbit satellites are left out on purpose.
 

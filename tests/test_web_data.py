@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 WEB = Path(__file__).resolve().parents[1] / 'web'
-MAX_BYTES = 400_000   # same budget as scripts/export_starmap.py (the index loaded up front)
+MAX_BYTES = 400_000   # same budget as scripts/starmap/export_starmap.py (the index loaded up front)
 COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois', 'sg',
            'np', 'nconf', 'tags', 'chunk', 'dist']
 CHUNK_MAX_BYTES = 150_000
@@ -100,7 +100,7 @@ def test_page_assets_exist():
 
 
 def test_sky_backdrop():
-    """web/sky.png (scripts/make_sky_backdrop.py) covers the 192-px map, one pixel per map pixel
+    """web/sky.png (scripts/starmap/make_sky_backdrop.py) covers the 192-px map, one pixel per map pixel
     and stays small; starmap.js loads it from the site itself (no third-party request)."""
     png = (WEB / 'sky.png').read_bytes()
     assert png[:8] == bytes.fromhex('89504e470d0a1a0a') and len(png) < 100_000
@@ -110,16 +110,16 @@ def test_sky_backdrop():
 
 
 def test_starmap_js_is_built_from_src():
-    """web/starmap.js is generated from web/src/*.js by scripts/build_web.py; they must agree."""
+    """web/starmap.js is generated from web/src/*.js by scripts/starmap/build_web.py; they must agree."""
     import importlib.util
-    spec = importlib.util.spec_from_file_location('build_web', WEB.parent / 'scripts' / 'build_web.py')
+    spec = importlib.util.spec_from_file_location('build_web', WEB.parent / 'scripts' / 'starmap' / 'build_web.py')
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    assert (WEB / 'starmap.js').read_text(encoding='utf-8') == mod.build(), 'run scripts/build_web.py'
+    assert (WEB / 'starmap.js').read_text(encoding='utf-8') == mod.build(), 'run scripts/starmap/build_web.py'
 
 
 def test_spacecraft_snapshot():
-    """data/spacecraft.js (scripts/fetch_spacecraft.py): spacecraft beyond Earth orbit only."""
+    """data/spacecraft.js (scripts/starmap/fetch_spacecraft.py): spacecraft beyond Earth orbit only."""
     text = (WEB / 'data' / 'spacecraft.js').read_text(encoding='utf-8')
     data = json.loads(text[text.index('{'):text.rindex('}') + 1])
     assert set(data['planets']) == {'Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'}

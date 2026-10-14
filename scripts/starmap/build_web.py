@@ -1,7 +1,7 @@
 """Build web/starmap.js from the readable parts in web/src/.
 
-    .venv\\Scripts\\python scripts\\build_web.py            # write web/starmap.js
-    .venv\\Scripts\\python scripts\\build_web.py --check    # exit 1 if web/starmap.js is out of date (CI)
+    .venv\\Scripts\\python scripts\\starmap\\build_web.py            # write web/starmap.js
+    .venv\\Scripts\\python scripts\\starmap\\build_web.py --check    # exit 1 if web/starmap.js is out of date (CI)
 
 The page loads one classic script so it also works opened straight from disk (file://), where
 ES modules are blocked. The parts are plain top-level JavaScript, joined in file-name order inside
@@ -13,14 +13,14 @@ import argparse
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / 'web' / 'src'
 OUT = ROOT / 'web' / 'starmap.js'
 
 HEADER = """// Kepler Star Map: pixel map of the Kepler field + pixel-art star systems.
-// Data comes from data/systems.js (scripts/export_starmap.py). Everything is drawn
+// Data comes from data/systems.js (scripts/starmap/export_starmap.py). Everything is drawn
 // procedurally on two small canvases, so a system costs a few numbers, not an image.
-// Built by scripts/build_web.py from web/src/*.js: edit those, not this file.
+// Built by scripts/starmap/build_web.py from web/src/*.js: edit those, not this file.
 (function () {
   'use strict';
 
@@ -59,7 +59,7 @@ def main():
     js = build()
     if args.check:
         if OUT.read_text(encoding='utf-8') != js:
-            sys.exit('web/starmap.js is out of date: run scripts/build_web.py')
+            sys.exit('web/starmap.js is out of date: run scripts/starmap/build_web.py')
         print('web/starmap.js is up to date')
         return
     OUT.write_text(js, encoding='utf-8', newline='\n')

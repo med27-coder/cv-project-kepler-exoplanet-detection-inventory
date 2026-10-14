@@ -1,9 +1,9 @@
 """Run the whole V3 pipeline, step by step, with a log per step.
 
-    .venv\\Scripts\\python scripts\\run_pipeline.py                  # everything
-    .venv\\Scripts\\python scripts\\run_pipeline.py --from train     # resume at a step
-    .venv\\Scripts\\python scripts\\run_pipeline.py --only export    # one step
-    .venv\\Scripts\\python scripts\\run_pipeline.py --list
+    .venv\\Scripts\\python scripts\\pipeline\\run_pipeline.py                  # everything
+    .venv\\Scripts\\python scripts\\pipeline\\run_pipeline.py --from train     # resume at a step
+    .venv\\Scripts\\python scripts\\pipeline\\run_pipeline.py --only export    # one step
+    .venv\\Scripts\\python scripts\\pipeline\\run_pipeline.py --list
 
 Steps: check (catalog sanity) -> views (labelled) -> candidates (unlabelled views) -> train ->
 score -> export (star map) -> scoreboard -> cv (cross-validation). It stops at the first failing
@@ -18,17 +18,17 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 LOGS = ROOT / 'logs' / 'pipeline'
 STEPS = {
-    'check': ['scripts/check_catalog.py', '--strict'],
-    'views': ['scripts/build_full_dataset.py'],
-    'candidates': ['scripts/build_full_dataset.py', '--candidates'],
-    'train': ['scripts/train_star_gazer.py', '--diagnostics', '--ensemble', '5'],
-    'score': ['scripts/score_candidates.py'],
-    'export': ['scripts/export_starmap.py'],
-    'scoreboard': ['scripts/scoreboard.py', 'record'],
-    'cv': ['scripts/cross_validate.py'],
+    'check': ['scripts/pipeline/check_catalog.py', '--strict'],
+    'views': ['scripts/pipeline/build_full_dataset.py'],
+    'candidates': ['scripts/pipeline/build_full_dataset.py', '--candidates'],
+    'train': ['scripts/pipeline/train_star_gazer.py', '--diagnostics', '--ensemble', '5'],
+    'score': ['scripts/pipeline/score_candidates.py'],
+    'export': ['scripts/starmap/export_starmap.py'],
+    'scoreboard': ['scripts/pipeline/scoreboard.py', 'record'],
+    'cv': ['scripts/pipeline/cross_validate.py'],
 }
 THREADED = {'train', 'cv'}   # get --threads
 
@@ -76,7 +76,7 @@ def main():
     LOGS.mkdir(parents=True, exist_ok=True)
     for name in names:
         if not run_step(name, args.threads):
-            sys.exit(f'Stopped at "{name}". Fix it, then: scripts/run_pipeline.py --from {name}')
+            sys.exit(f'Stopped at "{name}". Fix it, then: scripts/pipeline/run_pipeline.py --from {name}')
     print(f'== pipeline complete {time.strftime("%H:%M")}')
 
 

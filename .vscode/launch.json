@@ -13,7 +13,7 @@
       "name": "Import Colab checkpoints",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/scripts/import_colab_checkpoints.py",
+      "program": "${workspaceFolder}/scripts/data/import_colab_checkpoints.py",
       "args": ["${input:colabFolder}"],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}"

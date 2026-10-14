@@ -8,7 +8,7 @@ frozen (see [AUDIT_V3.md](AUDIT_V3.md)). Results are reported as measured, inclu
 **Question:** does Star Gazer still recognise Kepler planets when it sees them through a different
 telescope?
 
-**Method** (`scripts/tess_transfer.py`):
+**Method** (`scripts/experiments/tess_transfer.py`):
 - Started from the Kepler planets that NASA's TESS satellite re-detected (TOI disposition KP; same
   star within 3″, period within 1%): 93 pairs.
 - Took the first 40 and downloaded 4 TESS sectors each from MAST (SPOC / TESS-SPOC light curves).
@@ -48,7 +48,7 @@ training mix, and evaluate on TOIs that were never Kepler training data.
 **Question:** does adding Gaia's stellar properties help? And does the model lean on `koi_count`, the
 input the audit flagged as partly reflecting how NASA confirmed planets?
 
-**Method** (`scripts/ablation_features.py`): one hybrid network per variant, on the same star-grouped
+**Method** (`scripts/experiments/ablation_features.py`): one hybrid network per variant, on the same star-grouped
 split and seed as the first ensemble member, compared on the same 1,517 test KOIs. The key reference is
 the **spread of the five standard networks**, which differ only by random seed: accuracy 96.51–97.43%,
 AUC 0.9919–0.9941. A variant is only "different" if it lands outside that range.

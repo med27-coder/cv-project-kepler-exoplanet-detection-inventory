@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------- easter eggs: spacecraft and the ISS
 // "spacecraft" / "JWST" / "Voyager" / "rovers"...: the Solar System frozen on one real date, with
 // the planets and humanity's spacecraft beyond Earth orbit where NASA JPL Horizons puts them
-// (scripts/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
+// (scripts/starmap/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
 // are left out on purpose; "ISS" / "space station" opens the International Space Station instead.
 const CRAFT_QUERY = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|jwst|james webb( space telescope)?|webb|voyager( ?[12])?|new horizons|parker( solar probe)?|juno|europa clipper|rovers?|mars rovers?|curiosity|perseverance)$/i;
 const ISS_QUERY = /^(the )?(iss|international space station|space station)$/i;

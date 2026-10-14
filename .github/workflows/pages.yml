@@ -1,5 +1,5 @@
 # Publishes the pixel star map (web/) to GitHub Pages whenever it changes on main.
-# web/data/systems.js is committed (built locally by scripts/export_starmap.py), so this
+# web/data/systems.js is committed (built locally by scripts/starmap/export_starmap.py), so this
 # only uploads static files. One-time setup: repo Settings > Pages > Source: GitHub Actions.
 # Actions are pinned to commit SHAs (tag in the comment); Dependabot keeps them up to date.
 name: pages
