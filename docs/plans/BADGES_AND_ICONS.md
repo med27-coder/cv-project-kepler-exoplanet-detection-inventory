@@ -76,3 +76,13 @@ Fix: give the view its own drawing and reset the hint/controls, e.g.
 `pixel-art/icons/draft_trophy.png` (earned) and `draft_trophy_locked.png` (silhouette), 16 x 16; the grid
 and colours are in `draft_trophy.txt` in the site's row-of-letters format, ready to become the achievement
 icon that replaces the 🏆 emoji (earned: gold cup on a plum base; locked: the same shape in dark blue).
+
+## Trophy colours by difficulty (concept)
+`pixel-art/icons/draft_trophy_tiers.png`: COMMON bronze, RARE silver with a blue gem, EPIC gold with a star,
+SECRET a cosmic violet cup with galaxy speckles and a small planet on an orbit around it. Each tier also has
+its own mark (gem / star / orbit), so the difficulty doesn't rely on colour alone (colour-blind visitors).
+Locked: the dark silhouette for all tiers (secret ones stay "???" until earned).
+Suggested tiers: COMMON = one action (dice, depth, chips, eco...); RARE = a search or a find (famous worlds,
+first egg, collections of 2-3, believer/skeptic); EPIC = long or large (census 50, red planet fleet, grand
+tour, cartographer, mission control); SECRET = the six secret ones; TRUE STAR GAZER gets its own (black hole).
+The total count still drives the star-life emblem (stardust -> black hole), separately from these colours.
