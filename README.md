@@ -11,7 +11,7 @@
 
 **🗺️ [Explore the Kepler Star Map](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/)**: search any Kepler system and watch its planets orbit, in pixels.
 
-> **V3 "Star Gazer" (October 2026, training in progress):** every Kepler quarter of every labelled star (7,587 KOIs on 6,641 stars), AstroNet / ExoMiner-style views, and NASA catalog parameters in one hybrid network. The dataset is being rebuilt with a corrected view recipe; the final test results replace the ⏳ marks below when the full training run finishes. The code, tests and the Kepler Star Map are complete and live. See [Results across versions](#results-across-versions) and [How to Run](#how-to-run-vs-code). Use is subject to the [Terms of Use](TERMS_OF_USE.md).
+> **V3 "Star Gazer" (October 2026):** every Kepler quarter of every labelled star (~7,586 KOIs), AstroNet / ExoMiner-style views, and NASA catalog parameters in one hybrid network: **97.23% test accuracy, AUC 0.994**, up from 73.3% / 0.830 in V2. See [Results across versions](#results-across-versions) and [How to Run](#how-to-run-vs-code). Use is subject to the [Terms of Use](TERMS_OF_USE.md).
 
 ---
 
@@ -44,40 +44,65 @@ An automated exoplanet vetting pipeline that outputs a probability (0–1) that 
 | **V1** (Mar 2026, Colab) | One Kepler quarter per star, folded to 201 points; 320 curves | 1D CNN (AstroNet-inspired) | 59.4% accuracy, AUC 0.573 |
 | **V1.5** (May 2026, Colab) | Same, 794 curves; caching and parallel downloads | Same CNN | 70.4%, AUC 0.771 |
 | **V2** (Oct 6, 2026, VS Code) | Same, 3,576 curves; local package, duplicates removed | Same CNN | 73.3%, AUC 0.830 |
-| **V3 Star Gazer** (Oct 7, 2026) | **All quarters** per star; global, local, odd/even, secondary-eclipse and centroid views; NASA catalog parameters; 7,587 labelled KOIs | Multi-branch CNN + feature MLP | ⏳ training in progress |
+| **V3 Star Gazer** (Oct 7, 2026) | **All quarters** per star; global, local, odd/even, secondary-eclipse and centroid views; NASA catalog parameters; ~7,586 KOIs | Multi-branch CNN + feature MLP | **97.23%, AUC 0.994** |
 
 ---
 
 ## Results across versions
 
-*A chart of every version's results is added here with the final V3 numbers.*
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/version_progress_dark.png">
+  <img alt="Line charts of test accuracy, precision, recall and ROC AUC for V1, V1.5, V2 and V3, and a bar chart of usable light curves per version. Accuracy rises from 59.4% (V1) to 70.4%, 73.3% and 97.23% (V3); AUC from 0.573 to 0.771, 0.830 and 0.994." src="results/version_progress.png">
+</picture>
+
+*Regenerate with `.venv\Scripts\python scripts\plot_version_progress.py` (reads `results/v2/metrics.json` and `results/v3/metrics.json`).*
 
 | Metric | Target | V1 | V1.5 | V2 | V3 Star Gazer |
 |---|---|---|---|---|---|
-| Test Accuracy | >80% | 59.38% ❌ | 70.44% ❌ | 73.32% ❌ | ⏳ pending |
-| Test AUC | >0.85 | 0.573 ❌ | 0.771 ❌ | 0.830 ❌ | ⏳ pending |
-| Precision | >80% | 59.57% ❌ | 72.73% ❌ | 73.84% ❌ | ⏳ pending |
-| Recall | >80% | 80.00% ✅ | 73.56% ❌ | 71.55% ❌ | ⏳ pending |
+| Test Accuracy | >80% | 59.38% ❌ | 70.44% ❌ | 73.32% ❌ | **97.23%** ✅ |
+| Test AUC | >0.85 | 0.573 ❌ | 0.771 ❌ | 0.830 ❌ | **0.994** ✅ |
+| Precision | >80% | 59.57% ❌ | 72.73% ❌ | 73.84% ❌ | **95.68%** ✅ |
+| Recall | >80% | 80.00% ✅ | 73.56% ❌ | 71.55% ❌ | **96.72%** ✅ |
 | Prediction speed | <1s per curve | 7.4 ms ✅ | 7.4 ms ✅ | 9.0 ms ✅ | ✅ (after a one-time ~10 s download of the star's light curves) |
-| Test set size | — | 64 | 159 | 716 | ⏳ pending (KOIs on held-out stars) |
+| Test set size | — | 64 | 159 | 716 | 1,517 KOIs on held-out stars |
 
-All numbers are on a held-out test set at the 0.5 decision threshold. V3 numbers are added when training finishes.
+All numbers are on a held-out test set at the 0.5 decision threshold.
 
-**What changes in V3.** Three things change at once, and the ablation below will separate them:
+**How to read the jump to V3.** Three things changed at once, and the ablation below separates them:
 
 1. **All quarters instead of one.** V1–V2 folded ~90 days of data, so a planet with a long period showed one or two transits buried in noise (Kepler-90 g, P = 210 d, could not be folded at all). V3 stitches up to 18 quarters (~4 years), so every transit is averaged in.
 2. **Views that show what a false positive looks like.** Odd- vs even-transit depth, a secondary eclipse and a centroid shift are the classic signatures of eclipsing binaries, which are the most common false positives. V1–V2 could not see any of them.
 3. **NASA catalog parameters** (period, duration, depth, planet radius, stellar properties…). The columns that encode NASA's own decision (dispositions, `koi_score`, `koi_fpflag_*`) are never used as inputs.
 
-Two caveats keep the comparison honest. V3 uses every labelled KOI, so its classes are not balanced like V1–V2's 50/50 samples (4,839 of the 7,587 labelled KOIs, 64%, are false positives). It also splits **by star**: no star contributes KOIs to both training and test.
+Two caveats keep the comparison honest. V3 uses every labelled KOI, so its classes are not balanced like V1–V2's 50/50 samples (about 64% are false positives). It also splits **by star**: no star contributes KOIs to both training and test.
 
-### V3 ablation, calibration and cross-validation
+### V3 ablation: which inputs matter?
 
-⏳ pending. The full run reports, all on the same star-grouped split:
+Every variant was trained on the same star-grouped split (4,855 train / 1,214 validation / 1,517 test KOIs):
 
-- an **ablation** of the input types (light-curve views only, catalog features only, both, and both plus NASA's vetting diagnostics), to show what each contributes;
-- the **decision threshold** tuned on validation data, and the **Brier score** of the final 5-network ensemble (how well its probabilities are calibrated);
-- **grouped 5-fold cross-validation** (`scripts/cross_validate.py`), so every star is in the test set exactly once and the result does not depend on one lucky split.
+| Variant | Inputs | Test accuracy | Test AUC |
+|---|---|---|---|
+| Global + local transit view (AstroNet baseline) | light curve | 93.21% | 0.975 |
+| All light-curve views | + odd/even, centroid, secondary eclipse | 96.37% | 0.988 |
+| Catalog features only | 22 NASA catalog parameters, no light curve | 92.35% | 0.978 |
+| **Star Gazer** (final model) | all views + catalog parameters | **97.23%** | **0.994** |
+| Star Gazer + NASA diagnostics | adds NASA's Robovetter statistics (partly circular, ablation only) | 96.64% | 0.994 |
+
+**Reading the ablation.** The light-curve views carry most of the signal: the odd/even, centroid and secondary-eclipse views lift the AstroNet-style baseline from 93.2% to 96.4%. The 22 catalog numbers alone reach 92.4%, and combining both gives the best model. Two notes keep this fair. First, Star Gazer's row is the 5-network ensemble while the other rows are single networks; Star Gazer's own single networks score 96.5–97.4%, so roughly half a point of its lead comes from averaging. Second, single-split differences move by about ±0.4 points from seed to seed, so only gaps of about a point or more mean anything. Adding NASA's own Robovetter diagnostics doesn't help (96.6%, same AUC): the light curves already hold that information. Feature ablations (adding Gaia stellar properties; removing `koi_count`) are in [docs/EXPERIMENTS_V3.md](docs/EXPERIMENTS_V3.md).
+
+The decision threshold that maximises validation accuracy is 0.70. At that threshold the test accuracy is 97.63%. The web app uses this threshold.
+
+The final model is an **ensemble of 5 networks** (same architecture, different random seeds) whose probabilities are averaged. That makes it more stable and better calibrated: its Brier score is 0.021 (0 is perfect), and the calibration curve is in `results/v3/evaluation.png`.
+
+### Cross-validation: how stable is the result?
+
+A single test split can be lucky. `scripts/cross_validate.py` repeats training 5 times so that every star is in the test set exactly once (still grouped by star):
+
+| Variant | Accuracy (mean ± std) | AUC (mean ± std) |
+|---|---|---|
+| *(cross-validation is running; results will appear here)* | | |
+
+**Independently audited:** a separate review rebuilt the split, recomputed every metric and checked for leakage, test-set tuning and repeated re-runs; verdict, caveats and baselines in [docs/AUDIT_V3.md](docs/AUDIT_V3.md). In short: genuine (95% interval for accuracy ≈ 96.4–98.1%), measured on already-resolved KOIs, not on brand-new signals.
 
 ### Comparison with published models
 
@@ -85,7 +110,7 @@ Two caveats keep the comparison honest. V3 uses every labelled KOI, so its class
 |---|---|---|
 | AstroNet ([Shallue & Vanderburg 2018](https://arxiv.org/abs/1712.05044)) | Kepler DR24 TCEs, Autovetter labels; 1,523 test TCEs | AUC 0.988, precision 0.93, recall 0.95 |
 | ExoMiner ([Valizadegan et al. 2022](https://arxiv.org/abs/2111.10009)) | Kepler Q1–Q17 DR25 TCEs, cross-validated | Recall 0.936 at precision 0.99 |
-| **Star Gazer (this project)** | Kepler cumulative KOI table, CONFIRMED vs FALSE POSITIVE; test KOIs on held-out stars | ⏳ pending |
+| **Star Gazer (this project)** | Kepler cumulative KOI table, CONFIRMED vs FALSE POSITIVE; 1,517 test KOIs on held-out stars | AUC 0.994, precision 95.68%, recall 96.72%; recall 0.907 at precision 0.99 |
 
 The label sets differ (TCEs vs KOIs, Autovetter vs archive dispositions), so this is context, not a head-to-head ranking. Star Gazer also uses catalog parameters, which AstroNet does not.
 
@@ -93,11 +118,30 @@ The label sets differ (TCEs vs KOIs, Autovetter vs archive dispositions), so thi
 
 `src/kepler_cnn/saliency.py` hides one small window of a view at a time, or one catalog feature, re-runs the model and records how much P(planet) drops. Blue regions pushed the score towards "planet", red towards "false positive". The web app shows this for any KOI ("Explain this prediction").
 
-*Example saliency maps are added here with the final model.*
+![Saliency map for a confirmed planet](results/v3_public/saliency_planet.png)
+
+![Average saliency over test KOIs](results/v3_public/saliency_average.png)
+
+**What the saliency shows.** On average the evidence for "planet" sits in the transit itself: the dip in the global view and the transit window in the close-up, with the odd- and even-transit channels both supporting it (a planet's transits are identical; an eclipsing binary's alternate). The centroid channel argues slightly against "planet" when it moves, as it should. The secondary-eclipse view contributes little on average, about 1/100 of the transit's effect, because only a minority of false positives show one. Among the catalog numbers the largest effects come from the star's metallicity and the number of KOIs on the star. The independent audit flags the second as partly reflecting how NASA confirmed planets (multi-planet systems were validated in bulk). False positives also more often carry default stellar values, so part of the metallicity signal may be the same kind of bookkeeping artefact rather than astrophysics. The `no-koi-count` ablation measures it.
+
+**Through another telescope (TESS).** For 40 confirmed Kepler planets that NASA's TESS satellite saw again, views built from TESS light curves give the same verdict as Kepler's own for 85% (7 of 7 for planets never seen in training). It also exposed a weakness: these are mostly giant planets with deep transits, and even with Kepler data only 75% of them are called planets, well below the 96.7% recall on the full test set. Details: [docs/EXPERIMENTS_V3.md](docs/EXPERIMENTS_V3.md).
 
 ### Scoring the unlabelled candidates
 
-NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scripts/score_candidates.py` scores every one that has usable views and compares the result with NASA's own Robovetter score (`koi_score`, never a model input). ⏳ pending: the scores also go live on the [star map](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/), where scored candidates are coloured by Star Gazer's verdict.
+NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scripts/score_candidates.py` scores the 1,976 that have usable views: **737 (37%)** score above the threshold, and Star Gazer agrees with NASA's own Robovetter score (`koi_score`, never a model input) on 61% of them. The ten most planet-like:
+
+| KOI | Period (d) | Radius (R⊕) | Star Gazer P(planet) | NASA `koi_score` |
+|---|---|---|---|---|
+| K03444.01 | 12.67 | 0.76 | 0.999 | 1.000 |
+| K01590.01 | 12.89 | 1.93 | 0.999 | 0.998 |
+| K04032.05 | 7.24 | 0.82 | 0.999 | 0.790 |
+| K01053.02 | 46.25 | 2.46 | 0.999 | 0.908 |
+| K02926.05 | 75.73 | 3.47 | 0.999 | 0.889 |
+| K01151.05 | 21.72 | 0.80 | 0.998 | 0.795 |
+| K01590.03 | 4.75 | 1.30 | 0.998 | 0.996 |
+| K02449.01 | 53.36 | 3.41 | 0.998 | 1.000 |
+| K06132.01 | 33.32 | 13.00 | 0.998 | 0.996 |
+| K01628.03 | 37.84 | 1.76 | 0.998 | 0.000 |
 
 > These are model outputs for an educational project, **not** discoveries or classifications (see the [Terms of Use](TERMS_OF_USE.md)).
 
@@ -142,7 +186,7 @@ Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). Data files: [docs/DATA_DI
 | **Size (V1)** | 400 light curves sampled (200 per class) → 320 usable after filtering |
 | **Size (V1.5)** | 1,000 light curves sampled (500 per class) → 794 usable after filtering |
 | **Size (V2)** | 4,000 light curves sampled (2,000 per class) → 3,576 unique usable curves (1,771 planets, 1,805 false positives) |
-| **Size (V3)** | **All** 7,587 labelled KOIs (2,748 planets, 4,839 false positives) on 6,641 stars; the number with usable views is added after the rebuild |
+| **Size (V3)** | **All** 7,587 labelled KOIs → 7,586 with usable views (2,748 planets, 4,838 false positives) on 6,640 stars |
 | **Quality filters (V1–V2)** | Download success, NaN rate <10%, signal variance check, final NaN sanitisation |
 | **Processing (V3)** | Quality-flagged cadences removed, per-quarter normalisation, all known transits masked, Savitzky–Golay detrending, 3σ upward-outlier clipping, then six binned views per KOI ([details](data/README.md#v3-star-gazer-data)) |
 | **NASA Archive** | https://exoplanetarchive.ipac.caltech.edu |
@@ -232,7 +276,7 @@ The project evolved across four versions. V2 began as a Colab notebook titled "V
 | Component | V2 | V3 | Reason |
 |---|---|---|---|
 | **Light curves** | First quarter only (~90 days) | All long-cadence quarters (up to 18, ~4 years), fetched directly from MAST with retries | Long-period planets need many transits; this was V2's main known limitation |
-| **Dataset** | 3,576 curves (balanced sample) | Every CONFIRMED / FALSE POSITIVE KOI (7,587) | Use all labelled data |
+| **Dataset** | 3,576 curves (balanced sample) | Every CONFIRMED / FALSE POSITIVE KOI (7,587) → 7,586 usable | Use all labelled data |
 | **Pre-processing** | Normalise + fold | Mask all known transits, Savitzky–Golay detrend, clip outliers | Remove stellar variability without erasing the transit |
 | **Inputs** | One 201-point folded curve | Global (2001), local, odd, even, centroid and secondary views + 22 catalog parameters | Each view exposes one false-positive signature |
 | **Model** | Single 1D CNN | Multi-branch CNN + MLP (`src/kepler_cnn/star_gazer.py`) | Mirrors AstroNet / ExoMiner |
@@ -372,11 +416,11 @@ cv-project-kepler-exoplanet-detection-inventory/
 ├── models/                       ← models/<version>/ (git-ignored)
 ├── secure/                       ← star_gazer_v3.partNN.enc (encrypted model + results) + MANIFEST.json
 ├── results/
-│   ├── version_progress*.png     ← Cross-version chart (added with the final V3 results)
+│   ├── version_progress*.png     ← Cross-version chart (light / dark)
 │   ├── v1_5/                     ← Figures from the V1.5 Colab run (reported metrics)
 │   ├── v2/                       ← Figures written by the V2 notebook
 │   ├── v3/                       ← Written by the V3 scripts (git-ignored; committed encrypted)
-│   └── v3_public/                ← A few V3 figures for this README (added with the final results)
+│   └── v3_public/                ← A few V3 figures shown in this README
 └── docs/
     ├── STARMAP_PLAN.md           ← Star map roadmap
     ├── Exoplanet_CV_Portfolio_FM.pptx
@@ -404,7 +448,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 | Week 13 (V1.5 Completed) | May 8 | V1.5 finished — 70.44% accuracy, 0.771 AUC; +11% and +0.198 improvement over V1 🎉 |
 | V2 (Colab draft) | Mar 21–22 | Started V2 on Colab (titled "V3"): 2,000 KOIs per class, augmentation and diffusion experiments; not finished |
 | V2 (Completed) | Oct 6 | Migrated to VS Code with the 3,576-curve dataset: local package, resumable parallel downloads, Colab-file import, duplicate removal, corrected example KOIs, Terms of Use. 73.32% accuracy, 0.830 AUC |
-| V3 Star Gazer (In progress) | Oct 7 | All-quarter views for every labelled KOI, catalog features, multi-branch model, star-grouped split, ablation, encrypted artifacts, tests. Dataset rebuild and full training running |
+| V3 Star Gazer (Completed) | Oct 7 | All-quarter views for every labelled KOI, catalog features, multi-branch model, star-grouped split, ablation, encrypted artifacts, tests. 97.23% accuracy, 0.994 AUC — all targets met 🎉 |
 | Kepler Star Map | Oct 12 | Pixel star map of 3,611 Kepler stars and 1,975 drawn systems, live on GitHub Pages; code-review fixes; security hardening (CSP, pinned CI, CodeQL, dependency audit) |
 
 ---
@@ -424,7 +468,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 | Risk | Probability | Mitigation |
 |---|---|---|
 | Light curves with too many NaN values or gaps | High | V1–V2: 4-stage quality filter. V3: quality-flag masking, per-quarter normalisation, KOIs that cannot be folded are logged and skipped |
-| Model fails to hit accuracy targets | Being addressed in V3 (results pending) | All quarters, multi-view inputs, catalog features; ablation shows each one's contribution |
+| Model fails to hit accuracy targets | Resolved in V3 | All quarters, multi-view inputs, catalog features; ablation shows each one's contribution |
 | Information leakage (inflated scores) | Medium | Split by star; NASA disposition / score / false-positive flag columns never used; Robovetter diagnostics only in a labelled ablation |
 | NASA MAST unavailable / rate limiting | Medium | Resumable per-KOI cache, retries with backoff, modest worker count (Terms §3), failed stars logged for `--retry-failed` |
 | Web page or CI abused (script injection, compromised action, vulnerable dependency) | Low | Strict CSP and escaping; SHA-pinned actions with minimal permissions; CodeQL, pip-audit and Dependabot ([SECURITY.md](SECURITY.md)) |
