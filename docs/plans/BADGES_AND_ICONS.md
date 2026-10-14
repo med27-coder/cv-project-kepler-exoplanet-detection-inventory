@@ -60,3 +60,14 @@ so progress is visible at a glance:
 - on phones: just the emblem and the count, badges in the tab;
 - when a stage or badge is earned, it pulses once in the header as well as in the pop-up.
 Step 3 of the order above becomes "header emblem + badge row + rank-up pop-up".
+
+## Bug to fix: 🏆 next planets leaves the drawing empty
+Seen 2026-10-14: pressing **🏆 next planets** shows the candidates table, but the system drawing above it is
+blank and its hint is stale ("True scale: real distances and real sizes."). Cause: `showLeaderboard()`
+(web/src/30-info.js) never sets a scene of its own, so the canvas keeps whatever the last view left (here a
+true-scale view with nothing in frame) and the scale hint and controls aren't updated.
+Fix: give the view its own drawing and reset the hint/controls, e.g.
+- a pixel "podium" of the top candidates (mystery silhouettes with their Star Gazer score), or a slow
+  preview of the #1 candidate's system, clicking one opens it;
+- `setScene({ custom: ... })` so the zoom/scale tools hide and the hint clears (like the ISS card);
+- a browser test: open next planets after a true-scale system and check the canvas isn't blank.
