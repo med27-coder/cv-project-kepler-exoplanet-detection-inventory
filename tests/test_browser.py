@@ -125,3 +125,22 @@ def test_framed_page_shows_only_a_link(browser, site):
     frame.wait_for_load_state('load')
     assert frame.locator('a[target="_top"]').count() == 1
     assert frame.locator('#map').count() == 0
+
+
+def test_spacecraft_and_iss_easter_eggs(browser, site):
+    errors = []
+    page = open_page(browser, site + '#Spacecraft', errors)
+    page.wait_for_selector('#info table')
+    names = page.locator('#info tbody tr td:first-child').all_inner_texts()
+    assert 'Voyager 1' in names and 'James Webb Space Telescope' in names
+    assert page.locator('#sys-title').inner_text() == 'SPACECRAFT'
+    assert not page.locator('#sys-tools').is_hidden()        # zoom / FIT work on the frozen Solar System
+    page.click('#sys-fit')
+    page.goto(site + '#ISS')
+    page.wait_for_timeout(200)
+    page.evaluate("document.getElementById('query').value = 'space station';"
+                  "document.getElementById('search').requestSubmit()")
+    assert page.locator('#sys-title').inner_text() == 'INTERNATIONAL SPACE STATION'
+    assert page.locator('#sys-tools').is_hidden()             # nothing to zoom on the ISS card
+    page.wait_for_timeout(300)                                 # a few animation frames: no errors
+    assert not errors, errors

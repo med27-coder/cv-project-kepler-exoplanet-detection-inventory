@@ -35,7 +35,10 @@ const GLYPHS = {
   A: '010101111101101', U: '101101101101111', E: '111100111100111', R: '110101110101101',
   T: '111010010010010', H: '101101111101101', K: '101101110101101', M: '101111111101101',
   N: '110101101101101', C: '011100100100011', O: '010101101101010', F: '111100110100100',
-  I: '111010010010111', D: '110101101101110',
+  I: '111010010010111', D: '110101101101110', B: '110101110101110', G: '011100101101011',
+  J: '001001001101010', L: '100100100100111', P: '110101110100100', Q: '010101101110011',
+  S: '011100010001110', V: '101101101101010', W: '101101111111101', Y: '101101010010010',
+  Z: '111001010100111', '-': '000000111000000', '/': '001001010100100',
 };
 function pixelText(ctx, text, x, y, color) {
   ctx.fillStyle = color;
@@ -317,10 +320,11 @@ function drawSystem(seconds) {
     return;
   }
   if (scene.mystery) return drawMystery(seconds);
+  if (scene.custom) return scene.custom(seconds);
   sctx.fillStyle = '#070b1a';   // a blank (discarded) layer must not leave trails behind
   sctx.fillRect(0, 0, SW, SH);
   sctx.drawImage(scene.layer, 0, 0);
-  const t = REDUCED_MOTION ? 0 : seconds;
+  const t = REDUCED_MOTION || scene.frozen ? 0 : seconds;   // frozen: planets stay where they were on one date
   for (let k = 0; k < 6; k++) {   // a few background stars twinkle
     if (Math.sin(t * (0.7 + k * 0.23) + k * 2.1) > 0.6) {
       sctx.fillStyle = '#c8d0ff';
@@ -372,6 +376,7 @@ function drawSystem(seconds) {
   bodies.filter(b => !b.behind).forEach(drawPlanet);
   sctx.globalAlpha = 1;
   if (scene.ghost) pixelText(sctx, 'UNCONFIRMED', 4, 4, '#ffd34d');
+  if (scene.overlay) scene.overlay(seconds);
   sctx.fillStyle = '#070b1a';   // keep anything big out of the light-curve strip
   sctx.fillRect(0, H + 1, SW, STRIP - 1);
   sctx.drawImage(scene.layer, 0, H + 1, SW, STRIP - 1, 0, H + 1, SW, STRIP - 1);

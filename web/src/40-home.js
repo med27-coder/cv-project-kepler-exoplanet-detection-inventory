@@ -37,10 +37,13 @@ const SOLAR_ART = {
   mercury: (dx, dy, r, spin) => (hash(`me${Math.floor(dx + spin)},${dy}`) < 0.25 ? '#6f6a66' : '#9c9792'),
   venus: (dx, dy, r, spin) => (hash(`ve${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#d4c08a' : '#eadcaf'),
   earth: (dx, dy, r, spin) => {
-    if (Math.abs(dy) >= r) return '#eef6ff';                               // ice caps
-    const x = Math.floor((dx + spin) / 2), y = Math.floor((dy + r) / 2);
-    if (hash(`cl${Math.floor(dx + spin * 1.6)},${dy}`) < 0.1) return '#ffffff';   // clouds
-    const land = hash(`la${((x % 9) + 9) % 9},${y}`);
+    if (Math.abs(dy) >= r - Math.floor(r / 8)) return '#eef6ff';           // ice caps
+    // features scale with the sprite, so a big Earth gets continents rather than speckle
+    const cell = Math.max(2, Math.round(r / 5)), wrap = 9;
+    const x = Math.floor((dx + spin) / cell), y = Math.floor((dy + r) / cell);
+    const cloud = Math.max(1, Math.round(cell / 2));
+    if (hash(`cl${Math.floor((dx + spin * 1.6) / cloud)},${Math.floor(dy / cloud)}`) < 0.1) return '#ffffff';
+    const land = hash(`la${((x % wrap) + wrap) % wrap},${y}`);
     return land < 0.32 ? '#4f9a46' : land < 0.42 ? '#a98b55' : '#2f6fd0';    // forest, desert, ocean
   },
   mars: (dx, dy, r, spin) => {
@@ -85,7 +88,7 @@ function solarPlanet(ctx, x, y, p, lx, ly, t) {
     }
   }
   if (ring) planetRing(ctx, x0, y0, ring[0], ring[1], ring[2], true);
-  if (p.art === 'earth') {   // the Moon, once every 27.3 days
+  if (p.art === 'earth' && !p.noMoon) {   // the Moon, once every 27.3 days
     const a = (REDUCED_MOTION ? 1 : t) * (2 * Math.PI) / (1.5 * Math.sqrt(27.3)) * 4;
     ctx.fillStyle = '#c9c6c0';
     ctx.fillRect(Math.round(x0 + (r + 3) * Math.cos(a)), Math.round(y0 + (r + 3) * TILT * Math.sin(a)), 1, 1);
@@ -176,6 +179,8 @@ function lookup(query, updateHash = true) {
   query = String(query).slice(0, MAX_QUERY);
   if (!query.trim()) return;
   if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
+  if (ISS_QUERY.test(query.trim())) { showISS(updateHash); return; }
+  if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash); return; }
   const s = find(query);
   if (s) select(s, updateHash); else showUnknown(query);
 }

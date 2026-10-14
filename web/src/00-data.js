@@ -10,15 +10,20 @@ const chunkLoads = new Map();    // chunk number -> Promise
 window.STARMAP_DETAILS = (k, systems) => {
   for (const [name, d] of Object.entries(systems)) DETAILS.set(name, d);
 };
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const tag = document.createElement('script');
+    tag.src = src;
+    tag.addEventListener('load', resolve);
+    tag.addEventListener('error', () => { tag.remove(); reject(new Error('offline')); });
+    document.head.appendChild(tag);
+  });
+}
 function loadChunk(k) {
   if (!chunkLoads.has(k)) {
-    chunkLoads.set(k, new Promise((resolve, reject) => {
-      const tag = document.createElement('script');
-      tag.src = `data/details/${String(k).padStart(2, '0')}.js`;
-      tag.addEventListener('load', resolve);
-      tag.addEventListener('error', () => { chunkLoads.delete(k); tag.remove(); reject(new Error('offline')); });
-      document.head.appendChild(tag);
-    }));
+    const load = loadScript(`data/details/${String(k).padStart(2, '0')}.js`);
+    load.catch(() => chunkLoads.delete(k));
+    chunkLoads.set(k, load);
   }
   return chunkLoads.get(k);
 }

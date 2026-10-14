@@ -26,7 +26,7 @@ for (const evt of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart
 // whenever the page comes back, or the browser says it restored a canvas. Cheap: a few ms.
 function refreshLayers() {
   renderBase();
-  if (scene && !scene.mystery) layout();
+  if (liveScene()) layout();
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;

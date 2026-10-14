@@ -140,3 +140,7 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 | Source | File | What it is |
 |---|---|---|
 | `gaia_stars` | `raw/berger2020_gaia_kepler.csv` | Berger et al. 2020 (AJ 159, 280; VizieR J/AJ/159/280): radius, mass, Teff, logg, [Fe/H], density, luminosity, age and distance for 186,301 Kepler stars, derived with Gaia DR2 parallaxes. Credit: Berger et al. 2020 and ESA Gaia. |
+
+## Spacecraft positions (star map easter egg)
+
+`scripts/fetch_spacecraft.py` asks NASA JPL's [Horizons system](https://ssd.jpl.nasa.gov/horizons/) for the heliocentric positions of the planets and of spacecraft beyond Earth orbit on one date and writes `web/data/spacecraft.js`. Spacecraft without a published ephemeris for that date are skipped, never guessed. Re-run it to update the snapshot.
