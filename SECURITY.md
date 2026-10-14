@@ -32,8 +32,8 @@ model predictions (an educational model, not a scientific classification; see
   are ignored.
 - Clickjacking guard: GitHub Pages can't send `frame-ancestors` headers, so when another site
   frames the page it shows only a link that opens the real page.
-- Fonts are self-hosted, so no third party sees visitors' requests (only the optional sky photo
-  is fetched from CDS). No cookies, analytics or storage.
+- Fonts are self-hosted, so no third party sees visitors' requests. The only outside request is
+  the optional sky photo, fetched from CDS; the 14 featured systems' photos ship with the site. No cookies, analytics or storage.
 - Tests (`tests/test_web_data.py`) fail if the policy is loosened or inline code comes back,
   and validate the published data file.
 

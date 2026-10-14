@@ -53,9 +53,9 @@ try {
   const b = fig.querySelectorAll('button');
   ok('3 survey buttons', b.length === 3);
   b[2].click();
-  ok('survey switch to 2MASS', img.src.includes('2MASS') && b[2].getAttribute('aria-pressed') === 'true', img.src.slice(0, 120));
+  ok('survey switch to 2MASS', img.src.toUpperCase().includes('2MASS') && b[2].getAttribute('aria-pressed') === 'true', img.src.slice(0, 120));
   q.value = 'Kepler-62'; document.getElementById('search').dispatchEvent(new Event('submit', {cancelable:true}));
-  ok('survey choice kept', document.querySelector('#info .sky img').src.includes('2MASS'));
+  ok('survey choice kept', document.querySelector('#info .sky img').src.toUpperCase().includes('2MASS'));
   ok('star line has age', /billion years old/.test(document.querySelector('#info .head p').textContent), document.querySelector('#info .head p').textContent);
   ok('sunlight column', document.querySelectorAll('#info thead th').length === 8);
   const SM = window.STARMAP, C_ = Object.fromEntries(SM.columns.map((c, i) => [c, i]));

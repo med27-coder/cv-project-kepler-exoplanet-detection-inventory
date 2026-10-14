@@ -24,15 +24,19 @@ const SURVEYS = [
   ['2MASS', 'CDS/P/2MASS/color', '2MASS (infrared: cool stars and dust glow)'],
 ];
 let survey = 0;   // kept while browsing systems
-function skyUrl(ra, dec, k) {
+// Spotlight systems' photos ship with the site (scripts/make_sky_thumbs.py): no third-party request.
+const LOCAL_SKY = new Set(DATA.spotlight);
+const skySlug = name => name.toLowerCase().replace(/[^a-z0-9-]/g, '_');
+function skyUrl(ra, dec, k, name) {
+  if (name && LOCAL_SKY.has(name)) return `sky/${skySlug(name)}_${SURVEYS[k][0].toLowerCase()}.jpg`;
   return 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=' + encodeURIComponent(SURVEYS[k][1]) +
          `&width=40&height=40&fov=0.04&projection=TAN&coordsys=icrs&ra=${Number(ra)}&dec=${Number(dec)}&format=jpg`;
 }
-function skyThumb(ra, dec) {
+function skyThumb(ra, dec, name = '') {
   const buttons = SURVEYS.map(([name, , about], k) =>
     `<button type="button" data-k="${k}" title="${esc(about)}" aria-pressed="${k === survey}">${esc(name)}</button>`).join('');
-  return `<figure class="sky" data-ra="${Number(ra)}" data-dec="${Number(dec)}">
-            <img src="${esc(skyUrl(ra, dec, survey))}" width="40" height="40" loading="lazy"
+  return `<figure class="sky" data-ra="${Number(ra)}" data-dec="${Number(dec)}" data-name="${esc(name)}">
+            <img src="${esc(skyUrl(ra, dec, survey, name))}" width="40" height="40" loading="lazy"
                  referrerpolicy="no-referrer" alt="Real sky photo around the star (${esc(SURVEYS[survey][0])})">
             <figcaption>real sky</figcaption><div class="surveys">${buttons}</div></figure>`;
 }
@@ -45,7 +49,7 @@ function wireSkyThumbs() {
     img.addEventListener('error', () => { fig.hidden = true; });
     fig.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
       survey = Number(b.dataset.k);
-      img.src = skyUrl(fig.dataset.ra, fig.dataset.dec, survey);
+      img.src = skyUrl(fig.dataset.ra, fig.dataset.dec, survey, fig.dataset.name);
       img.alt = `Real sky photo around the star (${SURVEYS[survey][0]})`;
       fig.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     }));
@@ -143,7 +147,7 @@ function showSystem(s, detail) {
   if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
   const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
   info.innerHTML = `
-    <div class="head">${skyThumb(detail.ra, detail.dec)}<div>
+    <div class="head">${skyThumb(detail.ra, detail.dec, s[COL.name])}<div>
       <p>Star: ${starLine(detail)}</p>
       <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
     </div></div>
