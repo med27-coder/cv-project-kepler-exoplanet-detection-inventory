@@ -21,7 +21,34 @@
   const DATA = window.STARMAP;
   const COL = Object.fromEntries(DATA.columns.map((c, i) => [c, i]));
   const STARS = DATA.stars;
-  const SYSTEMS = DATA.systems;
+  const TAGS = DATA.tags;
+
+  // System details (star facts, planets) live in data/details/NN.js and load on demand, one chunk of
+  // ~100 systems at a time. A <script> rather than fetch(), so the page also works from file://.
+  const DETAILS = new Map();       // system name -> details
+  const chunkLoads = new Map();    // chunk number -> Promise
+  window.STARMAP_DETAILS = (k, systems) => {
+    for (const [name, d] of Object.entries(systems)) DETAILS.set(name, d);
+  };
+  function loadChunk(k) {
+    if (!chunkLoads.has(k)) {
+      chunkLoads.set(k, new Promise((resolve, reject) => {
+        const tag = document.createElement('script');
+        tag.src = `data/details/${String(k).padStart(2, '0')}.js`;
+        tag.addEventListener('load', resolve);
+        tag.addEventListener('error', () => { chunkLoads.delete(k); tag.remove(); reject(new Error('offline')); });
+        document.head.appendChild(tag);
+      }));
+    }
+    return chunkLoads.get(k);
+  }
+  // Calls done(details) right away when the chunk is already loaded (no flicker), else after loading.
+  function withDetail(s, done, failed) {
+    const name = s[COL.name];
+    if (DETAILS.has(name)) { done(DETAILS.get(name)); return; }
+    loadChunk(s[COL.chunk]).then(() => done(DETAILS.get(name)), failed);
+  }
+  const prefetch = s => { if (s && !DETAILS.has(s[COL.name])) loadChunk(s[COL.chunk]).catch(() => {}); };
   const SPOTLIGHT = [...DATA.spotlight].sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
   const SG_THRESHOLD = DATA.sg_threshold ?? 0.5;
   const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -107,26 +134,22 @@
   const starColors = STARS.map(s => {
     const mag = s[COL.kepmag] ?? 15;
     const light = Math.round(255 - Math.min(Math.max(mag - 9, 0), 8) * 14);   // brighter = lower mag
-    const hasConfirmed = SYSTEMS[s[COL.name]]?.planets.some(p => p.status === 'confirmed');
-    if (s[COL.sg] != null && !hasConfirmed) return s[COL.sg] >= SG_THRESHOLD ? MAP_COLORS.likely : MAP_COLORS.unlikely;
+    if (s[COL.sg] != null && !s[COL.nconf]) return s[COL.sg] >= SG_THRESHOLD ? MAP_COLORS.likely : MAP_COLORS.unlikely;
     if (s[COL.drawn]) return `rgb(${light - 30},${light - 15},${light})`;
     return `rgb(${light * 0.35 | 0},${light * 0.4 | 0},${light * 0.55 | 0})`;
   });
 
-  // Highlights: light up the systems that match, dim the rest. Candidates count only once
-  // Star Gazer calls them planets.
-  const isPlanet = p => p.status !== 'candidate' || p.sg_planet === true;
+  // Highlights: light up the systems that match, dim the rest. The tags are worked out by the
+  // export (candidates count only once Star Gazer calls them planets), so no details are needed.
   const HIGHLIGHTS = {
-    hz: ['habitable zone', d => {
-      const hz = habitableZone(d);
-      return Boolean(hz) && d.planets.some(p => isPlanet(p) && p.sma >= hz[0] && p.sma <= hz[1]);
-    }],
-    earth: ['Earth-sized', d => d.planets.some(p => isPlanet(p) && p.radius >= 0.7 && p.radius <= 1.5)],
-    multi: ['5+ planets', d => d.planets.filter(isPlanet).length >= 5],
-    giant: ['giant planets', d => d.planets.some(p => isPlanet(p) && p.radius >= 6)],
+    hz: ['habitable zone', TAGS.hz],
+    earth: ['Earth-sized', TAGS.earth],
+    multi: ['5+ planets', TAGS.multi],
+    giant: ['giant planets', TAGS.giant],
+    tess: ['seen by TESS', TAGS.tess],
   };
-  const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, test]]) =>
-    [key, new Set(STARS.filter(s => SYSTEMS[s[COL.name]] && test(SYSTEMS[s[COL.name]])))]));
+  const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, bit]]) =>
+    [key, new Set(STARS.filter(s => s[COL.tags] & bit))]));
   let highlight = null;
 
   // View: the map point shown at the canvas centre, and the zoom factor.
@@ -279,6 +302,7 @@
     }
     hovered = starAt(e);
     hoverLine.textContent = hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
+    prefetch(hovered);   // details are usually loaded before the click
   });
   map.addEventListener('pointerup', e => {
     const wasDrag = drag && drag.moved;
@@ -307,7 +331,7 @@
 
   function label(s) {
     const koi = s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? ` · KOI-${s[COL.koi]}` : '';
-    const state = s[COL.drawn] ? '' : ' · soon';
+    const state = s[COL.drawn] ? '' : ' · unconfirmed';
     return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}`;
   }
 
@@ -347,6 +371,8 @@
     8: '111101111101111', 9: '111101111001111', '.': '000000000000010', ' ': '000000000000000',
     A: '010101111101101', U: '101101101101111', E: '111100111100111', R: '110101110101101',
     T: '111010010010010', H: '101101111101101', K: '101101110101101', M: '101111111101101',
+    N: '110101101101101', C: '011100100100011', O: '010101101101010', F: '111100110100100',
+    I: '111010010010111', D: '110101101101110',
   };
   function pixelText(ctx, text, x, y, color) {
     ctx.fillStyle = color;
@@ -675,9 +701,14 @@
         sctx.fillRect(Math.round(b.x), Math.round(b.y) - s - 3, 1, 2);
       }
     };
+    if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);   // unconfirmed: faint, flickering
     bodies.filter(b => b.behind).forEach(drawPlanet);
+    sctx.globalAlpha = 1;
     drawStar(t, 0.75 + 0.25 * flux);
+    if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);
     bodies.filter(b => !b.behind).forEach(drawPlanet);
+    sctx.globalAlpha = 1;
+    if (scene.ghost) pixelText(sctx, 'UNCONFIRMED', 4, 4, '#ffd34d');
     sctx.fillStyle = '#070b1a';   // keep anything big out of the light-curve strip
     sctx.fillRect(0, H + 1, SW, STRIP - 1);
     sctx.drawImage(scene.layer, 0, H + 1, SW, STRIP - 1, 0, H + 1, SW, STRIP - 1);
@@ -899,6 +930,34 @@
       </table></div>`;
   }
 
+  // Plain-language reasons a candidate might not be a planet (same rules as the export's leaderboard).
+  function redFlags(p) {
+    const flags = [...(p.flags || [])];
+    if (p.snr != null && p.snr < 10) flags.push('weak signal');
+    if (p.radius != null && p.radius > 20) flags.push('too big for a planet');
+    if (p.nasa != null && p.nasa < 0.5) flags.push("NASA's vetting score is low");
+    return flags;
+  }
+
+  // One "case file" per candidate: the evidence for and against it being a real planet.
+  function caseFiles(detail) {
+    const cands = detail.planets.filter(p => p.status === 'candidate');
+    if (!cands.length) return '';
+    const pct = v => (v == null ? 'not scored yet' : `${fmt(Math.round(v * 100))}%`);
+    const items = cands.map(p => {
+      const flags = redFlags(p);
+      const good = [];
+      if (p.toi) good.push(`seen again by TESS (${esc(p.toi)})`);
+      if (p.snr != null && p.snr >= 20) good.push('strong, clear signal');
+      return `
+        <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · Star Gazer ${pct(p.sg)}${
+          p.snr != null ? ` · signal strength ${fmt(p.snr)}` : ''}
+          <br>${good.length ? `<span class="pro">✔ ${good.join(' · ')}</span> ` : ''}${
+          flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}</li>`;
+    }).join('');
+    return `<h3 class="facts-title">CASE FILES</h3><ul class="facts cases">${items}</ul>`;
+  }
+
   function showSystem(s, detail) {
     title.textContent = s[COL.name].toUpperCase();
     const count = k => detail.planets.filter(p => p.status === k).length;
@@ -912,6 +971,7 @@
         <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
       </div></div>
       ${planetTable(detail)}
+      ${caseFiles(detail)}
       <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
         star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
         planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
@@ -919,17 +979,64 @@
     setScene(buildScene(detail));
   }
 
-  function showSoon(s) {
+  // Only unscored candidates orbit this star: drawn as ghosts, with their case files.
+  function showUnconfirmed(s, detail) {
     title.textContent = s[COL.name].toUpperCase();
     const line = SOON[Math.floor(hash(s[COL.name]) * SOON.length)];
     info.innerHTML = `
       <p class="big">✦ ${esc(line.toUpperCase())} ✦</p>
+      <div class="head">${skyThumb(detail.ra, detail.dec)}<div>
+        <p>Star: ${starLine(detail)}</p>
+        <p>${plural(detail.planets.length, 'unconfirmed candidate')}, drawn as ghosts until Star Gazer scores them
+           and NASA decides · ${skyLink(detail.ra, detail.dec)}</p>
+      </div></div>
+      ${planetTable(detail)}
+      ${caseFiles(detail)}
+      <p class="note">Candidates are signals that look like transits but haven't been confirmed or ruled out ·
+        Kepler ID ${esc(detail.kepid)}</p>`;
+    wireSkyThumbs();
+    const scene = buildScene(detail);
+    scene.ghost = true;
+    setScene(scene);
+  }
+
+  // Details couldn't load (offline): the old "still in the hangar" card, from the index alone.
+  function showSoon(s) {
+    title.textContent = s[COL.name].toUpperCase();
+    info.innerHTML = `
+      <p class="big">✦ SOON TO CROSS THE STARS ✦</p>
       <div class="head">${skyThumb(s[COL.ra], s[COL.dec])}
-      <p>${esc(label(s))}. Only unconfirmed candidates orbit this star, so its pixel portrait is still in the hangar
-         until Star Gazer has scored them.</p></div>
-      <p>${skyLink(s[COL.ra], s[COL.dec])} · ${fmt(Object.keys(SYSTEMS).length)} systems are already drawn; try one above.</p>`;
+      <p>${esc(label(s))}. This system's details couldn't be loaded right now; check your connection and try again.</p></div>
+      <p>${skyLink(s[COL.ra], s[COL.dec])}</p>`;
     wireSkyThumbs();
     setScene({ mystery: true });
+  }
+
+  // "Next planets": the candidates most likely to be real (worked out by the export).
+  function showLeaderboard() {
+    selected = null;
+    title.textContent = 'NEXT PLANETS';
+    const pct = v => (v == null ? '-' : `${fmt(Math.round(v * 100))}%`);
+    const table = (rows, caption) => !rows.length ? '' : `
+      <h3 class="facts-title">${esc(caption)}</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Candidate</th><th>System</th><th class="num">Size (Earths)</th>
+          <th class="num">NASA vetting</th><th class="num">Star Gazer</th></tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td>${esc(r.planet)}</td>
+          <td><button type="button" class="linkish" data-name="${esc(r.system)}">${esc(r.system)}</button></td>
+          <td class="num">${fmt(r.radius, 1)}</td><td class="num">${pct(r.nasa)}</td><td class="num">${pct(r.sg)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    info.innerHTML = `
+      <p>Unconfirmed candidates most likely to be real planets: NASA's own vetting and Star Gazer agree, and
+         nothing in their case file looks wrong (no weak signal, not too big, no NASA warning flags).</p>
+      ${table(DATA.leaderboard.top, 'TOP CANDIDATES')}
+      ${table(DATA.leaderboard.hz, 'IN THE HABITABLE ZONE')}
+      <p class="note">Educational ranking, not a scientific classification. Click a system to open it.</p>`;
+    info.querySelectorAll('button[data-name]').forEach(b =>
+      b.addEventListener('click', () => { const s = byName.get(b.dataset.name.toLowerCase()); if (s) choose(s); }));
+    setScene(null);
   }
 
   function showUnknown(query) {
@@ -1099,10 +1206,18 @@
     if (updateHash) history.replaceState(null, '', '#Sun');
   }
 
+  let selectToken = 0;   // a slow chunk load must not overwrite a newer selection
   function select(s, updateHash = true) {
     selected = s;
-    const detail = SYSTEMS[s[COL.name]];
-    if (detail) showSystem(s, detail); else showSoon(s);
+    const token = ++selectToken;
+    withDetail(s, detail => {
+      if (token !== selectToken) return;
+      if (s[COL.drawn]) showSystem(s, detail); else showUnconfirmed(s, detail);
+    }, () => { if (token === selectToken) showSoon(s); });
+    if (token === selectToken && !DETAILS.has(s[COL.name])) {   // still loading
+      title.textContent = s[COL.name].toUpperCase();
+      info.innerHTML = '<p class="status">Loading…</p>';
+    }
     keepInView(s);
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', String(c.dataset.name === s[COL.name])));
     if (updateHash) history.replaceState(null, '', '#' + encodeURIComponent(s[COL.name]));
@@ -1158,13 +1273,14 @@
     suggest.innerHTML = options.map((s, i) => `
       <li role="option" id="opt-${i}" data-i="${i}">${esc(s[COL.name])}
         <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
-          s[COL.drawn] ? plural(SYSTEMS[s[COL.name]].planets.length, 'planet') : 'soon'}</span></li>`).join('');
+          s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}</span></li>`).join('');
     suggest.hidden = false;
     input.setAttribute('aria-expanded', 'true');
   }
 
   function setActive(i) {
     active = (i + options.length) % options.length;
+    prefetch(options[active]);
     suggest.querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', String(k === active)));
     input.setAttribute('aria-activedescendant', `opt-${active}`);
   }
@@ -1210,6 +1326,10 @@
     });
     highlightBox.appendChild(b);
   }
+  const board = document.createElement('button');
+  board.type = 'button'; board.className = 'chip'; board.textContent = '🏆 next planets';
+  board.addEventListener('click', showLeaderboard);
+  highlightBox.appendChild(board);
 
   const chips = document.getElementById('chips');
   for (const name of SPOTLIGHT) {

@@ -155,10 +155,18 @@ function showHome(updateHash = true) {
   if (updateHash) history.replaceState(null, '', '#Sun');
 }
 
+let selectToken = 0;   // a slow chunk load must not overwrite a newer selection
 function select(s, updateHash = true) {
   selected = s;
-  const detail = SYSTEMS[s[COL.name]];
-  if (detail) showSystem(s, detail); else showSoon(s);
+  const token = ++selectToken;
+  withDetail(s, detail => {
+    if (token !== selectToken) return;
+    if (s[COL.drawn]) showSystem(s, detail); else showUnconfirmed(s, detail);
+  }, () => { if (token === selectToken) showSoon(s); });
+  if (token === selectToken && !DETAILS.has(s[COL.name])) {   // still loading
+    title.textContent = s[COL.name].toUpperCase();
+    info.innerHTML = '<p class="status">Loading…</p>';
+  }
   keepInView(s);
   document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', String(c.dataset.name === s[COL.name])));
   if (updateHash) history.replaceState(null, '', '#' + encodeURIComponent(s[COL.name]));

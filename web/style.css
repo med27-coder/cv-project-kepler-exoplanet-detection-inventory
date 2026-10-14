@@ -193,3 +193,10 @@ a { color: var(--accent); }
 .facts { margin: 0; padding-left: 0; list-style: none; }
 .facts li { margin: 0 0 6px; padding-left: 18px; position: relative; }
 .facts li::before { content: '✦'; position: absolute; left: 0; color: var(--accent); }
+
+/* Candidate case files and the "next planets" list */
+.cases li { margin-bottom: 10px; }
+.pro { color: #6fe39a; }
+.con { color: #ff7a59; }
+button.linkish { background: none; border: none; box-shadow: none; padding: 0; color: var(--accent);
+                 font: inherit; text-decoration: underline; cursor: pointer; letter-spacing: 0; }

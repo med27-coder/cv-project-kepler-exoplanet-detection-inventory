@@ -23,26 +23,22 @@ const starIndex = new Map(STARS.map((s, i) => [s, i]));
 const starColors = STARS.map(s => {
   const mag = s[COL.kepmag] ?? 15;
   const light = Math.round(255 - Math.min(Math.max(mag - 9, 0), 8) * 14);   // brighter = lower mag
-  const hasConfirmed = SYSTEMS[s[COL.name]]?.planets.some(p => p.status === 'confirmed');
-  if (s[COL.sg] != null && !hasConfirmed) return s[COL.sg] >= SG_THRESHOLD ? MAP_COLORS.likely : MAP_COLORS.unlikely;
+  if (s[COL.sg] != null && !s[COL.nconf]) return s[COL.sg] >= SG_THRESHOLD ? MAP_COLORS.likely : MAP_COLORS.unlikely;
   if (s[COL.drawn]) return `rgb(${light - 30},${light - 15},${light})`;
   return `rgb(${light * 0.35 | 0},${light * 0.4 | 0},${light * 0.55 | 0})`;
 });
 
-// Highlights: light up the systems that match, dim the rest. Candidates count only once
-// Star Gazer calls them planets.
-const isPlanet = p => p.status !== 'candidate' || p.sg_planet === true;
+// Highlights: light up the systems that match, dim the rest. The tags are worked out by the
+// export (candidates count only once Star Gazer calls them planets), so no details are needed.
 const HIGHLIGHTS = {
-  hz: ['habitable zone', d => {
-    const hz = habitableZone(d);
-    return Boolean(hz) && d.planets.some(p => isPlanet(p) && p.sma >= hz[0] && p.sma <= hz[1]);
-  }],
-  earth: ['Earth-sized', d => d.planets.some(p => isPlanet(p) && p.radius >= 0.7 && p.radius <= 1.5)],
-  multi: ['5+ planets', d => d.planets.filter(isPlanet).length >= 5],
-  giant: ['giant planets', d => d.planets.some(p => isPlanet(p) && p.radius >= 6)],
+  hz: ['habitable zone', TAGS.hz],
+  earth: ['Earth-sized', TAGS.earth],
+  multi: ['5+ planets', TAGS.multi],
+  giant: ['giant planets', TAGS.giant],
+  tess: ['seen by TESS', TAGS.tess],
 };
-const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, test]]) =>
-  [key, new Set(STARS.filter(s => SYSTEMS[s[COL.name]] && test(SYSTEMS[s[COL.name]])))]));
+const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, bit]]) =>
+  [key, new Set(STARS.filter(s => s[COL.tags] & bit))]));
 let highlight = null;
 
 // View: the map point shown at the canvas centre, and the zoom factor.
@@ -195,6 +191,7 @@ map.addEventListener('pointermove', e => {
   }
   hovered = starAt(e);
   hoverLine.textContent = hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
+  prefetch(hovered);   // details are usually loaded before the click
 });
 map.addEventListener('pointerup', e => {
   const wasDrag = drag && drag.moved;
@@ -223,6 +220,6 @@ document.getElementById('zoom-out').addEventListener('click', () => stepZoom(-1)
 
 function label(s) {
   const koi = s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? ` · KOI-${s[COL.koi]}` : '';
-  const state = s[COL.drawn] ? '' : ' · soon';
+  const state = s[COL.drawn] ? '' : ' · unconfirmed';
   return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}`;
 }

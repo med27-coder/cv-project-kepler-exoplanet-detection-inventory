@@ -40,13 +40,14 @@ function showSuggestions() {
   suggest.innerHTML = options.map((s, i) => `
     <li role="option" id="opt-${i}" data-i="${i}">${esc(s[COL.name])}
       <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
-        s[COL.drawn] ? plural(SYSTEMS[s[COL.name]].planets.length, 'planet') : 'soon'}</span></li>`).join('');
+        s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}</span></li>`).join('');
   suggest.hidden = false;
   input.setAttribute('aria-expanded', 'true');
 }
 
 function setActive(i) {
   active = (i + options.length) % options.length;
+  prefetch(options[active]);
   suggest.querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', String(k === active)));
   input.setAttribute('aria-activedescendant', `opt-${active}`);
 }
@@ -92,6 +93,10 @@ for (const [key, [name]] of Object.entries(HIGHLIGHTS)) {
   });
   highlightBox.appendChild(b);
 }
+const board = document.createElement('button');
+board.type = 'button'; board.className = 'chip'; board.textContent = '🏆 next planets';
+board.addEventListener('click', showLeaderboard);
+highlightBox.appendChild(board);
 
 const chips = document.getElementById('chips');
 for (const name of SPOTLIGHT) {
