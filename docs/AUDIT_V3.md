@@ -18,6 +18,7 @@ planets vs false positives, on stars never seen in training.
 | Light-curve views use the label | Pass | Every KOI's transits are masked the same way, whatever its disposition |
 | Choices made on the test set | Pass | Early stopping and learning-rate schedule use validation; the 0.70 threshold is chosen on validation; feature scaling is fitted on training only |
 | Stale or mixed files | Pass | All results and models are from the same run; the data recipe (view version 3) matches the code |
+| Cross-validation (5 star-grouped folds, finished after the audit) | Pass | Single network: accuracy 97.09% ± 0.42, AUC 0.9935 ± 0.0015; fold 1 is the headline split, folds 2–5 are new and agree |
 | Re-runs tuned against the same test split | Low risk | Since V3 began, features, architecture, split and seed are unchanged; the run is deterministic (the run before a PC restart gave bit-identical numbers). Estimated optimism ≤ 0.5 points, within the statistical margin |
 
 **In context:**
