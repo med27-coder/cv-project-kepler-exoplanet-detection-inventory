@@ -18,6 +18,8 @@ filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
 
 [tool.ruff]
 line-length = 110
+# notebooks/*.py are jupytext mirrors of the notebooks (generated; see tests/test_notebooks.py)
+extend-exclude = ["notebooks/*.py", "notebooks/archive_colab"]   # + the historical Colab notebooks, kept as they were
 
 [tool.mypy]
 ignore_missing_imports = true

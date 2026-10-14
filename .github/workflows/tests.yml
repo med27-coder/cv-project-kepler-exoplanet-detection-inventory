@@ -1,4 +1,6 @@
-# Runs the pytest suite (synthetic data only, no NASA downloads) on every push and pull request.
+# Runs the checks on every push and pull request: lint, types, the pytest suite (synthetic data,
+# no NASA downloads) with coverage, and the star map in a real headless browser.
+# Dependencies install from the hash-locked requirements-dev.lock (scripts/lock_requirements.py).
 # Actions are pinned to commit SHAs (tag in the comment); Dependabot keeps them up to date.
 name: tests
 
@@ -12,7 +14,7 @@ permissions:
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -21,11 +23,21 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Install dependencies
+          cache-dependency-path: requirements-dev.lock
+      - name: Install dependencies (hash-checked)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        run: python -m pytest -q
+          pip install --require-hashes -r requirements-dev.lock
+          pip install --no-deps -e .
+      - name: Install the headless browser for the star map tests
+        run: python -m playwright install --with-deps chromium
+      - name: Lint
+        run: python -m ruff check scripts tests src app.py
+      - name: Type check
+        run: python -m mypy src/kepler_cnn scripts app.py
+      - name: Run tests with coverage
+        run: python -m pytest -q --cov=kepler_cnn --cov-report=term --cov-report=xml
       - name: Check the star map's JavaScript syntax
-        run: node --check web/starmap.js && node --check web/data/systems.js
+        run: |
+          python scripts/build_web.py --check
+          node --check web/starmap.js && node --check web/data/systems.js
