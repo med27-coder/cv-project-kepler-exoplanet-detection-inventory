@@ -53,7 +53,7 @@ model predictions (an educational model, not a scientific classification; see
   so parts can't be swapped, dropped, reordered or mixed between bundles. `MANIFEST.json` lists
   every part's SHA-256, checked before decrypting. Extraction only writes to `models/v3` and
   `results/v3`.
-- The key lives in `.secrets/` (git-ignored, owner-only file permissions) or the
+- The key lives in `.secrets/` (git-ignored; access restricted to your account, plus Windows SYSTEM/administrators) or the
   `STAR_GAZER_KEY` environment variable / Hugging Face secret, never in the repository. The key
   file can be passphrase-protected (`secure_artifacts.py protect`, scrypt). `rotate`
   re-encrypts with a new key.

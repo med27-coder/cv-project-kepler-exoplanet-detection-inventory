@@ -1,0 +1,28 @@
+{
+  "format": 2,
+  "bundle": "236df29ecf6e8f55",
+  "created_utc": "2026-10-14T06:20:21+00:00",
+  "encryption": "AES-256-GCM per part; associated data binds bundle id, time, part number and count",
+  "parts": [
+    {
+      "file": "star_gazer_v3.part00.enc",
+      "bytes": 90000032,
+      "sha256": "b0019120406748a2912ba29ea61af8dd37a80b734c049d82e9893da6faae9b35"
+    },
+    {
+      "file": "star_gazer_v3.part01.enc",
+      "bytes": 90000032,
+      "sha256": "f6168efebb95787bcb7f9d5c4baebee7a3f179cb160f648eb5e0e398cc78756f"
+    },
+    {
+      "file": "star_gazer_v3.part02.enc",
+      "bytes": 2228133,
+      "sha256": "12a7c06dc5f9e994be12c5260445fa9fe1afb7b835cb5c007814b4d70b9726e9"
+    }
+  ],
+  "n_files": 31,
+  "contains": [
+    "models/v3",
+    "results/v3"
+  ]
+}
