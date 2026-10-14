@@ -66,7 +66,18 @@ PICKS = [
     ('solar-system', 'uranus', 'PIA18182', 'Uranus (Voyager 2, 1986)'),
     ('solar-system', 'neptune', 'PIA01492', 'Neptune and its Great Dark Spot (Voyager 2, 1989)'),
     ('solar-system', 'pluto', 'PIA19952', 'Pluto by New Horizons (enhanced colour), heart and all'),
+    # A star's life, for the rank emblems (docs/STAR_GAZER_MISSION.md); concept references, not on the site yet.
+    ('stars', '1-nebula', 'PIA03515', 'Stellar nursery: dust pillars in the Carina Nebula (Spitzer, infrared)'),
+    ('stars', '2-protostar', 'PIA18928', 'A protostar flaring as it grows, in Orion (Spitzer)'),
+    ('stars', '4-red-giant', 'PIA09070', 'Mira, a red giant shedding a 13-light-year tail (GALEX ultraviolet)'),
+    ('stars', '5-planetary-nebula', 'PIA15817', "The Helix: a Sun-like star's cast-off layers (Spitzer)"),
+    ('stars', '6-white-dwarf', 'PIA22084', 'A white dwarf, what the Sun will become (artist concept)'),
+    ('stars', '7-supernova', 'PIA06908', "Kepler's Supernova Remnant: the star Johannes Kepler saw explode in 1604 (Chandra)"),
+    ('stars', '8-neutron-star', 'PIA21085', 'A pulsar: a spinning neutron star sweeping beams (artist concept)'),
+    ('stars', '9-black-hole', 'PIA16695', 'A black hole with its glowing disk and jet (artist concept)'),
+    ('stars', '9-black-hole-m87', 'PIA23122', 'Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset)'),
 ]
+WEB_FOLDERS = {'spacecraft', 'solar-system'}   # the Galleria's photos; 'stars' are concept references only
 EXTRA = [   # not in the NASA library search: (folder, file, URL, credit, what it shows)
     ('solar-system', 'earth-blue-marble',
      'https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg',
@@ -106,6 +117,11 @@ def main():
             continue
         data = get(pick.replace('http://', 'https://'))
         save_image(data, path)
+        if folder not in WEB_FOLDERS:
+            rows.append((f'{folder}/{name}.jpg', what, f"[{nasa_id}](https://images.nasa.gov/details/{nasa_id})",
+                         credit, meta.get('date_created', '')[:10]))
+            print(f'{folder}/{name}.jpg  <- {nasa_id}')
+            continue
         save_image(data, WEB / f'{name}.jpg', WEB_W, 80)
         gallery[name] = {'img': f'gallery/{name}.jpg', 'credit': credit,
                          'link': f'https://images.nasa.gov/details/{nasa_id}', 'what': what}

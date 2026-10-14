@@ -7,6 +7,7 @@
 | [EXPERIMENTS_V3.md](EXPERIMENTS_V3.md) | Follow-up experiments: the TESS transfer test and the feature ablations (Gaia, `koi_count`) |
 | [DATA_DICTIONARY.md](DATA_DICTIONARY.md) | Every field in the star map's data files, with units and sources |
 | [EASTER_EGGS.md](EASTER_EGGS.md) | Spoilers: the star map's hidden extras and how to find them |
+| [STAR_GAZER_MISSION.md](STAR_GAZER_MISSION.md) | Design (concept): the final TRUE STAR GAZER mission, rank emblems from stardust to a black hole, the achievements bar |
 | [STARMAP_PLAN.md](STARMAP_PLAN.md) | The star map's roadmap, phase by phase |
 | [IMPROVEMENTS.md](IMPROVEMENTS.md) | Project-wide backlog: what's done, what's open, what isn't feasible |
 | [presentation/](presentation/) | The portfolio deck (`.pptx`) and the course PDF |

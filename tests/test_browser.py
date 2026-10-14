@@ -191,7 +191,7 @@ def test_galleria_game(browser, site):
     page.click('#open-gallery')
     assert page.locator('.egg-card.found').count() == 1
     page.click('.egg-card[data-egg="lucy"]')
-    page.wait_for_selector('.egg-detail img')                      # the real photo next to the pixel art
+    page.wait_for_selector('.morph canvas')                        # the real photo, with the pixelation slider
     assert 'Lucy' in page.locator('#pane-eggs').inner_text()
     page.click('#tab-ach')
     assert 'CURIOUS MIND' in page.locator('.ach-list li.on').inner_text()

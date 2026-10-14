@@ -41,6 +41,15 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `solar-system/uranus.jpg` | Uranus (Voyager 2, 1986) | [PIA18182](https://images.nasa.gov/details/PIA18182) | NASA/JPL-Caltech | 1986-12-18 |
 | `solar-system/neptune.jpg` | Neptune and its Great Dark Spot (Voyager 2, 1989) | [PIA01492](https://images.nasa.gov/details/PIA01492) | NASA/JPL | 1998-10-30 |
 | `solar-system/pluto.jpg` | Pluto by New Horizons (enhanced colour), heart and all | [PIA19952](https://images.nasa.gov/details/PIA19952) | NASA/Johns Hopkins University Applied Physics Laboratory/Southwest Research Institute | 2015-09-24 |
+| `stars/1-nebula.jpg` | Stellar nursery: dust pillars in the Carina Nebula (Spitzer, infrared) | [PIA03515](https://images.nasa.gov/details/PIA03515) | NASA/JPL-Caltech/University of Colorado<br /> Animation: NASA/JPL-Caltech/NOAO/AURA/NSF | 2005-05-30 |
+| `stars/2-protostar.jpg` | A protostar flaring as it grows, in Orion (Spitzer) | [PIA18928](https://images.nasa.gov/details/PIA18928) | NASA/JPL-Caltech/Univ. of Toledo; background: E. Safron et al. | 2015-03-23 |
+| `stars/4-red-giant.jpg` | Mira, a red giant shedding a 13-light-year tail (GALEX ultraviolet) | [PIA09070](https://images.nasa.gov/details/PIA09070) | NASA/CXC/STScI/JPL-Caltech/UIUC/Univ. of Minn. | 2006-12-08 |
+| `stars/5-planetary-nebula.jpg` | The Helix: a Sun-like star's cast-off layers (Spitzer) | [PIA15817](https://images.nasa.gov/details/PIA15817) | NASA/JPL-Caltech | 2012-10-03 |
+| `stars/6-white-dwarf.jpg` | A white dwarf, what the Sun will become (artist concept) | [PIA22084](https://images.nasa.gov/details/PIA22084) | NASA/JPL-Caltech | 2017-11-01 |
+| `stars/7-supernova.jpg` | Kepler's Supernova Remnant: the star Johannes Kepler saw explode in 1604 (Chandra) | [PIA06908](https://images.nasa.gov/details/PIA06908) | Chandra X-Ray Observatory | 2004-10-06 |
+| `stars/8-neutron-star.jpg` | A pulsar: a spinning neutron star sweeping beams (artist concept) | [PIA21085](https://images.nasa.gov/details/PIA21085) | NASA/JPL-Caltech | 2017-01-06 |
+| `stars/9-black-hole.jpg` | A black hole with its glowing disk and jet (artist concept) | [PIA16695](https://images.nasa.gov/details/PIA16695) | NASA/JPL-Caltech | 2013-02-27 |
+| `stars/9-black-hole-m87.jpg` | Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset) | [PIA23122](https://images.nasa.gov/details/PIA23122) | NASA/JPL-Caltech/IPAC/Event Horizon Telescope Collaboration | 2019-04-25 |
 | `solar-system/earth-blue-marble.jpg` | Blue Marble map, the source of the pixel Earth | [Visible Earth](https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg) | NASA Goddard Space Flight Center / Visible Earth |  |
 
 JUICE and BepiColombo (ESA) have no image in the NASA library; their sprites follow ESA's published

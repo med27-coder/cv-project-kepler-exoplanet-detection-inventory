@@ -2424,7 +2424,10 @@
     const credit = egg.ref && window.STARMAP_GALLERY ? window.STARMAP_GALLERY[egg.ref] : null;
     const link = (u, t) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`;
     const real = !got ? ''
-      : credit?.img ? `<figure><img src="${esc(credit.img)}" alt="${esc(credit.what)}" loading="lazy" width="240">
+      : credit?.img ? `<figure class="morph">
+          <canvas width="240" height="160" role="img" aria-label="${esc(credit.what)}"></canvas>
+          <input type="range" min="0" max="100" value="0" step="1" aria-label="Slide from the real photo to the pixel art">
+          <span class="morph-ends" aria-hidden="true"><span>PHOTO</span><span>PIXEL ART</span></span>
           <figcaption>THE REAL THING · ${esc(credit.what)} · ${link(credit.link, `credit: ${credit.credit}`)}</figcaption></figure>`
       : `<figure class="no-photo"><figcaption>THE REAL THING · ${credit
           ? `${esc(credit.what)}: the picture is credited to ESA, so it isn't copied here; ${link(credit.link, `see it (${credit.credit})`)}`
@@ -2451,6 +2454,8 @@
       if (got && !REDUCED_MOTION) detailFrame = requestAnimationFrame(step);
     };
     drawEggArt(canvas, egg, 1, !got);
+    const morph = panes.eggs.querySelector('.morph');
+    if (morph) photoToPixels(morph, credit.img, egg);
     if (got && !REDUCED_MOTION) detailFrame = requestAnimationFrame(step);
     panes.eggs.querySelector('.back').addEventListener('click', () => { detailEgg = null; renderEggs(); });
     panes.eggs.querySelector('.show-me')?.addEventListener('click', () => {
@@ -2464,6 +2469,58 @@
       input.value = '';
       input.focus();
     });
+  }
+
+  // Pixelation slider: drag from the real photo (0) to the pixel art (100). Up to 80 the photo is drawn
+  // at lower and lower resolution (blocks of 1 to 16 pixels) with fewer and fewer colours; from 80 on it
+  // fades into the sprite. The photo comes from this site, so the canvas may read its pixels.
+  function photoToPixels(fig, src, egg) {
+    const canvas = fig.querySelector('canvas'), slider = fig.querySelector('input');
+    const ctx = canvas.getContext('2d'), photo = new Image();
+    const small = document.createElement('canvas'), sctx2 = small.getContext('2d', { willReadFrequently: true });
+    const sprite = document.createElement('canvas');
+    const draw = () => {
+      const v = Number(slider.value), W = canvas.width, H = canvas.height;
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#070b1a';
+      ctx.fillRect(0, 0, W, H);
+      if (!photo.complete || !photo.naturalWidth) return;
+      const f = Math.min(v, 80) / 80;
+      const block = Math.max(1, Math.round(1 + f ** 1.6 * 15));
+      if (block === 1) ctx.drawImage(photo, 0, 0, W, H);
+      else {
+        small.width = Math.ceil(W / block); small.height = Math.ceil(H / block);
+        sctx2.imageSmoothingEnabled = true;
+        sctx2.drawImage(photo, 0, 0, small.width, small.height);
+        const levels = Math.round(256 - f ** 0.7 * 250);   // 256 -> 6 shades per channel
+        if (levels < 256) {
+          const data = sctx2.getImageData(0, 0, small.width, small.height);
+          const step = 255 / (levels - 1);
+          for (let i = 0; i < data.data.length; i += 4) {
+            for (let c = 0; c < 3; c++) data.data[i + c] = Math.round(Math.round(data.data[i + c] / step) * step);
+          }
+          sctx2.putImageData(data, 0, 0);
+        }
+        ctx.drawImage(small, 0, 0, small.width * block, small.height * block);
+      }
+      if (v > 80) {   // the last stretch: our sprite fades in over the blocks
+        const a = (v - 80) / 20;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#070b1a';
+        ctx.fillRect(0, 0, W, H);
+        sprite.width = Math.floor(W / 3); sprite.height = Math.floor(H / 3);
+        drawEggArt(sprite, egg, 1, false);
+        ctx.drawImage(sprite, 0, 0, sprite.width * 3, sprite.height * 3);
+        ctx.globalAlpha = 1;
+      }
+    };
+    photo.addEventListener('load', () => {
+      canvas.height = Math.round(canvas.width * photo.naturalHeight / photo.naturalWidth);
+      draw();
+    });
+    photo.src = src;
+    slider.addEventListener('input', draw);
+    draw();
   }
 
   // The Solar System's card: real photos of the Sun, the planets and the Moon (natural colour).

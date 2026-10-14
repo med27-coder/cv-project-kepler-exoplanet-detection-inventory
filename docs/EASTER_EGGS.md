@@ -55,6 +55,8 @@ the pop-ups off or resets everything.
 
 ## Expanding ideas (brainstorm)
 
+The endgame (TRUE STAR GAZER, rank emblems, achievements bar) has its own design: [STAR_GAZER_MISSION.md](STAR_GAZER_MISSION.md).
+
 Not built yet; roughly from easiest to biggest.
 
 **Make the game deeper**
@@ -70,8 +72,8 @@ Not built yet; roughly from easiest to biggest.
   Earth-size world in a habitable zone), Kepler-10b (first rocky one), Kepler-90 (eight planets).
 
 **Make the reward better**
-- **Pixelation slider:** drag between the real photo and the pixel art; the photo pixelates step by step
-  into the sprite.
+- ✅ **Pixelation slider** (built): on a found card, drag from the real photo to the pixel art; the photo
+  pixelates step by step into the sprite.
 - **Mission timeline** on each spacecraft card (launch → flybys → today), with where it is right now from
   `data/spacecraft.js`.
 - **Shareable trophy card:** download your Galleria as one pixel PNG (drawn on a canvas, nothing uploaded).
