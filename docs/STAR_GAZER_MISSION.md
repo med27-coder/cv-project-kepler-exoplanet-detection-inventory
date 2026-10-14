@@ -1,6 +1,6 @@
 # The Star Gazer mission and rank emblems (design)
 
-**Status: concept, not built yet.** This is the long-term endgame for the star map's Galleria
+**Status: built (October 2026)** with the recommended choices: every system on the map, the staged reveal, the black-hole emblem and title, the white dwarf as an alternative final emblem and the white hole after a reset (web/src/49-ranks.js). This is the long-term endgame for the star map's Galleria
 ([EASTER_EGGS.md](EASTER_EGGS.md)): a final secret mission, a rank emblem that grows through the life of a
 star, and an achievements bar at the top of the page. Concept pixel art is in
 [`pixel-art/emblems/`](../pixel-art/emblems/) (made by `scripts/starmap/draft_emblems.py`); the official

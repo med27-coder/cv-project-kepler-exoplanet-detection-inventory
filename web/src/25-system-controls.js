@@ -11,6 +11,7 @@ function setScene(next) {   // a new system: reset the view, keep the chosen sca
   Object.assign(sview, { zoom: 1, panX: 0, panY: 0 });
   const live = liveScene();
   sysTools.hidden = !live;
+  if (!live) document.getElementById('sys-hint').textContent = '';   // no stale "True scale" hint on cards
   sys.classList.toggle('interactive', live);
   if (live) {
     layout();

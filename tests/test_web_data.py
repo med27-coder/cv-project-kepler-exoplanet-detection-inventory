@@ -206,7 +206,7 @@ SHIPPED_IDS = {
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
             'curious', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'l2', 'interstellar',
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
-            'launch-day'},
+            'launch-day', 'star-gazer'},
 }
 
 
