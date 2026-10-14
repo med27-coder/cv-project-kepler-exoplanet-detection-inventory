@@ -31,24 +31,51 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (18)
+### Achievements (46, in groups)
 
-| Achievement | How |
-|---|---|
-| FIRST LIGHT / STAR HOPPER / GALACTIC CENSUS | Open 1 / 10 / 50 different star systems |
-| ROLL OF THE DICE | Use 🎲 |
-| GHOST HUNTER | Visit a system with only unconfirmed planets |
-| FORTUNE TELLER | Open 🏆 next planets |
-| GOLDILOCKS | Highlight the habitable-zone systems |
-| DEPTH PERCEPTION | Turn on DEPTH |
-| CHIP CHECK | Toggle CCDS |
-| EAGLE EYE | Zoom the map to 8× |
-| TRANSIT WITNESS | Turn on KEPLER'S VIEW |
-| MIND THE GAP | Turn on TRUE SCALE |
-| SIGNAL RECEIVED | Open a shared view link (`#Kepler-90?view=true`) |
-| CURIOUS MIND / MISSION CONTROL / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all 24 |
-| PATIENT OBSERVER *(secret)* | Watch one system for two minutes |
-| NIGHT SHIFT *(secret)* | Open a system between midnight and 4 a.m. |
+| Group | Achievement | How |
+|---|---|---|
+| Explorer | FIRST LIGHT / STAR HOPPER / GALACTIC CENSUS | Open 1 / 10 / 50 different star systems |
+| | ROLL OF THE DICE | Use 🎲 |
+| | GHOST HUNTER | Visit a system with only unconfirmed planets |
+| | FORTUNE TELLER | Open 🏆 next planets |
+| | SIGNAL RECEIVED | Open a shared view link (`#Kepler-90?view=true`) |
+| Famous worlds | FIRST ROCK | Visit Kepler-10 (Kepler's first rocky planet) |
+| | EIGHT WORLDS | Visit Kepler-90 (eight planets, like ours) |
+| | EARTH'S COUSIN | Visit Kepler-452 |
+| | FIRST EDEN | Visit Kepler-186 (first Earth-size planet in a habitable zone) |
+| | SUPER PUFF | Visit Kepler-51 (planets as dense as cotton candy) |
+| | TINY WORLD | Visit Kepler-37 (a planet smaller than Mercury) |
+| Science | GOLDILOCKS | Highlight the habitable-zone systems |
+| | DOUBLE TROUBLE | Visit a system with more than one star |
+| | LAVA WORLD | Visit a planet hotter than 1,500 K |
+| | ANCIENT LIGHT | Open a star more than 4,600 light-years away (its light left before the Great Pyramid was built) |
+| | FLARE WATCHER | Catch a red dwarf flaring (Kepler-186 is a good place to wait) |
+| | TRANSIT WITNESS / MIND THE GAP | Turn on KEPLER'S VIEW / TRUE SCALE |
+| Star Gazer's guesses | BELIEVER / SKEPTIC / COIN FLIP | Open a candidate Star Gazer rates ≥ 90% / ≤ 10% / 40–60% |
+| Map and tools | DEPTH PERCEPTION / CHIP CHECK / EAGLE EYE | DEPTH on / toggle CCDS / zoom the map to 8× |
+| | CARTOGRAPHER | Hop 25 stars in a row with the arrow keys (a click resets the count) |
+| | HIGHLIGHTER | Try all five highlight filters in one visit |
+| | SKY PHOTOGRAPHER | Open a star's real sky photo |
+| | ECO MODE | Set the animation to battery saver |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all 24 |
+| | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
+| | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
+| | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |
+| | L2 NEIGHBOURS | Webb, Euclid |
+| | ROAD TO INTERSTELLAR | Voyager, New Horizons |
+| | PHOTO FINISH | Slide a Galleria photo all the way to pixel art |
+| | CURATOR | Open ten found Galleria cards in one visit |
+| Secret | PATIENT OBSERVER | Watch one system for two minutes |
+| | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
+| | NO SIGNAL | Search for five things that aren't there in one visit |
+| | WARP SPEED | Find three new easter eggs within a minute |
+| | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
+| | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |
+
+Not possible yet: **TATOOINE** (Kepler-16, the planet with two suns, isn't on the map: it isn't in the KOI table the
+map is built from) and **PROPHET** (visit a candidate NASA confirms after Star Gazer called it; needs history across
+the monthly data refreshes).
 
 Progress is kept only in the visitor's browser (localStorage, key `starmap.progress.v1`); ⚙ → SETTINGS turns
 the pop-ups off or resets everything.

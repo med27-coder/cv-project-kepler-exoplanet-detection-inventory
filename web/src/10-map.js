@@ -278,7 +278,7 @@ map.addEventListener('pointerup', e => {
   if (wasDrag) return;
   if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
   const s = starAt(e);
-  if (s) select(s);
+  if (s) { session.hops = 0; select(s); }
 });
 map.addEventListener('pointercancel', () => { drag = null; });
 map.addEventListener('pointerleave', () => { hovered = null; map.classList.remove('on-kepler'); hoverLine.textContent = HOVER_HINT; });
@@ -295,7 +295,7 @@ map.addEventListener('keydown', e => {
   if (!dir) return;
   e.preventDefault();
   const s = neighbour(selected, ...dir);
-  if (s) { select(s); hoverLine.textContent = `▸ ${label(s)}`; }
+  if (s) { select(s); arrowHop(); hoverLine.textContent = `▸ ${label(s)}`; }
 });
 document.getElementById('zoom-in').addEventListener('click', () => stepZoom(1));
 const ccdButton = document.getElementById('ccd'), depthButton = document.getElementById('depth');

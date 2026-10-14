@@ -180,11 +180,11 @@ def white_hole(t=0):
 LADDER = [   # stage file name, title, how it is reached (docs/STAR_GAZER_MISSION.md)
     ('0-stardust', stardust, 'STARDUST', 'start'),
     ('1-protostar', protostar, 'PROTOSTAR', '1 achievement'),
-    ('2-main-sequence', main_sequence, 'YOUNG STAR', '3'),
-    ('3-red-giant', red_giant, 'RED GIANT', '6'),
-    ('4-supergiant', supergiant, 'SUPERGIANT', '10'),
-    ('5-supernova', supernova, 'SUPERNOVA', '14'),
-    ('6-neutron-star', neutron_star, 'PULSAR', 'all 18'),
+    ('2-main-sequence', main_sequence, 'YOUNG STAR', '5'),
+    ('3-red-giant', red_giant, 'RED GIANT', '10'),
+    ('4-supergiant', supergiant, 'SUPERGIANT', '18'),
+    ('5-supernova', supernova, 'SUPERNOVA', '28'),
+    ('6-neutron-star', neutron_star, 'PULSAR', '40'),
     ('7-black-hole', black_hole, 'BLACK HOLE', 'STAR GAZER'),
 ]
 ALTERNATES = [
@@ -242,8 +242,8 @@ def main():
     head.paste(render(red_giant(0.25), 2 * s), (206 * s, 1 * s))
     d.text((242 * s, 9 * s), 'RED GIANT', fill=(255, 211, 77), font=font(8 * s), anchor='lm')
     d.rectangle((242 * s, 17 * s, 330 * s, 25 * s), outline=(42, 53, 102), width=s)
-    d.rectangle((243 * s, 18 * s, (243 + int(86 * 7 / 19)) * s, 24 * s), fill=(255, 211, 77))
-    d.text((334 * s, 21 * s), '7/19', fill=(154, 166, 214), font=font(8 * s), anchor='lm')
+    d.rectangle((243 * s, 18 * s, (243 + int(86 * 11 / 46)) * s, 24 * s), fill=(255, 211, 77))
+    d.text((334 * s, 21 * s), '11/46', fill=(154, 166, 214), font=font(8 * s), anchor='lm')
     d.rectangle((356 * s, 6 * s, 376 * s, 28 * s), outline=(42, 53, 102), width=s)
     gear = Image.new('RGB', (N, N), BG)   # a pixel gear for the button
     gd = canvas()
