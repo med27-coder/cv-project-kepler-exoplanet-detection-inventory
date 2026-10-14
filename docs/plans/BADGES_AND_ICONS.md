@@ -1,0 +1,51 @@
+# Plan: set badges, pixel icons, progress counters, and the star-life rank
+
+**Status: plan only (local branch).** Builds on docs/STAR_GAZER_MISSION.md and docs/plans/TATOOINE_AND_PROPHET.md.
+
+## 1. Total achievements -> the life of a star (replaces bronze/silver/gold)
+One rank for *all* achievements, shown as the header emblem and at the top of the Achievements tab:
+STARDUST (0) -> PROTOSTAR (1) -> YOUNG STAR (5) -> RED GIANT (10) -> SUPERGIANT (18) -> SUPERNOVA (28)
+-> PULSAR (40) -> BLACK HOLE (TRUE STAR GAZER: every system on the map).
+Concept art exists: pixel-art/emblems/ (scripts/starmap/draft_emblems.py). The tab shows
+"next: RED GIANT in 3 achievements" and the whole ladder, future stages as silhouettes.
+
+## 2. Set badges (one per group, earned by completing the group)
+Badge shelf at the top of the tab; dark silhouettes until earned; 16x16 pixel art.
+| Set | Badge |
+|---|---|
+| Explorer | compass |
+| Famous worlds | ringed planet |
+| Science | light curve with a transit dip |
+| Star Gazer's guesses | crystal ball |
+| Map and tools | telescope |
+| Easter eggs | golden satellite |
+| Secret | eye inside a "?" (purple set) |
+| *Two suns* (from the Tatooine plan) | two suns setting |
+| *Predictions* (from the PROPHET plan) | hourglass |
+
+## 3. Pixel icons per achievement (replace the emoji)
+12x12 icon per achievement in the CRAFT_ART row-of-letters format (46-craft-art.js style), drawn in colour
+when earned and as a silhouette when locked (same trick as the Galleria). Reuse what exists: spacecraft
+sprites for the collections, planet art for famous worlds, the Kepler sprite, the flare/star drawing.
+
+## 4. Progress counters
+Mini bar + "23 / 50" on counting achievements: STAR HOPPER, GALACTIC CENSUS, MISSION CONTROL, every
+collection (RED PLANET FLEET 4/6 ...), CARTOGRAPHER, CURATOR, HIGHLIGHTER, GRAND TOUR, and the final
+mission once revealed (100+ systems).
+
+## 5. Polish
+Date on its own line ("earned 14 Oct 2026"); NEW tag until the tab is seen; rarity (common / rare /
+legendary, set by us); secret cards purple even when locked.
+
+## 6. What the plan branch (TATOOINE_AND_PROPHET.md) adds
+- **TATOOINE** (visit a two-sun planet) and **DOUBLE SUNSET** (all 13) -> a new *Two suns* set and badge,
+  plus a binary-star drawing that doubles as its icon. Needs the ~20 missing Kepler systems added first.
+- **PROPHET, ORACLE, CASSANDRA, CONTRARIAN, PATIENCE OF A STAR** -> a *Predictions* set (hourglass badge).
+  Needs the monthly resolutions file and the predictions tab.
+- Both push the total past 50, so the star-life thresholds may move up (e.g. 1, 5, 12, 22, 34, 46).
+
+## Order (each step usable on its own)
+1. Concept art: 7 set badges + ~10 sample icons + a mock-up of the tab -> review.
+2. Build: badge shelf, icons, counters, polish, rank emblem + ladder in the tab.
+3. Header emblem + rank-up pop-up ("YOUR STAR EVOLVED").
+4. Later, with the Tatooine and PROPHET work: the two extra sets.
