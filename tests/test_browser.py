@@ -201,11 +201,25 @@ def test_galleria_game(browser, site):
     page.click('#tab-ach')
     earned = page.locator('.ach-list li.on').all_inner_texts()
     assert any('CURIOUS MIND' in a for a in earned) and any('EIGHT WORLDS' in a for a in earned)
+    page.reload()                                                   # survives a reload (and so a site update)
+    page.click('#open-gallery')
+    assert page.locator('.egg-card.found').count() == 1
     page.click('#tab-set')
+    assert 'Saved in this browser' in page.locator('#set-storage').inner_text()
+    with page.expect_download() as dl:                              # backup file
+        page.click('#set-export')
+    backup = Path(dl.value.path()).read_text(encoding='utf-8')
+    assert '"lucy"' in backup and '"eight-worlds"' in backup
     page.click('#set-reset')
     page.click('#set-reset')                                        # asks twice
     page.click('#tab-eggs')
     assert page.locator('.egg-card.found').count() == 0
+    page.click('#tab-set')
+    page.set_input_files('#set-import-file', files=[{'name': 'p.json', 'mimeType': 'application/json',
+                                                     'buffer': backup.encode()}])
+    page.wait_for_function("(document.getElementById('set-reset-note').textContent || '').includes('loaded')")
+    page.click('#tab-eggs')
+    assert page.locator('.egg-card.found').count() == 1               # restored from the file
     assert not errors, errors
 
 

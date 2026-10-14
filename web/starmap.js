@@ -2306,17 +2306,34 @@
   const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 
   // ---- progress (this browser only; the page works the same without storage)
+  // The key and the ids never change between site updates (tests/test_web_data.py checks the ids), so a new
+  // version of the page always finds what an older one saved. Ids this version doesn't know are kept, not
+  // dropped, so nothing earned is lost if a later version renames or retires something.
   const PROGRESS_KEY = 'starmap.progress.v1';
   const progress = { eggs: {}, ach: {}, systems: [], toasts: true };
-  try {
-    const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null');
-    if (saved && typeof saved === 'object') {
-      for (const id of Object.keys(saved.eggs || {})) if (EGG.has(id)) progress.eggs[id] = String(saved.eggs[id]).slice(0, 10);
-      for (const id of Object.keys(saved.ach || {})) if (ACH.has(id)) progress.ach[id] = String(saved.ach[id]).slice(0, 10);
-      if (Array.isArray(saved.systems)) progress.systems = saved.systems.filter(n => typeof n === 'string').slice(0, 200);
-      progress.toasts = saved.toasts !== false;
+  const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
+  function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
+    if (!saved || typeof saved !== 'object') return false;
+    for (const kind of ['eggs', 'ach']) {
+      const entries = Object.entries(saved[kind] && typeof saved[kind] === 'object' ? saved[kind] : {}).slice(0, 300);
+      for (const [id, date] of entries) {
+        if (!ID.test(id) || !DATE.test(String(date))) continue;
+        if (!progress[kind][id] || date < progress[kind][id]) progress[kind][id] = String(date);
+      }
     }
-  } catch { /* storage blocked: progress lasts for this visit */ }
+    if (Array.isArray(saved.systems)) {
+      progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60)])].slice(-200);
+    }
+    if (typeof saved.toasts === 'boolean') progress.toasts = saved.toasts;
+    return true;
+  }
+  let storageOK = false;   // false in private windows or with site data blocked: progress lasts for this visit
+  try {
+    mergeProgress(JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'));
+    localStorage.setItem('starmap.check', '1');
+    localStorage.removeItem('starmap.check');
+    storageOK = true;
+  } catch { /* see above */ }
   function saveProgress() {
     try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch { /* see above */ }
   }
@@ -2633,6 +2650,41 @@
     if (!panes.ach.hidden) renderAchievements();
   }
 
+  // Settings: is progress being kept, and a backup file to download or load.
+  const storageNote = document.getElementById('set-storage');
+  async function renderSettings() {
+    if (!storageOK) {
+      storageNote.textContent = '⚠ This browser isn\'t saving your progress (a private window, or site data is ' +
+        'blocked). It will be lost when you close the page: download it below to keep it.';
+      return;
+    }
+    let kept = '';
+    try { kept = (await navigator.storage?.persisted?.()) ? ' Protected from automatic clean-up.' : ''; } catch { /* older browser */ }
+    storageNote.textContent = `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
+      'site\'s data is cleared, in a private window, or on another browser or device: keep a backup file for those.';
+  }
+  document.getElementById('set-export').addEventListener('click', () => {
+    const file = new Blob([JSON.stringify({ app: 'kepler-star-map', version: 1, saved: today(), ...progress }, null, 1)],
+                          { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = `kepler-star-map-progress-${today()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    try { navigator.storage?.persist?.(); } catch { /* best effort: ask the browser to keep our data */ }
+  });
+  const importInput = document.getElementById('set-import-file');
+  document.getElementById('set-import').addEventListener('click', () => importInput.click());
+  importInput.addEventListener('change', async () => {
+    const file = importInput.files[0];
+    importInput.value = '';
+    if (!file) return;
+    let ok = false;
+    try { ok = file.size < 200_000 && mergeProgress(JSON.parse(await file.text())); } catch { ok = false; }
+    if (ok) saveProgress();
+    resetNote.textContent = ok ? 'Progress loaded and merged with what you had.' : 'That file isn\'t a star map progress file.';
+  });
+
   function showTab(name) {
     for (const [key, pane] of Object.entries(panes)) {
       const tab = document.getElementById(`tab-${key}`);
@@ -2642,6 +2694,7 @@
     }
     if (name === 'eggs') renderEggs();
     if (name === 'ach') renderAchievements();
+    if (name === 'set') renderSettings();
   }
   const tabs = [...document.querySelectorAll('#gallery [role="tab"]')];
   tabs.forEach((tab, i) => {

@@ -77,8 +77,10 @@ Not possible yet: **TATOOINE** (Kepler-16, the planet with two suns, isn't on th
 map is built from) and **PROPHET** (visit a candidate NASA confirms after Star Gazer called it; needs history across
 the monthly data refreshes).
 
-Progress is kept only in the visitor's browser (localStorage, key `starmap.progress.v1`); ⚙ → SETTINGS turns
-the pop-ups off or resets everything.
+Progress is kept only in the visitor's browser (localStorage, key `starmap.progress.v1`), so refreshes and site
+updates keep it; it's lost only if the site's data is cleared, in a private window, or on another browser or device.
+⚙ → SETTINGS says whether it's being saved, downloads it as a backup file and loads it back (merging), turns the
+pop-ups off, or resets everything. The key and every shipped id never change (`test_progress_ids_are_stable`).
 
 ## Expanding ideas (brainstorm)
 
