@@ -7,7 +7,7 @@ system or framework: the page also works opened straight from disk.
 | Path | What it is | Made by |
 |---|---|---|
 | `index.html`, `style.css` | The page and its styles (strict Content Security Policy: no inline code) | hand-written |
-| `src/*.js` | The page's code, in readable parts: data, map, system view, controls, info panel, Solar System, spacecraft/ISS, wiring, animation loop | hand-written |
+| `src/*.js` | The page's code, in readable parts: data, map, system view, controls, info panel, Solar System, spacecraft/ISS, the Kepler telescope, wiring, animation loop | hand-written |
 | `starmap.js` | The one script the page loads: `src/*.js` joined in order. **Don't edit it**; run `scripts/starmap/build_web.py` | generated |
 | `data/systems.js` | Index of all 3,611 stars, highlight tags and the "next planets" list (loaded up front) | `scripts/starmap/export_starmap.py` |
 | `data/details/NN.js` | Star facts and planets per system, in 32 files, loaded when a system is opened | `scripts/starmap/export_starmap.py` |
@@ -17,6 +17,7 @@ system or framework: the page also works opened straight from disk.
 | `og.png` | Social preview image | `scripts/starmap/make_og_image.py` |
 | `fonts/` | Press Start 2P and VT323 (SIL Open Font License, self-hosted) | |
 
+The sprites, enlarged, are in [pixel-art/](../pixel-art/) (`scripts/starmap/export_pixel_art.py`).
 Every data field is described in [docs/DATA_DICTIONARY.md](../docs/DATA_DICTIONARY.md); the hidden extras are
 in [docs/EASTER_EGGS.md](../docs/EASTER_EGGS.md).
 

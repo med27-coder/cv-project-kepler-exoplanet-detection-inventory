@@ -90,7 +90,7 @@ try {
 try {
   q.value = 'home'; document.getElementById('search').dispatchEvent(new Event('submit', {cancelable:true}));
   ok('easter egg: home', title() === 'THE SOLAR SYSTEM' && location.hash === '#Sun', title() + ' ' + location.hash);
-  ok('easter egg: 8 planets', document.querySelectorAll('#info tbody tr').length === 8);
+  ok('easter egg: 8 planets + Pluto', document.querySelectorAll('#info tbody tr').length === 9);
   q.value = 'Solar System'; document.getElementById('search').dispatchEvent(new Event('submit', {cancelable:true}));
   ok('easter egg: solar system', title() === 'THE SOLAR SYSTEM');
   q.value = 'sun'; q.dispatchEvent(new Event('input'));

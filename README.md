@@ -416,6 +416,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── Exoplanet_Detection_V2.ipynb            ← V2 notebook (VS Code)
 │   └── archive_colab/                          ← Original Colab notebooks (V1, V1.5, V2 draft, exploration), unchanged
 ├── web/                          ← 🗺️ Pixel star map (static site, deployed by .github/workflows/pages.yml)
+├── pixel-art/                    ← The map's sprites enlarged (solar-system/, spacecraft/) + drafts
 ├── tests/                        ← pytest suite (run on every push by .github/workflows/tests.yml)
 ├── data/                         ← Local data cache (git-ignored); see data/README.md
 ├── models/                       ← models/<version>/ (git-ignored)
@@ -427,9 +428,9 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── v3/                       ← Written by the V3 scripts (git-ignored; committed encrypted)
 │   └── v3_public/                ← A few V3 figures shown in this README
 └── docs/
+    ├── README.md                 ← Index of all docs (analysis, audit, easter eggs, roadmap)
     ├── STARMAP_PLAN.md           ← Star map roadmap
-    ├── Exoplanet_CV_Portfolio_FM.pptx
-    └── MDMedinaFranciscoITAI1378pdf.pdf
+    └── presentation/             ← Portfolio slides (.pptx) and the PDF
 ```
 
 ---

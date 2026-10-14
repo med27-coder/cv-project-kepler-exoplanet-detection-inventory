@@ -202,6 +202,7 @@ function drawMap(t) {
     mctx.fillStyle = on ? MAP_COLORS.spot : MAP_COLORS.spotDim;
     mctx.fillRect(screen[i][0] - 1, screen[i][1] - 1, spot, spot);
   });
+  drawKeplerOnMap(t);
   for (const [s, color] of [[hovered, '#9aa6d6'], [selected, '#ffd34d']]) {
     if (!s) continue;
     const [x, y] = screen[starIndex.get(s)];
@@ -263,17 +264,23 @@ map.addEventListener('pointermove', e => {
     }
     return;
   }
-  hovered = starAt(e);
-  hoverLine.textContent = hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
+  const onKepler = overKepler(e);
+  map.classList.toggle('on-kepler', onKepler);
+  hovered = onKepler ? null : starAt(e);
+  hoverLine.textContent = onKepler ? '▸ The Kepler space telescope · click for its story'
+    : hovered ? `▸ ${label(hovered)}` : HOVER_HINT;
   prefetch(hovered);   // details are usually loaded before the click
 });
 map.addEventListener('pointerup', e => {
   const wasDrag = drag && drag.moved;
   drag = null;
-  if (!wasDrag) { const s = starAt(e); if (s) select(s); }
+  if (wasDrag) return;
+  if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
+  const s = starAt(e);
+  if (s) select(s);
 });
 map.addEventListener('pointercancel', () => { drag = null; });
-map.addEventListener('pointerleave', () => { hovered = null; hoverLine.textContent = HOVER_HINT; });
+map.addEventListener('pointerleave', () => { hovered = null; map.classList.remove('on-kepler'); hoverLine.textContent = HOVER_HINT; });
 map.addEventListener('wheel', e => {
   const dir = e.deltaY < 0 ? 1 : -1;
   if (dir < 0 && view.zoom === 1) return;   // fully zoomed out: let the page scroll
