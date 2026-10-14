@@ -14,6 +14,7 @@ models/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !models/.gitkeep
+!models/README.md
 results/colab_import/
 
 # Local Terms of Use acceptance record

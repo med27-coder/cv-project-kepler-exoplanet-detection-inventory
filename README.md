@@ -129,6 +129,8 @@ The label sets differ (TCEs vs KOIs, Autovetter vs archive dispositions), so thi
 
 **Through another telescope (TESS).** For 40 confirmed Kepler planets that NASA's TESS satellite saw again, views built from TESS light curves give the same verdict as Kepler's own for 85% (7 of 7 for planets never seen in training). It also exposed a weakness: these are mostly giant planets with deep transits, and even with Kepler data only 75% of them are called planets, well below the 96.7% recall on the full test set. Details: [docs/EXPERIMENTS_V3.md](docs/EXPERIMENTS_V3.md).
 
+**Where it succeeds and fails.** Broken down by planet size, signal strength, period and star ([docs/DATA_ANALYSIS.md](docs/DATA_ANALYSIS.md)), Star Gazer finds 96–100% of small planets (under 4 Earth radii) but only 1 of the 7 real giant planets above 15 Earth radii in the test set, because nearly every KOI that big is an eclipsing binary. That is the main target for V4.
+
 ### Scoring the unlabelled candidates
 
 NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scripts/pipeline/score_candidates.py` scores the 1,976 that have usable views: **737 (37%)** score above the threshold, and Star Gazer agrees with NASA's own Robovetter score (`koi_score`, never a model input) on 61% of them. The ten most planet-like:
@@ -165,7 +167,7 @@ Everything is drawn from numbers on two small canvases (about 1.1 MB of data for
 
 One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are a few more: try looking for the robots we've sent out there, or where people live in space. 🛰️
 
-Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
+Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). All documentation: [docs/README.md](docs/README.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
