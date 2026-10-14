@@ -9,6 +9,7 @@ full list for anyone maintaining the site. Search is case-insensitive.
 | 🛰️ **Our spacecraft** | "★ HUMANITY'S ROBOTS ★": the Solar System frozen on one real date with 19 spacecraft beyond Earth orbit at their real positions (NASA JPL Horizons), each with its pixel art, signal delay and mission page, plus the Mars rovers. The corner of the drawing shows each spacecraft's pixel art in turn | `spacecraft`, `space craft`, `probe(s)`, `space probe(s)`, `robots`, `missions`, `rover(s)`, `mars rover(s)` | `#Spacecraft` |
 | 🎯 **One spacecraft** | The same view with that spacecraft in yellow, its table row highlighted and its pixel art in the corner | `jwst`, `webb`, `james webb (space telescope)`, `voyager` / `voyager 1`, `voyager 2`, `new horizons`, `parker (solar probe)`, `juno`, `europa clipper`, `soho`, `euclid`, `solar orbiter`, `bepicolombo`, `juice`, `lucy`, `psyche`, `osiris-apex` / `osiris-rex`, `mro` / `mars reconnaissance orbiter`, `(mars) odyssey`, `mars express`, `tgo` / `exomars` / `trace gas orbiter`, `curiosity`, `perseverance` | `#jwst`, `#lucy`, ... |
 | 🔭 **The Kepler telescope** | "★ THE PLANET HUNTER ★": the mission replayed on Kepler's Earth-trailing orbit (2009 → "Goodnight Kepler" in 2018), a big pixel Kepler, its story and NASA links. **Or click the little telescope in the map's top-left corner** (zoom 1, not in DEPTH) | `kepler`, `kepler space telescope`, `kepler telescope`, `kepler spacecraft`, `kepler mission`, `space telescope`, `telescope`, `goodnight kepler` (also with "the") | `#Kepler` |
+| ☀☀ **Tatooine** | Kepler-16, a real planet with two suns: a "YES, IT'S REAL" pop-up, both stars drawn orbiting each other (they eclipse in KEPLER'S VIEW), and the TATOOINE achievement | `tatooine` (also "the tatooine") | `#Tatooine` |
 | 🏠 **The International Space Station** | "★ PEOPLE LIVE UP HERE ★": the real continents (NASA's Blue Marble) on a turning, tilted pixel Earth with the ISS on a to-scale orbit and its pixel art in the corner (sped up ~460×), NASA's facts and a link to Spot the Station | `iss`, `space station`, `international space station` (also with "the") | `#ISS` |
 
 Earth-orbit satellites are left out on purpose; the ISS is the only exception.
@@ -31,7 +32,7 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (47, in groups), trophies, badges and your star
+### Achievements (49, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -76,6 +77,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | ROAD TO INTERSTELLAR | Voyager, New Horizons |
 | | PHOTO FINISH | Slide a Galleria photo all the way to pixel art |
 | | CURATOR | Open ten found Galleria cards in one visit |
+| Two suns | TATOOINE / DOUBLE SUNSET | Visit a planet with two suns / all 12 two-sun systems (the "two suns" highlight finds them) |
 | Secret | PATIENT OBSERVER | Watch one system for two minutes |
 | | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
 | | NO SIGNAL | Search for five things that aren't there in one visit |
@@ -83,8 +85,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |
 
-Not possible yet: **TATOOINE** (Kepler-16, the planet with two suns, isn't on the map: it isn't in the KOI table the
-map is built from) and **PROPHET** (visit a candidate NASA confirms after Star Gazer called it; needs history across
+Not possible yet: **PROPHET** (visit a candidate NASA confirms after Star Gazer called it; needs history across
 the monthly data refreshes).
 
 Progress is kept only in the visitor's browser (localStorage, key `starmap.progress.v1`), so refreshes and site

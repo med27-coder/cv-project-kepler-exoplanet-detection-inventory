@@ -134,6 +134,15 @@ const BADGES = {
     ringArt(put, 8, 3, 2.5, 1, '#eef2f8', a => Math.sin(a) > -0.5);
     put(8, 4, '#d6dae2');
   } },
+  'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
+    discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));
+    discArt(put, 11, 9, 2.4, (dx, dy, f) => (f < 0.55 ? '#ffd9a0' : '#ff9a3c'));
+    for (let x = 0; x < 16; x++) for (let y = 11; y < 16; y++) {
+      const dune = 11 + Math.round(Math.sin(x * 0.6) * 0.8);
+      if (y >= dune) put(x, y, y === dune ? '#e0a060' : (x + y) % 3 ? '#a8622c' : '#8a4e22');
+    }
+    if (Math.sin(t) > 0) put(2, 2, '#ffffff');
+  } },
   SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
     for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }
     discArt(put, 8, 8, 3.2, (dx, dy, f) => (f < 0.45 ? '#000000' : '#6a3fb0'));

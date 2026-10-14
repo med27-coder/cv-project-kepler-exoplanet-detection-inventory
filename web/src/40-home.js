@@ -259,6 +259,7 @@ function lookup(query, updateHash = true) {
   if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
   if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
   if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
+  if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
   const s = find(query);
   if (s) select(s, updateHash); else showUnknown(query);
 }

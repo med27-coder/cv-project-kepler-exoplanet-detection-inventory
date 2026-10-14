@@ -206,7 +206,7 @@ SHIPPED_IDS = {
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
             'curious', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'l2', 'interstellar',
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
-            'launch-day', 'star-gazer'},
+            'launch-day', 'star-gazer', 'tatooine', 'double-sunset'},
 }
 
 
@@ -218,3 +218,15 @@ def test_progress_ids_are_stable():
     ach = js[js.index('const ACHIEVEMENTS = ['):js.index('const ACH = new Map')]
     assert SHIPPED_IDS['eggs'] <= set(re.findall(r"\bid: '([\w-]+)'", eggs))
     assert SHIPPED_IDS['ach'] <= set(re.findall(r"\bid: '([\w-]+)'", ach))
+
+
+def test_kepler_worlds_outside_the_koi_list(data):
+    """Planets Kepler found that never were KOIs (export_starmap.py `extra`): Kepler-16, the "Tatooine", and
+    the other planets around two stars are on the map with their real Kepler IDs."""
+    col = {c: i for i, c in enumerate(data['columns'])}
+    extra = {s[col['name']]: s for s in data['stars'] if s[col['kois']] == 0}
+    assert {'Kepler-16', 'Kepler-34', 'Kepler-35', 'Kepler-38', 'Kepler-47'} <= set(extra)
+    assert extra['Kepler-16'][col['kepid']] == 12644769
+    two_suns = [s for s in data['stars'] if s[col['tags']] & data['tags']['twosuns']]
+    assert len(two_suns) >= 12
+    assert len({s[col['kepid']] for s in data['stars']}) == len(data['stars'])     # no star twice
