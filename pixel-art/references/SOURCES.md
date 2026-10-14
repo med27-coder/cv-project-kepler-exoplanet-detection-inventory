@@ -29,6 +29,18 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `spacecraft/curiosity.jpg` | Curiosity selfie on Mars | [PIA19808](https://images.nasa.gov/details/PIA19808) | NASA/JPL-Caltech/MSSS | 2015-08-19 |
 | `spacecraft/perseverance.jpg` | Perseverance selfie with Ingenuity | [PIA24542](https://images.nasa.gov/details/PIA24542) | NASA/JPL-Caltech/MSSS | 2021-04-07 |
 | `spacecraft/iss.jpg` | The ISS photographed from a departing Soyuz (2018) | [iss056e201248](https://images.nasa.gov/details/iss056e201248) | NASA JSC | 2018-10-04 |
+| `solar-system/pale-blue-dot.jpg` | The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020) | [PIA23645](https://images.nasa.gov/details/PIA23645) | NASA/JPL-Caltech | 2020-02-12 |
+| `solar-system/sun.jpg` | The Sun in visible light with a giant sunspot (SDO, 2014) | [GSFC_20171208_Archive_e000923](https://images.nasa.gov/details/GSFC_20171208_Archive_e000923) | NASA GSFC | 2017-12-08 |
+| `solar-system/mercury.jpg` | Mercury's surface from orbit, first colour image (MESSENGER, 2011) | [GSFC_20171208_Archive_e001922](https://images.nasa.gov/details/GSFC_20171208_Archive_e001922) | NASA GSFC | 2017-12-08 |
+| `solar-system/venus.jpg` | Venus and its clouds (Mariner 10, 1974, reprocessed) | [PIA23791](https://images.nasa.gov/details/PIA23791) | NASA/JPL-Caltech | 2020-06-08 |
+| `solar-system/earth.jpg` | Earth, Africa and Europe, from 1.5 million km (DSCOVR EPIC, 2015) | [epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o](https://images.nasa.gov/details/epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o) | NASA GSFC | 2015-07-29 |
+| `solar-system/moon.jpg` | The full Moon | [GSFC_20171208_Archive_e000868](https://images.nasa.gov/details/GSFC_20171208_Archive_e000868) | NASA GSFC | 2017-12-08 |
+| `solar-system/mars.jpg` | Mars near its close approach (Hubble) | [GSFC_20171208_Archive_e000332](https://images.nasa.gov/details/GSFC_20171208_Archive_e000332) | NASA GSFC | 2017-12-08 |
+| `solar-system/jupiter.jpg` | Jupiter and the Great Red Spot (Cassini, 2000) | [PIA04866](https://images.nasa.gov/details/PIA04866) | NASA/JPL/Space Science Institute | 2003-11-13 |
+| `solar-system/saturn.jpg` | Saturn with its moon Titan in front (Cassini, 2012) | [PIA14922](https://images.nasa.gov/details/PIA14922) | NASA/JPL-Caltech/Space Science Institute | 2012-08-29 |
+| `solar-system/uranus.jpg` | Uranus (Voyager 2, 1986) | [PIA18182](https://images.nasa.gov/details/PIA18182) | NASA/JPL-Caltech | 1986-12-18 |
+| `solar-system/neptune.jpg` | Neptune and its Great Dark Spot (Voyager 2, 1989) | [PIA01492](https://images.nasa.gov/details/PIA01492) | NASA/JPL | 1998-10-30 |
+| `solar-system/pluto.jpg` | Pluto by New Horizons (enhanced colour), heart and all | [PIA19952](https://images.nasa.gov/details/PIA19952) | NASA/Johns Hopkins University Applied Physics Laboratory/Southwest Research Institute | 2015-09-24 |
 | `solar-system/earth-blue-marble.jpg` | Blue Marble map, the source of the pixel Earth | [Visible Earth](https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg) | NASA Goddard Space Flight Center / Visible Earth |  |
 
 JUICE and BepiColombo (ESA) have no image in the NASA library; their sprites follow ESA's published

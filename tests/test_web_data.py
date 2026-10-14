@@ -177,3 +177,19 @@ def test_earth_map():
     water = sum(r.count('o') + r.count('s') for r in rows) / (128 * 64)
     assert 0.55 < water < 0.8                                       # ~70% of Earth is ocean
     assert len(text) < 15_000
+
+
+def test_gallery_photos():
+    """web/gallery/ + data/gallery.js (fetch_references.py): every listed photo exists, has a credit,
+    and nothing credited to ESA is copied (ESA's own licence: linked only)."""
+    text = (WEB / 'data' / 'gallery.js').read_text(encoding='utf-8')
+    gallery = json.loads(text[text.index('{'):text.rindex('}') + 1])
+    for name, g in gallery.items():
+        assert g['credit'] and g['link'].startswith('https://images.nasa.gov/details/'), name
+        if 'ESA' in g['credit']:
+            assert g['img'] is None and not (WEB / 'gallery' / f'{name}.jpg').exists(), name
+        else:
+            assert (WEB / g['img']).is_file(), name
+    egg_refs = re.findall(r"ref: '([\w-]+)'", (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8'))
+    assert set(egg_refs) <= set(gallery), set(egg_refs) - set(gallery)
+    assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 600_000

@@ -163,6 +163,7 @@ function drawStars(b, size) {
 function setZoom(zoom, anchor) {   // anchor: canvas point that stays put (default: centre)
   zoom = clamp(zoom, ZOOMS[0], ZOOMS[ZOOMS.length - 1]);
   if (zoom === view.zoom) return;
+  if (zoom === ZOOMS[ZOOMS.length - 1]) achieve('eagle');
   const [ax, ay] = anchor || [MW / 2, MH / 2];
   const [mx, my] = toMap(ax, ay);
   view.zoom = zoom;
@@ -300,11 +301,13 @@ document.getElementById('zoom-in').addEventListener('click', () => stepZoom(1));
 const ccdButton = document.getElementById('ccd'), depthButton = document.getElementById('depth');
 ccdButton.addEventListener('click', () => {
   showCcd = !showCcd;
+  achieve('chips');
   ccdButton.setAttribute('aria-pressed', String(showCcd));
   renderBase();
 });
 depthButton.addEventListener('click', () => {
   depth = !depth;
+  if (depth) achieve('depth');
   if (depth) { view.zoom = 1; view.cx = MW / 2; view.cy = MH / 2; }
   depthButton.setAttribute('aria-pressed', String(depth));
   for (const id of ['zoom-in', 'zoom-out']) document.getElementById(id).disabled = depth;

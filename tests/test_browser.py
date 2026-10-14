@@ -172,6 +172,37 @@ def test_kepler_telescope_and_pluto(browser, site):
     assert not errors, errors
 
 
+def test_galleria_game(browser, site):
+    """The Galleria: silhouettes until found; a search unlocks one (pop-up, saved in this browser);
+    achievements; reset."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.clear()")
+    page.reload()
+    page.click('#open-gallery')
+    assert page.locator('.egg-card').count() == 24
+    assert page.locator('.egg-card.found').count() == 0
+    page.click('#gallery-close')
+    page.fill('#query', 'lucy')
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.toast.egg')
+    assert 'TROJAN TOUR' in page.locator('.toast.egg').inner_text()
+    assert 'lucy' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    page.click('#open-gallery')
+    assert page.locator('.egg-card.found').count() == 1
+    page.click('.egg-card[data-egg="lucy"]')
+    page.wait_for_selector('.egg-detail img')                      # the real photo next to the pixel art
+    assert 'Lucy' in page.locator('#pane-eggs').inner_text()
+    page.click('#tab-ach')
+    assert 'CURIOUS MIND' in page.locator('.ach-list li.on').inner_text()
+    page.click('#tab-set')
+    page.click('#set-reset')
+    page.click('#set-reset')                                        # asks twice
+    page.click('#tab-eggs')
+    assert page.locator('.egg-card.found').count() == 0
+    assert not errors, errors
+
+
 def test_view_links_kepler_view_and_pinch(browser, site):
     """A shared link restores zoom, true scale and Kepler's view; pinching zooms; the URL follows."""
     errors = []

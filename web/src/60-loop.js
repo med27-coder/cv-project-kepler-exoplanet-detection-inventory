@@ -24,7 +24,11 @@ function frame(now) {
     return;
   }
   if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); lastMap = now; }
-  if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) { drawSystem(now / 1000); lastSys = now; }
+  if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) {
+    drawSystem(now / 1000);
+    lastSys = now;
+    if (scene && !scene.custom && !scene.mystery && now - sceneSince > 120_000) achieve('patient');
+  }
   requestAnimationFrame(frame);
 }
 function wake() {

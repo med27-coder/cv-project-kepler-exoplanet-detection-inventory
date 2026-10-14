@@ -236,6 +236,7 @@ function showHome(updateHash = true) {
 let selectToken = 0;   // a slow chunk load must not overwrite a newer selection
 function select(s, updateHash = true) {
   selected = s;
+  systemOpened(s);
   const token = ++selectToken;
   withDetail(s, detail => {
     if (token !== selectToken) return;
@@ -253,10 +254,11 @@ function select(s, updateHash = true) {
 function lookup(query, updateHash = true) {
   query = String(query).slice(0, MAX_QUERY);
   if (!query.trim()) return;
-  if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
-  if (ISS_QUERY.test(query.trim())) { showISS(updateHash); return; }
-  if (KEPLER_QUERY.test(query.trim())) { showKepler(updateHash); return; }
-  if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash, query.trim()); return; }
+  const q = query.trim();   // easter eggs first; finding one unlocks it in the Galleria (48-gallery.js)
+  if (HOME_QUERY.test(q) || /^(the )?pluto$/i.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
+  if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
+  if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
+  if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
   const s = find(query);
   if (s) select(s, updateHash); else showUnknown(query);
 }
