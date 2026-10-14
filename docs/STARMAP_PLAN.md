@@ -32,17 +32,17 @@ Status key: `[x]` done · `[ ]` to do · `[~]` started.
       figures closed in the app, mixed-channel ensembles, wrap padding when duration ≥ half the period,
       `--allow-stale` in `score_candidates.py`, shared input/catalog helpers, row counting, test `sys.path` leak
 - [~] Rebuild all views with recipe v3 (`build_full_dataset.py`, then `--candidates`), running
-- [ ] Full training: `train_star_gazer.py --diagnostics --ensemble 5`
-- [ ] Grouped 5-fold CV (`cross_validate.py`) and candidate scoring (`score_candidates.py`)
+- [x] Full training: `train_star_gazer.py --diagnostics --ensemble 5`
+- [x] Grouped 5-fold CV (`cross_validate.py`) and candidate scoring (`score_candidates.py`)
 - [x] Encrypt the model and detailed results (`secure_artifacts.py`, split format v2; 14 Oct 2026), back up the key
-- [ ] Fill in the README's V3 numbers and the version-progress chart
+- [x] Fill in the README's V3 numbers and the version-progress chart
 
 ## Phase 3: Connect the model to the map
 
 - [x] Export reads Star Gazer's candidate scores (`results/v3/candidates.csv`) when present; scores only, never the model
 - [x] Candidate-only stars on the map coloured by Star Gazer's verdict (likely planet / likely false positive)
 - [x] Candidate rows in the system table show Star Gazer's score next to NASA's status
-- [ ] Re-run `export_starmap.py` after `score_candidates.py` (Phase 2) so the scores go live
+- [x] Re-run `export_starmap.py` after `score_candidates.py` (Phase 2) so the scores go live
 - [ ] Optional: a small light-curve sparkline per planet (the 201-bin local view, ~1 KB)
 
 ## Phase 4: Grow the drawn systems ✅
@@ -56,8 +56,8 @@ Status key: `[x]` done · `[ ]` to do · `[~]` started.
 - [x] `.github/workflows/pages.yml` deploys `web/` to GitHub Pages on every push to `main` that changes it
 - [x] Star map section and link in README.md
 - [x] Credits footer: NASA Exoplanet Archive, Kepler mission
-- [ ] **One-time (you):** GitHub repo → Settings → Pages → Source: **GitHub Actions**
-- [ ] Commit + push, then check <https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/>
+- [x] **One-time (you):** GitHub repo → Settings → Pages → Source: **GitHub Actions**
+- [x] Commit + push, then check <https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/>
 
 ## Phase 6: Polish
 
@@ -86,7 +86,7 @@ Ordered by value for visitors. Everything runs in the browser from the data alre
 After the Phase 2 pipeline (needs the rebuilt views and scores):
 
 - [ ] Light-curve sparkline per planet (the folded transit from the local view), lazy-loaded per system
-- [ ] Scheduled data refresh: a monthly workflow that re-exports from the NASA archive (dispositions change)
+- [x] Scheduled data refresh (`.github/workflows/data-refresh.yml`): a monthly workflow that re-exports from the NASA archive (dispositions change)
 
 ## Phase 7: More data (for a better model)
 
