@@ -115,7 +115,7 @@ Everything is drawn from numbers on two small canvases (about 1.1 MB of data for
 .venv\Scripts\python scripts\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
 ```
 
-One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍
+One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are a few more: try looking for the robots we've sent out there, or where people live in space. 🛰️
 
 Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md).
 

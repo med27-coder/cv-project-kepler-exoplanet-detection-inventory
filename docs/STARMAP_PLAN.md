@@ -141,6 +141,12 @@ except one 18 KB backdrop):
       the loop stops when both are off-screen or after 3 idle minutes and wakes on any interaction.
       Measured: ~0.6% of one CPU core while animating; ~295 KB to download on a first visit.
 
+- [x] **Easter eggs: spacecraft and the ISS.** *spacecraft*, *JWST*, *Voyager*, *rovers*... freezes the Solar
+      System on one real date with the planets and 19 spacecraft beyond Earth orbit where NASA JPL Horizons
+      puts them (`scripts/fetch_spacecraft.py` → `web/data/spacecraft.js`), plus the Mars rovers' landing
+      sites. *ISS* / *space station*: a pixel Earth with the station on a to-scale orbit and NASA's facts.
+      Earth-orbit satellites are left out on purpose.
+
 Next ideas (not started):
 
 - [ ] **Real transit sparklines**: each planet's own folded Kepler light curve (the model's local
