@@ -71,3 +71,8 @@ Fix: give the view its own drawing and reset the hint/controls, e.g.
   preview of the #1 candidate's system, clicking one opens it;
 - `setScene({ custom: ... })` so the zoom/scale tools hide and the hint clears (like the ISS card);
 - a browser test: open next planets after a true-scale system and check the canvas isn't blank.
+
+## Pixel trophy (concept, requested 2026-10-14)
+`pixel-art/icons/draft_trophy.png` (earned) and `draft_trophy_locked.png` (silhouette), 16 x 16; the grid
+and colours are in `draft_trophy.txt` in the site's row-of-letters format, ready to become the achievement
+icon that replaces the 🏆 emoji (earned: gold cup on a plum base; locked: the same shape in dark blue).
