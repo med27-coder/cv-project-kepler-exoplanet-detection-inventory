@@ -172,6 +172,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .legend [hidden] { display: none; }
 
 footer { color: var(--ink-2); font-size: 18px; margin-top: 20px; }
+footer .disclaimer { border-top: 1px solid var(--edge); padding-top: 10px; }
 a { color: var(--accent); }
 
 .visually-hidden {
