@@ -18,11 +18,11 @@ const KEPLER_ART = [
   '..e...................',
   '.eee..................',
 ];
-const KEPLER_INK = {
-  P: '#6f8fe8', p: '#2f4fae', g: '#1b2a66',     // solar array: lit edge, cells, cell gaps
-  w: '#d8dde8', W: '#ffffff', s: '#8f99b0',     // tube: lit side, glint, shaded side
+const KEPLER_INK = {   // colours from NASA's picture (pixel-art/references/spacecraft/kepler.jpg)
+  P: '#5a6488', p: '#262b44', g: '#151a2c',     // dark solar array: lit edge, cells, cell gaps
+  w: '#d9a441', W: '#f3d27a', s: '#9c6b22',     // photometer tube in gold foil: lit side, glint, shade
   k: '#141a33',                                 // inside the sunshade
-  b: '#c9a24a', B: '#8a6d1f', e: '#aab4c8',     // bus foil, foil shadow, antenna
+  b: '#c8ccd4', B: '#6c7280', e: '#eef2f8',     // silver bus, its shadow, antenna
 };
 const KEPLER_W = KEPLER_ART[0].length, KEPLER_H = KEPLER_ART.length;
 const KEPLER_SPOT = { x: 5, y: 7 };   // map pixels at zoom 1: the field leaves this corner empty

@@ -478,7 +478,7 @@
     I: '111010010010111', D: '110101101101110', B: '110101110101110', G: '011100101101011',
     J: '001001001101010', L: '100100100100111', P: '110101110100100', Q: '010101101110011',
     S: '011100010001110', V: '101101101101010', W: '101101111111101', Y: '101101010010010',
-    Z: '111001010100111', '-': '000000111000000', '/': '001001010100100',
+    X: '101101010101101', Z: '111001010100111', '-': '000000111000000', '/': '001001010100100',
   };
   function pixelText(ctx, text, x, y, color) {
     ctx.fillStyle = color;
@@ -1291,16 +1291,7 @@
   const SOLAR_ART = {
     mercury: (dx, dy, r, spin) => (hash(`me${Math.floor(dx + spin)},${dy}`) < 0.25 ? '#6f6a66' : '#9c9792'),
     venus: (dx, dy, r, spin) => (hash(`ve${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#d4c08a' : '#eadcaf'),
-    earth: (dx, dy, r, spin) => {
-      if (Math.abs(dy) >= r - Math.floor(r / 8)) return '#eef6ff';           // ice caps
-      // features scale with the sprite, so a big Earth gets continents rather than speckle
-      const cell = Math.max(2, Math.round(r / 5)), wrap = 9;
-      const x = Math.floor((dx + spin) / cell), y = Math.floor((dy + r) / cell);
-      const cloud = Math.max(1, Math.round(cell / 2));
-      if (hash(`cl${Math.floor((dx + spin * 1.6) / cloud)},${Math.floor(dy / cloud)}`) < 0.1) return '#ffffff';
-      const land = hash(`la${((x % wrap) + wrap) % wrap},${y}`);
-      return land < 0.32 ? '#4f9a46' : land < 0.42 ? '#a98b55' : '#2f6fd0';    // forest, desert, ocean
-    },
+    earth: (dx, dy, r, spin) => earthSurface(dx, dy, r, spin),
     mars: (dx, dy, r, spin) => {
       if (dy <= -r) return '#f3ede4';                                         // north polar cap
       return hash(`ma${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#8e3d22' : '#c45a32';
@@ -1325,6 +1316,27 @@
     },
   };
 
+  // Earth: NASA's Blue Marble as a 128 x 64 pixel map (data/earth.js, scripts/starmap/make_earth_map.py)
+  // wrapped onto a globe tipped by its 23.4° axial tilt, turning west to east, with a few drifting
+  // clouds. `spin` is in pixels, so the surface moves at the same speed as on the other planets.
+  const EARTH_MAP = window.STARMAP_EARTH || null;
+  const EARTH_TILT = 23.4 * Math.PI / 180, EARTH_LON0 = 0.3;   // start over Africa and Europe
+  function earthSurface(dx, dy, r, spin) {
+    if (!EARTH_MAP) return '#2a5fbf';
+    const R = r + 0.5, c = Math.cos(EARTH_TILT), s = Math.sin(EARTH_TILT);
+    const x = (dx * c + dy * s) / R, y = (dy * c - dx * s) / R;   // undo the tilt
+    const z = Math.sqrt(Math.max(0, 1 - x * x - y * y));
+    const lat = Math.asin(clamp(-y, -1, 1)), turn = Math.atan2(x, z);
+    const lon = turn + EARTH_LON0 - spin / R;
+    const { width: W, height: H, rows, colors } = EARTH_MAP;
+    const row = clamp(Math.floor((0.5 - lat / Math.PI) * H), 0, H - 1);
+    const cloudLon = lon + spin / R * 0.35;   // weather drifts a little against the ground
+    const cell = Math.floor(((cloudLon / (2 * Math.PI)) % 1 + 1) % 1 * 48);
+    if (hash(`cl${cell >> 1},${row >> 2}`) < 0.14 && hash(`cm${cell},${row >> 1}`) < 0.55) return '#f4f8ff';
+    const col = Math.floor((((lon / (2 * Math.PI) + 0.5) % 1) + 1) % 1 * W);
+    return colors[rows[row][col]] || '#2a5fbf';
+  }
+
   // Rings as dotted ellipses around the planet: the far half before the planet, the near half after.
   function planetRing(ctx, x, y, rx, ry, color, near) {
     ctx.fillStyle = color;
@@ -1345,7 +1357,9 @@
       const w = Math.floor(Math.sqrt(r * r - dy * dy + r * 0.8));
       for (let dx = -w; dx <= w; dx++) {
         const lit = (dx * lx + dy * ly) / (r + 0.5);
-        ctx.fillStyle = shade(art(dx, dy, r, spin).toLowerCase(), lit > 0.3 ? 1.15 : lit < -0.35 ? 0.45 : 0.9);
+        const f = r < 8 ? (lit > 0.3 ? 1.15 : lit < -0.35 ? 0.45 : 0.9)   // small: three clear steps
+          : lit > 0.45 ? 1.12 : lit > 0.1 ? 1 : lit > -0.2 ? 0.85 : lit > -0.45 ? 0.62 : 0.42;   // big: a softer terminator
+        ctx.fillStyle = shade(art(dx, dy, r, spin).toLowerCase(), f);
         ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
       }
     }
@@ -1495,7 +1509,7 @@
     if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
     if (ISS_QUERY.test(query.trim())) { showISS(updateHash); return; }
     if (KEPLER_QUERY.test(query.trim())) { showKepler(updateHash); return; }
-    if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash); return; }
+    if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash, query.trim()); return; }
     const s = find(query);
     if (s) select(s, updateHash); else showUnknown(query);
   }
@@ -1505,7 +1519,22 @@
   // the planets and humanity's spacecraft beyond Earth orbit where NASA JPL Horizons puts them
   // (scripts/starmap/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
   // are left out on purpose; "ISS" / "space station" opens the International Space Station instead.
-  const CRAFT_QUERY = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|jwst|james webb( space telescope)?|webb|voyager( ?[12])?|new horizons|parker( solar probe)?|juno|europa clipper|rovers?|mars rovers?|curiosity|perseverance)$/i;
+  const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?)$/i;
+  // Search words for one spacecraft -> its name in data/spacecraft.js (or a rover's): the view then
+  // highlights it and shows its pixel art.
+  const CRAFT_ALIASES = [
+    [/^(the )?(jwst|webb|james webb( space telescope)?)$/i, 'James Webb Space Telescope'],
+    [/^voyager( ?1)?$/i, 'Voyager 1'], [/^voyager ?2$/i, 'Voyager 2'], [/^new horizons$/i, 'New Horizons'],
+    [/^parker( solar probe)?$/i, 'Parker Solar Probe'], [/^juno$/i, 'Juno'], [/^europa clipper$/i, 'Europa Clipper'],
+    [/^soho$/i, 'SOHO'], [/^euclid$/i, 'Euclid'], [/^solar orbiter$/i, 'Solar Orbiter'],
+    [/^bepi ?colombo$/i, 'BepiColombo'], [/^juice$/i, 'JUICE'], [/^lucy$/i, 'Lucy'], [/^psyche$/i, 'Psyche'],
+    [/^osiris[- ]?(apex|rex)$/i, 'OSIRIS-APEX'], [/^(mro|mars reconnaissance orbiter)$/i, 'Mars Reconnaissance Orbiter'],
+    [/^(mars )?odyssey$/i, 'Mars Odyssey'], [/^mars express$/i, 'Mars Express'],
+    [/^(tgo|exomars( trace gas orbiter)?|trace gas orbiter)$/i, 'ExoMars Trace Gas Orbiter'],
+    [/^curiosity$/i, 'Curiosity'], [/^perseverance$/i, 'Perseverance'],
+  ];
+  const craftFocus = q => CRAFT_ALIASES.find(([re]) => re.test(q))?.[1] ?? null;
+  const CRAFT_QUERY = { test: q => CRAFT_GENERAL.test(q) || craftFocus(q) != null };
   const ISS_QUERY = /^(the )?(iss|international space station|space station)$/i;
   const CRAFT_SPOT = '#e8f4ff', CRAFT_LABEL = '#9fd8ff';
 
@@ -1523,51 +1552,73 @@
     return sview.mode === 'true' ? au * sc.pxPerAU * sview.zoom : sc.logR(au) * sview.zoom;
   }
 
-  // Spacecraft as blinking crosses with labels that don't overlap (nearer the Sun wins).
-  function drawCraft(sc, crafts, seconds) {
+  // Spacecraft as blinking crosses with labels that don't overlap (nearer the Sun wins; a searched-for
+  // spacecraft, `focus`, comes first and is drawn in yellow).
+  function drawCraft(sc, crafts, seconds, focus) {
     const boxes = [];
     const free = (x, y, w) => !boxes.some(b => x < b[0] + b[2] + 2 && x + w + 2 > b[0] && Math.abs(y - b[1]) < 7);
     const marsCrew = crafts.filter(c => c.where === 'orbiting Mars');
-    for (const c of crafts) {
+    const order = [...crafts.filter(c => c.name === focus), ...crafts.filter(c => c.name !== focus)];
+    for (const c of order) {
+      const mine = c.name === focus;
       const R = screenRadius(sc, c.r_au), a = c.lon * Math.PI / 180;
       const x = Math.round(sc.cx + R * Math.cos(a)), y = Math.round(sc.cy + R * TILT * Math.sin(a));
       if (x < -2 || x > SW + 2 || y < -2 || y > SH - STRIP) continue;
       const on = REDUCED_MOTION || Math.sin(seconds * 4 + c.lon) > -0.5;
-      sctx.fillStyle = on ? CRAFT_SPOT : '#6f86a8';
+      sctx.fillStyle = mine ? '#ffd34d' : on ? CRAFT_SPOT : '#6f86a8';
       for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) sctx.fillRect(x + dx, y + dy, 1, 1);
-      const label = c.where === 'orbiting Mars' ? (c === marsCrew[0] ? `${marsCrew.length} ORBITERS` : null) : c.label;
+      const label = mine ? c.label
+        : c.where === 'orbiting Mars' ? (c === marsCrew[0] ? `${marsCrew.length} ORBITERS` : null) : c.label;
       if (!label) continue;
       const w = textWidth(label), lx = x + 3, ly = y - 7;
       if (lx + w < SW && ly > 0 && free(lx, ly, w)) {
-        pixelText(sctx, label, lx, ly, CRAFT_LABEL);
+        pixelText(sctx, label, lx, ly, mine ? '#ffd34d' : CRAFT_LABEL);
         boxes.push([lx, ly, w]);
       }
     }
   }
 
-  function craftTable(data) {
+  // Top-left panel: the searched-for spacecraft's pixel art, or every spacecraft in turn (3 s each).
+  function drawCraftInset(gallery, focus, seconds) {
+    if (!gallery.length) return;
+    const pick = focus ? gallery.find(g => g.name === focus)
+      : gallery[REDUCED_MOTION ? 0 : Math.floor(seconds / 3) % gallery.length];
+    if (!pick) return;
+    const [w, h] = spriteSize(pick.key);
+    const px = Math.max(1, Math.min(3, Math.floor(58 / w), Math.floor(30 / h)));
+    const bw = Math.max(w * px, textWidth(pick.label)) + 6, bh = h * px + 13;
+    sctx.fillStyle = '#0b1024';
+    sctx.fillRect(2, 2, bw, bh);
+    sctx.fillStyle = '#2b3566';
+    sctx.fillRect(2, 2, bw, 1); sctx.fillRect(2, 2 + bh, bw, 1); sctx.fillRect(2, 2, 1, bh); sctx.fillRect(1 + bw, 2, 1, bh);
+    craftSprite(sctx, pick.key, 2 + Math.floor((bw - w * px) / 2), 5, px);
+    pixelText(sctx, pick.label, 5, 7 + h * px, focus ? '#ffd34d' : CRAFT_LABEL);
+  }
+
+  function craftTable(data, focus) {
     const delay = min => (min < 1 ? `${fmt(min * 60)} s` : min < 120 ? `${fmt(min)} min` : `${fmt(min / 60, 1)} h`);
     const rows = [...data.spacecraft].sort((a, b) => b.r_au - a.r_au).map(c => `
-      <tr><td><a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a></td>
+      <tr${c.name === focus ? ' class="focus"' : ''}><td>${spriteIcon(CRAFT_SPRITE[c.name])}</td>
+        <td><a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a></td>
         <td>${esc(c.where)}</td><td class="num">${fmt(c.r_au, c.r_au < 10 ? 2 : 0)}</td>
         <td class="num">${delay(c.light_min)}</td><td class="num">${esc(c.launched)}</td><td>${esc(c.agency)}</td></tr>`).join('');
     return `
       <div class="table-wrap"><table>
-        <thead><tr><th>Spacecraft</th><th>Where</th><th class="num">From the Sun (AU)</th>
+        <thead><tr><th><span class="sr-only">Picture</span></th><th>Spacecraft</th><th>Where</th><th class="num">From the Sun (AU)</th>
           <th class="num">Signal delay</th><th class="num">Launched</th><th>Agency</th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>`;
   }
 
-  function showSpacecraft(updateHash = true) {
+  function showSpacecraft(updateHash = true, query = '') {
     selected = null;
-    const token = ++selectToken;
-    title.textContent = 'SPACECRAFT';
+    const token = ++selectToken, focus = craftFocus(query);
+    title.textContent = focus ? focus.toUpperCase() : 'SPACECRAFT';
     info.innerHTML = '<p class="status">Loading positions…</p>';
-    if (updateHash) history.replaceState(null, '', '#Spacecraft');
+    if (updateHash) history.replaceState(null, '', focus ? '#' + encodeURIComponent(query) : '#Spacecraft');
     loadCraft().then(data => {
       if (token !== selectToken) return;
-      const rovers = data.rovers.map(r => `<li><b><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></b>
+      const rovers = data.rovers.map(r => `<li${r.name === focus ? ' class="focus"' : ''}>${spriteIcon(CRAFT_SPRITE[r.name])} <b><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></b>
         (${esc(r.agency)}): landed in ${esc(r.site)} on ${esc(r.landed)}${r.note ? `; ${esc(r.note)}` : ''}.</li>`).join('');
       info.innerHTML = `
         <p class="big">★ HUMANITY'S ROBOTS ★</p>
@@ -1575,30 +1626,46 @@
            (the planets are frozen at their real positions that day too). White crosses on the drawing; press FIT to
            zoom out to the Voyagers, or TRUE SCALE and zoom into Earth to find the telescopes at L1 and L2.
            Satellites orbiting Earth are left out; try searching <b>ISS</b>.</p>
-        ${craftTable(data)}
+        ${focus ? `<p>Found <b>${esc(focus)}</b>: it's the yellow cross${
+          data.rovers.some(r => r.name === focus) ? ' on Mars' : ''}, highlighted in the table, with its pixel art
+          in the corner of the drawing.</p>` : ''}
+        ${craftTable(data, focus)}
         <h3 class="facts-title">ON MARS</h3>
         <ul class="facts">${rovers}</ul>
         <p class="note">Signal delay = how long radio (light) takes to travel between Earth and the spacecraft ·
-          sources: ${esc(data.source)}, NASA and ESA mission pages · you found an easter egg!</p>`;
+          sources: ${esc(data.source)}, NASA and ESA mission pages · pixel art drawn from official NASA images
+          (and ESA's designs for JUICE and BepiColombo) · you found an easter egg!</p>`;
+      paintSpriteIcons(info);
       const sc = buildScene({ ...SOLAR, planets: SOLAR.planets.map(p => ({ ...p, ecc: 0 })) });
       sc.planets.forEach((p, i) => {   // real positions on that date: ecliptic longitude, circular orbits
         const lon = data.planets[SOLAR.planets[i].name]?.lon ?? 0;
         Object.assign(p, { phase: lon * Math.PI / 180, cosw: 1, sinw: 0 });
       });
       sc.frozen = true;
-      sc.overlay = seconds => drawCraft(sc, data.spacecraft, seconds);
+      const gallery = [...data.spacecraft, ...data.rovers]
+        .filter((c, i, all) => CRAFT_SPRITE[c.name] && all.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)
+        .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name], label: c.name === 'Voyager 1' ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
+      if (focus) {   // the second Voyager shares the first's sprite
+        const own = gallery.find(g => g.name === focus) || { name: focus, key: CRAFT_SPRITE[focus] };
+        Object.assign(own, { label: focus.toUpperCase() });
+        if (!gallery.includes(own)) gallery.push(own);
+      }
+      sc.overlay = seconds => { drawCraft(sc, data.spacecraft, seconds, focus); drawCraftInset(gallery, focus, seconds); };
       sc.reach = () => Math.max(...data.spacecraft.map(c => screenRadius(sc, c.r_au)));
       setScene(sc);
     }, () => { if (token === selectToken) info.innerHTML = '<p>Spacecraft positions could not be loaded; check your connection.</p>'; });
   }
 
-  // The station itself, 9 x 3 pixels centred on (x, y).
+  // The station on its orbit, 11 x 5 pixels centred on (x, y): copper solar wings on the truss, modules
+  // in the middle (the full-size sprite is CRAFT_ART.iss, shown in the card's corner).
+  const ISS_SMALL = ['c.c.....c.c', 'C.C.....C.C', 'mmmmmmmmmmm', 'c.c.lwl.c.c', 'C.C.....C.C'];
   function issSprite(ctx, x, y) {
-    x = Math.round(x); y = Math.round(y);
-    ctx.fillStyle = '#5d7bd6';                       // solar arrays
-    ctx.fillRect(x - 4, y - 1, 3, 3); ctx.fillRect(x + 2, y - 1, 3, 3);
-    ctx.fillStyle = '#e6e6e6';                       // truss and modules
-    ctx.fillRect(x - 1, y, 3, 1); ctx.fillRect(x, y - 1, 1, 3);
+    x = Math.round(x) - 5; y = Math.round(y) - 2;
+    ISS_SMALL.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (ch === '.') return;
+      ctx.fillStyle = CRAFT_INK[ch];
+      ctx.fillRect(x + i, y + j, 1, 1);
+    }));
   }
 
   // The International Space Station: a pixel Earth with the station on a to-scale orbit (sped up).
@@ -1633,7 +1700,8 @@
     solarPlanet(sctx, cx, cy, { art: 'earth', size: EARTH_R_PX, seed: 'iss', noMoon: true }, -0.9, -0.3, t * 0.4);
     orbit(false);
     if (!behind) station(ix, iy);
-    if (!hidden) pixelText(sctx, 'ISS', Math.round(ix) + 6, Math.round(iy) - 8, '#ffd34d');
+    if (!hidden) pixelText(sctx, 'ISS', Math.round(ix) + 7, Math.round(iy) - 8, '#ffd34d');
+    drawCraftInset([{ name: 'ISS', key: 'iss', label: 'THE STATION' }], 'ISS', seconds);
     pixelText(sctx, 'ORBIT 92 MIN', 4, SH - 9, '#5a6a8a');
   }
 
@@ -1662,6 +1730,248 @@
     if (updateHash) history.replaceState(null, '', '#ISS');
   }
 
+  // ---------------------------------------------------------------- spacecraft pixel art
+  // One small sprite per spacecraft in the easter eggs, hand-drawn from official NASA images
+  // (pixel-art/references/, sources in pixel-art/references/SOURCES.md) and, for JUICE and
+  // BepiColombo, ESA's published designs. Each row is one line of pixels; letters are colours.
+  const CRAFT_INK = {
+    w: '#eef2f8', s: '#d6dae2', l: '#b8bfcc', m: '#7d8596', d: '#454b5e', k: '#151a2c',   // white -> black
+    g: '#d9a441', G: '#9c6b22', y: '#f3d27a',                                           // gold foil
+    p: '#2f4fae', P: '#5d7bd6',                                                         // blue solar cells
+    n: '#3a4366', N: '#66729c',                                                         // dark solar arrays
+    c: '#b8864a', C: '#6e4e2c',                                                         // the ISS's copper arrays
+    q: '#d5c3e0', Q: '#8f7aa8',                                                         // Webb's sunshield
+    r: '#b0663a',                                                                       // Martian dust
+  };
+
+  const CRAFT_ART = {
+    jwst: [   // gold hexagon mirror over the five-layer sunshield
+      '.......ygy.......',
+      '.....ygggggy.....',
+      '....ggyggggyg....',
+      '....gggGkGggg....',
+      '....ggyggggyg....',
+      '.....GggggggG....',
+      '.......GGG.......',
+      '........d........',
+      '...qqqqqqqqqqq...',
+      'qqqqqqqqqqqqqqqqq',
+      '..QQQQQQQQQQQQQ..',
+    ],
+    voyager: [   // big white dish, ten-sided bus, science boom one way, power (RTG) boom the other
+      '...wwwwwwwww.....',
+      '..wllllllllw.....',
+      '...wwwwwwwww.....',
+      '......dgd........',
+      '.mmmmmdgdmmmmmmmk',
+      '.d....ddd........',
+      '......m..........',
+      '.....m...........',
+      '....m............',
+    ],
+    newHorizons: [   // triangular body, dish on top, the black RTG sticking out
+      '...wwwwwww...',
+      '..wllllllw...',
+      '...wwwwwww...',
+      '.....ggg.....',
+      '....gyggg....',
+      '...ggggGgg...',
+      '..ggggggGgg..',
+      'kkkk.........',
+    ],
+    parker: [   // white heat shield in front, two small cooled wings, body behind
+      '.wwwwwwwwwww.',
+      'wsssssssssssw',
+      '.mmmmmmmmmmm.',
+      '......l......',
+      '.p...dld...p.',
+      '..p..dgd..p..',
+      '...pplllpp...',
+      '.....ddd.....',
+    ],
+    juno: [   // three long blue arrays in a Y around a dish and body
+      'pp...........pp',
+      '.Pp.........pP.',
+      '..pp.......pp..',
+      '...pP.www.Pp...',
+      '....pwlllwp....',
+      '.....dgggd.....',
+      '......pp.......',
+      '......Pp.......',
+      '......pp.......',
+      '......pm.......',
+    ],
+    clipper: [   // the largest planetary spacecraft: two huge dark arrays, dish, body
+      '...........www...........',
+      'nNnNnNnNnNwlllwnNnNnNnNnN',
+      'nnnnnnnnnnndgdnnnnnnnnnnn',
+      '...........ddd...........',
+    ],
+    soho: [   // gold box, two solar wings, dish
+      'ppp.ggggg.ppp',
+      'PpPmgGyGgmPpP',
+      'ppp.ggggg.ppp',
+      '.....lwl.....',
+    ],
+    euclid: [   // telescope tube behind a solar-panel sunshield, service module below
+      'nnnnnnn...',
+      'nNnNnNnww.',
+      'nnnnnnnlw.',
+      'nNnNnNnlw.',
+      'nnnnnnnww.',
+      '..dmmmmd..',
+      '..dgggGd..',
+    ],
+    solarOrbiter: [   // dark heat shield, box body, two long arrays, boom
+      'kkkkk..........',
+      'kdddkggg.......',
+      'kdddkgyGpppppp.',
+      'kdddkgggPpPpPp.',
+      'kkkkk.m........',
+      '......mmmmmm...',
+    ],
+    bepi: [   // stacked: Mercury orbiter with its long array, Japan's orbiter, transfer module
+      'pPpPpPpPp.....',
+      'ppppppppplll..',
+      '.........lwl..',
+      '.........ggg..',
+      '.........gGg..',
+      'nNnNnNnNnddd..',
+      'nnnnnnnnnddd..',
+    ],
+    juice: [   // a big cross of ten solar panels, dish, long radar antenna
+      '......ppp......',
+      '......pPp......',
+      '......ppp......',
+      'pppppplwlpppppp',
+      'pPpPpPgwgpPpPpP',
+      'ppppppgGgpppppp',
+      '......ppp......',
+      '......pPp.mmmmm',
+      '......ppp......',
+    ],
+    lucy: [   // two enormous round solar arrays
+      '.ppp.......ppp.',
+      'ppPpp.....ppPpp',
+      'pPPPpmgggmpPPPp',
+      'ppPpp.gGg.ppPpp',
+      '.ppp..lwl..ppp.',
+    ],
+    psyche: [   // two cross-shaped five-panel arrays, box body, dish
+      '..pp.......pp..',
+      'pppppmlwlmppppp',
+      'pPpPpdgggdpPpPp',
+      'pppppdgGgdppppp',
+      '..pp.......pp..',
+    ],
+    apex: [   // OSIRIS-APEX: box, two wings, dish on top, sample arm
+      '.....www.....',
+      '....wlllw....',
+      'ppp.ggggg.ppp',
+      'PpPmgGyGgmPpP',
+      'ppp.ggggg.ppp',
+      '......m......',
+      '.......m.....',
+    ],
+    mro: [   // Mars Reconnaissance Orbiter: the big 3 m dish over a gold body and two wings
+      '...wwwwwww...',
+      '..wlllllllw..',
+      '...wwwwwww...',
+      '......d......',
+      'nnnn.ggg.nnnn',
+      'NnNnmgGgmNnNn',
+      'nnnn.ggg.nnnn',
+    ],
+    odyssey: [   // gold box, one solar wing, the long gamma-ray boom
+      '.....g.......',
+      '....ggg.nnnnn',
+      'mmmmgGgmNnNnN',
+      '....ggg.nnnnn',
+      '.....w.......',
+    ],
+    mex: [   // Mars Express: gold cube, two wings, dish
+      '....lww....',
+      'ppp.ggg.ppp',
+      'PpPmgGgmPpP',
+      'ppp.ggg.ppp',
+    ],
+    tgo: [   // ExoMars Trace Gas Orbiter: big box, two long arrays, dish
+      '.....lww......',
+      'pppp.gggg.pppp',
+      'PpPpmgyGgmPpPp',
+      'pppp.gggg.pppp',
+      '.....GGGG.....',
+    ],
+    curiosity: [   // six wheels, white body, mast with the camera head, power unit at the back
+      '..........ddd',
+      '...........m.',
+      '...........m.',
+      'kk.........m.',
+      'kdwwwwwwwwwwr',
+      '.dllllllllll.',
+      '..dmmmmmmmmd.',
+      '.kk..kk..kk..',
+      '.kk..kk..kk..',
+    ],
+    perseverance: [   // like Curiosity, with the Ingenuity helicopter nearby
+      '..........ddd.....',
+      '...........m......',
+      '...........m...ll.',
+      'kk.........m....m.',
+      'kdwwwwwwwwwwr..mdm',
+      '.dllllllllll...m.m',
+      '..dmmmmmmmmd......',
+      '.kk..kk..kk.......',
+      '.kk..kk..kk.......',
+    ],
+    iss: [   // eight copper solar wings on the long truss, modules in the middle
+      'cc.cc.........cc.cc',
+      'Cc.Cc.........cC.cC',
+      'cc.cc.........cc.cc',
+      'mmmmmmmmmmmmmmmmmmm',
+      'cc.cc..lwwwl..cc.cc',
+      'Cc.Cc...lwl...cC.cC',
+      'cc.cc....l....cc.cc',
+    ],
+  };
+
+  // Spacecraft name (data/spacecraft.js, rovers) -> sprite.
+  const CRAFT_SPRITE = {
+    'Voyager 1': 'voyager', 'Voyager 2': 'voyager', 'New Horizons': 'newHorizons',
+    'James Webb Space Telescope': 'jwst', Euclid: 'euclid', SOHO: 'soho', 'Parker Solar Probe': 'parker',
+    'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
+    JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
+    'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
+    'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance',
+  };
+
+  const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];
+
+  // Draw sprite `key` with its top-left at (x, y), `px` canvas pixels per art pixel.
+  function craftSprite(ctx, key, x, y, px = 1) {
+    const art = CRAFT_ART[key];
+    if (!art) return;
+    art.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (ch === '.') return;
+      ctx.fillStyle = CRAFT_INK[ch];
+      ctx.fillRect(x + i * px, y + j * px, px, px);
+    }));
+  }
+
+  // Fill every <canvas data-sprite="key"> inside `root` (the info panel's icons), scaled to fit.
+  function paintSpriteIcons(root) {
+    root.querySelectorAll('canvas[data-sprite]').forEach(c => {
+      const key = c.dataset.sprite;
+      if (!CRAFT_ART[key]) return;
+      const [w, h] = spriteSize(key);
+      const px = Math.max(1, Math.min(Math.floor(c.width / w), Math.floor(c.height / h)));
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+      craftSprite(ctx, key, Math.floor((c.width - w * px) / 2), Math.floor((c.height - h * px) / 2), px);
+    });
+  }
+  const spriteIcon = key => (CRAFT_ART[key] ? `<canvas class="craft-icon" width="50" height="22" data-sprite="${esc(key)}" aria-hidden="true"></canvas>` : '');
+
   // ---------------------------------------------------------------- easter egg: the Kepler telescope
   // A tiny pixel Kepler sits in the map's empty top-left corner, looking at its field; click it (or
   // search "Kepler" / "telescope" / "goodnight Kepler") for its story: the mission replayed on its
@@ -1682,11 +1992,11 @@
     '..e...................',
     '.eee..................',
   ];
-  const KEPLER_INK = {
-    P: '#6f8fe8', p: '#2f4fae', g: '#1b2a66',     // solar array: lit edge, cells, cell gaps
-    w: '#d8dde8', W: '#ffffff', s: '#8f99b0',     // tube: lit side, glint, shaded side
+  const KEPLER_INK = {   // colours from NASA's picture (pixel-art/references/spacecraft/kepler.jpg)
+    P: '#5a6488', p: '#262b44', g: '#151a2c',     // dark solar array: lit edge, cells, cell gaps
+    w: '#d9a441', W: '#f3d27a', s: '#9c6b22',     // photometer tube in gold foil: lit side, glint, shade
     k: '#141a33',                                 // inside the sunshade
-    b: '#c9a24a', B: '#8a6d1f', e: '#aab4c8',     // bus foil, foil shadow, antenna
+    b: '#c8ccd4', B: '#6c7280', e: '#eef2f8',     // silver bus, its shadow, antenna
   };
   const KEPLER_W = KEPLER_ART[0].length, KEPLER_H = KEPLER_ART.length;
   const KEPLER_SPOT = { x: 5, y: 7 };   // map pixels at zoom 1: the field leaves this corner empty

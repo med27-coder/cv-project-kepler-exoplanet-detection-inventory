@@ -131,11 +131,16 @@ def test_spacecraft_and_iss_easter_eggs(browser, site):
     errors = []
     page = open_page(browser, site + '#Spacecraft', errors)
     page.wait_for_selector('#info table')
-    names = page.locator('#info tbody tr td:first-child').all_inner_texts()
+    names = page.locator('#info tbody tr td:nth-child(2)').all_inner_texts()
     assert 'Voyager 1' in names and 'James Webb Space Telescope' in names
     assert page.locator('#sys-title').inner_text() == 'SPACECRAFT'
     assert not page.locator('#sys-tools').is_hidden()        # zoom / FIT work on the frozen Solar System
     page.click('#sys-fit')
+    assert page.locator('canvas.craft-icon').count() >= 19         # pixel art for every spacecraft
+    page.goto(site + '#jwst')                                      # one spacecraft: highlighted
+    page.wait_for_function("document.getElementById('sys-title').textContent === 'JAMES WEBB SPACE TELESCOPE'")
+    page.wait_for_selector('#info tr.focus')
+    assert 'James Webb' in page.locator('#info tr.focus').inner_text()
     page.goto(site + '#ISS')
     page.wait_for_timeout(200)
     page.evaluate("document.getElementById('query').value = 'space station';"
