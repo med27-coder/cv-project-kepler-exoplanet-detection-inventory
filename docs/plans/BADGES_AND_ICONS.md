@@ -90,3 +90,9 @@ Update: SECRET is now a **galaxy cup** (a two-armed violet spiral galaxy fills t
 stars around it), and locked achievements use a **space lock** instead of the padlock emoji: the shackle is a
 planet's ring, the body a small dark planet with the ring crossing it and a star-shaped keyhole
 (`draft_lock_space.png`; all five on `draft_trophy_tiers.png`).
+
+## TRUE STAR GAZER trophy (concept)
+`pixel-art/icons/draft_trophy_star_gazer.png`, 24 x 24: a pale-blue cup with gold handles and a blue base, a
+**black hole rising out of it** (black shadow, glowing photon ring, an accretion disk across the rim), a
+ringed planet on the cup, sparkles and a small moon around it. Style inspired by a stock trophy illustration
+the user shared (watermarked, so not copied into the repo); the pixel art is our own.
