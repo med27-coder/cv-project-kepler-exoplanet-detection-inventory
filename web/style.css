@@ -206,3 +206,9 @@ button.linkish { background: none; border: none; box-shadow: none; padding: 0; c
 .fps { display: block; color: var(--ink-2); font-size: 18px; margin: 2px 0 8px; }
 .fps select { font: inherit; font-size: 18px; color: var(--ink); background: var(--bg); border: 1px solid var(--edge); }
 .fps select:focus-visible { outline: 2px solid var(--accent); }
+
+/* Spacecraft pixel art in the easter-egg tables (drawn by starmap.js, 46-craft-art.js) */
+canvas.craft-icon { display: inline-block; width: 50px; height: 22px; border: 0; vertical-align: middle; background: transparent; }
+tr.focus td { background: rgba(255, 211, 77, 0.12); }
+tr.focus td a, li.focus a { color: var(--accent); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

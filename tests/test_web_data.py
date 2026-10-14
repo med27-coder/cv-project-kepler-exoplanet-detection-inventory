@@ -136,3 +136,44 @@ def test_ccd_footprint():
     assert len(modules) == 21                                   # Kepler's science CCD modules
     for poly in modules:
         assert len(poly) >= 4 and all(279 < ra < 303 and 35 < dec < 54 for ra, dec in poly)
+
+
+def sprites(js, table):
+    """{name: rows} for a JS object of pixel-art string arrays (e.g. CRAFT_ART in 46-craft-art.js)."""
+    body = js[js.index(f'const {table} = {{'):]
+    body = body[:body.index('\n};')]
+    return {m.group(1): re.findall(r"'([^']*)'", m.group(2))
+            for m in re.finditer(r"^  (\w+): \[[^\n]*\n(.*?)^  \],", body, re.DOTALL | re.MULTILINE)}
+
+
+def test_pixel_art_sprites():
+    """Every spacecraft has a sprite; sprites are rectangles drawn only in palette colours."""
+    js = (WEB / 'src' / '46-craft-art.js').read_text(encoding='utf-8')
+    ink = set(re.findall(r"(\w): '#[0-9a-f]{6}'", js[js.index('const CRAFT_INK'):js.index('const CRAFT_ART')]))
+    art = sprites(js, 'CRAFT_ART')
+    assert len(art) >= 20
+    for name, rows in art.items():
+        assert rows and len({len(r) for r in rows}) == 1, f'{name}: rows of different lengths'
+        assert set(''.join(rows)) <= ink | {'.'}, f'{name}: colour not in CRAFT_INK'
+    mapped = dict(re.findall(r"'?([A-Za-z][\w -]*?)'?: '(\w+)'", js[js.index('const CRAFT_SPRITE'):js.index('const spriteSize')]))
+    assert set(mapped.values()) <= set(art)
+    text = (WEB / 'data' / 'spacecraft.js').read_text(encoding='utf-8')
+    data = json.loads(text[text.index('{'):text.rindex('}') + 1])
+    for c in data['spacecraft'] + data['rovers']:
+        assert c['name'] in mapped, f"{c['name']} has no sprite"
+    kepler = (WEB / 'src' / '47-kepler.js').read_text(encoding='utf-8')
+    rows = re.findall(r"'([^']*)'", kepler[kepler.index('const KEPLER_ART'):kepler.index('];')])
+    assert len({len(r) for r in rows}) == 1
+
+
+def test_earth_map():
+    """data/earth.js (scripts/starmap/make_earth_map.py): NASA Blue Marble as a 128 x 64 surface map."""
+    text = (WEB / 'data' / 'earth.js').read_text(encoding='utf-8')
+    earth = json.loads(text[text.index('{'):text.rindex('}') + 1])
+    rows = earth['rows']
+    assert len(rows) == earth['height'] == 64 and {len(r) for r in rows} == {128}
+    assert set(''.join(rows)) <= set(earth['colors'])
+    assert set(rows[-1]) == {'i'}                                   # Antarctica
+    water = sum(r.count('o') + r.count('s') for r in rows) / (128 * 64)
+    assert 0.55 < water < 0.8                                       # ~70% of Earth is ocean
+    assert len(text) < 15_000

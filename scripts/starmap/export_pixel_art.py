@@ -11,7 +11,9 @@ that also hands the drawing functions to window.__art.
     pixel-art/solar-system/<body>_scene.png  at the size it has on the map, with its moons
     pixel-art/solar-system/sheet.png         all of them side by side, labelled
     pixel-art/spacecraft/kepler.png          the Kepler telescope (map sprite)
-    pixel-art/spacecraft/iss.png             the International Space Station
+    pixel-art/spacecraft/<craft>.png         every other spacecraft and rover (CRAFT_ART, 46-craft-art.js)
+    pixel-art/spacecraft/sheet.png           all of them side by side, labelled
+    pixel-art/spacecraft/iss_orbit.png       the small station drawn on its orbit in the ISS card
     pixel-art/spacecraft/marker.png          the cross that marks spacecraft in the Solar System view
 
 Hand-made drafts go next to these as draft_*.png; this script never touches them. Re-run it after
@@ -34,7 +36,8 @@ BODIES = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'n
 SCENE_SIZE = {'mercury': 2, 'venus': 2, 'earth': 3, 'mars': 2, 'jupiter': 6, 'saturn': 5,
               'uranus': 4, 'neptune': 4, 'pluto': 2}   # sprite radius on the map (SOLAR in 40-home.js)
 
-EXPOSE = ('solarPlanet', 'keplerSprite', 'issSprite', 'pixelText', 'textWidth', 'CRAFT_SPOT')
+EXPOSE = ('solarPlanet', 'keplerSprite', 'issSprite', 'pixelText', 'textWidth', 'CRAFT_SPOT', 'CRAFT_ART',
+          'craftSprite', 'spriteSize')
 
 # Runs in the page: draw on a fresh canvas and return it as a PNG data URL. `draw` is the body of a
 # function of (ctx, w, h) that can call the page's drawing functions.
@@ -92,7 +95,23 @@ def main():
 
         craft = OUT / 'spacecraft'
         save(page, craft / 'kepler.png', 26, 14, 'keplerSprite(ctx, 2, 2, 1, null);', 12)
-        save(page, craft / 'iss.png', 13, 7, 'issSprite(ctx, 6, 3);', 16)
+        save(page, craft / 'iss_orbit.png', 15, 9, 'issSprite(ctx, 7, 4);', 16)
+        sizes = page.evaluate('() => Object.fromEntries(Object.keys(__art.CRAFT_ART).map(k => [k, __art.spriteSize(k)]))')
+        for key, (w, h) in sizes.items():
+            save(page, craft / f'{key}.png', w + 4, h + 4, f"craftSprite(ctx, '{key}', 2, 2);", 12)
+        cell_w = max(max(w for w, _ in sizes.values()) * 2 + 6, 60)
+        cell_h = max(h for _, h in sizes.values()) * 2 + 14
+        cols = 6
+        names = {'newHorizons': 'NEW HORIZONS', 'solarOrbiter': 'SOLAR ORBITER', 'bepi': 'BEPICOLOMBO',
+                 'apex': 'OSIRIS-APEX', 'mro': 'MRO', 'mex': 'MARS EXPRESS', 'tgo': 'EXOMARS TGO',
+                 'clipper': 'EUROPA CLIPPER', 'odyssey': 'MARS ODYSSEY'}
+        draw = ''.join(
+            f"craftSprite(ctx, '{k}', {(i % cols) * cell_w} + ({cell_w} - {w * 2}) / 2 | 0, {(i // cols) * cell_h + 3}, 2);"
+            f"pixelText(ctx, '{names.get(k, k.upper())}', {(i % cols) * cell_w} + "
+            f"({cell_w} - textWidth('{names.get(k, k.upper())}')) / 2 | 0, "
+            f"{(i // cols) * cell_h + cell_h - 9}, '#9fd8ff');"
+            for i, (k, (w, h)) in enumerate(sizes.items()))
+        save(page, craft / 'sheet.png', cell_w * cols, cell_h * ((len(sizes) + cols - 1) // cols), draw, 3)
         save(page, craft / 'marker.png', 7, 7,
              "ctx.fillStyle = CRAFT_SPOT; for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) "
              "ctx.fillRect(3 + dx, 3 + dy, 1, 1);", 16)

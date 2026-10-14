@@ -38,16 +38,7 @@ const SOLAR = {
 const SOLAR_ART = {
   mercury: (dx, dy, r, spin) => (hash(`me${Math.floor(dx + spin)},${dy}`) < 0.25 ? '#6f6a66' : '#9c9792'),
   venus: (dx, dy, r, spin) => (hash(`ve${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#d4c08a' : '#eadcaf'),
-  earth: (dx, dy, r, spin) => {
-    if (Math.abs(dy) >= r - Math.floor(r / 8)) return '#eef6ff';           // ice caps
-    // features scale with the sprite, so a big Earth gets continents rather than speckle
-    const cell = Math.max(2, Math.round(r / 5)), wrap = 9;
-    const x = Math.floor((dx + spin) / cell), y = Math.floor((dy + r) / cell);
-    const cloud = Math.max(1, Math.round(cell / 2));
-    if (hash(`cl${Math.floor((dx + spin * 1.6) / cloud)},${Math.floor(dy / cloud)}`) < 0.1) return '#ffffff';
-    const land = hash(`la${((x % wrap) + wrap) % wrap},${y}`);
-    return land < 0.32 ? '#4f9a46' : land < 0.42 ? '#a98b55' : '#2f6fd0';    // forest, desert, ocean
-  },
+  earth: (dx, dy, r, spin) => earthSurface(dx, dy, r, spin),
   mars: (dx, dy, r, spin) => {
     if (dy <= -r) return '#f3ede4';                                         // north polar cap
     return hash(`ma${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#8e3d22' : '#c45a32';
@@ -72,6 +63,27 @@ const SOLAR_ART = {
   },
 };
 
+// Earth: NASA's Blue Marble as a 128 x 64 pixel map (data/earth.js, scripts/starmap/make_earth_map.py)
+// wrapped onto a globe tipped by its 23.4° axial tilt, turning west to east, with a few drifting
+// clouds. `spin` is in pixels, so the surface moves at the same speed as on the other planets.
+const EARTH_MAP = window.STARMAP_EARTH || null;
+const EARTH_TILT = 23.4 * Math.PI / 180, EARTH_LON0 = 0.3;   // start over Africa and Europe
+function earthSurface(dx, dy, r, spin) {
+  if (!EARTH_MAP) return '#2a5fbf';
+  const R = r + 0.5, c = Math.cos(EARTH_TILT), s = Math.sin(EARTH_TILT);
+  const x = (dx * c + dy * s) / R, y = (dy * c - dx * s) / R;   // undo the tilt
+  const z = Math.sqrt(Math.max(0, 1 - x * x - y * y));
+  const lat = Math.asin(clamp(-y, -1, 1)), turn = Math.atan2(x, z);
+  const lon = turn + EARTH_LON0 - spin / R;
+  const { width: W, height: H, rows, colors } = EARTH_MAP;
+  const row = clamp(Math.floor((0.5 - lat / Math.PI) * H), 0, H - 1);
+  const cloudLon = lon + spin / R * 0.35;   // weather drifts a little against the ground
+  const cell = Math.floor(((cloudLon / (2 * Math.PI)) % 1 + 1) % 1 * 48);
+  if (hash(`cl${cell >> 1},${row >> 2}`) < 0.14 && hash(`cm${cell},${row >> 1}`) < 0.55) return '#f4f8ff';
+  const col = Math.floor((((lon / (2 * Math.PI) + 0.5) % 1) + 1) % 1 * W);
+  return colors[rows[row][col]] || '#2a5fbf';
+}
+
 // Rings as dotted ellipses around the planet: the far half before the planet, the near half after.
 function planetRing(ctx, x, y, rx, ry, color, near) {
   ctx.fillStyle = color;
@@ -92,7 +104,9 @@ function solarPlanet(ctx, x, y, p, lx, ly, t) {
     const w = Math.floor(Math.sqrt(r * r - dy * dy + r * 0.8));
     for (let dx = -w; dx <= w; dx++) {
       const lit = (dx * lx + dy * ly) / (r + 0.5);
-      ctx.fillStyle = shade(art(dx, dy, r, spin).toLowerCase(), lit > 0.3 ? 1.15 : lit < -0.35 ? 0.45 : 0.9);
+      const f = r < 8 ? (lit > 0.3 ? 1.15 : lit < -0.35 ? 0.45 : 0.9)   // small: three clear steps
+        : lit > 0.45 ? 1.12 : lit > 0.1 ? 1 : lit > -0.2 ? 0.85 : lit > -0.45 ? 0.62 : 0.42;   // big: a softer terminator
+      ctx.fillStyle = shade(art(dx, dy, r, spin).toLowerCase(), f);
       ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
     }
   }
@@ -242,7 +256,7 @@ function lookup(query, updateHash = true) {
   if (HOME_QUERY.test(query.trim())) { showHome(updateHash); return; }
   if (ISS_QUERY.test(query.trim())) { showISS(updateHash); return; }
   if (KEPLER_QUERY.test(query.trim())) { showKepler(updateHash); return; }
-  if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash); return; }
+  if (CRAFT_QUERY.test(query.trim())) { showSpacecraft(updateHash, query.trim()); return; }
   const s = find(query);
   if (s) select(s, updateHash); else showUnknown(query);
 }

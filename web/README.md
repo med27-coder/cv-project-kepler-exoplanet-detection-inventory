@@ -7,12 +7,13 @@ system or framework: the page also works opened straight from disk.
 | Path | What it is | Made by |
 |---|---|---|
 | `index.html`, `style.css` | The page and its styles (strict Content Security Policy: no inline code) | hand-written |
-| `src/*.js` | The page's code, in readable parts: data, map, system view, controls, info panel, Solar System, spacecraft/ISS, the Kepler telescope, wiring, animation loop | hand-written |
+| `src/*.js` | The page's code, in readable parts: data, map, system view, controls, info panel, Solar System, spacecraft/ISS, spacecraft pixel art, the Kepler telescope, wiring, animation loop | hand-written |
 | `starmap.js` | The one script the page loads: `src/*.js` joined in order. **Don't edit it**; run `scripts/starmap/build_web.py` | generated |
 | `data/systems.js` | Index of all 3,611 stars, highlight tags and the "next planets" list (loaded up front) | `scripts/starmap/export_starmap.py` |
 | `data/details/NN.js` | Star facts and planets per system, in 32 files, loaded when a system is opened | `scripts/starmap/export_starmap.py` |
 | `data/spacecraft.js` | Planet and spacecraft positions for the spacecraft easter egg | `scripts/starmap/fetch_spacecraft.py` |
 | `data/ccd.js` | Kepler's 21 CCD module outlines | `scripts/starmap/make_ccd_footprint.py` |
+| `data/earth.js` | Earth's surface as a 128 × 64 pixel map (NASA Blue Marble), wrapped onto the pixel Earth | `scripts/starmap/make_earth_map.py` |
 | `sky.png`, `sky/*.jpg` | Milky Way backdrop (ESA Gaia DR3) and sky photos for the 14 featured systems | `scripts/starmap/make_sky_backdrop.py`, `make_sky_thumbs.py` |
 | `og.png` | Social preview image | `scripts/starmap/make_og_image.py` |
 | `fonts/` | Press Start 2P and VT323 (SIL Open Font License, self-hosted) | |
