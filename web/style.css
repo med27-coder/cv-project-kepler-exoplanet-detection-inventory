@@ -348,3 +348,4 @@ em.new { font: 8px var(--pixel); font-style: normal; color: var(--bg); backgroun
 .toast.legend { border-color: #b56cff; box-shadow: 0 0 20px rgba(181, 108, 255, 0.6); }
 .toast.legend b { color: #b56cff; }
 .chip.unseen { border-color: #b56cff; }
+.callout { border-left: 3px solid var(--accent); padding: 4px 10px; margin: 8px 0; background: rgba(255, 211, 77, 0.07); }

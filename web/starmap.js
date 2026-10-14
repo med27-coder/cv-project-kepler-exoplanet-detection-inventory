@@ -174,6 +174,7 @@
     multi: ['5+ planets', TAGS.multi],
     giant: ['giant planets', TAGS.giant],
     tess: ['seen by TESS', TAGS.tess],
+    ...(TAGS.twosuns ? { twosuns: ['two suns', TAGS.twosuns] } : {}),   // planets around two stars
   };
   const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, bit]]) =>
     [key, new Set(STARS.filter(s => s[COL.tags] & bit))]));
@@ -437,7 +438,9 @@
     const koi = s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? ` · KOI-${s[COL.koi]}` : '';
     const state = s[COL.drawn] ? '' : ' · unconfirmed';
     const far = s[COL.dist] != null ? ` · ${fmt(s[COL.dist] * LY_PER_PC)} ly` : '';
-    return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}${far}`;
+    const kois = s[COL.kois] ? `${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}` : 'found outside the KOI list';
+    const suns = TAGS.twosuns && s[COL.tags] & TAGS.twosuns ? ' · two suns ☀☀' : '';
+    return `${s[COL.name]}${koi} · ${kois}${suns}${s[COL.spot] ? ' ★' : ''}${state}${far}`;
   }
 
   // ---------------------------------------------------------------- system view
@@ -563,7 +566,8 @@
       belts, logR, teff: detail.teff, logg: detail.logg, seed: String(detail.kepid ?? 'sun'),
       spriteR, srad: detail.srad ?? 1,
       starColor: starColor(detail.teff),
-      companion: (detail.nstars ?? 1) > 1,
+      companion: (detail.nstars ?? 1) > 1 && !detail.cb,
+      binary: Boolean(detail.cb),   // planets circling both stars of a binary
       hzAU: hz, hzLog: hz && hz.map(logR), earthLog: logR(1), home: Boolean(detail.home),
       pxPerAU: rMax / reach,   // true scale at zoom 1: the farthest planet just fits
       curve: [],
@@ -728,6 +732,28 @@
   }
 
   // The star: dithered glow, limb darkening (edge darker than the middle), a slow sparkle.
+  // Two stars orbiting each other, with the planets circling both ("Tatooine"). NASA's table describes the
+  // main star; the second one's size and colour are illustrative. When one passes in front of the other the
+  // light dips: that is how Kepler found these systems. Returns the brightness left (1 = no eclipse).
+  function drawBinary(t, dim) {
+    const sc = scene, keep = { cx: sc.cx, cy: sc.cy, starR: sc.starR, starColor: sc.starColor, teff: sc.teff };
+    const a = (REDUCED_MOTION ? 1 : t) * 0.9, sep = Math.max(7, keep.starR * 1.8);
+    const teffB = (keep.teff ?? 5000) * 0.72;
+    const A = { x: keep.cx - 0.36 * sep * Math.cos(a), y: keep.cy - 0.36 * sep * TILT * Math.sin(a),
+                r: Math.max(2, Math.round(keep.starR * 0.8)), c: keep.starColor, teff: keep.teff, z: -Math.sin(a), light: 0.75 };
+    const B = { x: keep.cx + 0.64 * sep * Math.cos(a), y: keep.cy + 0.64 * sep * TILT * Math.sin(a),
+                r: Math.max(2, Math.round(keep.starR * 0.55)), c: starColor(teffB), teff: teffB, z: Math.sin(a), light: 0.25 };
+    const [back, front] = [A, B].sort((p, q) => p.z - q.z);
+    for (const s of [back, front]) {
+      Object.assign(sc, { cx: Math.round(s.x), cy: Math.round(s.y), starR: s.r, starColor: s.c, teff: s.teff });
+      drawStar(t, dim);
+    }
+    Object.assign(sc, keep);
+    const gap = Math.hypot(back.x - front.x, (back.y - front.y) / Math.max(TILT, 0.05));
+    const covered = Math.max(0, Math.min(1, (back.r + front.r - gap) / (2 * back.r)));
+    return 1 - 0.6 * covered * back.light;
+  }
+
   function drawStar(t, dim) {
     const r = Math.round(scene.starR), c = scene.starColor, cx = scene.cx, cy = scene.cy;
     if (cx + r < -4 || cx - r > SW + 4 || cy + r < -4 || cy - r > SH - STRIP + 4) return;
@@ -847,7 +873,8 @@
     if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);   // unconfirmed: faint, flickering
     bodies.filter(b => b.behind).forEach(drawPlanet);
     sctx.globalAlpha = 1;
-    drawStar(t, 0.75 + 0.25 * flux);
+    if (scene.binary) flux *= drawBinary(t, 0.75 + 0.25 * flux);
+    else drawStar(t, 0.75 + 0.25 * flux);
     if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);
     bodies.filter(b => !b.behind).forEach(drawPlanet);
     sctx.globalAlpha = 1;
@@ -1176,13 +1203,20 @@
     const count = k => detail.planets.filter(p => p.status === k).length;
     const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
     if (count('candidate')) parts.push(`${plural(count('candidate'), 'candidate')} (hollow)`);
-    if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
+    if (count('other')) parts.push(detail.extra ? `${plural(count('other'), 'confirmed planet')} (◆)` : `${count('other')} more from NASA's planet list (◆)`);
+    const methods = [...new Set(detail.planets.map(p => p.method).filter(Boolean))].join(', ');
+    const origin = detail.cb ? `<p class="callout">☀☀ <b>Two suns.</b> ${detail.planets.length > 1 ? 'These planets circle' : 'This planet circles'}
+        both stars of a binary, like Tatooine. Kepler found ${detail.planets.length > 1 ? 'them' : 'it'} outside its usual list of
+        candidates (KOIs), in the light of stars that eclipse each other. The second star in the drawing is
+        illustrative.</p>`
+      : detail.extra ? `<p class="callout">Found by Kepler outside its usual list of candidates (KOIs), by ${esc(methods || 'other means')}.</p>` : '';
     const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
     info.innerHTML = `
       <div class="head">${skyThumb(detail.ra, detail.dec, s[COL.name])}<div>
         <p>Star: ${starLine(detail)}</p>
         <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
       </div></div>
+      ${origin}
       ${planetTable(detail)}
       ${caseFiles(detail)}
       <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
@@ -1527,6 +1561,7 @@
     if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
     if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
     if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
+    if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
     const s = find(query);
     if (s) select(s, updateHash); else showUnknown(query);
   }
@@ -2285,6 +2320,8 @@
     { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
     { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
     { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
+    { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
+    { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
     { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
     { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -2296,8 +2333,9 @@
   // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish'],
-    epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour'],
+           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine'],
+    epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+           'double-sunset'],
   };
   for (const a of ACHIEVEMENTS) {
     a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -2436,6 +2474,10 @@
     const hour = new Date().getHours();
     if (hour < 4) achieve('night');
     if (FAMOUS[name]) achieve(FAMOUS[name]);
+    if (TAGS.twosuns && s[COL.tags] & TAGS.twosuns) {
+      achieve('tatooine');
+      if (twoSunCount() >= TWO_SUN_STARS.length) achieve('double-sunset');
+    }
     if (s[COL.dist] != null && s[COL.dist] * LY_PER_PC > PYRAMID_LY) achieve('ancient');
     const sg = s[COL.sg];
     if (sg != null) {
@@ -2453,8 +2495,15 @@
       'grand-tour': [EGGS.filter(e => progress.eggs[e.id]).length, EGGS.length], cartographer: [session.hops, 25],
       curator: [session.cards.size, 10], highlighter: [session.highlights.size, Object.keys(HIGHLIGHTS).length],
     };
+    if (a.id === 'double-sunset') return [twoSunCount(), TWO_SUN_STARS.length];
     if (EGG_SETS[a.id]) return [EGG_SETS[a.id].filter(k => progress.eggs[k]).length, EGG_SETS[a.id].length];
     return counts[a.id] || null;
+  }
+
+  const TWO_SUN_STARS = TAGS.twosuns ? STARS.filter(s => s[COL.tags] & TAGS.twosuns) : [];
+  const twoSunCount = () => TWO_SUN_STARS.filter(s => seenStars.has(starKey(s))).length;
+  function tatooineFound() {   // searching "tatooine"
+    toast('badge', "YES, IT'S REAL", 'Kepler-16 b circles two suns, like Tatooine. Kepler found it in 2011.', null, BADGES['TWO SUNS'].art);
   }
 
   // Small hooks from the rest of the page.
@@ -2944,6 +2993,15 @@
       discArt(put, 8, 8, 2.8, (dx, dy) => (dx + dy < -1 ? '#fff1b0' : '#ffc93c'));
       ringArt(put, 8, 3, 2.5, 1, '#eef2f8', a => Math.sin(a) > -0.5);
       put(8, 4, '#d6dae2');
+    } },
+    'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
+      discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));
+      discArt(put, 11, 9, 2.4, (dx, dy, f) => (f < 0.55 ? '#ffd9a0' : '#ff9a3c'));
+      for (let x = 0; x < 16; x++) for (let y = 11; y < 16; y++) {
+        const dune = 11 + Math.round(Math.sin(x * 0.6) * 0.8);
+        if (y >= dune) put(x, y, y === dune ? '#e0a060' : (x + y) % 3 ? '#a8622c' : '#8a4e22');
+      }
+      if (Math.sin(t) > 0) put(2, 2, '#ffffff');
     } },
     SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
       for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }

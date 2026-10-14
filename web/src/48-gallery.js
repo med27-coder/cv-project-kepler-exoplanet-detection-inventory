@@ -125,6 +125,8 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
   { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
   { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
+  { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
+  { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
   { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
   { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -136,8 +138,9 @@ const ACHIEVEMENTS = [
 // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish'],
-  epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour'],
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine'],
+  epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+         'double-sunset'],
 };
 for (const a of ACHIEVEMENTS) {
   a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -276,6 +279,10 @@ function systemOpened(s) {   // from select(): counts systems for the achievemen
   const hour = new Date().getHours();
   if (hour < 4) achieve('night');
   if (FAMOUS[name]) achieve(FAMOUS[name]);
+  if (TAGS.twosuns && s[COL.tags] & TAGS.twosuns) {
+    achieve('tatooine');
+    if (twoSunCount() >= TWO_SUN_STARS.length) achieve('double-sunset');
+  }
   if (s[COL.dist] != null && s[COL.dist] * LY_PER_PC > PYRAMID_LY) achieve('ancient');
   const sg = s[COL.sg];
   if (sg != null) {
@@ -293,8 +300,15 @@ function achProgress(a) {
     'grand-tour': [EGGS.filter(e => progress.eggs[e.id]).length, EGGS.length], cartographer: [session.hops, 25],
     curator: [session.cards.size, 10], highlighter: [session.highlights.size, Object.keys(HIGHLIGHTS).length],
   };
+  if (a.id === 'double-sunset') return [twoSunCount(), TWO_SUN_STARS.length];
   if (EGG_SETS[a.id]) return [EGG_SETS[a.id].filter(k => progress.eggs[k]).length, EGG_SETS[a.id].length];
   return counts[a.id] || null;
+}
+
+const TWO_SUN_STARS = TAGS.twosuns ? STARS.filter(s => s[COL.tags] & TAGS.twosuns) : [];
+const twoSunCount = () => TWO_SUN_STARS.filter(s => seenStars.has(starKey(s))).length;
+function tatooineFound() {   // searching "tatooine"
+  toast('badge', "YES, IT'S REAL", 'Kepler-16 b circles two suns, like Tatooine. Kepler found it in 2011.', null, BADGES['TWO SUNS'].art);
 }
 
 // Small hooks from the rest of the page.

@@ -26,7 +26,7 @@ try {
   map.dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
   ok('arrow selects a star', title() !== '', title());
   const hb = [...document.querySelectorAll('#highlights button')];
-  ok('6 highlight buttons', hb.length === 6, hb.map(b => b.textContent).join(' | '));
+  ok('7 highlight buttons', hb.length === 7, hb.map(b => b.textContent).join(' | '));   // 6 filters + next planets
   hb[0].click();
   ok('highlight toggles on', hb[0].getAttribute('aria-pressed') === 'true');
   hb[0].click();

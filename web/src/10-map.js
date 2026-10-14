@@ -58,6 +58,7 @@ const HIGHLIGHTS = {
   multi: ['5+ planets', TAGS.multi],
   giant: ['giant planets', TAGS.giant],
   tess: ['seen by TESS', TAGS.tess],
+  ...(TAGS.twosuns ? { twosuns: ['two suns', TAGS.twosuns] } : {}),   // planets around two stars
 };
 const highlightSets = Object.fromEntries(Object.entries(HIGHLIGHTS).map(([key, [, bit]]) =>
   [key, new Set(STARS.filter(s => s[COL.tags] & bit))]));
@@ -321,5 +322,7 @@ function label(s) {
   const koi = s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? ` · KOI-${s[COL.koi]}` : '';
   const state = s[COL.drawn] ? '' : ' · unconfirmed';
   const far = s[COL.dist] != null ? ` · ${fmt(s[COL.dist] * LY_PER_PC)} ly` : '';
-  return `${s[COL.name]}${koi} · ${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}${s[COL.spot] ? ' ★' : ''}${state}${far}`;
+  const kois = s[COL.kois] ? `${s[COL.kois]} KOI${s[COL.kois] > 1 ? 's' : ''}` : 'found outside the KOI list';
+  const suns = TAGS.twosuns && s[COL.tags] & TAGS.twosuns ? ' · two suns ☀☀' : '';
+  return `${s[COL.name]}${koi} · ${kois}${suns}${s[COL.spot] ? ' ★' : ''}${state}${far}`;
 }

@@ -41,9 +41,19 @@ PLANETS = C.RAW_DIR / 'ps_kepler_planets.csv'
 # Hosts are matched to KOI stars by position (names differ: Kepler-90 is "KOI-351" there).
 PLANETS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
                'pl_name,hostname,ra,dec,discoverymethod,disc_year,sy_dist,pl_bmasse,pl_bmassprov,'
-               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt,pl_orbeccen,pl_orblper,pl_insol,sy_snum,st_spectype'
+               'pl_orbper,pl_orbsmax,pl_rade,pl_eqt,pl_orbeccen,pl_orblper,pl_insol,sy_snum,st_spectype,'
+               'disc_facility,cb_flag,st_teff,st_rad,st_mass,sy_kepmag'
                '+from+pscomppars+where+ra+between+279+and+303+and+dec+between+35+and+54&format=csv')
-PLANET_COLUMNS = {'pl_orbeccen', 'pl_orblper', 'pl_insol', 'sy_snum', 'st_spectype'}   # newest additions (re-download if missing)
+PLANET_COLUMNS = {'pl_orbeccen', 'pl_orblper', 'pl_insol', 'sy_snum', 'st_spectype',   # newest additions (re-download if missing)
+                  'disc_facility', 'cb_flag', 'st_teff', 'st_rad', 'st_mass', 'sy_kepmag'}
+# Kepler IDs of hosts NASA names differently or that have no KOI (Kepler-16, the "Tatooine", has none):
+# NASA's Kepler planet names table, then the Kepler star table by position for the rest.
+KEPLERNAMES = C.RAW_DIR / 'keplernames.csv'
+KEPLERNAMES_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+kepid,kepler_name'
+                   '+from+keplernames&format=csv')
+KIC_BY_POSITION = C.RAW_DIR / 'kic_by_position.csv'   # cache: hostname -> kepid
+KIC_QUERY = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?format=csv&query=' +
+             'select+kepid,ra,dec+from+keplerstellar+where+ra+between+{0}+and+{1}+and+dec+between+{2}+and+{3}')
 TOIS = C.RAW_DIR / 'toi_kepler_field.csv'
 # TESS Objects of Interest in the Kepler field: Kepler stars that TESS also flagged.
 TOIS_URL = ('https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+'
@@ -69,7 +79,7 @@ COLUMNS = ['name', 'kepid', 'koi', 'ra', 'dec', 'kepmag', 'spot', 'drawn', 'kois
            'np', 'nconf', 'tags', 'chunk', 'dist']   # dist: parsecs (NASA / Gaia), for the depth view
 # Highlight tags (bit flags in the 'tags' column), worked out here so the page can light them up
 # without loading every system's details. Same rules as the page's highlight buttons.
-TAGS = {'hz': 1, 'earth': 2, 'multi': 4, 'giant': 8, 'tess': 16, 'unscored': 32}
+TAGS = {'hz': 1, 'earth': 2, 'multi': 4, 'giant': 8, 'tess': 16, 'unscored': 32, 'twosuns': 64}
 FLAG_NAMES = {'koi_fpflag_nt': 'not transit-like', 'koi_fpflag_ss': 'stellar eclipse',
               'koi_fpflag_co': 'centroid offset', 'koi_fpflag_ec': 'ephemeris match'}
 
@@ -126,6 +136,46 @@ def load_planets(path=PLANETS, download=True):
     """NASA confirmed-planet table for the Kepler field, or None."""
     return _cached_table(path, PLANETS_URL, 'the confirmed-planet table (pscomppars) for Kepler systems',
                          download, PLANET_COLUMNS)
+
+
+def load_keplernames(path=KEPLERNAMES, download=True):
+    """{host name: kepid} from NASA's Kepler planet names ('Kepler-16 b' -> 'Kepler-16'), or {}."""
+    table = _cached_table(path, KEPLERNAMES_URL, 'the Kepler planet names table', download)
+    if table is None or table.empty:
+        return {}
+    hosts = table.assign(host=table['kepler_name'].str.replace(r'\s+\S+$', '', regex=True))
+    return {h: int(k) for h, k in zip(hosts['host'], hosts['kepid'])}
+
+
+def kic_by_position(host, ra, dec, download=True, path=KIC_BY_POSITION):
+    """Kepler ID of the Kepler star within 4 arcsec of (ra, dec), cached per host; None if not found."""
+    cache = pd.read_csv(path) if Path(path).exists() else pd.DataFrame(columns=['hostname', 'kepid'])
+    hit = cache[cache['hostname'] == host]
+    if len(hit):
+        return int(hit['kepid'].iloc[0]) if pd.notna(hit['kepid'].iloc[0]) else None
+    if not download:
+        return None
+    d = 4 / 3600
+    url = KIC_QUERY.format(ra - 2 * d, ra + 2 * d, dec - d, dec + d)
+    try:
+        rows = pd.read_csv(url)
+    except (OSError, ValueError) as err:   # offline or a bad reply: try again next time
+        print(f'  (could not look up the Kepler ID of {host}: {err})')
+        return None
+    kepid = int(rows['kepid'].iloc[0]) if len(rows) else None
+    pd.concat([cache, pd.DataFrame([{'hostname': host, 'kepid': kepid}])]).to_csv(path, index=False)
+    return kepid
+
+
+def host_kepid(host, rows, names, download=True):
+    """Kepler ID for a confirmed-planet host: NASA's names table, a 'KIC 123' name, or its position."""
+    if host in names:
+        return names[host]
+    m = re.fullmatch(r'KIC\s*(\d+)', str(host))
+    if m:
+        return int(m.group(1))
+    r = rows.iloc[0]
+    return kic_by_position(host, float(r['ra']), float(r['dec']), download)
 
 
 def load_tois(path=TOIS, download=True):
@@ -293,6 +343,8 @@ def system_detail(rows, scores, extras=None, gaia_row=None, tois=None):
     detail.update(star_facts(star, extras, gaia_row))
     if extras is not None and len(extras):
         detail['host'] = str(extras['hostname'].iloc[0])   # NASA's name, for its overview page
+        if 'cb_flag' in extras and (extras['cb_flag'] == 1).any():
+            detail['cb'] = True   # a planet circling both stars of a binary
     detail['planets'] = planets
     return detail
 
@@ -326,6 +378,8 @@ def tags(detail, drawn):
         bits |= TAGS['tess']
     if not drawn:
         bits |= TAGS['unscored']
+    if detail.get('cb'):
+        bits |= TAGS['twosuns']
     return bits
 
 
@@ -365,15 +419,48 @@ def leaderboard(systems, n=15):
     return {'top': rows[:n], 'hz': [r for r in rows if r['hz']][:n]}
 
 
-def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5, tois=None, gaia=None):
+def extra_system(host, rows, kepid):
+    """A system Kepler found outside the KOI list (e.g. planets around two stars, from eclipsing
+    binaries): star and planets from NASA's confirmed-planet table only."""
+    r = rows.iloc[0]
+    smass = float(r['st_mass']) if pd.notna(r.get('st_mass')) and r['st_mass'] > 0 else 1.0
+    planets = [p for p in (_other_method_planet(ps, smass) for _, ps in rows.iterrows()) if p]
+    planets.sort(key=lambda p: p['period'])
+    detail = {'kepid': int(kepid), 'teff': _num(r.get('st_teff'), 0), 'srad': _num(r.get('st_rad'), 3),
+              'kepmag': _num(r.get('sy_kepmag'), 2), 'ra': round(float(r['ra']), 5), 'dec': round(float(r['dec']), 5),
+              'smass': _num(r.get('st_mass'), 2), 'dist_pc': _num(r.get('sy_dist'), 1), 'host': str(host),
+              'extra': True, 'planets': planets}
+    if pd.notna(r.get('sy_snum')) and r['sy_snum'] > 1:
+        detail['nstars'] = int(r['sy_snum'])
+    if (rows['cb_flag'] == 1).any():
+        detail['cb'] = True   # the planets circle both stars ("Tatooine")
+    return {k: v for k, v in detail.items() if v is not None}
+
+
+def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5, tois=None, gaia=None,
+          names=None, lookup_kic=True):
     """Map pixels for every star with a non-false-positive KOI, full detail for drawn systems.
     Optional extras: `planets` is NASA's confirmed-planet table (masses, distances, non-KOI planets),
-    `tois` NASA's TESS Objects of Interest table, `gaia` {kepid: Berger et al. 2020 star row}."""
-    scores, gaia = scores or {}, gaia or {}
+    `tois` NASA's TESS Objects of Interest table, `gaia` {kepid: Berger et al. 2020 star row},
+    `names` {host: kepid} from NASA's Kepler names table. Planets Kepler found whose host has no KOI
+    are added as their own systems (`extra`)."""
+    scores, gaia, names = scores or {}, gaia or {}, names or {}
     kois = catalog[catalog['koi_disposition'].isin(list(STATUS))]
     kois = kois.dropna(subset=['ra', 'dec', 'koi_period'])
     positions = kois.groupby('kepid', as_index=False)[['ra', 'dec']].first()
     hosts = match_hosts(positions, planets)
+    extras = {}   # kepid -> (host, rows) for Kepler discoveries with no KOI star
+    if planets is not None and not planets.empty and 'disc_facility' in planets:
+        matched = {h for rows in hosts.values() for h in rows['hostname']}
+        koi_ids = set(positions['kepid'].astype(int))
+        for host, rows in planets[~planets['hostname'].isin(matched)].groupby('hostname'):
+            kepid = host_kepid(host, rows, names, lookup_kic)
+            if kepid is None:
+                continue
+            if kepid in koi_ids:   # the same star under another name or position (fast-moving stars)
+                hosts[kepid] = rows if kepid not in hosts else pd.concat([hosts[kepid], rows])
+            elif (rows['disc_facility'] == 'Kepler').any():
+                extras[kepid] = (host, rows[rows['disc_facility'] == 'Kepler'])
     tess = match_hosts(positions, tois, key='tid')
     stars, systems = [], {}
     wanted = set(spotlight)
@@ -391,6 +478,16 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       len(rows), round(max(cand_scores), 3) if cand_scores else None,
                       len(detail['planets']), sum(p['status'] == 'confirmed' for p in detail['planets']),
                       tags(detail, drawn), chunk_of(name),
+                      round(detail['dist_pc']) if detail.get('dist_pc') else None])
+    for kepid, (host, rows) in sorted(extras.items()):
+        detail = extra_system(host, rows, kepid)
+        if not detail['planets'] or host in systems:
+            continue
+        systems[host] = detail
+        stars.append([host, int(kepid), None, round(detail['ra'], 4), round(detail['dec'], 4),
+                      None if detail.get('kepmag') is None else round(detail['kepmag'], 1), int(host in wanted), 1,
+                      0, None, len(detail['planets']), 0,
+                      tags(detail, True), chunk_of(host),
                       round(detail['dist_pc']) if detail.get('dist_pc') else None])
     names = {s[0] for s in stars}
     missing = sorted(wanted - names)
@@ -463,7 +560,12 @@ def main():
     tois = load_tois(download=not args.offline)
     gaia = load_gaia()
     threshold = json.loads(threshold_file.read_text())['threshold'] if scores and threshold_file.exists() else 0.5
-    data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia)
+    names = load_keplernames(download=not args.offline)
+    data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia,
+                          names=names, lookup_kic=not args.offline)
+    extra = [s[0] for s in data['stars'] if s[COLUMNS.index('kois')] == 0]
+    if extra:
+        print(f'Added {len(extra)} systems Kepler found outside the KOI list: {", ".join(extra)}')
     if missing:
         print(f'Warning: spotlight systems not in the catalog: {", ".join(missing)}')
     size, chunk_sizes = write_outputs(data, args.out)

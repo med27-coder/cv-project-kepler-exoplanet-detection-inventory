@@ -235,7 +235,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/47'
+    assert page.locator('#rank-count').inner_text() == '12/49'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -281,6 +281,21 @@ def _base36(n):
         n, r = divmod(n, 36)
         out = digits[r] + out
     return out or '0'
+
+
+def test_tatooine(browser, site):
+    """Searching "tatooine" opens Kepler-16: two stars drawn, the two-suns note, the TATOOINE achievement."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'tatooine')
+    page.press('#query', 'Enter')
+    page.wait_for_function("document.getElementById('sys-title').textContent === 'KEPLER-16'")
+    page.wait_for_selector('.toast.badge')
+    assert 'Two suns' in page.locator('#info').inner_text()
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('tatooine')")
+    assert page.locator('#highlights .chip:has-text("two suns")').count() == 1
+    page.wait_for_timeout(300)
+    assert not errors, errors
 
 
 def test_view_links_kepler_view_and_pinch(browser, site):

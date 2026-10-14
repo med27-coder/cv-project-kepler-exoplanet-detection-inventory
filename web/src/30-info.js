@@ -145,13 +145,20 @@ function showSystem(s, detail) {
   const count = k => detail.planets.filter(p => p.status === k).length;
   const parts = count('confirmed') ? [plural(count('confirmed'), 'confirmed planet')] : [];
   if (count('candidate')) parts.push(`${plural(count('candidate'), 'candidate')} (hollow)`);
-  if (count('other')) parts.push(`${count('other')} more from NASA's planet list (◆)`);
+  if (count('other')) parts.push(detail.extra ? `${plural(count('other'), 'confirmed planet')} (◆)` : `${count('other')} more from NASA's planet list (◆)`);
+  const methods = [...new Set(detail.planets.map(p => p.method).filter(Boolean))].join(', ');
+  const origin = detail.cb ? `<p class="callout">☀☀ <b>Two suns.</b> ${detail.planets.length > 1 ? 'These planets circle' : 'This planet circles'}
+      both stars of a binary, like Tatooine. Kepler found ${detail.planets.length > 1 ? 'them' : 'it'} outside its usual list of
+      candidates (KOIs), in the light of stars that eclipse each other. The second star in the drawing is
+      illustrative.</p>`
+    : detail.extra ? `<p class="callout">Found by Kepler outside its usual list of candidates (KOIs), by ${esc(methods || 'other means')}.</p>` : '';
   const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
   info.innerHTML = `
     <div class="head">${skyThumb(detail.ra, detail.dec, s[COL.name])}<div>
       <p>Star: ${starLine(detail)}</p>
       <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
     </div></div>
+    ${origin}
     ${planetTable(detail)}
     ${caseFiles(detail)}
     <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the

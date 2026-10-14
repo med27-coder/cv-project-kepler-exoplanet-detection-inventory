@@ -121,7 +121,8 @@ function buildScene(detail) {
     belts, logR, teff: detail.teff, logg: detail.logg, seed: String(detail.kepid ?? 'sun'),
     spriteR, srad: detail.srad ?? 1,
     starColor: starColor(detail.teff),
-    companion: (detail.nstars ?? 1) > 1,
+    companion: (detail.nstars ?? 1) > 1 && !detail.cb,
+    binary: Boolean(detail.cb),   // planets circling both stars of a binary
     hzAU: hz, hzLog: hz && hz.map(logR), earthLog: logR(1), home: Boolean(detail.home),
     pxPerAU: rMax / reach,   // true scale at zoom 1: the farthest planet just fits
     curve: [],
@@ -286,6 +287,28 @@ function shadedPlanet(ctx, x, y, p, lx, ly) {
 }
 
 // The star: dithered glow, limb darkening (edge darker than the middle), a slow sparkle.
+// Two stars orbiting each other, with the planets circling both ("Tatooine"). NASA's table describes the
+// main star; the second one's size and colour are illustrative. When one passes in front of the other the
+// light dips: that is how Kepler found these systems. Returns the brightness left (1 = no eclipse).
+function drawBinary(t, dim) {
+  const sc = scene, keep = { cx: sc.cx, cy: sc.cy, starR: sc.starR, starColor: sc.starColor, teff: sc.teff };
+  const a = (REDUCED_MOTION ? 1 : t) * 0.9, sep = Math.max(7, keep.starR * 1.8);
+  const teffB = (keep.teff ?? 5000) * 0.72;
+  const A = { x: keep.cx - 0.36 * sep * Math.cos(a), y: keep.cy - 0.36 * sep * TILT * Math.sin(a),
+              r: Math.max(2, Math.round(keep.starR * 0.8)), c: keep.starColor, teff: keep.teff, z: -Math.sin(a), light: 0.75 };
+  const B = { x: keep.cx + 0.64 * sep * Math.cos(a), y: keep.cy + 0.64 * sep * TILT * Math.sin(a),
+              r: Math.max(2, Math.round(keep.starR * 0.55)), c: starColor(teffB), teff: teffB, z: Math.sin(a), light: 0.25 };
+  const [back, front] = [A, B].sort((p, q) => p.z - q.z);
+  for (const s of [back, front]) {
+    Object.assign(sc, { cx: Math.round(s.x), cy: Math.round(s.y), starR: s.r, starColor: s.c, teff: s.teff });
+    drawStar(t, dim);
+  }
+  Object.assign(sc, keep);
+  const gap = Math.hypot(back.x - front.x, (back.y - front.y) / Math.max(TILT, 0.05));
+  const covered = Math.max(0, Math.min(1, (back.r + front.r - gap) / (2 * back.r)));
+  return 1 - 0.6 * covered * back.light;
+}
+
 function drawStar(t, dim) {
   const r = Math.round(scene.starR), c = scene.starColor, cx = scene.cx, cy = scene.cy;
   if (cx + r < -4 || cx - r > SW + 4 || cy + r < -4 || cy - r > SH - STRIP + 4) return;
@@ -405,7 +428,8 @@ function drawSystem(seconds) {
   if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);   // unconfirmed: faint, flickering
   bodies.filter(b => b.behind).forEach(drawPlanet);
   sctx.globalAlpha = 1;
-  drawStar(t, 0.75 + 0.25 * flux);
+  if (scene.binary) flux *= drawBinary(t, 0.75 + 0.25 * flux);
+  else drawStar(t, 0.75 + 0.25 * flux);
   if (scene.ghost) sctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.5);
   bodies.filter(b => !b.behind).forEach(drawPlanet);
   sctx.globalAlpha = 1;

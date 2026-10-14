@@ -11,7 +11,7 @@ The files the Kepler Star Map loads from `web/data/`. All are generated; never e
 | `source`, `exported` | Data sources and export date (UTC) |
 | `scored`, `sg_threshold` | Whether Star Gazer scores were available; its decision threshold (probability) |
 | `columns` | Names of the fields in each `stars` row (below) |
-| `tags` | Bit values used in the `tags` column: `hz` 1, `earth` 2, `multi` 4, `giant` 8, `tess` 16, `unscored` 32 |
+| `tags` | Bit values used in the `tags` column: `hz` 1, `earth` 2, `multi` 4, `giant` 8, `tess` 16, `unscored` 32, `twosuns` 64 (planets circling both stars of a binary) |
 | `chunks` | Number of details files (32) |
 | `spotlight` | Featured systems (quick-pick buttons, twinkling gold pixels) |
 | `leaderboard` | `top` and `hz`: the "next planets" lists (candidate, system, combined score, NASA and Star Gazer scores, radius) |
@@ -40,7 +40,8 @@ The files the Kepler Star Map loads from `web/data/`. All are generated; never e
 `window.STARMAP_DETAILS(NN, {name: system, ...})`.
 
 **System**: `kepid`, `teff` (K), `srad` (solar radii), `kepmag`, `ra`, `dec`, `smass` (solar masses),
-`age` (Gyr, Gaia isochrones), `met` ([Fe/H]), `logg` (cgs), `dist_pc`, `nstars` (if > 1),
+`age` (Gyr, Gaia isochrones), `met` ([Fe/H]), `logg` (cgs), `dist_pc`, `nstars` (if > 1), `cb` (true: the planets circle both stars, NASA's `cb_flag`), `extra` (true: a system
+Kepler found outside the KOI list; its star and planets come only from NASA's confirmed-planet table, and its `kois` is 0),
 `spectype`, `host` (NASA's host name, for its overview page), `planets` (list).
 
 **Planet**
