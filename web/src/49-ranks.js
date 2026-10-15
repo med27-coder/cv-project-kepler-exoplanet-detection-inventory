@@ -143,6 +143,18 @@ const BADGES = {
     }
     if (Math.sin(t) > 0) put(2, 2, '#ffffff');
   } },
+  PREDICTIONS: { name: 'THE HOURGLASS', art: (put, t) => {
+    for (let x = 3; x < 13; x++) { put(x, 1, '#c9a24a'); put(x, 14, '#c9a24a'); }
+    for (let y = 2; y < 14; y++) {
+      const w = Math.round(Math.abs(y - 7.5) * 0.7) + 1;
+      put(7 - w, y, '#9fd8ff'); put(8 + w, y, '#9fd8ff');
+      const fall = (t * 2) % 6;
+      for (let x = 8 - w; x < 8 + w; x++) {
+        if ((y > 9 && y > 13 - fall) || (y < 6 && y > 1 + fall)) put(x, y, '#ffd34d');
+      }
+    }
+    put(7, 8, '#ffd34d'); put(8, 7, '#ffd34d');
+  } },
   SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
     for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }
     discArt(put, 8, 8, 3.2, (dx, dy, f) => (f < 0.45 ? '#000000' : '#6a3fb0'));
@@ -225,10 +237,10 @@ const STAGES = [   // reached by the number of achievements (TRUE STAR GAZER exc
   { name: 'STARDUST', at: 0, art: stage.stardust, about: 'A cold cloud of gas and dust: every star starts as one.' },
   { name: 'PROTOSTAR', at: 1, art: stage.protostar, about: 'A ball of gas collapsing and heating up inside a dusty disk.' },
   { name: 'YOUNG STAR', at: 5, art: stage.young, about: 'Hydrogen fusion has begun: a star like the Sun.' },
-  { name: 'RED GIANT', at: 10, art: stage.redGiant, about: 'Its core runs low on hydrogen and the star swells up.' },
-  { name: 'SUPERGIANT', at: 18, art: stage.supergiant, about: 'A heavy star swollen even more, shedding dust.' },
-  { name: 'SUPERNOVA', at: 28, art: stage.supernova, about: 'The core collapses and the star explodes.' },
-  { name: 'PULSAR', at: 40, art: stage.pulsar, about: 'What is left: a city-sized neutron star, spinning and sweeping beams.' },
+  { name: 'RED GIANT', at: 12, art: stage.redGiant, about: 'Its core runs low on hydrogen and the star swells up.' },
+  { name: 'SUPERGIANT', at: 22, art: stage.supergiant, about: 'A heavy star swollen even more, shedding dust.' },
+  { name: 'SUPERNOVA', at: 34, art: stage.supernova, about: 'The core collapses and the star explodes.' },
+  { name: 'PULSAR', at: 46, art: stage.pulsar, about: 'What is left: a city-sized neutron star, spinning and sweeping beams.' },
   { name: 'BLACK HOLE', at: Infinity, art: stage.blackHole, about: 'Earned only as a TRUE STAR GAZER: not even light escapes.' },
 ];
 const regularCount = () => ACHIEVEMENTS.filter(a => a.id !== 'star-gazer' && progress.ach[a.id]).length;

@@ -32,7 +32,7 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (49, in groups), trophies, badges and your star
+### Achievements (55, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -78,6 +78,9 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | PHOTO FINISH | Slide a Galleria photo all the way to pixel art |
 | | CURATOR | Open ten found Galleria cards in one visit |
 | Two suns | TATOOINE / DOUBLE SUNSET | Visit a planet with two suns / all 12 two-sun systems (the "two suns" highlight finds them) |
+| Predictions | FIRST CALL / PROPHET / ORACLE | Call a candidate (PLANET or NOT A PLANET in its case file) / be proven right by NASA once / five times |
+| | CASSANDRA / CONTRARIAN | Rightly call a false positive Star Gazer believed in / be right three times when Star Gazer was wrong |
+| | PATIENCE OF A STAR | Have a call settled a year or more after you made it |
 | Secret | PATIENT OBSERVER | Watch one system for two minutes |
 | | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
 | | NO SIGNAL | Search for five things that aren't there in one visit |
@@ -85,8 +88,9 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |
 
-Not possible yet: **PROPHET** (visit a candidate NASA confirms after Star Gazer called it; needs history across
-the monthly data refreshes).
+**Predictions** (⚙ → PREDICTIONS): every candidate's case file has YOUR CALL buttons. NASA's rulings are recorded
+by the monthly data refresh in `web/data/resolutions.js` (since 14 October 2026, dated when first seen); a call
+counts only if NASA ruled after it was made. Calls live in the browser with the rest of the progress.
 
 Progress is kept only in the visitor's browser (localStorage, key `starmap.progress.v1`), so refreshes and site
 updates keep it; it's lost only if the site's data is cleared, in a private window, or on another browser or device.

@@ -1179,7 +1179,7 @@
   }
 
   // One "case file" per candidate: the evidence for and against it being a real planet.
-  function caseFiles(detail) {
+  function caseFiles(detail, system = '') {
     const cands = detail.planets.filter(p => p.status === 'candidate');
     if (!cands.length) return '';
     const pct = v => (v == null ? 'not scored yet' : `${fmt(Math.round(v * 100))}%`);
@@ -1192,7 +1192,8 @@
         <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · Star Gazer ${pct(p.sg)}${
           p.snr != null ? ` · signal strength ${fmt(p.snr)}` : ''}
           <br>${good.length ? `<span class="pro">✔ ${good.join(' · ')}</span> ` : ''}${
-          flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}</li>`;
+          flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}${
+          callMarkup(p, system)}</li>`;
     }).join('');
     return `<h3 class="facts-title">CASE FILES</h3><ul class="facts cases">${items}</ul>`;
   }
@@ -1218,11 +1219,12 @@
       </div></div>
       ${origin}
       ${planetTable(detail)}
-      ${caseFiles(detail)}
+      ${caseFiles(detail, s[COL.name])}
       <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
         star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
         planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
     wireSkyThumbs();
+    wireCalls(info);
     setScene(buildScene(detail));
   }
 
@@ -1240,10 +1242,11 @@
            and NASA decides · ${skyLink(detail.ra, detail.dec)}</p>
       </div></div>
       ${planetTable(detail)}
-      ${caseFiles(detail)}
+      ${caseFiles(detail, s[COL.name])}
       <p class="note">Candidates are signals that look like transits but haven't been confirmed or ruled out ·
         Kepler ID ${esc(detail.kepid)}</p>`;
     wireSkyThumbs();
+    wireCalls(info);
     const scene = buildScene(detail);
     scene.ghost = true;
     setScene(scene);
@@ -2322,6 +2325,12 @@
     { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
     { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
     { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
+    { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
+    { g: 'PREDICTIONS', id: 'prophet', title: 'PROPHET', how: 'Be proven right by NASA for the first time.' },
+    { g: 'PREDICTIONS', id: 'seer', title: 'ORACLE', how: 'Be proven right by NASA five times.' },
+    { g: 'PREDICTIONS', id: 'cassandra', title: 'CASSANDRA', how: 'Call a false positive that Star Gazer believed in, and be proven right.' },
+    { g: 'PREDICTIONS', id: 'contrarian', title: 'CONTRARIAN', how: 'Be right three times when Star Gazer was wrong.' },
+    { g: 'PREDICTIONS', id: 'patience', title: 'PATIENCE OF A STAR', how: 'Have a call settled a year or more after you made it.' },
     { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
     { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -2333,9 +2342,9 @@
   // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine'],
+           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience'],
     epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
-           'double-sunset'],
+           'double-sunset', 'seer', 'cassandra', 'contrarian'],
   };
   for (const a of ACHIEVEMENTS) {
     a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -2360,7 +2369,8 @@
   // version of the page always finds what an older one saved. Ids this version doesn't know are kept, not
   // dropped, so nothing earned is lost if a later version renames or retires something.
   const PROGRESS_KEY = 'starmap.progress.v1';
-  const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false };
+  const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
+                     calls: {}, notified: [] };   // predictions (48b-predictions.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2381,6 +2391,13 @@
     if (Array.isArray(saved.viewed)) progress.viewed = [...new Set([...progress.viewed, ...saved.viewed.filter(v => ID.test(v))])].slice(0, 300);
     if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
     if (saved.whiteHole === true) progress.whiteHole = true;
+    const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
+    for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
+      if (!/^K\d{5}\.\d{2}$/.test(koi) || !Array.isArray(c) || !['planet', 'not'].includes(c[0]) || !DATE.test(String(c[1]))) continue;
+      if (progress.calls[koi] && progress.calls[koi][1] <= c[1]) continue;
+      progress.calls[koi] = [c[0], c[1], ['planet', 'not'].includes(c[2]) ? c[2] : '', typeof c[3] === 'string' ? c[3].slice(0, 60) : ''];
+    }
+    if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
     return true;
   }
   let storageOK = false;   // false in private windows or with site data blocked: progress lasts for this visit
@@ -2407,10 +2424,19 @@
       <div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
     if (egg) drawEggArt(el.querySelector('canvas'), egg, 0, false);
     else if (art) drawArt(el.querySelector('canvas').getContext('2d'), art, 0, 0, 1, 1);
-    toastBox.appendChild(el);
-    while (toastBox.children.length > 3) toastBox.firstChild.remove();
-    setTimeout(() => el.classList.add('leaving'), 4200);
-    setTimeout(() => el.remove(), 4800);
+    toastQueue.push([el, kind === 'legend' ? 9000 : 4200]);
+    pumpToasts();
+  }
+  // At most three pop-ups at once; the rest wait their turn (none is dropped, so earning several things at
+  // once never hides the important one).
+  const toastQueue = [];
+  function pumpToasts() {
+    while (toastBox.children.length < 3 && toastQueue.length) {
+      const [el, ms] = toastQueue.shift();
+      toastBox.appendChild(el);
+      setTimeout(() => el.classList.add('leaving'), ms);
+      setTimeout(() => { el.remove(); pumpToasts(); }, ms + 600);
+    }
   }
 
   function glow() {   // the drawing lights up for a moment
@@ -2563,7 +2589,8 @@
 
   // ---- the Galleria dialog
   const galleryDialog = document.getElementById('gallery');
-  const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'), set: document.getElementById('pane-set') };
+  const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'),
+                  pred: document.getElementById('pane-pred'), set: document.getElementById('pane-set') };
   let detailEgg = null, detailFrame = 0;
   const blanks = name => [...name].map(ch => (/[A-Za-z0-9]/.test(ch) ? '_' : ch === ' ' ? ' ' : ch)).join('');
 
@@ -2803,6 +2830,7 @@
     if (name === 'eggs') renderEggs();
     if (name === 'ach') renderAchievements();
     if (name === 'set') renderSettings();
+    if (name === 'pred') renderPredictions();
   }
   const tabs = [...document.querySelectorAll('#gallery [role="tab"]')];
   tabs.forEach((tab, i) => {
@@ -2832,11 +2860,11 @@
     if (resetButton.dataset.armed !== '1') {   // ask twice
       resetButton.dataset.armed = '1';
       resetButton.textContent = 'SURE? CLICK AGAIN';
-      resetNote.textContent = 'This forgets every easter egg and achievement you found in this browser.';
+      resetNote.textContent = 'This forgets every easter egg, achievement and prediction in this browser (download a backup first?).';
       return;
     }
     const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
-    Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished });
+    Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [] });
     syncSeen();
     saveProgress();
     renderHeaderRank();
@@ -2857,6 +2885,115 @@
     renderHeaderRank();
   });
   info.addEventListener('click', e => { if (e.target.closest('a[href*="aladin"]')) achieve('sky'); });
+
+  // ---------------------------------------------------------------- predictions: call it before NASA does
+  // On any candidate's case file a visitor can call it, PLANET or NOT A PLANET. When NASA later confirms it
+  // or rules it a false positive (data/resolutions.js, recorded by each monthly export with the date it was
+  // first seen), the call is scored, but only if NASA ruled after the call was made. Calls are kept in this
+  // browser with the rest of the progress (and in the backup file). docs/plans/TATOOINE_AND_PROPHET.md
+  const RULINGS = window.STARMAP_RESOLUTIONS || { since: null, resolved: {} };
+  const KOI_ID = /^K\d{5}\.\d{2}$/;
+
+  function callOutcome(koi) {   // 'waiting' | 'early' (NASA ruled before the call) | 'right' | 'wrong'
+    const c = progress.calls[koi], r = RULINGS.resolved[koi];
+    if (!c || !r) return { state: 'waiting' };
+    const planet = r[0] === 'confirmed';
+    if (!(r[1] > c[1])) return { state: 'early', ruling: r[0], date: r[1] };
+    return { state: (c[0] === 'planet') === planet ? 'right' : 'wrong', ruling: r[0], date: r[1],
+             sgRight: c[2] ? (c[2] === 'planet') === planet : null };
+  }
+
+  const CALL_WORD = { planet: 'PLANET', not: 'NOT A PLANET' };
+  const OUTCOME_WORD = { waiting: 'waiting for NASA', early: 'NASA had already ruled', right: '✔ NASA agrees!', wrong: '✖ NASA ruled otherwise' };
+
+  // The "YOUR CALL" line on a candidate's case file (30-info.js).
+  function callMarkup(p, system) {
+    if (p.status !== 'candidate' || !KOI_ID.test(p.koi)) return '';
+    const c = progress.calls[p.koi];
+    if (c) {
+      return `<br><span class="call made">YOUR CALL: <b>${CALL_WORD[c[0]]}</b> · ${esc(niceDate(c[1]))} · ${OUTCOME_WORD[callOutcome(p.koi).state]}</span>`;
+    }
+    const sg = p.sg_planet === true ? 'planet' : p.sg_planet === false ? 'not' : '';
+    return `<br><span class="call" data-koi="${esc(p.koi)}" data-system="${esc(system)}" data-sg="${sg}">YOUR CALL:
+      <button type="button" class="ghost" data-call="planet">PLANET</button>
+      <button type="button" class="ghost" data-call="not">NOT A PLANET</button></span>`;
+  }
+  function wireCalls(root) {
+    root.querySelectorAll('.call[data-koi] button[data-call]').forEach(b => b.addEventListener('click', () => {
+      const span = b.closest('.call'), koi = span.dataset.koi;
+      progress.calls[koi] = [b.dataset.call, today(), span.dataset.sg, span.dataset.system];
+      saveProgress();
+      span.outerHTML = `<span class="call made">YOUR CALL: <b>${CALL_WORD[b.dataset.call]}</b> · saved · waiting for NASA
+        (see ⚙ → PREDICTIONS)</span>`;
+      checkPredictions();
+    }));
+  }
+
+  function predictionStats() {
+    const s = { calls: 0, waiting: 0, early: 0, right: 0, wrong: 0, sgRight: 0, sgWrong: 0, cassandra: 0, contrarian: 0, patience: 0 };
+    for (const [koi, c] of Object.entries(progress.calls)) {
+      s.calls++;
+      const o = callOutcome(koi);
+      s[o.state]++;
+      if (o.state !== 'right' && o.state !== 'wrong') continue;
+      if (o.sgRight === true) s.sgRight++;
+      if (o.sgRight === false) s.sgWrong++;
+      if (o.state === 'right' && o.sgRight === false) s.contrarian++;
+      if (o.state === 'right' && c[0] === 'not' && c[2] === 'planet') s.cassandra++;
+      if ((Date.parse(o.date) - Date.parse(c[1])) / 86_400_000 >= 365) s.patience++;
+    }
+    return s;
+  }
+  function checkPredictions() {   // achievements, and a pop-up for each call NASA has settled since last time
+    const s = predictionStats();
+    if (s.calls >= 1) achieve('first-call');
+    if (s.right >= 1) achieve('prophet');
+    if (s.right >= 5) achieve('seer');
+    if (s.cassandra >= 1) achieve('cassandra');
+    if (s.contrarian >= 3) achieve('contrarian');
+    if (s.patience >= 1) achieve('patience');
+    for (const koi of Object.keys(progress.calls)) {
+      const o = callOutcome(koi);
+      if ((o.state === 'right' || o.state === 'wrong') && !progress.notified.includes(koi)) {
+        progress.notified.push(koi);
+        saveProgress();
+        toast('rank', 'NASA RULED', `${koi} is ${o.ruling === 'confirmed' ? 'a planet' : 'not a planet'}: ${
+          o.state === 'right' ? 'you called it!' : 'not this time.'}`, null, BADGES.PREDICTIONS.art);
+      }
+    }
+  }
+
+  function renderPredictions() {
+    const pane = document.getElementById('pane-pred'), s = predictionStats();
+    const rows = Object.entries(progress.calls).sort((a, b) => b[1][1].localeCompare(a[1][1])).map(([koi, c]) => {
+      const o = callOutcome(koi), r = RULINGS.resolved[koi];
+      return `<tr class="${o.state}"><td>${esc(koi)}</td>
+        <td><button type="button" class="linkish" data-name="${esc(c[3])}">${esc(c[3])}</button></td>
+        <td>${CALL_WORD[c[0]]}</td><td>${esc(niceDate(c[1]))}</td><td>${c[2] ? CALL_WORD[c[2]] : '-'}</td>
+        <td>${r ? `${esc(r[0])} · ${esc(niceDate(r[1]))}` : 'waiting'}</td>
+        <td>${o.state === 'right' ? '✔' : o.state === 'wrong' ? '✖' : o.state === 'early' ? '(too late)' : ''}</td></tr>`;
+    }).join('');
+    const settled = s.right + s.wrong;
+    pane.innerHTML = `
+      <p>Call a candidate before NASA does: open a system with candidates (try 🏆 next planets) and choose
+         <b>PLANET</b> or <b>NOT A PLANET</b> in its case files. When NASA confirms it or rules it a false positive,
+         your call is scored here. It's a slow game: NASA settles a few Kepler candidates at a time.</p>
+      <p class="gallery-progress"><b>${s.calls}</b> CALLS · <b>${s.right}</b> RIGHT · <b>${s.wrong}</b> WRONG · ${s.waiting} WAITING</p>
+      ${settled ? `<p>You vs Star Gazer on the same settled calls: you <b>${s.right}/${settled}</b>, Star Gazer
+        <b>${s.sgRight}/${s.sgRight + s.sgWrong}</b>.</p>` : ''}
+      ${rows ? `<div class="table-wrap"><table>
+        <thead><tr><th>Candidate</th><th>System</th><th>Your call</th><th>Called</th><th>Star Gazer</th><th>NASA</th><th></th></tr></thead>
+        <tbody>${rows}</tbody></table></div>` : '<p class="status">No calls yet.</p>'}
+      <p class="note">NASA's rulings are recorded by the site's monthly data refresh${RULINGS.since ? ` (since ${esc(niceDate(RULINGS.since))})` : ''},
+        dated when they were first seen. A call counts only if NASA ruled after you made it. Calls are saved in this
+        browser (keep a backup under SETTINGS).</p>`;
+    pane.querySelectorAll('button[data-name]').forEach(b => b.addEventListener('click', () => {
+      const star = byName.get(b.dataset.name.toLowerCase());
+      if (star) { galleryDialog.close(); choose(star); }
+    }));
+  }
+
+  queueMicrotask(checkPredictions);
 
   // ---------------------------------------------------------------- ranks: trophies, badges and a star's life
   // Pixel art for the achievements and the rank shown in the page header (docs/STAR_GAZER_MISSION.md):
@@ -3003,6 +3140,18 @@
       }
       if (Math.sin(t) > 0) put(2, 2, '#ffffff');
     } },
+    PREDICTIONS: { name: 'THE HOURGLASS', art: (put, t) => {
+      for (let x = 3; x < 13; x++) { put(x, 1, '#c9a24a'); put(x, 14, '#c9a24a'); }
+      for (let y = 2; y < 14; y++) {
+        const w = Math.round(Math.abs(y - 7.5) * 0.7) + 1;
+        put(7 - w, y, '#9fd8ff'); put(8 + w, y, '#9fd8ff');
+        const fall = (t * 2) % 6;
+        for (let x = 8 - w; x < 8 + w; x++) {
+          if ((y > 9 && y > 13 - fall) || (y < 6 && y > 1 + fall)) put(x, y, '#ffd34d');
+        }
+      }
+      put(7, 8, '#ffd34d'); put(8, 7, '#ffd34d');
+    } },
     SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
       for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }
       discArt(put, 8, 8, 3.2, (dx, dy, f) => (f < 0.45 ? '#000000' : '#6a3fb0'));
@@ -3085,10 +3234,10 @@
     { name: 'STARDUST', at: 0, art: stage.stardust, about: 'A cold cloud of gas and dust: every star starts as one.' },
     { name: 'PROTOSTAR', at: 1, art: stage.protostar, about: 'A ball of gas collapsing and heating up inside a dusty disk.' },
     { name: 'YOUNG STAR', at: 5, art: stage.young, about: 'Hydrogen fusion has begun: a star like the Sun.' },
-    { name: 'RED GIANT', at: 10, art: stage.redGiant, about: 'Its core runs low on hydrogen and the star swells up.' },
-    { name: 'SUPERGIANT', at: 18, art: stage.supergiant, about: 'A heavy star swollen even more, shedding dust.' },
-    { name: 'SUPERNOVA', at: 28, art: stage.supernova, about: 'The core collapses and the star explodes.' },
-    { name: 'PULSAR', at: 40, art: stage.pulsar, about: 'What is left: a city-sized neutron star, spinning and sweeping beams.' },
+    { name: 'RED GIANT', at: 12, art: stage.redGiant, about: 'Its core runs low on hydrogen and the star swells up.' },
+    { name: 'SUPERGIANT', at: 22, art: stage.supergiant, about: 'A heavy star swollen even more, shedding dust.' },
+    { name: 'SUPERNOVA', at: 34, art: stage.supernova, about: 'The core collapses and the star explodes.' },
+    { name: 'PULSAR', at: 46, art: stage.pulsar, about: 'What is left: a city-sized neutron star, spinning and sweeping beams.' },
     { name: 'BLACK HOLE', at: Infinity, art: stage.blackHole, about: 'Earned only as a TRUE STAR GAZER: not even light escapes.' },
   ];
   const regularCount = () => ACHIEVEMENTS.filter(a => a.id !== 'star-gazer' && progress.ach[a.id]).length;

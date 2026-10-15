@@ -1,6 +1,6 @@
 # Plan: TATOOINE (Kepler's worlds outside the KOI list) and PROPHET (your own predictions)
 
-**Status: Part A (Tatooine) built in October 2026: 20 Kepler systems added, 12 of them with two suns. Part B (PROPHET) in progress.** Numbers below were checked against the NASA
+**Status: Part A (Tatooine) built in October 2026: 20 Kepler systems added, 12 of them with two suns. Part B (PROPHET and the predictions tab) built too; NASA's rulings recorded from 14 October 2026.** Numbers below were checked against the NASA
 Exoplanet Archive on 14 October 2026.
 
 ---
