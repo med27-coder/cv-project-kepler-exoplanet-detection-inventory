@@ -485,7 +485,7 @@
     I: '111010010010111', D: '110101101101110', B: '110101110101110', G: '011100101101011',
     J: '001001001101010', L: '100100100100111', P: '110101110100100', Q: '010101101110011',
     S: '011100010001110', V: '101101101101010', W: '101101111111101', Y: '101101010010010',
-    X: '101101010101101', Z: '111001010100111', '?': '111001011000010', '%': '101001010100101', '-': '000000111000000', '/': '001001010100100',
+    X: '101101010101101', Z: '111001010100111', '?': '111001011000010', '%': '101001010100101', ':': '000010000010000', ',': '000000000010100', '-': '000000111000000', '/': '001001010100100',
   };
   function pixelText(ctx, text, x, y, color) {
     ctx.fillStyle = color;
@@ -1282,11 +1282,12 @@
       <h3 class="facts-title">${esc(caption)}</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Candidate</th><th>System</th><th class="num">Size (Earths)</th>
-          <th class="num">NASA vetting</th><th class="num">Star Gazer</th></tr></thead>
+          <th class="num">NASA vetting</th><th class="num">Star Gazer</th><th>Your call</th></tr></thead>
         <tbody>${rows.map(r => `<tr>
           <td>${esc(r.planet)}</td>
           <td><button type="button" class="linkish" data-name="${esc(r.system)}">${esc(r.system)}</button></td>
           <td class="num">${fmt(r.radius, 1)}</td><td class="num">${pct(r.nasa)}</td><td class="num">${pct(r.sg)}</td>
+          <td>${callCell(r)}</td>
         </tr>`).join('')}</tbody>
       </table></div>`;
     info.innerHTML = `
@@ -1297,6 +1298,7 @@
       <p class="note">Educational ranking, not a scientific classification. Click a system to open it.</p>`;
     info.querySelectorAll('button[data-name]').forEach(b =>
       b.addEventListener('click', () => { const s = byName.get(b.dataset.name.toLowerCase()); if (s) choose(s); }));
+    wireCalls(info);   // call them yourself (48b-predictions.js)
     setScene({ custom: drawPodium });   // a podium of the top three, not an empty drawing (49-ranks.js)
   }
 
@@ -2339,6 +2341,8 @@
     { g: 'PREDICTIONS', id: 'cassandra', title: 'CASSANDRA', how: 'Call a false positive that Star Gazer believed in, and be proven right.' },
     { g: 'PREDICTIONS', id: 'contrarian', title: 'CONTRARIAN', how: 'Be right three times when Star Gazer was wrong.' },
     { g: 'PREDICTIONS', id: 'patience', title: 'PATIENCE OF A STAR', how: 'Have a call settled a year or more after you made it.' },
+    { g: 'DAILY SKY', id: 'daily', title: 'MYSTERY SOLVED', how: 'Find the mystery star of the day (in the Galleria).' },
+    { g: 'DAILY SKY', id: 'streak', title: 'WEEK OF WONDERS', how: 'Solve the daily mystery seven days in a row.' },
     { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
     { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -2350,9 +2354,9 @@
   // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience'],
+           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily'],
     epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
-           'double-sunset', 'seer', 'cassandra', 'contrarian'],
+           'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
   };
   for (const a of ACHIEVEMENTS) {
     a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -2380,7 +2384,8 @@
   const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                      calls: {}, notified: [],    // predictions (48b-predictions.js)
                      showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
-                     toured: false };   // first-visit tour (49c-ui.js)
+                     toured: false,   // first-visit tour (49c-ui.js)
+                     daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0 };   // 49d-connect.js
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2411,6 +2416,11 @@
     if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
     if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
     if (saved.toured === true) progress.toured = true;
+    if (saved.daily && DATE.test(String(saved.daily.last)) && (!progress.daily.last || saved.daily.last > progress.daily.last)) {
+      progress.daily = { last: saved.daily.last, streak: Number.isInteger(saved.daily.streak) ? Math.min(9999, Math.max(0, saved.daily.streak)) : 1 };
+    }
+    if (DATE.test(String(saved.lastExport))) progress.lastExport = saved.lastExport;
+    if (Number.isInteger(saved.lastStars)) progress.lastStars = saved.lastStars;
     if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
     return true;
   }
@@ -2515,6 +2525,7 @@
     const hour = new Date().getHours();
     if (hour < 4) achieve('night');
     if (FAMOUS[name]) achieve(FAMOUS[name]);
+    dailyCheck(s);
     if (TAGS.twosuns && s[COL.tags] & TAGS.twosuns) {
       achieve('tatooine');
       if (twoSunCount() >= TWO_SUN_STARS.length) achieve('double-sunset');
@@ -2613,6 +2624,7 @@
     const found = EGGS.filter(e => progress.eggs[e.id]).length;
     if (detailEgg) return renderDetail(detailEgg);
     panes.eggs.innerHTML = `
+      ${dailyCard()}
       <p class="gallery-progress"><b>${found} / ${EGGS.length}</b> FOUND
         <span class="bar" aria-hidden="true"><span></span></span></p>
       <p class="note">Each silhouette is a hidden easter egg. Read the clue, guess the name, then type it in the
@@ -2777,6 +2789,7 @@
           <ol class="ladder" aria-label="The life of your star">${STAGES.map((st, k) => `<li title="${esc(st.name)}: ${
             Number.isFinite(st.at) ? `${st.at} achievements` : 'TRUE STAR GAZER'}"><canvas width="16" height="16" data-stage="${k}" data-locked="${k > i ? 1 : 0}"></canvas></li>`).join('')}</ol></div>
       </div>
+      <p><button type="button" class="ghost" id="share-card">DOWNLOAD MY STAR CARD</button></p>
       <h3 class="facts-title">BADGES <span class="ach-count">${badges.length} / ${Object.keys(BADGES).length}</span></h3>
       <ul class="badge-shelf">${Object.entries(BADGES).map(([g, b]) => `<li class="${badges.includes(g) ? 'on' : ''}">
         <canvas width="16" height="16" data-badge="${esc(g)}" data-locked="${badges.includes(g) ? 0 : 1}" aria-hidden="true"></canvas>
@@ -2790,6 +2803,7 @@
       }).join('')}`;
     panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
     paintRankArt(panes.ach);
+    panes.ach.querySelector('#share-card').addEventListener('click', shareCard);
     panes.ach.querySelectorAll('li[data-ach]').forEach(li => {
       li.addEventListener('click', () => openHologram(li.dataset.ach));
       li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHologram(li.dataset.ach); } });
@@ -2890,7 +2904,7 @@
     }
     const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
     Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [],
-                              showcase: [], levels: {} });
+                              showcase: [], levels: {}, daily: { last: '', streak: 0 } });
     syncSeen();
     saveProgress();
     renderHeaderRank();
@@ -2944,6 +2958,17 @@
       <button type="button" class="ghost" data-call="planet">PLANET</button>
       <button type="button" class="ghost" data-call="not">NOT A PLANET</button></span>`;
   }
+  // A compact call cell for the next-planets table (row: export_starmap.py leaderboard).
+  function callCell(row) {
+    if (!KOI_ID.test(row.planet)) return '';
+    const c = progress.calls[row.planet];
+    if (c) return `<span class="call made"><b>${CALL_WORD[c[0]]}</b></span>`;
+    const sg = row.sg == null ? '' : row.sg >= SG_THRESHOLD ? 'planet' : 'not';
+    return `<span class="call" data-koi="${esc(row.planet)}" data-system="${esc(row.system)}" data-sg="${sg}">
+      <button type="button" class="ghost" data-call="planet">PLANET</button>
+      <button type="button" class="ghost" data-call="not">NOT</button></span>`;
+  }
+
   function wireCalls(root) {
     root.querySelectorAll('.call[data-koi] button[data-call]').forEach(b => b.addEventListener('click', () => {
       const span = b.closest('.call'), koi = span.dataset.koi;
@@ -3107,6 +3132,7 @@
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
     'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
+    streak: ['rrrrrrr', 'wwwwwww', 'wkwkwkw', 'wwwwwww', 'wkwkwyw', 'wwwwwww'],              // a week on the calendar
   };
   const trophyFor = a => (a.id === 'star-gazer' ? starGazerTrophy : !SYMBOLS[a.id] ? trophyArt(a.tier) : (put, t) => {
     trophyArt(a.tier)(put, t);
@@ -3217,6 +3243,12 @@
         }
       }
       put(7, 8, '#ffd34d'); put(8, 7, '#ffd34d');
+    } },
+    'DAILY SKY': { name: 'THE STAR CALENDAR', art: (put, t) => {
+      for (let y = 2; y < 15; y++) for (let x = 2; x < 14; x++) put(x, y, y < 5 ? '#c43c2a' : (x === 2 || x === 13 || y === 14) ? '#9aa6b8' : '#eef2f8');
+      for (const x of [4, 11]) { put(x, 1, '#9aa6b8'); put(x, 2, '#454b5e'); }
+      const on = Math.sin(t * 2) > -0.3;
+      [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => put(8 + dx, 9 + dy, dx || dy ? '#ffd34d' : on ? '#ffffff' : '#ffd34d'));
     } },
     SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
       for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }
@@ -3787,6 +3819,105 @@
     const forced = /[?&]tour\b/.test(location.search);
     if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => showTourStep(0), forced ? 0 : 900);
   });
+
+  // ---------------------------------------------------------------- connecting the pieces
+  // A daily mystery star (a riddle built from a real system's data, the same for everyone on a given day),
+  // "what's new" after each monthly data refresh, and a share card: your emblem, badges and stats as one
+  // pixel picture to download. (Calls on the next-planets list: callCell, 48b-predictions.js.)
+  const pad2 = n => String(n).padStart(2, '0');
+  const localDay = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const DAILY_POOL = STARS.filter(s => s[COL.drawn] && s[COL.np] >= 2 && s[COL.kois] > 0);
+  const dailyStar = (day = localDay()) => DAILY_POOL[Math.floor(hash('daily' + day) * DAILY_POOL.length)];
+
+  function dailyClues(s) {
+    const i = starIndex.get(s), [x, y] = home[i], tags = s[COL.tags];
+    const clues = [`${s[COL.np]} worlds orbit this star.`];
+    if (s[COL.dist] != null) clues.push(`Its light takes about ${fmt(Math.round(s[COL.dist] * LY_PER_PC / 100) * 100)} years to reach us.`);
+    if (tags & TAGS.hz) clues.push('One of its worlds may sit in the habitable zone.');
+    else if (tags & TAGS.earth) clues.push('One of its worlds is about the size of Earth.');
+    else if (tags & TAGS.giant) clues.push('A giant planet lives here.');
+    if (TAGS.twosuns && tags & TAGS.twosuns) clues.push('It has two suns.');
+    if (tags & TAGS.tess) clues.push('TESS saw it again, years after Kepler.');
+    const v = y < MH / 3 ? 'top' : y > 2 * MH / 3 ? 'bottom' : 'middle', h = x < MW / 3 ? 'left' : x > 2 * MW / 3 ? 'right' : 'centre';
+    clues.push(`Look in the ${v === 'middle' && h === 'centre' ? 'middle' : `${v} ${h}`} of the map.`);
+    return clues;
+  }
+  function dailyCard() {
+    const s = dailyStar(), solved = progress.daily.last === localDay();
+    if (!s) return '';
+    return `<div class="daily-card${solved ? ' on' : ''}">
+      <b>★ MYSTERY STAR OF THE DAY${progress.daily.streak > 1 ? ` · STREAK ${progress.daily.streak}` : ''}</b>
+      ${solved ? `<span>Solved: it was <b>${esc(s[COL.name])}</b>. A new one appears tomorrow.</span>`
+        : `<ul>${dailyClues(s).map(c => `<li>${esc(c)}</li>`).join('')}</ul><span>Find it and open it on the map.</span>`}</div>`;
+  }
+  function dailyCheck(s) {   // from systemOpened
+    const today = localDay();
+    if (s !== dailyStar(today) || progress.daily.last === today) return;
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    progress.daily.streak = progress.daily.last === localDay(d) ? progress.daily.streak + 1 : 1;
+    progress.daily.last = today;
+    saveProgress();
+    toast('rank', 'MYSTERY SOLVED', `${s[COL.name]} was the star of the day.${progress.daily.streak > 1 ? ` Streak: ${progress.daily.streak} days.` : ''}`,
+          null, BADGES['DAILY SKY'].art);
+    achieve('daily');
+    if (progress.daily.streak >= 7) achieve('streak');
+  }
+
+  // ---- what's new since your last visit (after a monthly data refresh)
+  function whatsNew() {
+    const before = progress.lastExport;
+    if (before && before !== DATA.exported) {
+      const rulings = Object.values(RULINGS.resolved).filter(r => r[1] > before);
+      const mine = Object.keys(progress.calls).filter(k => RULINGS.resolved[k] && RULINGS.resolved[k][1] > before).length;
+      const added = STARS.length - (progress.lastStars || STARS.length);
+      const bits = rulings.length ? [`${plural(rulings.length, 'NASA ruling')} on candidates`] : [];
+      if (added > 0) bits.push(`${plural(added, 'new system')} on the map`);
+      if (mine) bits.push(`${mine} of your calls settled`);
+      toast('badge', "WHAT'S NEW", `Fresh data from NASA (${niceDate(DATA.exported)})${bits.length ? `: ${bits.join(' · ')}` : ''}.`, null, ICONS.trophy);
+    }
+    if (progress.lastExport !== DATA.exported || progress.lastStars !== STARS.length) {
+      progress.lastExport = DATA.exported;
+      progress.lastStars = STARS.length;
+      saveProgress();
+    }
+  }
+
+  // ---- share card: a 240 x 135 pixel picture, saved at 4x
+  function shareCard() {
+    const W = 240, H = 135, c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d'), i = rankIndex();
+    ctx.fillStyle = '#070b1a';
+    ctx.fillRect(0, 0, W, H);
+    for (let k = 0; k < 90; k++) { ctx.fillStyle = k % 7 ? '#1e2550' : '#4a5590'; ctx.fillRect(Math.floor(hash('sc' + k) * W), Math.floor(hash('sd' + k) * H), 1, 1); }
+    ctx.fillStyle = '#ffd34d';
+    ctx.fillRect(0, 0, W, 1); ctx.fillRect(0, H - 1, W, 1); ctx.fillRect(0, 0, 1, H); ctx.fillRect(W - 1, 0, 1, H);
+    pixelText(ctx, 'KEPLER STAR MAP', 8, 7, '#ffd34d');
+    drawArt(ctx, rankArt(i), 8, 18, 3, 1);   // the emblem, 48 x 48
+    const n = ACHIEVEMENTS.filter(a => progress.ach[a.id]).length, s = predictionStats();
+    const lines = [[`MY STAR: ${rankName(i)}`, '#ffd34d'], [`${n} / ${ACHIEVEMENTS.length} ACHIEVEMENTS`, '#c8d0ff'],
+                   [`${EGGS.filter(e => progress.eggs[e.id]).length} / ${EGGS.length} EASTER EGGS`, '#c8d0ff'],
+                   [`${fmt(gazeCount())} / ${fmt(STARS.length)} STAR SYSTEMS SEEN`, '#c8d0ff'],
+                   [`${s.right} RIGHT CALLS OF ${s.right + s.wrong} SETTLED`, '#c8d0ff']];
+    lines.forEach(([text, col], k) => pixelText(ctx, text, 64, 22 + k * 9, col));
+    const badges = earnedBadges();
+    badges.forEach((g, k) => drawArt(ctx, BADGES[g].art, 8 + k * 18, 74, 1, 1));
+    progress.showcase.filter(id => progress.ach[id]).forEach((id, k) => drawArt(ctx, trophyFor(ACH.get(id)), 8 + k * 18, 96, 1, 1));
+    pixelText(ctx, localDay(), W - 8 - textWidth(localDay()), H - 10, '#5a6a8a');
+    pixelText(ctx, 'MED27-CODER.GITHUB.IO', 8, H - 10, '#5a6a8a');
+    const big = document.createElement('canvas');
+    big.width = W * 4; big.height = H * 4;
+    const b = big.getContext('2d');
+    b.imageSmoothingEnabled = false;
+    b.drawImage(c, 0, 0, W * 4, H * 4);
+    const a = document.createElement('a');
+    a.href = big.toDataURL('image/png');
+    a.download = `kepler-star-map-card-${localDay()}.png`;
+    a.click();
+  }
+
+  queueMicrotask(whatsNew);
 
   // ---------------------------------------------------------------- wiring
   const input = document.getElementById('query');

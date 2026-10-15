@@ -30,6 +30,17 @@ function callMarkup(p, system) {
     <button type="button" class="ghost" data-call="planet">PLANET</button>
     <button type="button" class="ghost" data-call="not">NOT A PLANET</button></span>`;
 }
+// A compact call cell for the next-planets table (row: export_starmap.py leaderboard).
+function callCell(row) {
+  if (!KOI_ID.test(row.planet)) return '';
+  const c = progress.calls[row.planet];
+  if (c) return `<span class="call made"><b>${CALL_WORD[c[0]]}</b></span>`;
+  const sg = row.sg == null ? '' : row.sg >= SG_THRESHOLD ? 'planet' : 'not';
+  return `<span class="call" data-koi="${esc(row.planet)}" data-system="${esc(row.system)}" data-sg="${sg}">
+    <button type="button" class="ghost" data-call="planet">PLANET</button>
+    <button type="button" class="ghost" data-call="not">NOT</button></span>`;
+}
+
 function wireCalls(root) {
   root.querySelectorAll('.call[data-koi] button[data-call]').forEach(b => b.addEventListener('click', () => {
     const span = b.closest('.call'), koi = span.dataset.koi;

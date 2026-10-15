@@ -133,6 +133,8 @@ const ACHIEVEMENTS = [
   { g: 'PREDICTIONS', id: 'cassandra', title: 'CASSANDRA', how: 'Call a false positive that Star Gazer believed in, and be proven right.' },
   { g: 'PREDICTIONS', id: 'contrarian', title: 'CONTRARIAN', how: 'Be right three times when Star Gazer was wrong.' },
   { g: 'PREDICTIONS', id: 'patience', title: 'PATIENCE OF A STAR', how: 'Have a call settled a year or more after you made it.' },
+  { g: 'DAILY SKY', id: 'daily', title: 'MYSTERY SOLVED', how: 'Find the mystery star of the day (in the Galleria).' },
+  { g: 'DAILY SKY', id: 'streak', title: 'WEEK OF WONDERS', how: 'Solve the daily mystery seven days in a row.' },
   { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
   { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -144,9 +146,9 @@ const ACHIEVEMENTS = [
 // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience'],
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily'],
   epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
-         'double-sunset', 'seer', 'cassandra', 'contrarian'],
+         'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
 for (const a of ACHIEVEMENTS) {
   a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -174,7 +176,8 @@ const PROGRESS_KEY = 'starmap.progress.v1';
 const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                    calls: {}, notified: [],    // predictions (48b-predictions.js)
                    showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
-                   toured: false };   // first-visit tour (49c-ui.js)
+                   toured: false,   // first-visit tour (49c-ui.js)
+                   daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0 };   // 49d-connect.js
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -205,6 +208,11 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
   if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
   if (saved.toured === true) progress.toured = true;
+  if (saved.daily && DATE.test(String(saved.daily.last)) && (!progress.daily.last || saved.daily.last > progress.daily.last)) {
+    progress.daily = { last: saved.daily.last, streak: Number.isInteger(saved.daily.streak) ? Math.min(9999, Math.max(0, saved.daily.streak)) : 1 };
+  }
+  if (DATE.test(String(saved.lastExport))) progress.lastExport = saved.lastExport;
+  if (Number.isInteger(saved.lastStars)) progress.lastStars = saved.lastStars;
   if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
   return true;
 }
@@ -309,6 +317,7 @@ function systemOpened(s) {   // from select(): counts systems for the achievemen
   const hour = new Date().getHours();
   if (hour < 4) achieve('night');
   if (FAMOUS[name]) achieve(FAMOUS[name]);
+  dailyCheck(s);
   if (TAGS.twosuns && s[COL.tags] & TAGS.twosuns) {
     achieve('tatooine');
     if (twoSunCount() >= TWO_SUN_STARS.length) achieve('double-sunset');
@@ -407,6 +416,7 @@ function renderEggs() {
   const found = EGGS.filter(e => progress.eggs[e.id]).length;
   if (detailEgg) return renderDetail(detailEgg);
   panes.eggs.innerHTML = `
+    ${dailyCard()}
     <p class="gallery-progress"><b>${found} / ${EGGS.length}</b> FOUND
       <span class="bar" aria-hidden="true"><span></span></span></p>
     <p class="note">Each silhouette is a hidden easter egg. Read the clue, guess the name, then type it in the
@@ -571,6 +581,7 @@ function renderAchievements() {
         <ol class="ladder" aria-label="The life of your star">${STAGES.map((st, k) => `<li title="${esc(st.name)}: ${
           Number.isFinite(st.at) ? `${st.at} achievements` : 'TRUE STAR GAZER'}"><canvas width="16" height="16" data-stage="${k}" data-locked="${k > i ? 1 : 0}"></canvas></li>`).join('')}</ol></div>
     </div>
+    <p><button type="button" class="ghost" id="share-card">DOWNLOAD MY STAR CARD</button></p>
     <h3 class="facts-title">BADGES <span class="ach-count">${badges.length} / ${Object.keys(BADGES).length}</span></h3>
     <ul class="badge-shelf">${Object.entries(BADGES).map(([g, b]) => `<li class="${badges.includes(g) ? 'on' : ''}">
       <canvas width="16" height="16" data-badge="${esc(g)}" data-locked="${badges.includes(g) ? 0 : 1}" aria-hidden="true"></canvas>
@@ -584,6 +595,7 @@ function renderAchievements() {
     }).join('')}`;
   panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
   paintRankArt(panes.ach);
+  panes.ach.querySelector('#share-card').addEventListener('click', shareCard);
   panes.ach.querySelectorAll('li[data-ach]').forEach(li => {
     li.addEventListener('click', () => openHologram(li.dataset.ach));
     li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHologram(li.dataset.ach); } });
@@ -684,7 +696,7 @@ resetButton.addEventListener('click', () => {
   }
   const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
   Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [],
-                            showcase: [], levels: {} });
+                            showcase: [], levels: {}, daily: { last: '', streak: 0 } });
   syncSeen();
   saveProgress();
   renderHeaderRank();

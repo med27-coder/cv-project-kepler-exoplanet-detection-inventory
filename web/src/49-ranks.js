@@ -84,6 +84,7 @@ const SYMBOLS = {
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
   'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
+  streak: ['rrrrrrr', 'wwwwwww', 'wkwkwkw', 'wwwwwww', 'wkwkwyw', 'wwwwwww'],              // a week on the calendar
 };
 const trophyFor = a => (a.id === 'star-gazer' ? starGazerTrophy : !SYMBOLS[a.id] ? trophyArt(a.tier) : (put, t) => {
   trophyArt(a.tier)(put, t);
@@ -194,6 +195,12 @@ const BADGES = {
       }
     }
     put(7, 8, '#ffd34d'); put(8, 7, '#ffd34d');
+  } },
+  'DAILY SKY': { name: 'THE STAR CALENDAR', art: (put, t) => {
+    for (let y = 2; y < 15; y++) for (let x = 2; x < 14; x++) put(x, y, y < 5 ? '#c43c2a' : (x === 2 || x === 13 || y === 14) ? '#9aa6b8' : '#eef2f8');
+    for (const x of [4, 11]) { put(x, 1, '#9aa6b8'); put(x, 2, '#454b5e'); }
+    const on = Math.sin(t * 2) > -0.3;
+    [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => put(8 + dx, 9 + dy, dx || dy ? '#ffd34d' : on ? '#ffffff' : '#ffd34d'));
   } },
   SECRET: { name: 'THE ALL-SEEING EYE', art: (put, t) => {
     for (let x = 1; x < 15; x++) { const h = Math.round(Math.sqrt(Math.max(0, 1 - ((x - 7.5) / 7) ** 2)) * 4); put(x, 8 - h, '#b56cff'); put(x, 8 + h, '#b56cff'); }
