@@ -14,6 +14,7 @@ that also hands the drawing functions to window.__art.
     pixel-art/spacecraft/<craft>.png         every other spacecraft and rover (CRAFT_ART, 46-craft-art.js)
     pixel-art/spacecraft/sheet.png           all of them side by side, labelled
     pixel-art/spacecraft/iss_orbit.png       the small station drawn on its orbit in the ISS card
+    pixel-art/icons/trophies.png             every achievement's trophy (unique ones for the hard and secret achievements)
     pixel-art/spacecraft/marker.png          the cross that marks spacecraft in the Solar System view
 
 Hand-made drafts go next to these as draft_*.png; this script never touches them. Re-run it after
@@ -37,7 +38,7 @@ SCENE_SIZE = {'mercury': 2, 'venus': 2, 'earth': 3, 'mars': 2, 'jupiter': 6, 'sa
               'uranus': 4, 'neptune': 4, 'pluto': 2}   # sprite radius on the map (SOLAR in 40-home.js)
 
 EXPOSE = ('solarPlanet', 'keplerSprite', 'issSprite', 'pixelText', 'textWidth', 'CRAFT_SPOT', 'CRAFT_ART',
-          'craftSprite', 'spriteSize')
+          'craftSprite', 'spriteSize', 'drawArt', 'trophyFor', 'ACHIEVEMENTS', 'SYMBOLS', 'spaceLock')
 
 # Runs in the page: draw on a fresh canvas and return it as a PNG data URL. `draw` is the body of a
 # function of (ctx, w, h) that can call the page's drawing functions.
@@ -115,6 +116,14 @@ def main():
         save(page, craft / 'marker.png', 7, 7,
              "ctx.fillStyle = CRAFT_SPOT; for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) "
              "ctx.fillRect(3 + dx, 3 + dy, 1, 1);", 16)
+        icons = OUT / 'icons'
+        n = page.evaluate('() => __art.ACHIEVEMENTS.length')
+        cols, cw, ch = 8, 64, 30
+        draw = (f"__art.ACHIEVEMENTS.forEach((a, i) => {{ const x = (i % {cols}) * {cw}, y = Math.floor(i / {cols}) * {ch}; "
+                f"__art.drawArt(ctx, __art.trophyFor(a), x + 24, y + 1, 1, 1); "
+                f"pixelText(ctx, a.title.slice(0, 15), x + Math.max(1, ({cw} - textWidth(a.title.slice(0, 15))) / 2 | 0), y + 20, "
+                f"__art.SYMBOLS[a.id] ? '#ffd34d' : '#5a6a8a'); }});")
+        save(page, icons / 'trophies.png', cols * cw, -(-n // cols) * ch, draw, 3)
         browser.close()
     server.shutdown()
     if errors:
