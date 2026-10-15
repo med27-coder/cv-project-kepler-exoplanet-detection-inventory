@@ -56,7 +56,10 @@ local storage, about 25 KB for all 3,611; nothing leaves the browser.
 ## 2. Rank emblems: the life of a star
 
 Your emblem is a star that grows up as you collect achievements. It sits at the top of the page next to the
-⚙ button and moves a little (the Supergiant pulses, the Pulsar sweeps its beams, the Black Hole's disk turns).
+⚙ button and every stage moves, like the concept GIFs: stardust twinkles, the protostar's jets flicker, the young
+star's rays pulse, the red giant's surface boils, the supergiant breathes, the supernova blasts outward, the pulsar
+sweeps its beams and the black hole's disk turns. The harder (epic and secret) achievements have unique trophies:
+the cup carries a symbol of what they're for (Mars, Jupiter, the Golden Record, a rocket, "zZ"...).
 
 | # | Emblem | Reached at | What the stage is | Reference |
 |---|---|---|---|---|

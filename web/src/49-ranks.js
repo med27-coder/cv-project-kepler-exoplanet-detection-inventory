@@ -59,6 +59,45 @@ const trophyArt = tier => (put, t) => {
     for (const [sx, sy] of [[3, 1], [12, 3], [5, 6]]) put(sx, sy, '#9fd8ff');
   }
 };
+// The harder achievements get their own trophy: the tier's cup with a symbol of what they're for (7 x 6
+// pixels on the bowl). Letters are colours (SYMBOL_INK); '.' leaves the cup showing.
+const SYMBOL_INK = {
+  r: '#c45a32', R: '#8e3d22', w: '#ffffff', b: '#9fd8ff', B: '#2f4fae', k: '#151a2c', y: '#ffd34d', o: '#ff9a3c',
+  v: '#b56cff', V: '#6a3fb0', g: '#4fd17a', t: '#e6d3a8', T: '#a8774c', s: '#d6dae2', m: '#7d8596',
+};
+const SYMBOLS = {
+  census: ['w.....w', '...y...', '.w...b.', '..b.w..', 'y....w.', '...w...'],                   // a sky full of stars
+  cartographer: ['...r...', '..rrr..', '.kkwkk.', '..sss..', '...s...', '.......'],          // a compass needle
+  'mission-control': ['.......', 'BB.s.BB', 'BBsssBB', 'BB.s.BB', '...m...', '..m.m..'],     // a satellite
+  'red-fleet': ['..rrr..', '.rrRrr.', '.rRrrr.', '.rrrRr.', '..rrr..', '.......'],           // Mars
+  'jupiter-crew': ['..ttt..', '.TTTTT.', '.ttttt.', '.TrTTT.', '..ttt..', '.......'],        // Jupiter and its spot
+  'sun-chasers': ['y..y..y', '.yoooy.', 'yoyyyoy', '.yoooy.', 'y..y..y', '.......'],         // the Sun
+  curator: ['TTTTTTT', 'TbbbbbT', 'TbbgbbT', 'TbgggbT', 'TTTTTTT', '.......'],               // a framed picture
+  'grand-tour': ['..kkk..', '.kyyyk.', 'kyykyyk', '.kyyyk.', '..kkk..', '.......'],          // the Golden Record
+  'double-sunset': ['.yy.oo.', 'yyyyooo', '.yy.oo.', 'TTTTTTT', 'T.TTT.T', '.......'],      // two suns setting
+  seer: ['..vvv..', '.vwvvv.', '.vvvvv.', '..vvv..', '.TTTTT.', '.......'],                  // a crystal ball
+  cassandra: ['.r...r.', '..r.r..', '...r...', '..r.r..', '.r...r.', '.......'],             // "not a planet"
+  contrarian: ['..b....', '.bbb...', '..b..o.', '..b..o.', '....ooo', '.....o.'],            // against the flow
+  patient: ['.......', '..www..', '.wwkww.', '..www..', '.......', '.......'],               // an eye that waits
+  night: ['..yy...', '.yy....', '.yy....', '.yy..w.', '..yy...', '.......'],                 // a crescent moon
+  hollow: ['...m...', '.b.m.b.', 'b..m..b', '.b.m.b.', '..mmm..', '.......'],                // an antenna, no reply
+  speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
+  goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
+  'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
+};
+const trophyFor = a => (a.id === 'star-gazer' ? starGazerTrophy : !SYMBOLS[a.id] ? trophyArt(a.tier) : (put, t) => {
+  trophyArt(a.tier)(put, t);
+  for (let r = 0; r < 6; r++) for (let c = 0; c < 7; c++) {   // a dark plaque on the bowl, so the symbol reads on any cup
+    if ((r === 0 || r === 5) && (c === 0 || c === 6)) continue;
+    put(4 + c, 1 + r, a.tier === 'secret' ? '#1a1240' : '#1c2245');
+  }
+  SYMBOLS[a.id].forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '.') return;
+    const blink = a.tier === 'secret' && (ch === 'w' || ch === 'b') && Math.sin(t * 3 + c + r) < -0.6;   // secret symbols twinkle
+    put(4 + c, 1 + r, blink ? '#e9d5ff' : SYMBOL_INK[ch]);
+  }));
+});
+
 // TRUE STAR GAZER: a black hole rising from a pale-blue cup (24 x 24; pixel-art/icons/draft_trophy_star_gazer.png)
 const starGazerTrophy = (put, t) => {
   const OUT = '#1a1f3a';
@@ -184,8 +223,12 @@ const stage = {
     const rays = Math.sin(t * 2) > 0 ? 2 : 1;
     for (let k = 1; k <= rays + 1; k++) for (const [x, y] of [[7, 3 - k], [7, 12 + k], [3 - k, 7], [12 + k, 7]]) put(x, y, '#ffd34d');
   },
-  redGiant: put => discArt(put, 8, 8, 6.4, (dx, dy, f) => (f > 0.92 ? '#7a1f1a' : f > 0.75 || noise(Math.floor(dx / 2), Math.floor(dy / 2)) < 0.22 ? '#c43c2a'
-    : noise(Math.floor(dx), Math.floor(dy)) < 0.5 ? '#e0602a' : '#ff9a3c')),
+  redGiant: (put, t) => {   // a boiling surface: big convection cells drift and change, the star breathes
+    const r = 6.3 + 0.3 * Math.sin(t * 1.4), tick = Math.floor(t * 2.5);
+    discArt(put, 8, 8, r, (dx, dy, f) => (f > 0.92 ? '#7a1f1a'
+      : f > 0.75 || noise(Math.floor(dx / 2), Math.floor(dy / 2), tick % 7) < 0.22 ? '#c43c2a'
+      : noise(Math.floor(dx + t * 0.6), Math.floor(dy), tick % 5) < 0.5 ? '#e0602a' : '#ff9a3c'));
+  },
   supergiant: (put, t) => {
     const r = 7.4 + 0.4 * Math.sin(t * 2);
     discArt(put, 8, 8, r, (dx, dy, f) => (f > 0.9 ? '#7a1f1a' : noise(Math.floor(dx / 3), Math.floor(dy / 3)) < 0.35 ? '#c43c2a' : '#e0602a'));
@@ -270,7 +313,8 @@ function paintRankArt(root, t = 1) {
   root.querySelectorAll('canvas[data-trophy]').forEach(c => {
     const ctx = c.getContext('2d'), key = c.dataset.trophy;
     ctx.clearRect(0, 0, c.width, c.height);
-    drawArt(ctx, key === 'lock' ? spaceLock : key === 'legend' ? starGazerTrophy : trophyArt(key), 0, 0, 1, t);
+    const art = key === 'lock' ? spaceLock : key === 'legend' ? starGazerTrophy : ACH.has(key) ? trophyFor(ACH.get(key)) : trophyArt(key);
+    drawArt(ctx, art, 0, 0, 1, t);
   });
   root.querySelectorAll('canvas[data-badge]').forEach(c => {
     const ctx = c.getContext('2d');
@@ -304,9 +348,17 @@ let lastEmblem = 0;
 function drawHeaderEmblem(now) {   // called by the animation loop (~8 fps with the map)
   if (now - lastEmblem < 110 && now) return;
   lastEmblem = now;
-  const ctx = rankCanvas.getContext('2d');
+  const ctx = rankCanvas.getContext('2d'), t = REDUCED_MOTION ? 1 : now / 1000;
   ctx.clearRect(0, 0, 16, 16);
-  drawArt(ctx, rankArt(), 0, 0, 1, REDUCED_MOTION ? 1 : now / 1000);
+  drawArt(ctx, rankArt(), 0, 0, 1, t);
+  paintRankArt(document.getElementById('rank-badges'), t);   // the badges move too
+}
+// The Achievements tab moves while it's open: emblems, badges and trophies (~8 frames a second).
+let achLast = 0;
+function animateAchievements(now) {
+  if (!galleryDialog.open || panes.ach.hidden || REDUCED_MOTION) return;
+  if (now - achLast > 120) { paintRankArt(panes.ach, now / 1000); achLast = now; }
+  requestAnimationFrame(animateAchievements);
 }
 function pulseHeader() {
   rankBox.classList.remove('pulse');

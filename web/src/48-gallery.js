@@ -254,7 +254,7 @@ function achieve(id) {
   progress.ach[id] = today();
   saveProgress();
   const a = ACH.get(id);
-  if (id !== 'star-gazer') toast('ach', `${TIERS[a.tier].name} ACHIEVEMENT: ${a.title}`, a.how, null, trophyArt(a.tier));
+  if (id !== 'star-gazer') toast('ach', `${TIERS[a.tier].name} ACHIEVEMENT: ${a.title}`, a.how, null, trophyFor(a));
   afterAchievement(rankBefore, badgesBefore);
   refreshGallery();
 }
@@ -548,7 +548,7 @@ function renderAchievements() {
   const card = a => {
     const on = progress.ach[a.id], hidden = a.secret && !on, prog = !on && !hidden && achProgress(a);
     return `<li class="${on ? 'on' : ''} tier-${a.tier}">
-      <canvas width="16" height="16" data-trophy="${on ? a.tier : 'lock'}" aria-hidden="true"></canvas>
+      <canvas width="16" height="16" data-trophy="${on ? a.id : 'lock'}" aria-hidden="true"></canvas>
       <div><b>${hidden ? '???' : esc(a.title)}${isNew(a) ? ' <em class="new">NEW</em>' : ''}</b>
         <span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}</span>
         ${prog ? `<span class="ach-bar"><span data-w="${Math.round(100 * Math.min(1, prog[0] / prog[1]))}"></span></span>
@@ -575,6 +575,7 @@ function renderAchievements() {
     }).join('')}`;
   panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
   paintRankArt(panes.ach);
+  requestAnimationFrame(animateAchievements);
   const earned = ACHIEVEMENTS.filter(a => progress.ach[a.id]).map(a => a.id);
   if (earned.some(id => !progress.viewed.includes(id))) { progress.viewed = earned; saveProgress(); }
 }
