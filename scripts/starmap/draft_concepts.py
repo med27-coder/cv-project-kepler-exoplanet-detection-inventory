@@ -149,8 +149,71 @@ def hail_mary(t):
     return f
 
 
+# ---- page background: a pixel night sky (docs/plans/BACKGROUND.md)
+BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+SKY_BANDS = ['#070b1a', '#0a1230', '#0d1d40', '#10294f', '#12385e', '#14506e', '#17707f', '#1fa0a8']
+
+
+def noise1(x, seed):
+    v = math.sin(x * 12.9898 + seed * 78.233) * 43758.5453
+    return v - math.floor(v)
+
+
+def background(t, w=320, h=180):
+    f = Frame(w, h, seed=0)
+    horizon = h - 34
+    for y in range(h):   # gradient, dithered between bands (no smooth blends: pixel art)
+        pos = min(1, y / horizon) * (len(SKY_BANDS) - 1)
+        lo = int(pos)
+        frac = pos - lo
+        for x in range(w):
+            k = lo + (1 if frac * 16 > BAYER[y % 4][x % 4] else 0)
+            f.put(x, y, SKY_BANDS[min(k, len(SKY_BANDS) - 1)])
+    colours = ['#ffffff', '#fff1b0', '#9fd8ff', '#ffd34d', '#ff9a3c', '#7ff0e0']
+    for k in range(260):   # stars, thinning toward the horizon, twinkling
+        x, y = int(noise1(k, 1) * w), int(noise1(k, 2) ** 1.6 * horizon)
+        c = colours[k % len(colours)]
+        if math.sin(t * 2 * math.pi * (1 + k % 3) + k) < -0.6:
+            continue
+        f.put(x, y, c)
+        if k % 17 == 0:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                f.put(x + dx, y + dy, c)
+    f.disc(64, 44, 4, lambda dx, dy, q: '#e8f4ff' if q < 0.4 else '#4a8fd6' if q < 0.75 else None)   # a bright blue star
+    for dx, dy in ((5, 0), (-5, 0), (0, 5), (0, -5), (6, 0), (-6, 0)):
+        f.put(64 + dx, 44 + dy, '#9fd8ff')
+    p = (t * 1.6) % 1   # a shooting star now and then
+    if p < 0.45:
+        sx, sy = 150 + p * 120, 20 + p * 50
+        for k in range(14):
+            f.put(sx - k, sy - k * 0.42, '#ffffff' if k < 3 else '#9fd8ff' if k < 8 else '#2b5a8a')
+    for band, (y0, col, rim, n) in enumerate([(92, '#0e2340', '#24507a', 4), (114, '#123a58', '#2f8098', 5), (132, '#16566a', '#46b8c0', 6)]):
+        drift = t * (6 + band * 4)
+        for c in range(n):   # puffy clouds: overlapping round lumps on a flat base, drifting slowly
+            cx = (noise1(c, band + 3) * (w + 80) + drift) % (w + 80) - 40
+            size = 7 + band * 2 + noise1(c, band + 8) * 5
+            lumps = [(cx + (j - 2) * size * 0.8, y0 - noise1(c * 7 + j, band) * size * 0.6, size * (0.6 + noise1(j, c + band) * 0.5))
+                     for j in range(5)]
+            for (lx, ly, r) in lumps:
+                for y in range(int(ly - r), y0 + 4):
+                    for x in range(int(lx - r), int(lx + r) + 1):
+                        d = math.hypot(x - lx, y - ly)
+                        if d <= r or (y >= ly and abs(x - lx) <= r):
+                            top_edge = d > r - 1.2 and y < ly and (x - lx) < r * 0.4
+                            f.put(x, y, rim if top_edge else col)
+    for x in range(w):   # tree line, two layers
+        back = horizon + 6 - 9 * noise1(x // 3, 7) - 4 * math.sin(x / 17)
+        front = horizon + 14 - 7 * noise1(x // 2, 9) - 5 * math.sin(x / 11 + 2)
+        for y in range(int(back), h):
+            f.put(x, y, '#0f2a3f')
+        for y in range(int(front), h):
+            f.put(x, y, '#081626')
+    return f
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    save_gif([background(k / 12) for k in range(12)], 'draft_background.gif', scale=3, ms=140)
     save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif')
     save_gif([comet(k / 20) for k in range(20)], 'draft_comet.gif', ms=80)
     save_gif([asteroid(k / 20) for k in range(20)], 'draft_asteroid.gif', ms=90)
