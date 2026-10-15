@@ -575,7 +575,7 @@ function renderAchievements() {
     }).join('')}`;
   panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
   paintRankArt(panes.ach);
-  requestAnimationFrame(animateAchievements);
+  startAchievementsAnimation();
   const earned = ACHIEVEMENTS.filter(a => progress.ach[a.id]).map(a => a.id);
   if (earned.some(id => !progress.viewed.includes(id))) { progress.viewed = earned; saveProgress(); }
 }
@@ -596,10 +596,10 @@ async function renderSettings() {
   }
   document.getElementById('set-final').hidden = !progress.ach['star-gazer'];
   document.getElementById('set-final-emblem').value = progress.finalEmblem;
-  let kept = '';
-  try { kept = (await navigator.storage?.persisted?.()) ? ' Protected from automatic clean-up.' : ''; } catch { /* older browser */ }
-  storageNote.textContent = `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
+  const note = kept => `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
     'site\'s data is cleared, in a private window, or on another browser or device: keep a backup file for those.';
+  storageNote.textContent = note('');   // right away; the browser's answer below only adds to it
+  try { if (await navigator.storage?.persisted?.()) storageNote.textContent = note(' Protected from automatic clean-up.'); } catch { /* older browser */ }
 }
 document.getElementById('set-export').addEventListener('click', () => {
   const file = new Blob([JSON.stringify({ app: 'kepler-star-map', version: 1, saved: today(), ...progress }, null, 1)],

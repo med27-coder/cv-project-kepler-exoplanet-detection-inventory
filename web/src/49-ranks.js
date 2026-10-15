@@ -354,12 +354,13 @@ function drawHeaderEmblem(now) {   // called by the animation loop (~8 fps with 
   paintRankArt(document.getElementById('rank-badges'), t);   // the badges move too
 }
 // The Achievements tab moves while it's open: emblems, badges and trophies (~8 frames a second).
-let achLast = 0;
+let achLast = 0, achLoop = false;   // one loop at a time, however often the tab re-renders
 function animateAchievements(now) {
-  if (!galleryDialog.open || panes.ach.hidden || REDUCED_MOTION) return;
+  if (!galleryDialog.open || panes.ach.hidden || REDUCED_MOTION) { achLoop = false; return; }
   if (now - achLast > 120) { paintRankArt(panes.ach, now / 1000); achLast = now; }
   requestAnimationFrame(animateAchievements);
 }
+const startAchievementsAnimation = () => { if (!achLoop) { achLoop = true; requestAnimationFrame(animateAchievements); } };
 function pulseHeader() {
   rankBox.classList.remove('pulse');
   void rankBox.offsetWidth;
