@@ -156,18 +156,31 @@ NASA still lists 1,977 KOIs as CANDIDATE (neither confirmed nor ruled out). `scr
 
 **[Open the star map](https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/)** (or open `web/index.html` straight from disk).
 
-A pixel map of the Kepler field with every star that has a planet or planet candidate (3,600+). Search a system (`Kepler-90`, `KOI-351`, `K00351.01` or a Kepler ID), click a pixel or use the arrow keys, and the system pops up as pixel art: a limb-darkened star coloured by temperature, shaded planets sized by radius and coloured by temperature (banded giants, icy caps, lava worlds), eccentric orbits that follow Kepler's equation, an approximate habitable zone, a companion star in multi-star systems, and a live light curve that dips whenever a planet crosses its star, the way Kepler found them. Each system can be zoomed and dragged, fitted to show its whole habitable zone, or switched to true scale (real distances and sizes, with a scale bar and Earth's orbit for comparison). Behind the map is the real Milky Way (ESA Gaia DR3); each system has real sky photos (DSS2, Pan-STARRS, 2MASS infrared), star facts (mass, age, metals, distance), TESS re-detections, and a table with masses, orbits, sunlight and discovery years. Systems whose only planets are unscored candidates show *"Soon to cross the stars"*; once Star Gazer has scored them, they are drawn and coloured by its verdict.
+A pixel map of the Kepler field with every star that has a planet or planet candidate (3,600+, including the
+planets Kepler found outside its usual candidate list, like Kepler-16 b, a real "Tatooine" with two suns). Search a system (`Kepler-90`, `KOI-351`, `K00351.01` or a Kepler ID), click a pixel or use the arrow keys, and the system pops up as pixel art: a limb-darkened star coloured by temperature, shaded planets sized by radius and coloured by temperature (banded giants, icy caps, lava worlds), eccentric orbits that follow Kepler's equation, an approximate habitable zone, a companion star in multi-star systems, and a live light curve that dips whenever a planet crosses its star, the way Kepler found them. Each system can be zoomed and dragged, fitted to show its whole habitable zone, or switched to true scale (real distances and sizes, with a scale bar and Earth's orbit for comparison). Behind the map is the real Milky Way (ESA Gaia DR3); each system has real sky photos (DSS2, Pan-STARRS, 2MASS infrared), star facts (mass, age, metals, distance), TESS re-detections, and a table with masses, orbits, sunlight and discovery years. Systems whose only planets are unscored candidates show *"Soon to cross the stars"*; once Star Gazer has scored them, they are drawn and coloured by its verdict.
 
-Everything is drawn from numbers on two small canvases (about 1.1 MB of data for all systems, plus one 18 KB sky backdrop) and hosted free on GitHub Pages. The data comes from the NASA Exoplanet Archive (KOI, confirmed-planet and TESS TOI tables), Berger et al. 2020 (Gaia stellar properties) and Star Gazer's candidate scores:
+**It's also a game.** The ⚙ button opens the **Galleria**: 24 hidden easter eggs to find by name (each shows its
+pixel art next to the real NASA photo, with a slider that turns one into the other), 57 achievements with
+trophies by difficulty, set badges and a constellation per group, and a hologram close-up of every trophy. Your
+achievements grow **your star** in the page header, from stardust to a black hole for the final mission (open
+every system on the map). Visitors can **make their own predictions** on candidates (planet or not?), scored
+when NASA rules, and there's a **daily mystery star**. Progress stays in your own browser (no accounts, no
+tracking) and can be backed up to a file. A first-visit tour shows the way around.
+
+Everything is drawn from numbers on small canvases (about 1.8 MB of data for all systems, loaded in pieces as
+you open them) and hosted free on GitHub Pages. The data comes from the NASA Exoplanet Archive (KOI,
+confirmed-planet, Kepler-names and TESS TOI tables; NASA's rulings on candidates are recorded every month),
+Berger et al. 2020 (Gaia stellar properties), NASA JPL Horizons (spacecraft positions), NASA's Image and Video
+Library (Galleria photos) and Star Gazer's candidate scores:
 
 ```powershell
 .venv\Scripts\python scripts\starmap\export_starmap.py      # -> web/data/systems.js
 .venv\Scripts\python scripts\starmap\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
 ```
 
-One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are a few more: try looking for the robots we've sent out there, or where people live in space. 🛰️
+One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. 🌍 There are many more: the Galleria shows each one as a silhouette with a clue. 🛰️ (Spoilers: [docs/EASTER_EGGS.md](docs/EASTER_EGGS.md).)
 
-Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). All documentation: [docs/README.md](docs/README.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
+Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). The game's design: [docs/STAR_GAZER_MISSION.md](docs/STAR_GAZER_MISSION.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). All documentation: [docs/README.md](docs/README.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -385,7 +398,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 ├── requirements.txt              ← Local (VS Code) dependencies
 ├── pyproject.toml                ← `pip install -e .` + pytest config
 ├── app.py                        ← Gradio web demo: Star Gazer, V2 or V1.5 (local by default)
-├── .vscode/                      ← Interpreter, notebook root, launch configs, extensions
+├── .vscode/                      ← Interpreter, notebook root, launch configs, recommended extensions
 ├── .github/                      ← CI: tests, star map deploy, CodeQL, dependency audit, Dependabot
 ├── cspell.json                   ← Project words for the VS Code spell checker
 ├── src/kepler_cnn/
@@ -394,29 +407,23 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── model.py                  ← V1–V2: 1D CNN, training, evaluation, prediction
 │   ├── views.py                  ← V3: all-quarter download, detrending, the six views
 │   ├── star_gazer.py             ← V3: features, star-grouped split, hybrid model, train/evaluate
+│   ├── training.py               ← V3: training variants, checkpoints, scoring (shared by the scripts)
 │   ├── saliency.py               ← V3: occlusion saliency (what drove a prediction)
 │   ├── runtime.py                ← Low CPU priority + TensorFlow thread limits for long runs
 │   ├── plots.py                  ← All figures
 │   └── terms.py                  ← Terms of Use acceptance gate
-├── scripts/
-│   ├── build_full_dataset.py     ← V3: builds views for every labelled KOI (resumable)
-│   ├── train_star_gazer.py       ← V3: ablation variants + final model, metrics, figures
-│   ├── cross_validate.py         ← V3: grouped k-fold cross-validation
-│   ├── score_candidates.py       ← V3: scores the unlabelled CANDIDATE KOIs
-│   ├── secure_artifacts.py       ← V3: encrypt / decrypt the trained model and results
-│   ├── make_hf_space.py          ← V3: builds a free Hugging Face Space for the web demo
-│   ├── export_starmap.py         ← Star map data: NASA tables + Star Gazer scores → web/data/systems.js
-│   ├── make_og_image.py          ← Star map social preview (web/og.png), run by export_starmap.py
-│   ├── make_sky_backdrop.py      ← Star map background: Gaia DR3 Milky Way in the map's projection
-│   ├── fetch_extra_data.py       ← Extra public datasets for later experiments (Gaia stellar properties)
-│   ├── plot_version_progress.py  ← The cross-version chart in this README
-│   └── import_colab_checkpoints.py  ← Moves your old Colab/Drive files into place
+├── scripts/                      ← Grouped by job; index in scripts/README.md
+│   ├── pipeline/                 ← V3: build views, train, cross-validate, score candidates, scoreboard (run_pipeline.py runs them all)
+│   ├── starmap/                  ← Star map data and art: export (NASA tables), sky backdrop, spacecraft, Earth map, reference photos, pixel-art exports
+│   ├── experiments/              ← Ablations, TESS transfer, error analysis, the cross-version chart
+│   ├── data/                     ← Extra datasets, NASA schema check, Colab import
+│   └── tools/                    ← Encrypted model (secure_artifacts.py), hash-locked dependencies, Hugging Face demo
 ├── notebooks/
 │   ├── Exoplanet_Detection_V3_StarGazer.ipynb  ← ✅ Current notebook (V3)
 │   ├── Exoplanet_Detection_V2.ipynb            ← V2 notebook (VS Code)
 │   └── archive_colab/                          ← Original Colab notebooks (V1, V1.5, V2 draft, exploration), unchanged
 ├── web/                          ← 🗺️ Pixel star map (static site, deployed by .github/workflows/pages.yml)
-├── pixel-art/                    ← The map's sprites enlarged (solar-system/, spacecraft/) + drafts
+├── pixel-art/                    ← The map's sprites enlarged (solar-system/, spacecraft/, icons/), concept art (emblems/, concepts/), official reference photos (references/)
 ├── tests/                        ← pytest suite (run on every push by .github/workflows/tests.yml)
 ├── data/                         ← Local data cache (git-ignored); see data/README.md
 ├── models/                       ← models/<version>/ (git-ignored)
@@ -429,7 +436,12 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   └── v3_public/                ← A few V3 figures shown in this README
 └── docs/
     ├── README.md                 ← Index of all docs (analysis, audit, easter eggs, roadmap)
+    ├── DATA_ANALYSIS.md          ← Where Star Gazer succeeds and fails
+    ├── AUDIT_V3.md               ← Independent check of the V3 results
+    ├── EASTER_EGGS.md            ← Spoilers: every easter egg and achievement
+    ├── STAR_GAZER_MISSION.md     ← The star map game: ranks, trophies, the final mission
     ├── STARMAP_PLAN.md           ← Star map roadmap
+    ├── plans/                    ← Design plans for upcoming features
     └── presentation/             ← Portfolio slides (.pptx) and the PDF
 ```
 
