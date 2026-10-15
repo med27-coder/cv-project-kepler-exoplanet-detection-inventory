@@ -551,6 +551,7 @@
         speed: (2 * Math.PI) / (1.5 * Math.sqrt(p.period ?? 10)),   // radians per second
         phase: hash(p.koi) * 2 * Math.PI,
         seed: p.koi,
+        name: p.name,   // for the hover label (49c-ui.js)
       };
     });
     const reach = Math.max(...planets.map(p => p.a * (1 + p.ecc)));
@@ -852,6 +853,7 @@
       const [X, Y] = orbitPoint(p, p.phase + p.speed * t);
       return { p, X, x: cx + X, y: cy + Y * TILT, behind: Y < 0 };
     });
+    scene.hits = bodies.map(b => ({ x: b.x, y: b.y, r: b.p.size, name: b.p.name, radius: b.p.radius }));
     let flux = 1;
     for (const b of bodies) { b.depth = transitDepth(b); flux -= b.depth; }
     flux = Math.max(0, flux);
@@ -880,6 +882,7 @@
     sctx.globalAlpha = 1;
     if (scene.ghost) pixelText(sctx, 'UNCONFIRMED', 4, 4, '#ffd34d');
     if (scene.overlay) scene.overlay(seconds);
+    drawHoverLabel();
     sctx.fillStyle = '#070b1a';   // keep anything big out of the light-curve strip
     sctx.fillRect(0, H + 1, SW, STRIP - 1);
     sctx.drawImage(scene.layer, 0, H + 1, SW, STRIP - 1, 0, H + 1, SW, STRIP - 1);
@@ -1014,7 +1017,11 @@
   sys.addEventListener('pointermove', e => {
     if (touches.has(e.pointerId)) touches.set(e.pointerId, sysPoint(e));
     if (pinch && touches.size === 2) { setSysZoom(pinch.zoom * spread() / pinch.dist, middle()); return; }
-    if (!sysDrag) return;
+    if (!sysDrag) {   // hovering: name the planet under the pointer
+      const hit = planetAt(e);
+      if (scene && (hit?.name ?? null) !== (scene.hover ?? null)) { scene.hover = hit?.name ?? null; wake(); }
+      return;
+    }
     const r = sys.getBoundingClientRect();
     sview.panX = sysDrag.panX + (e.clientX - sysDrag.x) * SW / r.width;
     sview.panY = sysDrag.panY + (e.clientY - sysDrag.y) * SH / r.height;
@@ -1027,6 +1034,7 @@
     rememberView();
   };
   sys.addEventListener('pointerup', endSysDrag);
+  sys.addEventListener('pointerleave', () => { if (scene) scene.hover = null; });
   sys.addEventListener('pointercancel', endSysDrag);
   sys.addEventListener('dblclick', fitAll);
   sys.addEventListener('wheel', e => {
@@ -2371,7 +2379,8 @@
   const PROGRESS_KEY = 'starmap.progress.v1';
   const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                      calls: {}, notified: [],    // predictions (48b-predictions.js)
-                     showcase: [], levels: {}, sound: false };   // trophies (49b-trophies.js)
+                     showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
+                     toured: false };   // first-visit tour (49c-ui.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2401,6 +2410,7 @@
     if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
     if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
     if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
+    if (saved.toured === true) progress.toured = true;
     if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
     return true;
   }
@@ -3684,6 +3694,100 @@
     } catch { /* no audio in this browser */ }
   }
 
+  // ---------------------------------------------------------------- interface: pixel icons, first-visit tour
+  // Pixel icons replace the last emoji buttons (dice, gear, trophy). A three-step tour greets first-time
+  // visitors (search, the map, the Galleria); it never runs under automated testing (navigator.webdriver)
+  // unless the address asks for it (index.html?tour).
+  const ICONS = {
+    dice: put => {
+      for (let y = 1; y < 11; y++) for (let x = 1; x < 11; x++) {
+        const edge = x === 1 || y === 1 || x === 10 || y === 10, corner = (x === 1 || x === 10) && (y === 1 || y === 10);
+        if (!corner) put(x, y, edge ? '#9aa6b8' : '#eef2f8');
+      }
+      for (const [x, y] of [[3, 3], [7, 3], [5, 5], [3, 7], [7, 7]]) { put(x, y, '#151a2c'); put(x + 1, y, '#151a2c'); put(x, y + 1, '#151a2c'); put(x + 1, y + 1, '#151a2c'); }
+    },
+    gear: put => {
+      discArt(put, 6, 6, 4.6, (dx, dy, f) => (f < 0.42 ? null : '#e6ecff'));
+      for (let k = 0; k < 8; k++) {
+        const a = k * Math.PI / 4;
+        put(Math.round(5.5 + 5.2 * Math.cos(a)), Math.round(5.5 + 5.2 * Math.sin(a)), '#e6ecff');
+      }
+    },
+    trophy: (put, t) => trophyArt('epic')((x, y, c) => put(x - 2, y - 2, c), t),
+  };
+  function paintIcons(root = document) {
+    root.querySelectorAll('canvas[data-icon]').forEach(c => {
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+      ICONS[c.dataset.icon]((x, y, col) => { if (col && x >= 0 && y >= 0) { ctx.fillStyle = col; ctx.fillRect(x, y, 1, 1); } }, 1);
+    });
+  }
+  const iconCanvas = (name, size = 12) => `<canvas class="icon" width="${size}" height="${size}" data-icon="${name}" aria-hidden="true"></canvas>`;
+
+  // ---- first-visit tour
+  const TOUR = [
+    ['#query', 'SEARCH THE SKY', 'Type a star system (try Kepler-90) and press SCAN, or roll the dice for a surprise.'],
+    ['#map', 'EVERY PIXEL IS A STAR', 'Click one, or use the arrow keys: each has planets or planet candidates found by Kepler.'],
+    ['#open-gallery', 'YOUR GALLERIA', 'Easter eggs, achievements, predictions and settings live here. Happy hunting!'],
+  ];
+  let tourBox = null;
+  function showTourStep(i) {
+    document.querySelectorAll('.tour-target').forEach(el => el.classList.remove('tour-target'));
+    if (i >= TOUR.length) { endTour(); return; }
+    const [sel, head, text] = TOUR[i], target = document.querySelector(sel);
+    if (!target) { endTour(); return; }
+    target.classList.add('tour-target');
+    target.scrollIntoView({ block: 'nearest', behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
+    tourBox = tourBox || Object.assign(document.createElement('div'), { className: 'tour', role: 'dialog' });
+    tourBox.setAttribute('aria-label', 'Quick tour');
+    tourBox.innerHTML = `<b>${esc(head)}</b><span>${esc(text)}</span>
+      <span class="tour-buttons"><span class="tour-step">${i + 1} / ${TOUR.length}</span>
+        <button type="button" class="ghost" data-tour="skip">SKIP</button>
+        <button type="button" data-tour="next">${i === TOUR.length - 1 ? 'DONE' : 'NEXT'}</button></span>`;
+    document.body.appendChild(tourBox);
+    const r = target.getBoundingClientRect(), w = Math.min(300, innerWidth - 16);
+    tourBox.style.width = `${w}px`;
+    tourBox.style.left = `${Math.round(Math.min(Math.max(8, r.left + scrollX), scrollX + innerWidth - w - 8))}px`;
+    tourBox.style.top = `${Math.round(r.bottom + scrollY + 10)}px`;
+    tourBox.querySelector('[data-tour="next"]').addEventListener('click', () => showTourStep(i + 1));
+    tourBox.querySelector('[data-tour="skip"]').addEventListener('click', endTour);
+    tourBox.querySelector('[data-tour="next"]').focus({ preventScroll: true });
+  }
+  function endTour() {
+    document.querySelectorAll('.tour-target').forEach(el => el.classList.remove('tour-target'));
+    tourBox?.remove();
+    tourBox = null;
+    progress.toured = true;
+    saveProgress();
+  }
+
+  // ---- planets: hover labels on the system drawing (name and size)
+  function planetAt(evt) {
+    if (!scene || !scene.hits) return null;
+    const r = sys.getBoundingClientRect(), x = (evt.clientX - r.left) * SW / r.width, y = (evt.clientY - r.top) * SH / r.height;
+    let best = null, bestD = Infinity;
+    for (const h of scene.hits) {
+      const d = Math.hypot(h.x - x, h.y - y);
+      if (d <= h.r + 4 && d < bestD) { best = h; bestD = d; }
+    }
+    return best;
+  }
+  function drawHoverLabel() {   // from drawSystem, after the planets
+    const h = scene && scene.hover && scene.hits && scene.hits.find(p => p.name === scene.hover);
+    if (!h) return;
+    const text = `${String(h.name).toUpperCase()}${h.radius != null ? ` ${fmt(h.radius, 1)}X EARTH` : ''}`;
+    const w = textWidth(text) + 4, x = Math.round(Math.min(Math.max(1, h.x - w / 2), SW - w - 1)), y = Math.round(Math.max(1, h.y - h.r - 10));
+    sctx.fillStyle = 'rgba(7, 11, 26, 0.85)';
+    sctx.fillRect(x, y, w, 8);
+    pixelText(sctx, text, x + 2, y + 2, '#ffd34d');
+  }
+
+  queueMicrotask(() => {
+    paintIcons();
+    const forced = /[?&]tour\b/.test(location.search);
+    if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => showTourStep(0), forced ? 0 : 900);
+  });
+
   // ---------------------------------------------------------------- wiring
   const input = document.getElementById('query');
   const suggest = document.getElementById('suggest');
@@ -3712,7 +3816,12 @@
     let q = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
     if (/^koi\s*\d/.test(q)) q = q.replace(/^koi\s*-?\s*/, 'koi-');
     if (/^kepler\s*\d/.test(q)) q = q.replace(/^kepler\s*-?\s*/, 'kepler-');
-    if (q.length < 2) { closeSuggestions(); return; }
+    if (q.length < 2) {   // empty box: the systems you viewed last
+      const recent = q ? [] : [...progress.systems].reverse().map(n => byName.get(n.toLowerCase())).filter(Boolean).slice(0, 5);
+      if (!recent.length) { closeSuggestions(); return; }
+      renderSuggestions(recent, 'recently viewed');
+      return;
+    }
     const starts = [], contains = [];
     for (const item of searchIndex) {
       if (item.keys.some(k => k.startsWith(q))) starts.push(item);
@@ -3720,31 +3829,40 @@
     }
     const byRank = (a, b) => a.rank - b.rank ||
       a.s[COL.name].localeCompare(b.s[COL.name], 'en', { numeric: true });
-    options = [...starts.sort(byRank), ...contains.sort(byRank)].slice(0, 8).map(item => item.s);
+    const eggs = EGGS.filter(e => progress.eggs[e.id] && (e.name.toLowerCase().includes(q) || e.query.toLowerCase().includes(q)))
+      .slice(0, 3).map(egg => ({ egg }));   // easter eggs you've found are easy to revisit
+    renderSuggestions([...eggs, ...[...starts.sort(byRank), ...contains.sort(byRank)].map(item => item.s)].slice(0, 8));
+  }
+
+  function renderSuggestions(list, note) {
+    options = list;
     if (!options.length) { closeSuggestions(); return; }
     active = -1;
-    suggest.innerHTML = options.map((s, i) => `
+    suggest.innerHTML = options.map((s, i) => (s.egg ? `
+      <li role="option" id="opt-${i}" data-i="${i}">${esc(s.egg.name)}<span>★ easter egg you found</span></li>` : `
       <li role="option" id="opt-${i}" data-i="${i}">${esc(s[COL.name])}
-        <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
-          s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}</span></li>`).join('');
+        <span>${note ? esc(note) : `${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
+          s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}`}</span></li>`)).join('');
     suggest.hidden = false;
     input.setAttribute('aria-expanded', 'true');
   }
 
   function setActive(i) {
     active = (i + options.length) % options.length;
-    prefetch(options[active]);
+    if (!options[active].egg) prefetch(options[active]);
     suggest.querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', String(k === active)));
     input.setAttribute('aria-activedescendant', `opt-${active}`);
   }
 
   function choose(s) {
+    if (s.egg) { input.value = s.egg.query; closeSuggestions(); lookup(s.egg.query); return; }
     input.value = s[COL.name];
     closeSuggestions();
     select(s);
   }
 
   input.addEventListener('input', showSuggestions);
+  input.addEventListener('focus', showSuggestions);
   input.addEventListener('keydown', e => {
     if (suggest.hidden) return;
     if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
@@ -3783,7 +3901,8 @@
     highlightBox.appendChild(b);
   }
   const board = document.createElement('button');
-  board.type = 'button'; board.className = 'chip'; board.textContent = '🏆 next planets';
+  board.type = 'button'; board.className = 'chip';
+  board.innerHTML = `${iconCanvas('trophy')} next planets`;   // pixel trophy (49c-ui.js)
   board.addEventListener('click', showLeaderboard);
   highlightBox.appendChild(board);
 

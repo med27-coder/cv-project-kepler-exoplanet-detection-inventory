@@ -333,6 +333,30 @@ def test_predictions(browser, site):
     assert not errors, errors
 
 
+def test_tour_icons_and_suggestions(browser, site):
+    """First-visit tour (forced with ?tour), pixel icons, found eggs and recent systems in the suggestions."""
+    errors = []
+    page = open_page(browser, site + '?tour', errors)
+    page.wait_for_selector('.tour')
+    assert 'SEARCH THE SKY' in page.locator('.tour').inner_text()
+    for _ in range(3):
+        page.click('.tour [data-tour="next"]')
+    assert page.locator('.tour').count() == 0
+    assert '"toured":true' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    assert page.locator('#random canvas.icon').count() == 1 and page.locator('#open-gallery canvas.icon').count() == 1
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.fill('#query', 'lucy')
+    page.press('#query', 'Enter')                                     # finds the Lucy easter egg
+    page.fill('#query', 'luc')
+    page.wait_for_selector('#suggest li:has-text("easter egg you found")')
+    page.fill('#query', '')
+    page.locator('#query').blur()
+    page.locator('#query').focus()
+    page.wait_for_selector('#suggest li:has-text("recently viewed")')
+    assert not errors, errors
+
+
 def test_view_links_kepler_view_and_pinch(browser, site):
     """A shared link restores zoom, true scale and Kepler's view; pinching zooms; the URL follows."""
     errors = []

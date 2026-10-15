@@ -26,7 +26,12 @@ function showSuggestions() {
   let q = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
   if (/^koi\s*\d/.test(q)) q = q.replace(/^koi\s*-?\s*/, 'koi-');
   if (/^kepler\s*\d/.test(q)) q = q.replace(/^kepler\s*-?\s*/, 'kepler-');
-  if (q.length < 2) { closeSuggestions(); return; }
+  if (q.length < 2) {   // empty box: the systems you viewed last
+    const recent = q ? [] : [...progress.systems].reverse().map(n => byName.get(n.toLowerCase())).filter(Boolean).slice(0, 5);
+    if (!recent.length) { closeSuggestions(); return; }
+    renderSuggestions(recent, 'recently viewed');
+    return;
+  }
   const starts = [], contains = [];
   for (const item of searchIndex) {
     if (item.keys.some(k => k.startsWith(q))) starts.push(item);
@@ -34,31 +39,40 @@ function showSuggestions() {
   }
   const byRank = (a, b) => a.rank - b.rank ||
     a.s[COL.name].localeCompare(b.s[COL.name], 'en', { numeric: true });
-  options = [...starts.sort(byRank), ...contains.sort(byRank)].slice(0, 8).map(item => item.s);
+  const eggs = EGGS.filter(e => progress.eggs[e.id] && (e.name.toLowerCase().includes(q) || e.query.toLowerCase().includes(q)))
+    .slice(0, 3).map(egg => ({ egg }));   // easter eggs you've found are easy to revisit
+  renderSuggestions([...eggs, ...[...starts.sort(byRank), ...contains.sort(byRank)].map(item => item.s)].slice(0, 8));
+}
+
+function renderSuggestions(list, note) {
+  options = list;
   if (!options.length) { closeSuggestions(); return; }
   active = -1;
-  suggest.innerHTML = options.map((s, i) => `
+  suggest.innerHTML = options.map((s, i) => (s.egg ? `
+    <li role="option" id="opt-${i}" data-i="${i}">${esc(s.egg.name)}<span>★ easter egg you found</span></li>` : `
     <li role="option" id="opt-${i}" data-i="${i}">${esc(s[COL.name])}
-      <span>${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
-        s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}</span></li>`).join('');
+      <span>${note ? esc(note) : `${s[COL.koi] != null && !s[COL.name].startsWith('KOI') ? `KOI-${fmt(s[COL.koi])} · `.replace(/,/g, '') : ''}${
+        s[COL.drawn] ? plural(s[COL.np], 'planet') : plural(s[COL.np], 'candidate')}`}</span></li>`)).join('');
   suggest.hidden = false;
   input.setAttribute('aria-expanded', 'true');
 }
 
 function setActive(i) {
   active = (i + options.length) % options.length;
-  prefetch(options[active]);
+  if (!options[active].egg) prefetch(options[active]);
   suggest.querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', String(k === active)));
   input.setAttribute('aria-activedescendant', `opt-${active}`);
 }
 
 function choose(s) {
+  if (s.egg) { input.value = s.egg.query; closeSuggestions(); lookup(s.egg.query); return; }
   input.value = s[COL.name];
   closeSuggestions();
   select(s);
 }
 
 input.addEventListener('input', showSuggestions);
+input.addEventListener('focus', showSuggestions);
 input.addEventListener('keydown', e => {
   if (suggest.hidden) return;
   if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
@@ -97,7 +111,8 @@ for (const [key, [name]] of Object.entries(HIGHLIGHTS)) {
   highlightBox.appendChild(b);
 }
 const board = document.createElement('button');
-board.type = 'button'; board.className = 'chip'; board.textContent = '🏆 next planets';
+board.type = 'button'; board.className = 'chip';
+board.innerHTML = `${iconCanvas('trophy')} next planets`;   // pixel trophy (49c-ui.js)
 board.addEventListener('click', showLeaderboard);
 highlightBox.appendChild(board);
 

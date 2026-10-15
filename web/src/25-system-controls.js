@@ -105,7 +105,11 @@ sys.addEventListener('pointerdown', e => {
 sys.addEventListener('pointermove', e => {
   if (touches.has(e.pointerId)) touches.set(e.pointerId, sysPoint(e));
   if (pinch && touches.size === 2) { setSysZoom(pinch.zoom * spread() / pinch.dist, middle()); return; }
-  if (!sysDrag) return;
+  if (!sysDrag) {   // hovering: name the planet under the pointer
+    const hit = planetAt(e);
+    if (scene && (hit?.name ?? null) !== (scene.hover ?? null)) { scene.hover = hit?.name ?? null; wake(); }
+    return;
+  }
   const r = sys.getBoundingClientRect();
   sview.panX = sysDrag.panX + (e.clientX - sysDrag.x) * SW / r.width;
   sview.panY = sysDrag.panY + (e.clientY - sysDrag.y) * SH / r.height;
@@ -118,6 +122,7 @@ const endSysDrag = e => {
   rememberView();
 };
 sys.addEventListener('pointerup', endSysDrag);
+sys.addEventListener('pointerleave', () => { if (scene) scene.hover = null; });
 sys.addEventListener('pointercancel', endSysDrag);
 sys.addEventListener('dblclick', fitAll);
 sys.addEventListener('wheel', e => {
