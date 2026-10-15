@@ -2773,7 +2773,7 @@
       }).join('')}`;
     panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
     paintRankArt(panes.ach);
-    requestAnimationFrame(animateAchievements);
+    startAchievementsAnimation();
     const earned = ACHIEVEMENTS.filter(a => progress.ach[a.id]).map(a => a.id);
     if (earned.some(id => !progress.viewed.includes(id))) { progress.viewed = earned; saveProgress(); }
   }
@@ -2794,10 +2794,10 @@
     }
     document.getElementById('set-final').hidden = !progress.ach['star-gazer'];
     document.getElementById('set-final-emblem').value = progress.finalEmblem;
-    let kept = '';
-    try { kept = (await navigator.storage?.persisted?.()) ? ' Protected from automatic clean-up.' : ''; } catch { /* older browser */ }
-    storageNote.textContent = `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
+    const note = kept => `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
       'site\'s data is cleared, in a private window, or on another browser or device: keep a backup file for those.';
+    storageNote.textContent = note('');   // right away; the browser's answer below only adds to it
+    try { if (await navigator.storage?.persisted?.()) storageNote.textContent = note(' Protected from automatic clean-up.'); } catch { /* older browser */ }
   }
   document.getElementById('set-export').addEventListener('click', () => {
     const file = new Blob([JSON.stringify({ app: 'kepler-star-map', version: 1, saved: today(), ...progress }, null, 1)],
@@ -3352,12 +3352,13 @@
     paintRankArt(document.getElementById('rank-badges'), t);   // the badges move too
   }
   // The Achievements tab moves while it's open: emblems, badges and trophies (~8 frames a second).
-  let achLast = 0;
+  let achLast = 0, achLoop = false;   // one loop at a time, however often the tab re-renders
   function animateAchievements(now) {
-    if (!galleryDialog.open || panes.ach.hidden || REDUCED_MOTION) return;
+    if (!galleryDialog.open || panes.ach.hidden || REDUCED_MOTION) { achLoop = false; return; }
     if (now - achLast > 120) { paintRankArt(panes.ach, now / 1000); achLast = now; }
     requestAnimationFrame(animateAchievements);
   }
+  const startAchievementsAnimation = () => { if (!achLoop) { achLoop = true; requestAnimationFrame(animateAchievements); } };
   function pulseHeader() {
     rankBox.classList.remove('pulse');
     void rankBox.offsetWidth;

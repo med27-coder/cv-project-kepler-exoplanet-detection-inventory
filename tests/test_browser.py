@@ -209,7 +209,7 @@ def test_galleria_game(browser, site):
     page.click('#open-gallery')
     assert page.locator('.egg-card.found').count() == 1
     page.click('#tab-set')
-    assert 'Saved in this browser' in page.locator('#set-storage').inner_text()
+    page.wait_for_function("document.getElementById('set-storage').textContent.includes('Saved in this browser')")
     with page.expect_download() as dl:                              # backup file
         page.click('#set-export')
     backup = Path(dl.value.path()).read_text(encoding='utf-8')
