@@ -3,6 +3,11 @@
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-toolsai.jupyter",
-    "charliermarsh.ruff"
+    "charliermarsh.ruff",
+    "github.vscode-github-actions",
+    "tyriar.luna-paint",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "ms-vscode.live-server"
   ]
 }
