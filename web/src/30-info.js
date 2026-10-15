@@ -216,11 +216,12 @@ function showLeaderboard() {
     <h3 class="facts-title">${esc(caption)}</h3>
     <div class="table-wrap"><table>
       <thead><tr><th>Candidate</th><th>System</th><th class="num">Size (Earths)</th>
-        <th class="num">NASA vetting</th><th class="num">Star Gazer</th></tr></thead>
+        <th class="num">NASA vetting</th><th class="num">Star Gazer</th><th>Your call</th></tr></thead>
       <tbody>${rows.map(r => `<tr>
         <td>${esc(r.planet)}</td>
         <td><button type="button" class="linkish" data-name="${esc(r.system)}">${esc(r.system)}</button></td>
         <td class="num">${fmt(r.radius, 1)}</td><td class="num">${pct(r.nasa)}</td><td class="num">${pct(r.sg)}</td>
+        <td>${callCell(r)}</td>
       </tr>`).join('')}</tbody>
     </table></div>`;
   info.innerHTML = `
@@ -231,6 +232,7 @@ function showLeaderboard() {
     <p class="note">Educational ranking, not a scientific classification. Click a system to open it.</p>`;
   info.querySelectorAll('button[data-name]').forEach(b =>
     b.addEventListener('click', () => { const s = byName.get(b.dataset.name.toLowerCase()); if (s) choose(s); }));
+  wireCalls(info);   // call them yourself (48b-predictions.js)
   setScene({ custom: drawPodium });   // a podium of the top three, not an empty drawing (49-ranks.js)
 }
 

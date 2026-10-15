@@ -399,3 +399,9 @@ canvas.icon { display: inline-block; width: 20px; height: 20px; background: tran
   .egg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .holo { flex-direction: column; overflow-y: auto; }
 }
+
+/* ---- daily mystery star (49d-connect.js) */
+.daily-card { border: 2px dashed var(--accent); padding: 8px 12px; margin-bottom: 10px; color: var(--ink); }
+.daily-card b:first-child { display: block; font: 10px var(--pixel); color: var(--accent); letter-spacing: 1px; margin-bottom: 4px; }
+.daily-card ul { margin: 4px 0; padding-left: 18px; }
+.daily-card.on { border-style: solid; border-color: #4fd17a; }

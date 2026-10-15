@@ -238,7 +238,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/55'
+    assert page.locator('#rank-count').inner_text() == '12/57'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -354,6 +354,24 @@ def test_tour_icons_and_suggestions(browser, site):
     page.locator('#query').blur()
     page.locator('#query').focus()
     page.wait_for_selector('#suggest li:has-text("recently viewed")')
+    assert not errors, errors
+
+
+def test_daily_mystery_calls_and_card(browser, site):
+    """The daily mystery card has clues; calls work from the next-planets list; the star card downloads."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.click('#open-gallery')
+    assert 'MYSTERY STAR OF THE DAY' in page.locator('.daily-card').inner_text()
+    assert page.locator('.daily-card li').count() >= 2
+    page.click('#tab-ach')
+    with page.expect_download() as dl:
+        page.click('#share-card')
+    assert dl.value.suggested_filename.endswith('.png')
+    page.click('#gallery-close')
+    page.click('button.chip:has-text("next planets")')
+    page.click('#info .call[data-koi] button[data-call="planet"] >> nth=0')
+    page.wait_for_function("Object.keys(JSON.parse(localStorage.getItem('starmap.progress.v1')).calls).length === 1")
     assert not errors, errors
 
 
