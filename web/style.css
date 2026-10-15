@@ -380,3 +380,22 @@ canvas.constellation { width: 100%; max-width: 480px; height: auto; background: 
 @keyframes trophy-shine { 50% { filter: brightness(1.8) drop-shadow(0 0 6px #ffd34d); } }
 @keyframes trophy-swirl { 0% { filter: hue-rotate(0deg) drop-shadow(0 0 6px #b56cff); } 100% { filter: hue-rotate(360deg) drop-shadow(0 0 6px #b56cff); } }
 @media (prefers-reduced-motion: reduce) { .toast .toast-art { animation: none !important; } }
+
+/* ---- pixel icons, tour, phones (49c-ui.js) */
+canvas.icon { display: inline-block; width: 20px; height: 20px; background: transparent; border: 0; vertical-align: middle; }
+.chip canvas.icon { width: 16px; height: 16px; margin-right: 2px; }
+.tour { position: absolute; z-index: 30; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px;
+        background: var(--panel); border: 2px solid var(--accent); box-shadow: 0 0 18px rgba(255, 211, 77, 0.35); }
+.tour b { font: 11px var(--pixel); color: var(--accent); letter-spacing: 1px; }
+.tour-buttons { display: flex; gap: 8px; align-items: center; justify-content: flex-end; }
+.tour-buttons button { padding: 6px 10px; font-size: 10px; }
+.tour-step { margin-right: auto; color: var(--ink-2); font-size: 16px; }
+.tour-target { outline: 3px solid var(--accent) !important; outline-offset: 3px; }
+@media (max-width: 600px) {
+  dialog#gallery { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 10px; border-width: 0; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .tabs [role="tab"] { flex: none; min-height: 40px; }
+  .chip, #highlights button, .call button { min-height: 36px; }
+  .egg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .holo { flex-direction: column; overflow-y: auto; }
+}

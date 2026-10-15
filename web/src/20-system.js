@@ -106,6 +106,7 @@ function buildScene(detail) {
       speed: (2 * Math.PI) / (1.5 * Math.sqrt(p.period ?? 10)),   // radians per second
       phase: hash(p.koi) * 2 * Math.PI,
       seed: p.koi,
+      name: p.name,   // for the hover label (49c-ui.js)
     };
   });
   const reach = Math.max(...planets.map(p => p.a * (1 + p.ecc)));
@@ -407,6 +408,7 @@ function drawSystem(seconds) {
     const [X, Y] = orbitPoint(p, p.phase + p.speed * t);
     return { p, X, x: cx + X, y: cy + Y * TILT, behind: Y < 0 };
   });
+  scene.hits = bodies.map(b => ({ x: b.x, y: b.y, r: b.p.size, name: b.p.name, radius: b.p.radius }));
   let flux = 1;
   for (const b of bodies) { b.depth = transitDepth(b); flux -= b.depth; }
   flux = Math.max(0, flux);
@@ -435,6 +437,7 @@ function drawSystem(seconds) {
   sctx.globalAlpha = 1;
   if (scene.ghost) pixelText(sctx, 'UNCONFIRMED', 4, 4, '#ffd34d');
   if (scene.overlay) scene.overlay(seconds);
+  drawHoverLabel();
   sctx.fillStyle = '#070b1a';   // keep anything big out of the light-curve strip
   sctx.fillRect(0, H + 1, SW, STRIP - 1);
   sctx.drawImage(scene.layer, 0, H + 1, SW, STRIP - 1, 0, H + 1, SW, STRIP - 1);

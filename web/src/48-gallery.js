@@ -173,7 +173,8 @@ const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 const PROGRESS_KEY = 'starmap.progress.v1';
 const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                    calls: {}, notified: [],    // predictions (48b-predictions.js)
-                   showcase: [], levels: {}, sound: false };   // trophies (49b-trophies.js)
+                   showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
+                   toured: false };   // first-visit tour (49c-ui.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -203,6 +204,7 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
   if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
   if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
+  if (saved.toured === true) progress.toured = true;
   if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
   return true;
 }
