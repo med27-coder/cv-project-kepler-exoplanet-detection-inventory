@@ -134,10 +134,12 @@
     <div class="tabs" role="tablist" aria-label="Galleria sections">
       <button type="button" role="tab" id="tab-eggs" aria-controls="pane-eggs" aria-selected="true">EASTER EGGS</button>
       <button type="button" role="tab" id="tab-ach" aria-controls="pane-ach" aria-selected="false" tabindex="-1">ACHIEVEMENTS</button>
+      <button type="button" role="tab" id="tab-pred" aria-controls="pane-pred" aria-selected="false" tabindex="-1">PREDICTIONS</button>
       <button type="button" role="tab" id="tab-set" aria-controls="pane-set" aria-selected="false" tabindex="-1">SETTINGS</button>
     </div>
     <section id="pane-eggs" role="tabpanel" aria-labelledby="tab-eggs"></section>
     <section id="pane-ach" role="tabpanel" aria-labelledby="tab-ach" hidden></section>
+    <section id="pane-pred" role="tabpanel" aria-labelledby="tab-pred" hidden></section>
     <section id="pane-set" role="tabpanel" aria-labelledby="tab-set" hidden>
       <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
       <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
@@ -163,6 +165,7 @@
   <script src="data/ccd.js"></script>
   <script src="data/earth.js"></script>
   <script src="data/gallery.js"></script>
+  <script src="data/resolutions.js"></script>
   <script src="starmap.js"></script>
 </body>
 </html>

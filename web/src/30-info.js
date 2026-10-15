@@ -121,7 +121,7 @@ function redFlags(p) {
 }
 
 // One "case file" per candidate: the evidence for and against it being a real planet.
-function caseFiles(detail) {
+function caseFiles(detail, system = '') {
   const cands = detail.planets.filter(p => p.status === 'candidate');
   if (!cands.length) return '';
   const pct = v => (v == null ? 'not scored yet' : `${fmt(Math.round(v * 100))}%`);
@@ -134,7 +134,8 @@ function caseFiles(detail) {
       <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · Star Gazer ${pct(p.sg)}${
         p.snr != null ? ` · signal strength ${fmt(p.snr)}` : ''}
         <br>${good.length ? `<span class="pro">✔ ${good.join(' · ')}</span> ` : ''}${
-        flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}</li>`;
+        flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}${
+        callMarkup(p, system)}</li>`;
   }).join('');
   return `<h3 class="facts-title">CASE FILES</h3><ul class="facts cases">${items}</ul>`;
 }
@@ -160,11 +161,12 @@ function showSystem(s, detail) {
     </div></div>
     ${origin}
     ${planetTable(detail)}
-    ${caseFiles(detail)}
+    ${caseFiles(detail, s[COL.name])}
     <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
       star's brightness as Kepler sees it: it dips when a planet crosses in front (dips exaggerated) ·
       planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
   wireSkyThumbs();
+  wireCalls(info);
   setScene(buildScene(detail));
 }
 
@@ -182,10 +184,11 @@ function showUnconfirmed(s, detail) {
          and NASA decides · ${skyLink(detail.ra, detail.dec)}</p>
     </div></div>
     ${planetTable(detail)}
-    ${caseFiles(detail)}
+    ${caseFiles(detail, s[COL.name])}
     <p class="note">Candidates are signals that look like transits but haven't been confirmed or ruled out ·
       Kepler ID ${esc(detail.kepid)}</p>`;
   wireSkyThumbs();
+  wireCalls(info);
   const scene = buildScene(detail);
   scene.ghost = true;
   setScene(scene);

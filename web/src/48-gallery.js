@@ -127,6 +127,12 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
   { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
   { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
+  { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
+  { g: 'PREDICTIONS', id: 'prophet', title: 'PROPHET', how: 'Be proven right by NASA for the first time.' },
+  { g: 'PREDICTIONS', id: 'seer', title: 'ORACLE', how: 'Be proven right by NASA five times.' },
+  { g: 'PREDICTIONS', id: 'cassandra', title: 'CASSANDRA', how: 'Call a false positive that Star Gazer believed in, and be proven right.' },
+  { g: 'PREDICTIONS', id: 'contrarian', title: 'CONTRARIAN', how: 'Be right three times when Star Gazer was wrong.' },
+  { g: 'PREDICTIONS', id: 'patience', title: 'PATIENCE OF A STAR', how: 'Have a call settled a year or more after you made it.' },
   { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
   { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
@@ -138,9 +144,9 @@ const ACHIEVEMENTS = [
 // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine'],
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience'],
   epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
-         'double-sunset'],
+         'double-sunset', 'seer', 'cassandra', 'contrarian'],
 };
 for (const a of ACHIEVEMENTS) {
   a.tier = a.id === 'star-gazer' ? 'legend' : a.secret ? 'secret' : TIER_OF.rare.includes(a.id) ? 'rare' : TIER_OF.epic.includes(a.id) ? 'epic' : 'common';
@@ -165,7 +171,8 @@ const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 // version of the page always finds what an older one saved. Ids this version doesn't know are kept, not
 // dropped, so nothing earned is lost if a later version renames or retires something.
 const PROGRESS_KEY = 'starmap.progress.v1';
-const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false };
+const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
+                   calls: {}, notified: [] };   // predictions (48b-predictions.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -186,6 +193,13 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (Array.isArray(saved.viewed)) progress.viewed = [...new Set([...progress.viewed, ...saved.viewed.filter(v => ID.test(v))])].slice(0, 300);
   if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
   if (saved.whiteHole === true) progress.whiteHole = true;
+  const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
+  for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
+    if (!/^K\d{5}\.\d{2}$/.test(koi) || !Array.isArray(c) || !['planet', 'not'].includes(c[0]) || !DATE.test(String(c[1]))) continue;
+    if (progress.calls[koi] && progress.calls[koi][1] <= c[1]) continue;
+    progress.calls[koi] = [c[0], c[1], ['planet', 'not'].includes(c[2]) ? c[2] : '', typeof c[3] === 'string' ? c[3].slice(0, 60) : ''];
+  }
+  if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
   return true;
 }
 let storageOK = false;   // false in private windows or with site data blocked: progress lasts for this visit
@@ -212,10 +226,19 @@ function toast(kind, title, text, egg, art) {
     <div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
   if (egg) drawEggArt(el.querySelector('canvas'), egg, 0, false);
   else if (art) drawArt(el.querySelector('canvas').getContext('2d'), art, 0, 0, 1, 1);
-  toastBox.appendChild(el);
-  while (toastBox.children.length > 3) toastBox.firstChild.remove();
-  setTimeout(() => el.classList.add('leaving'), 4200);
-  setTimeout(() => el.remove(), 4800);
+  toastQueue.push([el, kind === 'legend' ? 9000 : 4200]);
+  pumpToasts();
+}
+// At most three pop-ups at once; the rest wait their turn (none is dropped, so earning several things at
+// once never hides the important one).
+const toastQueue = [];
+function pumpToasts() {
+  while (toastBox.children.length < 3 && toastQueue.length) {
+    const [el, ms] = toastQueue.shift();
+    toastBox.appendChild(el);
+    setTimeout(() => el.classList.add('leaving'), ms);
+    setTimeout(() => { el.remove(); pumpToasts(); }, ms + 600);
+  }
 }
 
 function glow() {   // the drawing lights up for a moment
@@ -368,7 +391,8 @@ function drawEggArt(canvas, egg, t, silhouette) {
 
 // ---- the Galleria dialog
 const galleryDialog = document.getElementById('gallery');
-const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'), set: document.getElementById('pane-set') };
+const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'),
+                pred: document.getElementById('pane-pred'), set: document.getElementById('pane-set') };
 let detailEgg = null, detailFrame = 0;
 const blanks = name => [...name].map(ch => (/[A-Za-z0-9]/.test(ch) ? '_' : ch === ' ' ? ' ' : ch)).join('');
 
@@ -608,6 +632,7 @@ function showTab(name) {
   if (name === 'eggs') renderEggs();
   if (name === 'ach') renderAchievements();
   if (name === 'set') renderSettings();
+  if (name === 'pred') renderPredictions();
 }
 const tabs = [...document.querySelectorAll('#gallery [role="tab"]')];
 tabs.forEach((tab, i) => {
@@ -637,11 +662,11 @@ resetButton.addEventListener('click', () => {
   if (resetButton.dataset.armed !== '1') {   // ask twice
     resetButton.dataset.armed = '1';
     resetButton.textContent = 'SURE? CLICK AGAIN';
-    resetNote.textContent = 'This forgets every easter egg and achievement you found in this browser.';
+    resetNote.textContent = 'This forgets every easter egg, achievement and prediction in this browser (download a backup first?).';
     return;
   }
   const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
-  Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished });
+  Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [] });
   syncSeen();
   saveProgress();
   renderHeaderRank();

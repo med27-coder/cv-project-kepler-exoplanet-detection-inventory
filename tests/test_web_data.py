@@ -206,7 +206,8 @@ SHIPPED_IDS = {
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
             'curious', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'l2', 'interstellar',
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
-            'launch-day', 'star-gazer', 'tatooine', 'double-sunset'},
+            'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
+            'contrarian', 'patience'},
 }
 
 
@@ -230,3 +231,13 @@ def test_kepler_worlds_outside_the_koi_list(data):
     two_suns = [s for s in data['stars'] if s[col['tags']] & data['tags']['twosuns']]
     assert len(two_suns) >= 12
     assert len({s[col['kepid']] for s in data['stars']}) == len(data['stars'])     # no star twice
+
+
+def test_resolutions():
+    """data/resolutions.js (export_starmap.py): NASA's rulings on candidates, dated when first seen."""
+    text = (WEB / 'data' / 'resolutions.js').read_text(encoding='utf-8')
+    rec = json.loads(text[text.index('{'):text.rindex('}') + 1])
+    assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', rec['since'])
+    for koi, (ruling, date) in rec['resolved'].items():
+        assert re.fullmatch(r'K\d{5}\.\d{2}', koi) and ruling in {'confirmed', 'false positive'}
+        assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', date) and date >= rec['since']

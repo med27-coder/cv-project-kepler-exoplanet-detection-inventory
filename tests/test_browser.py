@@ -54,6 +54,9 @@ def blank_image(route):
 
 def open_page(browser, url, errors, init_script=None):
     page = browser.new_page(viewport={'width': 1280, 'height': 1000})
+    # A fixed afternoon, so time-of-day achievements (NIGHT SHIFT after midnight, anniversaries) don't depend on
+    # when the tests run (a CI run crossing midnight UTC once earned an extra one).
+    page.clock.set_system_time('2026-10-14T15:00:00')
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
     page.route('**/alasky.cds.unistra.fr/**', blank_image)   # no third-party calls in tests
@@ -235,7 +238,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/49'
+    assert page.locator('#rank-count').inner_text() == '12/55'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -259,7 +262,8 @@ def test_final_mission(browser, site):
     errors = []
     page = open_page(browser, site, errors)
     page.evaluate("seen => localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, ach: {}, systems: [], seen}))", seen)
-    page.reload()
+    page.clock.set_system_time('2026-10-15T00:30:00')   # after midnight: NIGHT SHIFT is earned at the same moment,
+    page.reload()                                        # and the TRUE STAR GAZER pop-up must still show
     page.wait_for_selector('#highlights .chip.unseen')                                            # revealed: UNSEEN chip
     page.fill('#query', 'Kepler-90')
     page.press('#query', 'Enter')
@@ -295,6 +299,31 @@ def test_tatooine(browser, site):
     page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('tatooine')")
     assert page.locator('#highlights .chip:has-text("two suns")').count() == 1
     page.wait_for_timeout(300)
+    assert not errors, errors
+
+
+def test_predictions(browser, site):
+    """Call a candidate; when NASA rules after the call, it is scored (PROPHET) and shown in the tab."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.clear()")
+    page.reload()
+    page.fill('#query', 'KOI-3444')
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.call[data-koi="K03444.01"]')
+    page.click('.call[data-koi="K03444.01"] button[data-call="planet"]')
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('K03444.01')")
+    assert 'first-call' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    ruling = ('window.STARMAP_RESOLUTIONS = {"since": "2026-10-14", '
+              '"resolved": {"K03444.01": ["confirmed", "2099-01-01"]}};')   # NASA confirms it, after the call
+    page.route('**/data/resolutions.js', lambda r: r.fulfill(status=200, content_type='text/javascript', body=ruling))
+    page.reload()
+    page.wait_for_selector('.toast:has-text("NASA RULED")')
+    assert 'you called it' in page.locator('.toast:has-text("NASA RULED")').inner_text()
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('prophet')")
+    page.click('#open-gallery')
+    page.click('#tab-pred')
+    assert '1RIGHT' in ''.join(page.locator('#pane-pred .gallery-progress').inner_text().split())
     assert not errors, errors
 
 
