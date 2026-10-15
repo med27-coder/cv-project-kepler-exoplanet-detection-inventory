@@ -32,7 +32,7 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (55, in groups), trophies, badges and your star
+### Achievements (57, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -81,6 +81,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | Predictions | FIRST CALL / PROPHET / ORACLE | Call a candidate (PLANET or NOT A PLANET in its case file) / be proven right by NASA once / five times |
 | | CASSANDRA / CONTRARIAN | Rightly call a false positive Star Gazer believed in / be right three times when Star Gazer was wrong |
 | | PATIENCE OF A STAR | Have a call settled a year or more after you made it |
+| Daily sky | MYSTERY SOLVED / WEEK OF WONDERS | Solve the daily mystery star (clues on the Galleria's first tab) / seven days in a row |
 | Secret | PATIENT OBSERVER | Watch one system for two minutes |
 | | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
 | | NO SIGNAL | Search for five things that aren't there in one visit |
@@ -137,6 +138,17 @@ Not built yet; roughly from easiest to biggest.
 - Every clue also works for screen readers (they're real text), and the game is playable by keyboard.
 - No accounts, no server, no tracking: progress stays in the browser, so it never syncs between devices.
   That's on purpose.
+
+### Around the trophies
+
+- **Holograms:** click any trophy in the Achievements tab: a projector beams it up with an ARTIFACT SCAN readout
+  (and a fact for each hard one). Pin up to three to your header with **SHOW ON MY HEADER**.
+- **Constellations:** each group's achievements are the stars of a constellation; complete the group and the
+  figure draws itself.
+- **Unique trophies:** epic and secret achievements carry a symbol (Mars, Jupiter, the Golden Record, a rocket...).
+  GALACTIC CENSUS has levels (★ 50, ★★ 500, ★★★ 1,000 systems). Secrets show a riddle after ten achievements.
+- **Daily mystery star:** a new riddle every day; **DOWNLOAD MY STAR CARD** saves your emblem and stats as a
+  picture; an optional 8-bit fanfare is in Settings.
 
 ## Hidden in plain sight
 
