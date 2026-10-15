@@ -172,7 +172,8 @@ const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 // dropped, so nothing earned is lost if a later version renames or retires something.
 const PROGRESS_KEY = 'starmap.progress.v1';
 const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
-                   calls: {}, notified: [] };   // predictions (48b-predictions.js)
+                   calls: {}, notified: [],    // predictions (48b-predictions.js)
+                   showcase: [], levels: {}, sound: false };   // trophies (49b-trophies.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -199,6 +200,9 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
     if (progress.calls[koi] && progress.calls[koi][1] <= c[1]) continue;
     progress.calls[koi] = [c[0], c[1], ['planet', 'not'].includes(c[2]) ? c[2] : '', typeof c[3] === 'string' ? c[3].slice(0, 60) : ''];
   }
+  if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
+  if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
+  if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
   if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
   return true;
 }
@@ -254,7 +258,8 @@ function achieve(id) {
   progress.ach[id] = today();
   saveProgress();
   const a = ACH.get(id);
-  if (id !== 'star-gazer') toast('ach', `${TIERS[a.tier].name} ACHIEVEMENT: ${a.title}`, a.how, null, trophyFor(a));
+  if (id !== 'star-gazer') toast(`ach tier-${a.tier}`, `${TIERS[a.tier].name} ACHIEVEMENT: ${a.title}`, a.how, null, trophyFor(a));
+  fanfare(a.tier);
   afterAchievement(rankBefore, badgesBefore);
   refreshGallery();
 }
@@ -547,13 +552,14 @@ function renderAchievements() {
   const isNew = a => progress.ach[a.id] && !progress.viewed.includes(a.id);
   const card = a => {
     const on = progress.ach[a.id], hidden = a.secret && !on, prog = !on && !hidden && achProgress(a);
-    return `<li class="${on ? 'on' : ''} tier-${a.tier}">
+    return `<li class="${on ? 'on' : ''} tier-${a.tier}" data-ach="${esc(a.id)}" role="button" tabindex="0"
+      aria-label="${hidden ? 'Secret achievement' : esc(a.title)}: open its hologram">
       <canvas width="16" height="16" data-trophy="${on ? a.id : 'lock'}" aria-hidden="true"></canvas>
       <div><b>${hidden ? '???' : esc(a.title)}${isNew(a) ? ' <em class="new">NEW</em>' : ''}</b>
-        <span>${hidden ? 'A secret achievement. Keep exploring.' : esc(a.how)}</span>
+        <span>${hidden ? esc(secretHint(a) || 'A secret achievement. Keep exploring.') : esc(a.how)}</span>
         ${prog ? `<span class="ach-bar"><span data-w="${Math.round(100 * Math.min(1, prog[0] / prog[1]))}"></span></span>
           <span class="ach-progress">${fmt(Math.min(prog[0], prog[1]))} / ${fmt(prog[1])}</span>` : ''}
-        <span class="ach-meta">${hidden ? '' : TIERS[a.tier].name}${on ? ` · earned ${esc(niceDate(on))}` : ''}</span></div></li>`;
+        <span class="ach-meta">${hidden ? '' : TIERS[a.tier].name}${on ? ` · earned ${esc(niceDate(on))}` : ''}${esc(levelText(a))}</span></div></li>`;
   };
   panes.ach.innerHTML = `
     <div class="rank-panel">
@@ -571,10 +577,15 @@ function renderAchievements() {
     ${groups.map(g => {
       const list = ACHIEVEMENTS.filter(a => a.g === g);
       return `<h3 class="facts-title">${esc(g)} <span class="ach-count">${list.filter(a => progress.ach[a.id]).length} / ${list.length}</span></h3>
+      <canvas class="constellation" width="160" height="46" data-constellation="${esc(g)}" aria-hidden="true"></canvas>
       <ul class="ach-list">${list.map(card).join('')}</ul>`;
     }).join('')}`;
   panes.ach.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${el.dataset.w}%`; });
   paintRankArt(panes.ach);
+  panes.ach.querySelectorAll('li[data-ach]').forEach(li => {
+    li.addEventListener('click', () => openHologram(li.dataset.ach));
+    li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHologram(li.dataset.ach); } });
+  });
   startAchievementsAnimation();
   const earned = ACHIEVEMENTS.filter(a => progress.ach[a.id]).map(a => a.id);
   if (earned.some(id => !progress.viewed.includes(id))) { progress.viewed = earned; saveProgress(); }
@@ -655,6 +666,9 @@ document.getElementById('gallery-close').addEventListener('click', () => gallery
 galleryDialog.addEventListener('click', e => { if (e.target === galleryDialog) galleryDialog.close(); });   // click outside
 galleryDialog.addEventListener('close', () => cancelAnimationFrame(detailFrame));
 
+const soundSetting = document.getElementById('set-sound');
+soundSetting.checked = progress.sound;
+soundSetting.addEventListener('change', () => { progress.sound = soundSetting.checked; saveProgress(); if (progress.sound) fanfare('rare'); });
 const toastSetting = document.getElementById('set-toasts');
 toastSetting.checked = progress.toasts;
 toastSetting.addEventListener('change', () => { progress.toasts = toastSetting.checked; saveProgress(); });
@@ -667,7 +681,8 @@ resetButton.addEventListener('click', () => {
     return;
   }
   const finished = Boolean(progress.ach['star-gazer']) || progress.whiteHole;
-  Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [] });
+  Object.assign(progress, { eggs: {}, ach: {}, systems: [], seen: '', viewed: [], whiteHole: finished, calls: {}, notified: [],
+                            showcase: [], levels: {} });
   syncSeen();
   saveProgress();
   renderHeaderRank();

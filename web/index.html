@@ -22,6 +22,7 @@
 <body>
   <header>
     <div class="header-right">
+      <span id="rank-showcase" aria-label="Your showcase trophies"></span>
       <span id="rank-badges" aria-label="Your badges"></span>
       <button type="button" id="rank" class="ghost rank" aria-haspopup="dialog">
         <canvas id="rank-emblem" width="16" height="16" aria-hidden="true"></canvas>
@@ -137,11 +138,16 @@
       <button type="button" role="tab" id="tab-pred" aria-controls="pane-pred" aria-selected="false" tabindex="-1">PREDICTIONS</button>
       <button type="button" role="tab" id="tab-set" aria-controls="pane-set" aria-selected="false" tabindex="-1">SETTINGS</button>
     </div>
+    <div id="holo" class="holo" hidden role="group" aria-label="Trophy hologram">
+      <canvas id="holo-canvas" width="120" height="96" aria-hidden="true"></canvas>
+      <div id="holo-data" aria-live="polite"></div>
+    </div>
     <section id="pane-eggs" role="tabpanel" aria-labelledby="tab-eggs"></section>
     <section id="pane-ach" role="tabpanel" aria-labelledby="tab-ach" hidden></section>
     <section id="pane-pred" role="tabpanel" aria-labelledby="tab-pred" hidden></section>
     <section id="pane-set" role="tabpanel" aria-labelledby="tab-set" hidden>
       <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
+      <label class="setting"><input type="checkbox" id="set-sound"> Play a short 8-bit fanfare when you earn something</label>
       <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
          doesn't follow you to other devices.</p>
       <label class="setting" id="set-final" hidden>Final emblem

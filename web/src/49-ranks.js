@@ -96,6 +96,7 @@ const trophyFor = a => (a.id === 'star-gazer' ? starGazerTrophy : !SYMBOLS[a.id]
     const blink = a.tier === 'secret' && (ch === 'w' || ch === 'b') && Math.sin(t * 3 + c + r) < -0.6;   // secret symbols twinkle
     put(4 + c, 1 + r, blink ? '#e9d5ff' : SYMBOL_INK[ch]);
   }));
+  trophyMarks(a, put);   // e.g. GALACTIC CENSUS level stars (49b-trophies.js)
 });
 
 // TRUE STAR GAZER: a black hole rising from a pale-blue cup (24 x 24; pixel-art/icons/draft_trophy_star_gazer.png)
@@ -321,6 +322,7 @@ function paintRankArt(root, t = 1) {
     ctx.clearRect(0, 0, c.width, c.height);
     drawArt(ctx, BADGES[c.dataset.badge].art, 0, 0, 1, t, c.dataset.locked === '1');
   });
+  root.querySelectorAll('canvas[data-constellation]').forEach(c => drawConstellation(c, t));
   root.querySelectorAll('canvas[data-stage]').forEach(c => {
     const ctx = c.getContext('2d'), i = Number(c.dataset.stage);
     ctx.clearRect(0, 0, c.width, c.height);
@@ -339,7 +341,9 @@ function renderHeaderRank() {
   const badges = earnedBadges();
   document.getElementById('rank-badges').innerHTML = badges.map(g =>
     `<canvas width="16" height="16" data-badge="${esc(g)}" title="${esc(BADGES[g].name)}: every ${esc(g.toLowerCase())} achievement"></canvas>`).join('');
-  paintRankArt(document.getElementById('rank-badges'));
+  document.getElementById('rank-showcase').innerHTML = progress.showcase.filter(id => progress.ach[id]).map(id =>
+    `<canvas width="16" height="16" data-trophy="${esc(id)}" title="${esc(ACH.get(id)?.title || '')}"></canvas>`).join('');
+  paintRankArt(document.querySelector('.header-right'));
   const next = nextStage();
   rankBox.title = `Your star: ${rankName(i)}. ${STAGES[i].about}${next ? ` Next: ${next.stage.name} in ${plural(next.left, 'achievement')}.` : ''} Open your achievements.`;
   drawHeaderEmblem(performance.now());
@@ -351,7 +355,7 @@ function drawHeaderEmblem(now) {   // called by the animation loop (~8 fps with 
   const ctx = rankCanvas.getContext('2d'), t = REDUCED_MOTION ? 1 : now / 1000;
   ctx.clearRect(0, 0, 16, 16);
   drawArt(ctx, rankArt(), 0, 0, 1, t);
-  paintRankArt(document.getElementById('rank-badges'), t);   // the badges move too
+  paintRankArt(document.querySelector('.header-right'), t);   // badges and showcase trophies move too
 }
 // The Achievements tab moves while it's open: emblems, badges and trophies (~8 frames a second).
 let achLast = 0, achLoop = false;   // one loop at a time, however often the tab re-renders
@@ -396,6 +400,7 @@ function starSeen(s) {
   progress.seen = [...seenStars].join(',');
   saveProgress();
   const n = gazeCount();
+  checkLevels();
   if (n >= GAZE_REVEAL) ensureUnseenChip();
   if (n >= gazeTotal()) finale();
 }
@@ -403,6 +408,7 @@ function finale() {
   if (progress.ach['star-gazer']) return;
   achieve('star-gazer');
   gazeWave = performance.now();
+  fanfare('legend');
   toast('legend', 'TRUE STAR GAZER', 'Only those who dare look beyond the stars may call themselves true Star Gazers.', null, starGazerTrophy);
   wake();
 }
