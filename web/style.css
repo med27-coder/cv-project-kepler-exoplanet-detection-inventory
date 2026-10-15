@@ -354,3 +354,29 @@ em.new { font: 8px var(--pixel); font-style: normal; color: var(--bg); backgroun
 .call.made b { color: var(--accent); }
 #pane-pred tr.right td:last-child { color: #4fd17a; }
 #pane-pred tr.wrong td:last-child { color: var(--alert); }
+
+/* ---- trophies: hologram, constellations, showcase, unlock moment (49b-trophies.js) */
+#rank-showcase { display: flex; gap: 2px; }
+#rank-showcase canvas { width: 24px; height: 24px; background: transparent; border: 0; }
+.ach-list li[data-ach] { cursor: pointer; }
+.ach-list li[data-ach]:hover, .ach-list li[data-ach]:focus-visible { border-color: #9fd8ff; outline: none; }
+canvas.constellation { width: 100%; max-width: 480px; height: auto; background: transparent; border: 0; margin: 0 0 6px; }
+.holo { position: fixed; inset: 0; z-index: 20; display: flex; gap: 18px; align-items: center; justify-content: center;
+        flex-wrap: wrap; padding: 20px; background: rgba(3, 6, 15, 0.94); }
+.holo[hidden] { display: none; }
+#holo-canvas { width: min(360px, 90vw); height: auto; border: 1px solid #1e4a6a; background: #03060f;
+               box-shadow: 0 0 30px rgba(80, 200, 255, 0.25); }
+#holo-data { max-width: 340px; color: #9fd8ff; font-size: 18px; }
+.holo-title { display: block; font: 12px var(--pixel); color: #9fd8ff; letter-spacing: 2px; margin-bottom: 8px;
+              text-shadow: 0 0 6px rgba(80, 200, 255, 0.8); }
+#holo-data dl { margin: 0 0 10px; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; }
+#holo-data dt { font: 8px var(--pixel); color: #4a7fd6; letter-spacing: 1px; padding-top: 4px; }
+#holo-data dd { margin: 0; color: #d6ecff; }
+#holo-data button { border-color: #1e4a6a; color: #9fd8ff; margin-right: 6px; }
+.toast.ach .toast-art { animation: trophy-drop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.toast.tier-epic .toast-art { animation: trophy-drop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1), trophy-shine 1.4s 0.7s ease-in-out 2; }
+.toast.tier-secret .toast-art { animation: trophy-drop 0.7s cubic-bezier(0.3, 1.6, 0.5, 1), trophy-swirl 2.4s 0.7s linear; }
+@keyframes trophy-drop { from { transform: translateY(-24px) scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes trophy-shine { 50% { filter: brightness(1.8) drop-shadow(0 0 6px #ffd34d); } }
+@keyframes trophy-swirl { 0% { filter: hue-rotate(0deg) drop-shadow(0 0 6px #b56cff); } 100% { filter: hue-rotate(360deg) drop-shadow(0 0 6px #b56cff); } }
+@media (prefers-reduced-motion: reduce) { .toast .toast-art { animation: none !important; } }

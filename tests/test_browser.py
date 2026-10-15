@@ -243,6 +243,12 @@ def test_rank_header_badges_and_podium(browser, site):
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
     assert page.locator('.ach-list canvas[data-trophy="lock"]').count() > 0                      # space locks
+    assert page.locator('canvas.constellation').count() >= 8                                      # a constellation per group
+    page.click('li[data-ach="eight-worlds"]')                                                     # the hologram
+    assert page.locator('#holo').is_visible() and 'EIGHT WORLDS' in page.locator('#holo-data').inner_text()
+    page.click('#holo-pin')                                                                       # pin it to the header
+    assert page.locator('#rank-showcase canvas').count() == 1
+    page.click('#holo-close')
     page.click('#gallery-close')
     page.click('button.chip:has-text("next planets")')
     page.wait_for_timeout(300)
