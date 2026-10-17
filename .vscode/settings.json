@@ -1,6 +1,8 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-  "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
   "python.terminal.activateEnvironment": true,
   "jupyter.notebookFileRoot": "${workspaceFolder}",
   "notebook.output.scrolling": true,
@@ -11,5 +13,10 @@
   "search.exclude": {
     "data/interim": true,
     ".venv": true
-  }
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests"
+  ]
 }
