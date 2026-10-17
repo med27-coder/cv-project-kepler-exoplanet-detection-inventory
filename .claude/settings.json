@@ -9,5 +9,10 @@
       "mcp__Claude_Browser__find",
       "mcp__Claude_Browser__read_page"
     ]
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true
   }
 }

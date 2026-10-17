@@ -1,0 +1,6 @@
+{
+  "//": "For Claude Code's typescript-lsp plugin: the star map's parts (web/src) are plain scripts joined into web/starmap.js, so only the parts are checked (the joined file would repeat every name).",
+  "compilerOptions": { "target": "es2022", "lib": ["es2022", "dom"], "checkJs": false, "allowJs": true },
+  "include": ["web/src/**/*.js"],
+  "exclude": ["web/starmap.js", "web/data", "node_modules"]
+}

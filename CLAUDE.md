@@ -23,6 +23,11 @@ CI (`.github/workflows/tests.yml`) runs ruff, mypy, pytest with coverage, `build
 `node --check web/starmap.js`. Dependencies are hash-locked (`requirements*.lock`, regenerated with
 `scripts/tools/lock_requirements.py`; never let it bump unrelated pins silently).
 
+Tooling: the project enables Anthropic's `pyright-lsp`, `typescript-lsp` and `security-guidance` plugins
+(`.claude/settings.json`; configs: `[tool.pyright]` in `pyproject.toml`, root `jsconfig.json`), so edits come back
+with diagnostics. Pyright is advisory (8 known numpy/pandas typing quirks); mypy is the type check of record.
+The GitHub CLI (`gh`) is installed: use `gh run list` / `gh run view --log-failed` for CI.
+
 Shell gotcha: heredocs passed through the Bash tool mangle backslashes and some quotes. For multi-line Python
 patches, write a script file (scratchpad) and run it, or use the Edit tool.
 
