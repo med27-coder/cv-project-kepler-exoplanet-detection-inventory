@@ -23,3 +23,18 @@ extend-exclude = ["notebooks/*.py", "notebooks/archive_colab"]   # + the histori
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pyright]
+# For Claude Code's pyright-lsp plugin (diagnostics after edits). mypy in CI remains the type check of record.
+venvPath = "."
+venv = ".venv"
+include = ["src", "scripts", "tests", "app.py"]
+exclude = ["**/__pycache__", "build", "data", "models", "results", "web"]
+extraPaths = ["src", "scripts/starmap", "scripts/pipeline", "scripts/experiments", "scripts/tools", "scripts/data"]
+typeCheckingMode = "basic"
+# Quiet the checks that mostly flag pandas / TensorFlow typing (mypy already accepts this code), keep the rest.
+reportOptionalMemberAccess = false
+reportOptionalSubscript = false
+reportOptionalOperand = false
+reportAttributeAccessIssue = "warning"
+reportArgumentType = "warning"
