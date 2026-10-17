@@ -8,6 +8,12 @@
     "tyriar.luna-paint",
     "streetsidesoftware.code-spell-checker",
     "usernamehw.errorlens",
-    "ms-vscode.live-server"
+    "ms-vscode.live-server",
+    "naumovs.color-highlight",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml"
+  ],
+  "unwantedRecommendations": [
+    "ms-azuretools.vscode-containers"
   ]
 }
