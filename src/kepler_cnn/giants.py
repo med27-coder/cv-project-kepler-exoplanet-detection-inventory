@@ -91,3 +91,31 @@ def fit(X, y, seed):
     model = make_model(seed)
     model.fit(X, y, sample_weight=compute_sample_weight('balanced', y))
     return model
+
+
+# ---- Colossus 2 (docs/V4B_PREREGISTRATION.md): the physics features as extra inputs to V3's network
+LOG_PHYSICS = {'ruwe', 'n_gaia_within_2as'}
+
+
+class PhysicsScaler:
+    """Median-impute, log-scale (RUWE, crowding), standardise on training rows only, clip to ±10."""
+
+    def fit(self, P):
+        X = self._raw(P)
+        self.median = np.nan_to_num(np.nanmedian(X, axis=0))
+        X = np.where(np.isnan(X), self.median, X)
+        self.mean, self.std = X.mean(axis=0), X.std(axis=0) + 1e-6
+        return self
+
+    @staticmethod
+    def _raw(P):
+        X = P[PHYSICS].to_numpy(dtype=float).copy()
+        for j, c in enumerate(PHYSICS):
+            if c in LOG_PHYSICS:
+                X[:, j] = np.log10(np.clip(X[:, j], 0, None) + 1e-3)
+        return X
+
+    def transform(self, P):
+        X = self._raw(P)
+        X = np.where(np.isnan(X), self.median, X)
+        return np.clip((X - self.mean) / self.std, -S.FEATURE_CLIP, S.FEATURE_CLIP).astype(np.float32)
