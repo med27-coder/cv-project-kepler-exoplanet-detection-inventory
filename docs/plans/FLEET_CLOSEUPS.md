@@ -73,6 +73,15 @@ Each with its own symbol on the cup (as SYMBOLS do today):
 
 ## 7. Decisions for you
 
+**Answered 18 October 2026:**
+1. **Every agency** (NASA, ESA, JAXA, Roscosmos/Soviet, CNSA, ISRO, ...).
+2. **All the robots**, built in waves: Mars and the Moon first, then the rest.
+3. **New:** achievements for finding each set (by world and by agency) and one for finding them all.
+4. The user's reference images: whenever convenient.
+
+The questions as first asked:
+
+
 1. Robots from every agency (recommended: the story is humanity's), or NASA only?
 2. All the robots in section 3, or a first set (Mars and the Moon)?
 3. Your reference images: please share them when convenient (for the close-up style).
