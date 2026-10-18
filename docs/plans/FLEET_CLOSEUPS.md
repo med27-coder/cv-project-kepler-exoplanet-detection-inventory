@@ -58,7 +58,7 @@ Mars rovers already built. Set achievements for each destination, one per agency
 | Mars | Opportunity | NASA, 2004 | landed 25 January 2004, three weeks after Spirit (not the same day); last contact June 2018, ended February 2019 | **built v1.9.0** |
 | Mars | Curiosity | NASA, 2012 | | **built v1.4.0** |
 | Mars | Perseverance (with Ingenuity) | NASA, 2021 | | **built v1.4.0** |
-| Mars | Zhurong (Tianwen-1) | China (CNSA), 2021 | landed May 2021 in Utopia Planitia; dormant since May 2022 | to build |
+| Mars | Zhurong (Tianwen-1) | China (CNSA), 2021 | landed May 2021 in Utopia Planitia; dormant since May 2022 | **built v1.9.8** |
 | Moon | Lunokhod 1 (Luna 17) | USSR, 1970 | the first rover on another world | to build |
 | Moon | Lunokhod 2 (Luna 21) | USSR, 1973 | | to build |
 | Moon | Yutu (Chang'e 3) | China, 2013 | | to build |

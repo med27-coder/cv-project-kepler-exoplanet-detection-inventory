@@ -5,11 +5,11 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 
 ## State
 
-- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.7**. Every version is in
+- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.8**. Every version is in
   [CHANGELOG.md](../CHANGELOG.md), tagged and published as a GitHub Release; players see the same history, in plain
   words, in the antenna's UPDATES tab (`HISTORY` in `web/src/00-version.js`).
-- **The game:** 35 easter eggs (Hubble in 1.9.3, the Hail Mary at Tau Ceti in 1.9.4), 75 achievements, sky events (comets, asteroids, a rare UFO), animated scenes for the
-  Mars rovers (Sojourner, Spirit, Opportunity, Curiosity, Perseverance), the Martian farm, the dwarf planets, the
+- **The game:** 36 easter eggs (Hubble in 1.9.3, the Hail Mary at Tau Ceti in 1.9.4, Zhurong in 1.9.8), 75 achievements, sky events (comets, asteroids, a rare UFO), animated scenes for the
+  Mars rovers (Sojourner, Spirit, Opportunity, Curiosity, Perseverance, Zhurong), the Martian farm, the dwarf planets, the
   lost astronaut's wardrobe, fun facts on every Galleria card.
 - **Star Gazer** (the model): **V3** stays. Three registered attempts to beat it on giant planets failed and are
   reported as registered: Colossus, Colossus 2, V3.1 ([star-gazer/V3_1_RESULTS.md](star-gazer/V3_1_RESULTS.md)).

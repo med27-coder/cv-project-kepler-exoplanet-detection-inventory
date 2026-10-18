@@ -240,6 +240,18 @@ const CRAFT_ART = {
     '.xmx..xmx....xmx....',
     '.xxx..xxx....xxx....',
   ],
+  zhurong: [   // China's rover: four blue solar panels spread like butterfly wings, a tall mast with cameras
+    '...........lwl.......',
+    '............m........',
+    '............m........',
+    'PPP.........m.....PPP',
+    '.ppppp....pppp..ppppp',
+    '......sssssssss......',
+    '......lllllllll......',
+    '.....mmmmmmmmmmm.....',
+    '....xx...xx...xx.....',
+    '....xm...xm...xm.....',
+  ],
   spirit: [   // a Mars Exploration Rover: the wide flat solar deck, the camera mast, six wheels
     '..........lwl......',
     '...........m.......',
@@ -322,7 +334,7 @@ const CRAFT_SPRITE = {
   'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
   JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
   'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
-  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner', Spirit: 'spirit', Opportunity: 'opportunity',
+  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner', Spirit: 'spirit', Opportunity: 'opportunity', Zhurong: 'zhurong',
 };
 
 const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];

@@ -114,6 +114,12 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA24542",
   "what": "Perseverance selfie with Ingenuity"
  },
+ "zhurong": {
+  "img": "gallery/zhurong.jpg",
+  "credit": "NASA/JPL-Caltech/University of Arizona",
+  "link": "https://images.nasa.gov/details/PIA24914",
+  "what": "Zhurong and its lander on Utopia Planitia, photographed by NASA's Mars Reconnaissance Orbiter (2021)"
+ },
  "mer-rover": {
   "img": "gallery/mer-rover.jpg",
   "credit": "NASA/JPL/Cornell University",

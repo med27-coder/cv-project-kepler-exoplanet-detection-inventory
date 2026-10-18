@@ -108,6 +108,9 @@ const EGGS = [
   { id: 'perseverance', name: 'Perseverance', kind: 'craft', art: 'perseverance', ref: 'perseverance', query: 'Perseverance', toast: 'LIFTOFF ON MARS',
     clue: 'I collect rock samples in tubes, and I brought a little helicopter along.',
     story: 'Perseverance landed in Jezero Crater, an ancient river delta, on 18 February 2021. It seals rock samples in tubes for a future trip to Earth, and it carried Ingenuity, the first aircraft to fly on another planet: 72 flights instead of the planned five.' },
+  { id: 'zhurong', name: 'Zhurong', kind: 'craft', art: 'zhurong', ref: 'zhurong', query: 'Zhurong', toast: 'FIRE STAR ROVER',
+    clue: 'Named after a god of fire, I drove across a northern plain on Mars and took a selfie with a camera I left on the ground.',
+    story: 'China\'s Tianwen-1 mission put its lander and the rover Zhurong on Utopia Planitia on 14 May 2021. Zhurong drove about 1.9 km, scanned the ground beneath it with radar, and photographed itself with its lander using a small camera it had dropped. It went to sleep for the Martian winter in May 2022 and has not woken up.' },
   { id: 'spirit', name: 'Spirit', kind: 'craft', art: 'spirit', ref: 'mer-rover', query: 'Spirit', toast: 'TWIN ON THE HILLS',
     clue: 'One of twins sent in 2004. I climbed a hill named after an astronaut, and kept driving backwards on a broken wheel.',
     story: 'Spirit landed in Gusev Crater on 4 January 2004, the first of NASA\'s twin Mars Exploration Rovers. Built to last 90 sols, it explored for six years, climbed Husband Hill, and even its broken wheel made a discovery: dragging through the soil, it uncovered silica left by ancient hot springs.' },
@@ -428,7 +431,7 @@ function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
 
 // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
 const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Zhurong', 'zhurong'], ['Parker', 'parker'],
   ['Osiris Rex', 'apex'], ['Tatooine', null]];
 const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
 function editDistance(a, b) {   // Levenshtein, one row at a time

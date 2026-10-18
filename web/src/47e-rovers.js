@@ -5,9 +5,10 @@
 // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
 // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
 // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy)( rover)?$/i;
+const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy|zhurong|tianwen 1|tianwen)( rover)?$/i;
 const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
-                   'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity' };
+                   'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity',
+                   zhurong: 'zhurong', 'tianwen 1': 'zhurong', tianwen: 'zhurong' };
 const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
 const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
@@ -50,7 +51,7 @@ function drawRoverTiny(ctx, x, y) {
 }
 // From 47d-martian.js: rovers already found drive along the far plain, one behind the other.
 function drawFarRovers(ctx, w, horizon, t) {
-  const found = ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance'].filter(id => progress.eggs[id]);
+  const found = ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance', 'zhurong'].filter(id => progress.eggs[id]);
   found.forEach((id, k) => {
     const x = Math.round(((t * 3 + k * (w + 40) / 2) % (w + 40)) - 20);
     drawRoverTiny(ctx, x, horizon + 3 + (k % 3));
@@ -192,6 +193,46 @@ function drawOpportunityScene(ctx, w, h, t) {
   pixelText(ctx, 'ENDEAVOUR CRATER', w - textWidth('ENDEAVOUR CRATER') - 4, 4, '#5a2a14');
   const sol = `SOL ${Math.min(5111, 1 + Math.floor((REDUCED_MOTION ? 0 : t) * 20))}`;
   pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
+}
+
+// Zhurong (China, 2021): a blue rover with four butterfly-wing solar panels and a tall mast, facing right.
+function drawZhurong(ctx, x, y, s, t, moving, dust = 0) {
+  const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+  const bob = k => (moving && !REDUCED_MOTION ? Math.round(Math.sin(t * 6 + k * 2) * 0.5) : 0);
+  for (const [k, wx] of [[0, -7], [1, -1], [2, 5]]) { put(wx, -3 + bob(k), 3, 3, '#2a2a30'); put(wx + 1, -2 + bob(k), 1, 1, '#8a8f9a'); }
+  put(-6, -5, 13, 1, '#8a8f9a');
+  put(-5, -8, 10, 3, '#d6dae2'); put(-5, -6, 10, 1, '#b8bfcc');            // the body
+  const cell = dust > 0.5 ? '#8a7a6a' : '#2f4fae', edge = dust > 0.5 ? '#a08a72' : '#5d7bd6';
+  put(-12, -10, 6, 1, cell); put(-13, -11, 3, 1, edge);                     // two wings back, two forward,
+  put(6, -10, 6, 1, cell); put(10, -11, 3, 1, edge);                        // spread like a butterfly's
+  put(-5, -9, 4, 1, cell); put(1, -9, 4, 1, cell);
+  put(4, -17, 1, 8, '#8a8f9a'); put(2, -19, 5, 2, '#eef2f8'); put(5, -18, 1, 1, '#151a2c');   // the mast and cameras
+}
+
+function drawZhurongScene(ctx, w, h, t) {
+  const horizon = Math.round(h * 0.55);
+  marsSky(ctx, w, horizon);
+  for (let x = 0; x < w; x++) {   // Utopia Planitia: a wide, flat plain, low far ridges
+    const top = horizon - 2 - Math.round(2 * hash(`up${x >> 4}`) + Math.sin(x / 20));
+    ctx.fillStyle = '#9a5634'; ctx.fillRect(x, top, 1, horizon - top);
+  }
+  marsGround(ctx, w, h, horizon, 'utopia');
+  const ground = h - 30, lx = Math.round(w * 0.22), c = REDUCED_MOTION ? 16 : t % 26;
+  // the Tianwen-1 lander with its ramp
+  ctx.fillStyle = '#c4beb3'; ctx.fillRect(lx - 14, ground - 8, 28, 6);
+  ctx.fillStyle = '#d9a441'; ctx.fillRect(lx - 10, ground - 11, 20, 3);
+  ctx.fillStyle = '#8a8f9a'; ctx.fillRect(lx - 14, ground - 2, 2, 2); ctx.fillRect(lx + 12, ground - 2, 2, 2); ctx.fillRect(lx + 14, ground - 4, 10, 1);
+  // the little camera Zhurong set down on the ground, then drove away from, to photograph itself with the lander
+  const camX = Math.round(w * 0.48);
+  if (c > 8) { ctx.fillStyle = '#eef2f8'; ctx.fillRect(camX, ground - 3, 2, 2); ctx.fillStyle = '#151a2c'; ctx.fillRect(camX + 1, ground - 3, 1, 1); }
+  const x = c < 8 ? lx + 30 + (camX - lx - 18) * (c / 8) : c < 10 ? camX + 12 : c < 18 ? camX + 12 + (w * 0.3) * ((c - 10) / 8) : camX + 12 + w * 0.3;
+  for (let tx = lx + 30; tx < x - 10; tx += 2) { ctx.fillStyle = '#9a4f2c'; ctx.fillRect(tx, ground - 1, 1, 1); }
+  drawZhurong(ctx, x, ground, 2, t, c < 8 || (c >= 10 && c < 18), c >= 18 ? Math.min(1, (c - 18) / 6) : 0);
+  if (c > 10 && c < 12 && !REDUCED_MOTION) {   // the selfie: a flash at the camera
+    ctx.fillStyle = '#fff1b0'; ctx.fillRect(camX - 1, ground - 5, 4, 1); ctx.fillRect(camX + 1, ground - 7, 1, 5);
+  }
+  pixelText(ctx, 'UTOPIA PLANITIA', 4, h - 10, '#fff1d6');
+  if (c >= 18) pixelText(ctx, 'ASLEEP SINCE 2022', w - textWidth('ASLEEP SINCE 2022') - 4, h - 10, '#fff1d6');
 }
 
 // The Mars sky and plain, shared by every Mars scene (these rovers and the Martian farm, 47d-martian.js).
@@ -342,6 +383,18 @@ const ROVERS = {
     ],
     link: 'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/',
   },
+  zhurong: {
+    title: 'ZHURONG', big: '★ ZHURONG IN UTOPIA PLANITIA ★', draw: drawZhurongScene, hash: 'zhurong',
+    intro: 'China\'s first Mars rover, from the Tianwen-1 mission. Watch it roll off its lander, set a small camera on the ground, drive away and take a picture of itself with the lander, then settle in for a long sleep.',
+    facts: [
+      'Landed on 14 May 2021 in Utopia Planitia, a huge plain in Mars\'s northern lowlands, making China the second country to drive a rover on Mars.',
+      'It is named after Zhurong, a god of fire in Chinese mythology; in Chinese, Mars is called the "fire star".',
+      'It drove about 1.9 km and studied the ground with radar, finding layers that may be the shores of an ancient ocean.',
+      'It went to sleep for the Martian winter in May 2022; dust on its solar panels is thought to have kept it from waking.',
+      'NASA\'s Mars Reconnaissance Orbiter photographed it from orbit, beside its lander (the photo in the Galleria).',
+    ],
+    link: 'https://images.nasa.gov/details/PIA24914', linkLabel: "NASA's photo of Zhurong from Mars orbit",
+  },
   perseverance: {
     title: 'PERSEVERANCE', big: '★ PERSEVERANCE IN JEZERO CRATER ★', draw: drawPerseveranceScene, hash: 'perseverance',
     intro: 'NASA\'s newest rover explores Jezero Crater, an old lake with a river delta on its rim, sealing rock samples in tubes for a future trip to Earth. Its little helicopter, Ingenuity, flies nearby.',
@@ -366,7 +419,7 @@ function showRover(id, updateHash = true) {
     <p>${esc(r.intro)}</p>
     <h3 class="facts-title">THE REAL ROVER</h3>
     <ul class="facts">${r.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
-    <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">NASA: the ${esc(r.title.toLowerCase())} mission ↗</a> ·
+    <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.linkLabel || `NASA: the ${r.title.toLowerCase()} mission`)} ↗</a> ·
        <a href="#mars-rovers">where the rovers are on Mars and in the Solar System</a></p>
     <p class="note">The drawing is pixel art, sped up; the scenery follows NASA's photos · you found an easter egg!</p>`;
   setScene({ custom: seconds => {

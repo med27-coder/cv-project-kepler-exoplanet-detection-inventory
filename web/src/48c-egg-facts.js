@@ -195,6 +195,12 @@ const EGG_FACTS = {
           'It carries chips with the names of 10.9 million people.'],
     why: 'The rover collecting pieces of Mars to bring home one day, with the first aircraft on another planet as its sidekick. Search it to watch them work.',
   },
+  zhurong: {
+    fun: ['Zhurong weighs about 240 kg, a little more than Spirit and Opportunity.',
+          'China reached Mars orbit, landed and drove a rover on its very first independent Mars mission, a first for any country.',
+          'Its lander and rover were set down by a parachute, rockets and a hover phase, like NASA\'s, with a few minutes of "terror" all on autopilot.'],
+    why: 'The first rover in the game from outside NASA: the story of driving on Mars belongs to more than one country, and Zhurong is the newest chapter.',
+  },
   spirit: {
     fun: ['Spirit and Opportunity were named by Sofi Collis, a 9-year-old from Arizona, in a NASA essay contest.',
           'Its landing site was named Columbia Memorial Station, and the hills nearby after the seven astronauts of Space Shuttle Columbia.',
