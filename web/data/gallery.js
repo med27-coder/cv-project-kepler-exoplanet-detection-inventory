@@ -236,9 +236,9 @@ window.STARMAP_GALLERY = {
  },
  "veggie": {
   "img": "gallery/veggie.jpg",
-  "credit": "NASA/Dan Casper",
-  "link": "https://images.nasa.gov/details/KSC-20180227-PH_DAC01_0044",
-  "what": "Seeds placed into pods for Veggie, the space station's garden (2018)"
+  "credit": "NASA",
+  "link": "https://images.nasa.gov/details/KSC-20171017-PH_ISS01_0001",
+  "what": "Lettuce and mustard greens growing in Veggie, the space station's plant chamber: a real greenhouse in space (2017)"
  },
  "universe-deep-field": {
   "img": null,

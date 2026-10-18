@@ -2649,7 +2649,7 @@
       clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
       story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
     { id: 'martian', name: 'The Martian', kind: 'martian', ref: 'martian-gardens', query: 'The Martian', toast: 'BOTANIST OF MARS',
-      refs: [['mars-habitat', 'BASE'], ['mars-greenhouse', 'GLASS'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'VEGGIE']],
+      refs: [['mars-habitat', 'BASE'], ['mars-greenhouse', 'GLASS'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'SPACE GARDEN']],
       clue: 'Left behind on the red planet, I grew potatoes to stay alive, and called home through a lander from 1997.',
       story: 'A nod to Andy Weir\'s 2011 novel and the 2015 film. The real science: Martian soil holds toxic perchlorates that a farm would have to wash out, NASA has grown crops in simulated Martian soil, and astronauts first ate space-grown lettuce on the ISS in August 2015. The pictures are NASA\'s, used as references for the pixel farm.' },
     { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
