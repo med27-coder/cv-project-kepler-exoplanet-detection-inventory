@@ -16,6 +16,13 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
    Add it as an easter egg like the ISS (an Earth-orbit exception): a pixel Earth with Hubble on its orbit, its
    sprite, Galleria card with NASA's photo, fun facts, search words (hubble, hst, hubble telescope, hubble space
    telescope). New egg id `hubble` (add to SHIPPED_IDS).
+0a. **Project Hail Mary at Tau Ceti** (user request, 18 Oct): Tau Ceti is outside Kepler's field, so searching it
+   finds nothing today. Add "tau ceti" as a special system view: the real star (G8 V, 11.9 light-years, in Cetus) and
+   its four planet candidates from Feng et al. 2017, clearly marked unconfirmed (g 20.0 d, h 49.4 d, e 162.9 d,
+   f 636 d; a = 0.133, 0.243, 0.538, 1.334 AU; minimum masses 1.75, 1.83, 3.93, 3.93 Earths). Before it is found,
+   the Hail Mary is a glowing, pulsing dot next to one planet (like the hidden spacecraft); "hail mary" /
+   "project hail mary" / "astrophage" reveals the ship (egg `hailmary`, sprite, Galleria card, fun facts, why it's
+   here). The story's planet Adrian is fictional: say so. The secret Erid egg stays a later item.
 0b. **Haumea after NASA's Eyes on the Solar System** (user's screenshots, reference only, not committed): redraw
    Haumea's pixel globe as the stretched egg it is, grey-brown with the darker patch, and show its two moons on their
    tilted orbits (Hi'iaka, the larger and farther; Namaka, closer, on a strongly inclined orbit) in its close-up and
