@@ -121,6 +121,10 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.4', date: '18 Oct 2026', notes: [
+      'New: a nearby star you can visit now, even though Kepler never looked at it. Something small glints there.',
+      'Fixed: systems whose catalog numbers put a planet inside its star now explain why.',
+    ] },
     { v: '1.9.3', date: '18 Oct 2026', notes: [
       'New: the Hubble Space Telescope can be found now, circling the Earth.',
       'Fixed: clearer wording in a Galleria fun fact.',
@@ -1422,7 +1426,19 @@
           <th class="num">Year (days)</th><th class="num">Temp (K)</th><th class="num">Sunlight (vs Earth)</th>
           <th>Status</th><th class="num">Found</th></tr></thead>
         <tbody>${rows}</tbody>
-      </table></div>`;
+      </table></div>${insideStarNote(detail)}`;
+  }
+
+  // A few catalog entries put a planet's orbit inside its own star (the star's listed size and its surface gravity
+  // disagree, so one of them is wrong, or the signal isn't a planet). The drawing keeps the catalog's numbers and says so.
+  function insideStarNote(detail) {
+    const starAU = (detail.srad || 0) * 0.00465047;   // solar radii to AU
+    const inside = detail.planets.filter(p => p.sma != null && starAU && p.sma < starAU);
+    if (!inside.length) return '';
+    return `<p class="callout">Look closely in TRUE SCALE: the catalog puts ${inside.length === 1 ? 'one orbit' : `${inside.length} orbits`}
+      (${inside.map(p => esc(p.name)).join(', ')}) inside the star itself, which is impossible. The listed star size
+      (${esc(fmt(detail.srad, 1))} times the Sun's) is probably wrong, or the signal is not a planet; these numbers are
+      shown as the catalog gives them.</p>`;
   }
 
   // Plain-language reasons a candidate might not be a planet (same rules as the export's leaderboard).
@@ -1846,6 +1862,8 @@
     if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
     if (MARTIAN_QUERY.test(q)) { showMartian(updateHash); unlockEgg('martian'); return; }   // 47d-martian.js
     if (HUBBLE_QUERY.test(q)) { showHubble(updateHash); unlockEgg('hubble'); return; }   // 47f-hubble.js
+    if (HAILMARY_QUERY.test(q)) { unlockEgg('hailmary'); showTauCeti(updateHash); return; }   // 47g-tauceti.js
+    if (TAUCETI_QUERY.test(q)) { showTauCeti(updateHash); return; }
     const rover = roverFor(q);   // Curiosity and Perseverance at work on Mars (47e-rovers.js)
     if (rover) { showRover(rover, updateHash); unlockEgg(rover); return; }
     const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
@@ -2130,7 +2148,7 @@
     r: '#b0663a',                                                                       // Martian dust
     b: '#1e2f6e',                                                                       // solar cell grid lines
     v: '#6a5a86',                                                                       // Webb's sunshield, underside
-    x: '#2a2a30', e: '#9fd8ff', E: '#4a8fd6', o: '#ff9a3c',                             // black (shields, RTGs, wheels), thruster glow
+    x: '#2a2a30', e: '#9fd8ff', E: '#4a8fd6', o: '#ff9a3c', O: '#ff5a2a',                             // black (shields, RTGs, wheels), thruster glow
   };
 
   const CRAFT_ART = {
@@ -2380,6 +2398,13 @@
       '....mmmmmmmmmmm....',
       '...xx...xx...xx....',
       '...xm...xm...xm....',
+    ],
+    hailmary: [   // a nod to Project Hail Mary: the long ship, crew module at the front, Astrophage engines at the back
+      '.........m..........',
+      'oo.mmmmmmlsssssww...',
+      'Oollllllllsssssswwk.',
+      'oo.mmmmmmlsssssww...',
+      '.........m..........',
     ],
     hubble: [   // the silver tube with its open aperture door, two blue solar wings, the high-gain antennas
       'PpP..............PpP',
@@ -3553,6 +3578,97 @@
     if (updateHash) history.replaceState(null, '', '#hubble');
   }
 
+  // ---------------------------------------------------------------- Tau Ceti, and a nod to Project Hail Mary
+  // Tau Ceti is outside Kepler's field, so it isn't on the map, but "tau ceti" opens it: a Sun-like star 11.9 light-
+  // years away with four planet candidates (Feng et al. 2017, radial velocities; not confirmed, so drawn dashed). In
+  // Andy Weir's 2021 novel and its 2026 film, the ship Hail Mary travels here. Until it is found, it is a glowing dot
+  // beside the third candidate, like the spacecraft hidden as flashing lights; "hail mary" reveals it (an easter egg).
+  // The story's planet, Adrian, is fiction; the candidates are real.
+  const TAUCETI_QUERY = /^(the )?(tau ceti|tau cet|52 ceti|hd 10700)( system)?$/i;
+  const HAILMARY_QUERY = /^(the )?((project )?hail mary|astrophage)$/i;
+  const TAU_CETI = [   // name, period (days), semi-major axis (AU), minimum mass (Earths): Feng et al. 2017
+    ['G', 20.0, 0.133, 1.75], ['H', 49.4, 0.243, 1.83], ['E', 162.9, 0.538, 3.93], ['F', 636.1, 1.334, 3.93],
+  ];
+
+  function drawTauCeti(seconds) {
+    const t = REDUCED_MOTION ? 0 : seconds, cx = CX, cy = Math.round((SH - 10) / 2), found = Boolean(progress.eggs.hailmary);
+    sctx.fillStyle = '#070b1a';
+    sctx.fillRect(0, 0, SW, SH);
+    for (let k = 0; k < 80; k++) {
+      sctx.fillStyle = k % 6 === 0 ? '#4a5590' : '#1e2550';
+      sctx.fillRect(Math.floor(hash('tc' + k) * SW), Math.floor(hash('ty' + k) * SH), 1, 1);
+    }
+    for (let r = 1; r <= 12; r++) {   // a faint debris disk, much dustier than our Kuiper Belt
+      const a = 108 + r * 2;
+      for (let k = 0; k < 40; k++) {
+        const th = hash(`dd${r}${k}`) * 2 * Math.PI;
+        sctx.fillStyle = '#2a2a48';
+        sctx.fillRect(Math.round(cx + a * Math.cos(th)), Math.round(cy + a * 0.4 * Math.sin(th)), 1, 1);
+      }
+    }
+    const scale = 88 / 1.334;   // F's orbit fills the view
+    let shipAt = null;
+    TAU_CETI.forEach(([name, period, sma], k) => {
+      const a = sma * scale, b = a * 0.4;
+      sctx.fillStyle = '#3a4888';
+      for (let s = 0; s < 120; s += 4) {   // dashed: candidates, not confirmed planets
+        const th = (s / 120) * 2 * Math.PI;
+        sctx.fillRect(Math.round(cx + a * Math.cos(th)), Math.round(cy + b * Math.sin(th)), 1, 1);
+      }
+      const th = (t / (period / 20)) + k * 1.9;   // faster for the inner ones, as in life
+      const px = cx + a * Math.cos(th), py = cy + b * Math.sin(th);
+      solarPlanet(sctx, px, py, { art: k === 2 ? 'earth' : k === 3 ? 'neptune' : 'mercury', size: k > 1 ? 2 : 1, noMoon: true },
+                  -Math.cos(th), -Math.sin(th), t);
+      pixelText(sctx, name, Math.round(px) + 4, Math.round(py) - 7, '#7f8fc0');
+      if (name === 'E') shipAt = [px + 5, py + 3];
+    });
+    for (let r = 6; r >= 1; r--) {   // Tau Ceti: a little smaller, cooler and more golden than the Sun
+      sctx.fillStyle = r > 4 ? '#5a4520' : r > 2 ? '#e8b64a' : '#fff1c0';
+      sctx.beginPath(); sctx.arc(cx, cy, r, 0, 2 * Math.PI); sctx.fill();
+    }
+    const [sx, sy] = shipAt;
+    if (found) {   // the Hail Mary: a long ship, its Astrophage engines glowing infrared-red at the back
+      sctx.fillStyle = '#ff6a3a'; sctx.fillRect(Math.round(sx) - 5, Math.round(sy), 2, 1);
+      sctx.fillStyle = '#d6dae2'; sctx.fillRect(Math.round(sx) - 3, Math.round(sy), 8, 1);
+      sctx.fillStyle = '#9aa6b8'; sctx.fillRect(Math.round(sx) + 1, Math.round(sy) - 1, 1, 3);
+      pixelText(sctx, 'HAIL MARY', Math.round(sx) + 8, Math.round(sy) - 2, '#ffd34d');
+    } else {   // still a mystery: a glint that pulses
+      const on = REDUCED_MOTION || Math.sin(t * 4) > -0.2;
+      sctx.fillStyle = on ? '#fff1b0' : '#6a5a3a';
+      sctx.fillRect(Math.round(sx), Math.round(sy), 1, 1);
+      if (on && Math.sin(t * 4) > 0.6) { sctx.fillRect(Math.round(sx) - 1, Math.round(sy), 3, 1); sctx.fillRect(Math.round(sx), Math.round(sy) - 1, 1, 3); }
+    }
+    pixelText(sctx, 'TAU CETI  11.9 LY', 4, SH - 9, '#5a6a8a');
+    pixelText(sctx, 'CANDIDATES', SW - textWidth('CANDIDATES') - 4, SH - 9, '#5a6a8a');
+  }
+
+  function showTauCeti(updateHash = true) {
+    selected = null;
+    ++selectToken;
+    const found = Boolean(progress.eggs.hailmary);
+    title.textContent = 'TAU CETI';
+    info.innerHTML = `
+      <p class="big">★ ${found ? 'THE HAIL MARY AT TAU CETI' : 'A STAR NEXT DOOR'} ★</p>
+      <p>Tau Ceti, a Sun-like star 11.9 light-years away in the constellation Cetus, is far outside Kepler's field, but
+         one of our nearest neighbours. Four planets may circle it, found in 2017 from the star's tiny wobble; none is
+         confirmed yet, so their orbits are dashed. ${found ? '' : 'Something small glints near the third one.'}</p>
+      <ul class="facts">
+        <li>A little smaller and cooler than the Sun, and older: about 0.8 solar masses.</li>
+        <li>The candidates (minimum masses): g 1.75 and h 1.83 Earths, close in; e and f about 3.9 Earths, near the inner
+          and outer edges of the habitable zone.</li>
+        <li>It is wrapped in a dust disk about ten times as massive as our Kuiper Belt, so comets and asteroids may
+          strike its planets far more often than ours.</li>
+        ${found ? `<li>In Andy Weir's 2021 novel <i>Project Hail Mary</i> (filmed in 2026), the ship Hail Mary travels here
+          to learn why Tau Ceti is the one nearby star not dimming. The story's planet, Adrian, is fiction; the drawing
+          puts the ship by candidate e.</li>` : ''}
+      </ul>
+      <p><a href="https://exoplanetarchive.ipac.caltech.edu/overview/tau%20Cet" target="_blank" rel="noopener noreferrer">Tau Ceti in NASA's Exoplanet Archive ↗</a></p>
+      <p class="note">Planet candidates from Feng et al. 2017; sizes and the ship are illustrative${found ? ' · you found an easter egg!' : ''}.</p>`;
+    setScene({ custom: drawTauCeti });
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#tau-ceti');
+  }
+
   // ---------------------------------------------------------------- Galleria: the easter-egg game
   // The ⚙ button opens the Galleria. Every easter egg starts as a black silhouette with a question mark,
   // its name blanked out and a clue underneath; typing the right name in the search bar finds it: the
@@ -3594,6 +3710,10 @@
     { id: 'hubble', name: 'Hubble Space Telescope', kind: 'craft', art: 'hubble', ref: 'hubble', query: 'Hubble', toast: 'DEEP FIELD',
       clue: 'Above the air since 1990, I was launched with a blurry mirror, fixed by astronauts, and showed us the age of the universe.',
       story: 'NASA and ESA\'s Hubble Space Telescope was carried up by Space Shuttle Discovery on 24 April 1990. Its mirror turned out to be slightly the wrong shape, and in 1993 astronauts fitted it with corrective optics in orbit. Five servicing missions later, it has taken more than a million observations, from the Hubble Deep Field to the expanding universe.' },
+    { id: 'hailmary', name: 'Hail Mary', kind: 'fiction', art: 'hailmary', ref: null, query: 'Hail Mary', toast: 'AMAZE AMAZE AMAZE',
+      clue: 'A ship from a story by the author of The Martian, sent to the one nearby star that isn\'t fading. Look near Tau Ceti.',
+      story: 'A nod to Andy Weir\'s 2021 novel Project Hail Mary and its 2026 film: a lone astronaut wakes up on the ship Hail Mary at Tau Ceti, sent to learn why the Sun and the nearby stars are dimming, all but this one. The dimming is the thing Kepler measured, star by star. Tau Ceti and its four planet candidates are real; the story\'s planet, Adrian, is not.',
+      link: 'https://exoplanetarchive.ipac.caltech.edu/overview/tau%20Cet', linkLabel: "see Tau Ceti in NASA's Exoplanet Archive" },
     { id: 'voyager', name: 'Voyager 1', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 1', toast: 'INTERSTELLAR SIGNAL',
       clue: 'The farthest human-made object. I took the Pale Blue Dot, and in 2012 I was first to leave the Sun\'s bubble.',
       story: 'Launched on 5 September 1977, Voyager 1 flew past Jupiter (1979) and Saturn (1980), then headed up out of the planets\' plane. On 14 February 1990 it turned round and took the Pale Blue Dot, Earth from 6 billion km. In August 2012 it became the first spacecraft in interstellar space. It carries a Golden Record of sounds and pictures of Earth, and its signal takes most of a day to reach us.' },
@@ -3979,7 +4099,7 @@
 
   // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
   const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
     ['Osiris Rex', 'apex'], ['Tatooine', null]];
   const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
   function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -4594,6 +4714,12 @@
             'It is about as long as a football field, 109 metres end to end.',
             'You can see it from your back yard: it looks like a bright, steady star gliding across the sky.'],
       why: 'The one place in space where people live, and the only Earth-orbit spacecraft in the game. You can go outside and find it for real.',
+    },
+    hailmary: {
+      fun: ['Tau Ceti is one of the closest single Sun-like stars, so it has starred in science fiction for decades.',
+            'In 1960 Frank Drake pointed a radio telescope at Tau Ceti in the first modern search for alien signals, Project Ozma.',
+            'Its four planet candidates were found from the star\'s tiny back-and-forth wobble, not from transits like Kepler\'s.'],
+      why: 'A nod to the story by the author of The Martian: in it, stars dim because something eats their light, and catching stars dimming is exactly how Kepler found its planets. The ship hides as a glint near Tau Ceti until you name it.',
     },
     hubble: {
       fun: ['Hubble is about the size of a school bus: 13.2 metres long.',

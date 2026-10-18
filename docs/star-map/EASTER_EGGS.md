@@ -30,7 +30,7 @@ bar finds it:
   (an official NASA photo, credited; ESA-credited pictures are linked instead) and a short history.
   The Solar System's card adds a strip of real photos of the Sun, every planet and the Moon.
 
-34 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Hubble, Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
+35 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Hubble, the Hail Mary (a nod to Project Hail Mary: `tau ceti` shows the real system with the ship as a glint by candidate e; `hail mary` finds it), Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
 Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OSIRIS-APEX, MRO, Mars
 Odyssey, Mars Express, ExoMars, Curiosity, Perseverance, Sojourner, Spirit and Opportunity (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
@@ -79,7 +79,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | SPACE FARMER | Search "martian man" and watch the farm bring in a whole crop (a minute) |
 | | ECO MODE | Set the animation to battery saver |
 | | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
-| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 34 |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 35 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
 | | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |

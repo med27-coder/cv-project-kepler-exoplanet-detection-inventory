@@ -7,6 +7,18 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.4] - 2026-10-18
+
+### Added
+- **Tau Ceti and a nod to Project Hail Mary** (35 easter eggs; a player request): "tau ceti" opens the real Sun-like
+  star 11.9 light-years away with its four planet candidates (Feng et al. 2017, dashed as unconfirmed) and its dust
+  disk. The ship Hail Mary hides as a glint by candidate e until "hail mary" finds it; the story's planet Adrian is
+  fiction, and the card says so.
+
+### Fixed
+- Ten systems whose catalog numbers put a planet's orbit inside the star (the listed star size disagrees with its
+  surface gravity, e.g. KOI-2093) now say so under the planet table instead of looking like a drawing bug.
+
 ## [1.9.3] - 2026-10-18
 
 ### Added
@@ -167,6 +179,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.4]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.4
 [1.9.3]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.3
 [1.9.2]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.2
 [1.9.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.1

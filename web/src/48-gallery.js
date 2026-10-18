@@ -39,6 +39,10 @@ const EGGS = [
   { id: 'hubble', name: 'Hubble Space Telescope', kind: 'craft', art: 'hubble', ref: 'hubble', query: 'Hubble', toast: 'DEEP FIELD',
     clue: 'Above the air since 1990, I was launched with a blurry mirror, fixed by astronauts, and showed us the age of the universe.',
     story: 'NASA and ESA\'s Hubble Space Telescope was carried up by Space Shuttle Discovery on 24 April 1990. Its mirror turned out to be slightly the wrong shape, and in 1993 astronauts fitted it with corrective optics in orbit. Five servicing missions later, it has taken more than a million observations, from the Hubble Deep Field to the expanding universe.' },
+  { id: 'hailmary', name: 'Hail Mary', kind: 'fiction', art: 'hailmary', ref: null, query: 'Hail Mary', toast: 'AMAZE AMAZE AMAZE',
+    clue: 'A ship from a story by the author of The Martian, sent to the one nearby star that isn\'t fading. Look near Tau Ceti.',
+    story: 'A nod to Andy Weir\'s 2021 novel Project Hail Mary and its 2026 film: a lone astronaut wakes up on the ship Hail Mary at Tau Ceti, sent to learn why the Sun and the nearby stars are dimming, all but this one. The dimming is the thing Kepler measured, star by star. Tau Ceti and its four planet candidates are real; the story\'s planet, Adrian, is not.',
+    link: 'https://exoplanetarchive.ipac.caltech.edu/overview/tau%20Cet', linkLabel: "see Tau Ceti in NASA's Exoplanet Archive" },
   { id: 'voyager', name: 'Voyager 1', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 1', toast: 'INTERSTELLAR SIGNAL',
     clue: 'The farthest human-made object. I took the Pale Blue Dot, and in 2012 I was first to leave the Sun\'s bubble.',
     story: 'Launched on 5 September 1977, Voyager 1 flew past Jupiter (1979) and Saturn (1980), then headed up out of the planets\' plane. On 14 February 1990 it turned round and took the Pale Blue Dot, Earth from 6 billion km. In August 2012 it became the first spacecraft in interstellar space. It carries a Golden Record of sounds and pictures of Earth, and its signal takes most of a day to reach us.' },
@@ -424,7 +428,7 @@ function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
 
 // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
 const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
   ['Osiris Rex', 'apex'], ['Tatooine', null]];
 const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
 function editDistance(a, b) {   // Levenshtein, one row at a time

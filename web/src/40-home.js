@@ -281,6 +281,8 @@ function lookup(query, updateHash = true) {
   if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
   if (MARTIAN_QUERY.test(q)) { showMartian(updateHash); unlockEgg('martian'); return; }   // 47d-martian.js
   if (HUBBLE_QUERY.test(q)) { showHubble(updateHash); unlockEgg('hubble'); return; }   // 47f-hubble.js
+  if (HAILMARY_QUERY.test(q)) { unlockEgg('hailmary'); showTauCeti(updateHash); return; }   // 47g-tauceti.js
+  if (TAUCETI_QUERY.test(q)) { showTauCeti(updateHash); return; }
   const rover = roverFor(q);   // Curiosity and Perseverance at work on Mars (47e-rovers.js)
   if (rover) { showRover(rover, updateHash); unlockEgg(rover); return; }
   const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
