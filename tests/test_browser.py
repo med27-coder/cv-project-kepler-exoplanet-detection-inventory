@@ -192,13 +192,16 @@ def test_astronaut_outfits(browser, site):
 
 
 def test_the_martian(browser, site):
-    """The Martian: the farm opens from search (and from its #the-martian link), the egg is found, and the Galleria
+    """The Martian: the farm opens only from "martian man" (and its #martian-man link), the egg is found, and the Galleria
     card shows the NASA references; a full crop earns SPACE FARMER (time fast-forwarded)."""
     errors = []
     page = open_page(browser, site, errors)
-    page.fill('#query', 'the martian')
+    page.fill('#query', 'the martian')                                  # only "martian man" finds it
     page.press('#query', 'Enter')
-    assert page.locator('#sys-title').inner_text() == 'THE MARTIAN'
+    assert page.locator('#sys-title').inner_text() == 'NO SIGNAL'
+    page.fill('#query', 'Martian Man')
+    page.press('#query', 'Enter')
+    assert page.locator('#sys-title').inner_text() == 'MARTIAN MAN'
     assert 'martian' in page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).eggs")
     page.clock.run_for(61_000)                                          # a whole crop
     page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('space-farmer')")
@@ -206,8 +209,8 @@ def test_the_martian(browser, site):
     page.click('.egg-card[data-egg="martian"]')
     page.wait_for_selector('#pane-eggs .planet-strip img')
     assert page.locator('#pane-eggs .planet-strip li').count() == 5
-    page.goto(site + '#the-martian')                                    # a shared link opens it too
-    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'THE MARTIAN'")
+    page.goto(site + '#martian-man')                                    # a shared link opens it too
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'MARTIAN MAN'")
     assert not errors, errors
 
 

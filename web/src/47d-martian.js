@@ -1,10 +1,10 @@
 // ---------------------------------------------------------------- easter egg: The Martian (a fan nod)
 // Andy Weir's 2011 novel and the 2015 film: an astronaut left behind at the Ares 3 base on Acidalia Planitia grows
-// potatoes to survive. Searching for it opens a Mars farm in pixel art: the Hab, a glass biodome where potato
+// potatoes to survive. Searching "martian man" opens a Mars farm in pixel art: the Hab, a glass biodome where potato
 // rows grow through a whole crop while an astronaut tends them (in whatever outfit they wear, 47c-astronaut.js),
 // solar panels and a rover. Watching a crop all the way to harvest earns SPACE FARMER. The Galleria card shows
 // NASA's real work on farming Mars as references (no film stills: those are the studio's).
-const MARTIAN_QUERY = /^(the )?(martian|mark watney|watney|ares 3|ares iii|potatoes on mars|mars farm|space potatoes)$/i;
+const MARTIAN_QUERY = /^(the )?martian man$/i;   // the only way in: the Galleria clue points to it
 const CROP_MS = 60_000;   // one crop, sprout to harvest, in a minute of watching
 let martianSince = 0, cropDone = false;
 
@@ -91,7 +91,7 @@ function showMartian(updateHash = true) {
   ++selectToken;
   martianSince = performance.now();
   cropDone = false;
-  title.textContent = 'THE MARTIAN';
+  title.textContent = 'MARTIAN MAN';
   info.innerHTML = `
     <p class="big">★ A FARM ON MARS ★</p>
     <p>A nod to Andy Weir's 2011 novel and Ridley Scott's 2015 film: an astronaut left behind at the Ares 3 base on
@@ -122,5 +122,5 @@ function showMartian(updateHash = true) {
     pixelText(sctx, crop, SW - textWidth(crop) - 4, SH - 10, '#fff1d6');
   } });
   document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
-  if (updateHash) history.replaceState(null, '', '#the-martian');
+  if (updateHash) history.replaceState(null, '', '#martian-man');
 }

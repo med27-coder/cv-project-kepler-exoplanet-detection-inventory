@@ -2496,11 +2496,11 @@
 
   // ---------------------------------------------------------------- easter egg: The Martian (a fan nod)
   // Andy Weir's 2011 novel and the 2015 film: an astronaut left behind at the Ares 3 base on Acidalia Planitia grows
-  // potatoes to survive. Searching for it opens a Mars farm in pixel art: the Hab, a glass biodome where potato
+  // potatoes to survive. Searching "martian man" opens a Mars farm in pixel art: the Hab, a glass biodome where potato
   // rows grow through a whole crop while an astronaut tends them (in whatever outfit they wear, 47c-astronaut.js),
   // solar panels and a rover. Watching a crop all the way to harvest earns SPACE FARMER. The Galleria card shows
   // NASA's real work on farming Mars as references (no film stills: those are the studio's).
-  const MARTIAN_QUERY = /^(the )?(martian|mark watney|watney|ares 3|ares iii|potatoes on mars|mars farm|space potatoes)$/i;
+  const MARTIAN_QUERY = /^(the )?martian man$/i;   // the only way in: the Galleria clue points to it
   const CROP_MS = 60_000;   // one crop, sprout to harvest, in a minute of watching
   let martianSince = 0, cropDone = false;
 
@@ -2587,7 +2587,7 @@
     ++selectToken;
     martianSince = performance.now();
     cropDone = false;
-    title.textContent = 'THE MARTIAN';
+    title.textContent = 'MARTIAN MAN';
     info.innerHTML = `
       <p class="big">★ A FARM ON MARS ★</p>
       <p>A nod to Andy Weir's 2011 novel and Ridley Scott's 2015 film: an astronaut left behind at the Ares 3 base on
@@ -2618,7 +2618,7 @@
       pixelText(sctx, crop, SW - textWidth(crop) - 4, SH - 10, '#fff1d6');
     } });
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
-    if (updateHash) history.replaceState(null, '', '#the-martian');
+    if (updateHash) history.replaceState(null, '', '#martian-man');
   }
 
   // ---------------------------------------------------------------- Galleria: the easter-egg game
@@ -2648,9 +2648,9 @@
     { id: 'eris', name: 'Eris', kind: 'dwarf', ref: 'eris', query: 'Eris', toast: 'GODDESS OF DISCORD',
       clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
       story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
-    { id: 'martian', name: 'The Martian', kind: 'martian', ref: 'martian-gardens', query: 'The Martian', toast: 'BOTANIST OF MARS',
+    { id: 'martian', name: 'Martian Man', kind: 'martian', ref: 'martian-gardens', query: 'Martian Man', toast: 'BOTANIST OF MARS',
       refs: [['mars-habitat', 'BASE'], ['mars-greenhouse', 'GLASS'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'SPACE GARDEN']],
-      clue: 'Left behind on the red planet, I grew potatoes to stay alive, and called home through a lander from 1997.',
+      clue: 'Left behind on the red planet, I grew potatoes to stay alive. What do you call a man who lives on Mars?',
       story: 'A nod to Andy Weir\'s 2011 novel and the 2015 film. The real science: Martian soil holds toxic perchlorates that a farm would have to wash out, NASA has grown crops in simulated Martian soil, and astronauts first ate space-grown lettuce on the ISS in August 2015. The pictures are NASA\'s, used as references for the pixel farm.' },
     { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
       clue: 'I stared at one patch of sky for four years. Every pixel on this map is a star I watched. (I may be hiding on the map.)',
