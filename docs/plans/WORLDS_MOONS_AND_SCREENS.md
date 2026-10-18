@@ -48,6 +48,9 @@ tumbling slowly with a loose tether (`draft_lost_in_orbit.gif`), "LOST IN ORBIT 
 button to jump to a random system. "NO SIGNAL" gets the same astronaut, with the search hint.
 
 ## 6. Spacecraft hidden until named
+
+**Superseded by [FLEET_CLOSEUPS.md](FLEET_CLOSEUPS.md)** (17 October 2026): hidden as flashing lights, with close-ups.
+
 The spacecraft view currently shows every spacecraft with its name. To match the game, it shows only the ones
 you've found, labelled with their pixel art; the rest are faint "?" marks and table rows reading "??? · find
 it by name" (with the Galleria clue). Searching a name reveals it, with the unlock moment. The educational
@@ -61,6 +64,6 @@ version (everything shown) stays available after GRAND TOUR, or with a "show all
    independent data check, as in HIGHLIGHTS.md.
 
 ## 8. Decisions for you
-1. Spacecraft: hidden until found (planned), with "show all" after GRAND TOUR?
+1. Spacecraft: answered, see FLEET_CLOSEUPS.md (flashing lights until named).
 2. Loading screen: always shown briefly, or only when loading takes more than half a second (recommended)?
 3. Exomoon and water-world labels: "candidate" / "likely" wording as above, OK?
