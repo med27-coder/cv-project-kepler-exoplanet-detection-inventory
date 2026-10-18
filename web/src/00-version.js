@@ -5,6 +5,9 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.5', date: '18 Oct 2026', notes: [
+    "New: one of the dwarf planets has a fresh look, closer to NASA's, with its two moons on their tilted orbits.",
+  ] },
   { v: '1.9.4', date: '18 Oct 2026', notes: [
     'New: a nearby star you can visit now, even though Kepler never looked at it. Something small glints there.',
     'Fixed: systems whose catalog numbers put a planet inside its star now explain why.',
