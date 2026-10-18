@@ -1595,7 +1595,9 @@
     // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
     // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
     const q = query.trim().replace(/[-_.]/g, ' ');
-    if (HOME_QUERY.test(q) || /^(the )?pluto$/i.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
+    const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
+    if (dwarf) { showDwarf(dwarf, updateHash); unlockEgg(dwarf); return; }
+    if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
     if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
     if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
     if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
@@ -2260,6 +2262,154 @@
     if (updateHash) history.replaceState(null, '', '#Kepler');
   }
 
+  // ---------------------------------------------------------------- easter eggs: the five dwarf planets
+  // Pluto, Ceres, Haumea, Makemake and Eris, the five the IAU recognises (docs/plans/WORLDS_MOONS_AND_SCREENS.md).
+  // Searching one opens a close-up: the world turning, its known moons on (not-to-scale) orbits, and a card of
+  // facts from NASA. Finding all five earns DWARF KING (48-gallery.js). Moon periods: NASA / JPL; Makemake's
+  // moon's period is still uncertain.
+  const DWARFS = {
+    pluto: {
+      name: 'Pluto', km: 2377, stretch: 1, art: (dx, dy, r, spin) => SOLAR_ART.pluto(dx, dy, r, spin),
+      moons: [['CHARON', 6.387, '#9c958e', 2], ['STYX', 20.16, '#8f8a86', 1], ['NIX', 24.85, '#b5b0aa', 1],
+              ['KERBEROS', 32.17, '#7f7a76', 1], ['HYDRA', 38.2, '#c2bdb6', 1]],
+      url: `${NASA_SCIENCE}dwarf-planets/pluto/`,
+      facts: [
+        'Found by Clyde Tombaugh at Lowell Observatory in 1930, and counted as the ninth planet until 2006.',
+        'About 2,377 km across, smaller than our Moon (3,475 km). It takes 248 years to circle the Sun, 30 to 49 times as far out as Earth.',
+        'New Horizons flew past in July 2015 and found a heart-shaped plain of nitrogen ice (Tombaugh Regio) and mountains of water ice.',
+        'Five moons. Charon is half Pluto\'s size, so the two circle a point in the space between them.',
+      ],
+    },
+    ceres: {
+      name: 'Ceres', km: 939, stretch: 1,
+      art: (dx, dy, r, spin) => {   // grey, cratered, with Occator's bright salt spots turning into view
+        const P = 4 * r + 2, u = (((dx + spin + P / 2) % P) + P) % P - P / 2;
+        if (Math.hypot(u - r * 0.3, dy + r * 0.25) < Math.max(1, r * 0.09)) return '#ffffff';
+        return hash(`ce${Math.floor((dx + spin) / 2)},${Math.floor(dy / 2)}`) < 0.22 ? '#6d6a66' : '#8f8b86';
+      },
+      moons: [],
+      url: `${NASA_SCIENCE}dwarf-planets/ceres/`,
+      facts: [
+        'The first one found: Giuseppe Piazzi spotted it on 1 January 1801. It was called a planet, then an asteroid, and since 2006 a dwarf planet.',
+        'About 940 km across, the largest object in the asteroid belt between Mars and Jupiter, and the only dwarf planet in the inner Solar System.',
+        'NASA\'s Dawn orbited it from 2015 to 2018. The bright spots in Occator crater are salts (sodium carbonate) left behind by briny water from below.',
+        'No known moons.',
+      ],
+    },
+    haumea: {
+      name: 'Haumea', km: 2322, stretch: 1.55,
+      art: (dx, dy, r) => (hash(`ha${dx},${dy}`) < 0.12 ? '#cfccc6' : '#ecebe7'),   // bright crystalline water ice
+      ring: '#a9a59c',
+      moons: [['NAMAKA', 18.3, '#c8c4bc', 1], ['HIIAKA', 49.5, '#dedad2', 1]],
+      url: `${NASA_SCIENCE}dwarf-planets/haumea/`,
+      facts: [
+        'It spins once every 3.9 hours, one of the fastest-spinning large objects known, which has stretched it into an egg about 2,300 km long and half as wide.',
+        'A ring was discovered around it in 2017, when it passed in front of a star: the first ring found around a dwarf planet.',
+        'Two moons, Hiʻiaka and Namaka, named after daughters of Haumea, the Hawaiian goddess of childbirth.',
+        'Found in 2004 and 2005; credit is shared between teams in the United States and Spain. It takes about 284 years to circle the Sun.',
+      ],
+    },
+    makemake: {
+      name: 'Makemake', km: 1430, stretch: 1,
+      art: (dx, dy, r, spin) => (hash(`mk${Math.floor((dx + spin) / 2)},${Math.floor(dy / 2)}`) < 0.3 ? '#9a5f45' : '#b97a58'),
+      moons: [['MK2', 12.4, '#4a3a33', 1]],
+      url: `${NASA_SCIENCE}dwarf-planets/makemake/`,
+      facts: [
+        'Found in 2005, shortly after Easter, by Mike Brown\'s team at Palomar Observatory, and named after Makemake, the creator god of Rapa Nui (Easter Island).',
+        'About 1,430 km across, reddish-brown, with frozen methane on its surface. It takes about 305 years to circle the Sun.',
+        'One small, dark moon, nicknamed MK2, spotted by the Hubble Space Telescope in 2016; its orbit is still uncertain (drawn here at about 12 days).',
+      ],
+    },
+    eris: {
+      name: 'Eris', km: 2326, stretch: 1,
+      art: (dx, dy, r, spin) => (hash(`er${Math.floor((dx + spin) / 2)},${dy}`) < 0.15 ? '#d9d9de' : '#f4f4f6'),
+      moons: [['DYSNOMIA', 15.79, '#8d8b88', 1]],
+      url: `${NASA_SCIENCE}dwarf-planets/eris/`,
+      facts: [
+        'Found in 2005 (in pictures taken in 2003) by Mike Brown, Chad Trujillo and David Rabinowitz. A world about Pluto\'s size forced astronomers to define "planet": in 2006 the IAU did, and Pluto became a dwarf planet.',
+        'About 2,326 km across, a little smaller than Pluto but about 27% more massive.',
+        'One of the most reflective bodies in the Solar System, coated in frozen methane. Its orbit takes about 557 years and reaches more than twice as far out as Pluto\'s.',
+        'One moon, Dysnomia, named after Eris\'s daughter in Greek myth, the spirit of lawlessness.',
+      ],
+    },
+  };
+  const DWARF_QUERY = /^(the )?(dwarf planet )?(pluto|ceres|haumea|makemake|eris)$/i;
+  const dwarfFor = q => { const m = DWARF_QUERY.exec(q); return m ? m[3].toLowerCase() : null; };
+
+  // A lit, possibly stretched (Haumea) pixel globe; the ring, if any, is split behind and in front.
+  function dwarfBody(ctx, x, y, r, d, lx, ly, t) {
+    const x0 = Math.round(x), y0 = Math.round(y), sx = d.stretch, spin = REDUCED_MOTION ? 0 : t * 1.5;
+    const ring = d.ring ? [r * sx * 1.6, r * 0.55, d.ring] : null;
+    if (ring) planetRing(ctx, x0, y0, ring[0], ring[1], ring[2], false);
+    for (let dy = -r; dy <= r; dy++) {
+      const w = Math.floor(Math.sqrt(r * r - dy * dy + r * 0.8) * sx);
+      for (let dx = -w; dx <= w; dx++) {
+        const lit = (dx / sx * lx + dy * ly) / (r + 0.5);
+        const f = r < 8 ? (lit > 0.3 ? 1.15 : lit < -0.35 ? 0.45 : 0.9)
+          : lit > 0.45 ? 1.12 : lit > 0.1 ? 1 : lit > -0.2 ? 0.85 : lit > -0.45 ? 0.62 : 0.42;
+        ctx.fillStyle = shade(d.art(Math.round(dx / sx), dy, r, spin).toLowerCase(), f);
+        ctx.fillRect(x0 + dx, y0 + dy, 1, 1);
+      }
+    }
+    if (ring) planetRing(ctx, x0, y0, ring[0], ring[1], ring[2], true);
+  }
+
+  function drawDwarf(key, seconds) {
+    const d = DWARFS[key], t = REDUCED_MOTION ? 0 : seconds;
+    sctx.fillStyle = '#070b1a';
+    sctx.fillRect(0, 0, SW, SH);
+    for (let k = 0; k < 70; k++) {
+      sctx.fillStyle = k % 7 ? '#1e2550' : '#4a5590';
+      sctx.fillRect(Math.floor(hash('dw' + k) * SW), Math.floor(hash('dv' + k) * SH), 1, 1);
+    }
+    const cx = Math.round(SW / 2), cy = Math.round(SH / 2) - 6, r = 22, FLAT = 0.45;
+    const reach = (d.ring ? r * d.stretch * 1.6 : r * d.stretch) + 7;   // moons circle outside the globe (and ring)
+    const orbit = k => reach + 12 * k;
+    const onGlobe = (x, y, pad = 1) => ((x - cx) / (r * d.stretch + pad)) ** 2 + ((y - cy) / (r + pad)) ** 2 < 1;
+    d.moons.forEach((m, k) => {   // dotted orbits, broken where the globe hides them
+      sctx.fillStyle = '#26305e';
+      for (let a = 0; a < 2 * Math.PI; a += 0.1) {
+        const x = cx + orbit(k) * Math.cos(a), y = cy + orbit(k) * FLAT * Math.sin(a);
+        if (!(Math.sin(a) < 0 && onGlobe(x, y))) sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+      }
+    });
+    const placed = d.moons.map(([name, period, colour, size], k) => {
+      const a = t * 2 / Math.sqrt(period) + hash(name) * 6.3;
+      return { name, colour, size, x: cx + orbit(k) * Math.cos(a), y: cy + orbit(k) * FLAT * Math.sin(a), behind: Math.sin(a) < 0 };
+    });
+    const moon = m => {
+      if (m.behind && onGlobe(m.x, m.y)) return;   // hidden behind the world
+      sctx.fillStyle = m.colour;
+      sctx.fillRect(Math.round(m.x), Math.round(m.y), m.size, m.size);
+      const w = textWidth(m.name), lx = Math.round(Math.min(Math.max(1, m.x + 3), SW - w - 1)), ly = Math.round(m.y - 7);
+      if (!onGlobe(lx, ly + 2, 3) && !onGlobe(lx + w, ly + 2, 3)) pixelText(sctx, m.name, lx, ly, '#7f8ab8');   // never over the globe
+    };
+    placed.filter(m => m.behind).forEach(moon);
+    dwarfBody(sctx, cx, cy, r, d, -0.8, -0.5, t);
+    placed.filter(m => !m.behind).forEach(moon);
+    const label = `${d.name.toUpperCase()} · ${fmt(d.km)} KM`.replace(' · ', ' - ');
+    pixelText(sctx, label, 4, SH - 18, '#ffd34d');
+    pixelText(sctx, d.moons.length ? 'MOON ORBITS NOT TO SCALE' : 'NO KNOWN MOONS', 4, SH - 10, '#5a6a8a');
+  }
+
+  function showDwarf(key, updateHash = true) {
+    const d = DWARFS[key];
+    selected = null;
+    ++selectToken;
+    title.textContent = d.name.toUpperCase();
+    const others = Object.keys(DWARFS).filter(k => k !== key)
+      .map(k => (progress.eggs[k] ? `<b>${esc(DWARFS[k].name)}</b>` : '???')).join(', ');
+    info.innerHTML = `
+      <p class="big">★ DWARF PLANET ★</p>
+      <ul class="facts">${d.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
+      <p>The other dwarf planets: ${others}. Find all five for <b>DWARF KING</b>.</p>
+      <p class="note">Source: <a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">NASA: ${esc(d.name)}</a> ·
+        the drawing is pixel art, not a photo · you found an easter egg!</p>`;
+    setScene({ custom: seconds => drawDwarf(key, seconds) });
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#' + d.name);
+  }
+
   // ---------------------------------------------------------------- Galleria: the easter-egg game
   // The ⚙ button opens the Galleria. Every easter egg starts as a black silhouette with a question mark,
   // its name blanked out and a clue underneath; typing the right name in the search bar finds it: the
@@ -2270,9 +2420,23 @@
     { id: 'sun', name: 'Solar System', kind: 'sun', ref: 'pale-blue-dot', query: 'Solar System', toast: 'HOME SWEET HOME',
       clue: 'Eight worlds circle me, and on one of them, someone is reading this.',
       story: 'The Sun and its planets formed about 4.6 billion years ago from a collapsing cloud of gas and dust. It is the only system we know of with life, and the only one Kepler could never see: its view looked away from home.' },
-    { id: 'pluto', name: 'Pluto', kind: 'pluto', ref: 'pluto', query: 'Pluto', toast: 'DWARF PLANET DISCOVERED',
+    { id: 'pluto', name: 'Pluto', kind: 'dwarf', ref: 'pluto', query: 'Pluto', toast: 'DWARF PLANET DISCOVERED',
       clue: 'A planet for 76 years, then demoted. I still wear a heart.',
       story: 'Clyde Tombaugh found Pluto in 1930 at Lowell Observatory by comparing photographs night after night. In 2006 the IAU made it a dwarf planet. In July 2015 New Horizons flew past and found mountains of water ice and a heart-shaped plain of nitrogen ice, Tombaugh Regio.' },
+    { id: 'ceres', name: 'Ceres', kind: 'dwarf', ref: 'ceres', query: 'Ceres', toast: 'QUEEN OF THE BELT',
+      clue: 'Found on New Year\'s Day 1801 and called a planet, then an asteroid, now something in between. I live among the rocks between Mars and Jupiter.',
+      story: 'Giuseppe Piazzi found Ceres on 1 January 1801. About 940 km across, it is the largest object in the asteroid belt. NASA\'s Dawn orbited it from 2015 to 2018 and found that the bright spots in Occator crater are salts left by briny water seeping up from below.' },
+    { id: 'haumea', name: 'Haumea', kind: 'dwarf', ref: null, query: 'Haumea', toast: 'SPINNING EGG',
+      clue: 'I spin so fast that I\'ve been stretched into an egg, and I wear a ring.',
+      story: 'Haumea turns once every 3.9 hours, so fast that it has stretched into an egg about 2,300 km long. A ring was found around it in 2017, the first around a dwarf planet. Its two moons are named after daughters of the Hawaiian goddess Haumea.',
+      link: 'https://science.nasa.gov/dwarf-planets/haumea/', linkLabel: "see NASA's Haumea page" },
+    { id: 'makemake', name: 'Makemake', kind: 'dwarf', ref: null, query: 'Makemake', toast: 'EASTER DISCOVERY',
+      clue: 'Found just after Easter, I\'m named after a god of the island famous for its giant stone heads.',
+      story: 'Mike Brown\'s team found Makemake in 2005, just after Easter, and named it after the creator god of Rapa Nui (Easter Island). Reddish-brown and coated in frozen methane, it is about 1,430 km across. Hubble spotted a small dark moon around it in 2016.',
+      link: 'https://science.nasa.gov/dwarf-planets/makemake/', linkLabel: "see NASA's Makemake page" },
+    { id: 'eris', name: 'Eris', kind: 'dwarf', ref: 'eris', query: 'Eris', toast: 'GODDESS OF DISCORD',
+      clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
+      story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
     { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
       clue: 'I stared at one patch of sky for four years. Every pixel on this map is a star I watched. (I may be hiding on the map.)',
       story: 'Launched in March 2009, Kepler watched about 150,000 stars in Cygnus and Lyra for the tiny dips of passing planets. When two of its four reaction wheels failed, engineers balanced it against sunlight for the K2 mission. It ran out of fuel in 2018; its last command, on 15 November, was a "goodnight".' },
@@ -2384,6 +2548,7 @@
     { g: 'EASTER EGGS', id: 'jupiter-crew', title: "JUPITER'S ENTOURAGE", how: 'Find Juno, Europa Clipper, JUICE and Lucy.' },
     { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
     { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
+    { g: 'EASTER EGGS', id: 'dwarf-king', title: 'DWARF KING', how: 'Find all five dwarf planets.' },
     { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find the two missions heading out of the Solar System.' },
     { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
     { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
@@ -2412,7 +2577,7 @@
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
            'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom'],
-    epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+    epic: ['census', 'cartographer', 'dwarf-king', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
            'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
   };
   for (const a of ACHIEVEMENTS) {
@@ -2428,6 +2593,7 @@
     'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
     l2: ['jwst', 'euclid'],
     interstellar: ['voyager', 'newHorizons'],
+    'dwarf-king': ['pluto', 'ceres', 'haumea', 'makemake', 'eris'],
   };
   const PYRAMID_LY = 4600;   // the Great Pyramid of Giza is about 4,600 years old
   const session = { unknown: 0, hops: 0, highlights: new Set(), cards: new Set(), unlocks: [] };   // this visit only
@@ -2561,7 +2727,7 @@
 
   // Which easter egg a search found (called by lookup() after it opened one).
   function eggForQuery(q) {
-    if (/^(the )?pluto$/i.test(q)) return 'pluto';
+    if (dwarfFor(q)) return dwarfFor(q);
     if (HOME_QUERY.test(q)) return 'sun';
     if (ISS_QUERY.test(q)) return 'iss';
     if (KEPLER_QUERY.test(q)) return 'kepler';
@@ -2676,8 +2842,8 @@
       }
       disc(ctx, cx, cy, r, '#ffd34d');
       disc(ctx, cx - 1, cy - 1, Math.max(1, r - 2), '#fff1b0');
-    } else if (egg.kind === 'pluto') {
-      solarPlanet(ctx, cx, cy, { art: 'pluto', size: Math.floor(h / 3) }, -0.8, -0.6, t * 2);
+    } else if (egg.kind === 'dwarf') {
+      dwarfBody(ctx, cx, cy, Math.floor(h / 3), DWARFS[egg.id], -0.8, -0.6, t * 2);
     } else if (egg.kind === 'kepler') {
       const px = Math.max(1, Math.min(Math.floor((w - 4) / KEPLER_W), Math.floor((h - 4) / KEPLER_H)));
       keplerSprite(ctx, cx - Math.floor(KEPLER_W * px / 2), cy - Math.floor(KEPLER_H * px / 2), px, silhouette ? null : (t / 3) % 1);
@@ -2752,7 +2918,7 @@
           <figcaption>THE REAL THING · ${esc(credit.what)} · ${link(credit.link, `credit: ${credit.credit}`)}</figcaption></figure>`
       : `<figure class="no-photo"><figcaption>THE REAL THING · ${credit
           ? `${esc(credit.what)}: the picture is credited to ESA, so it isn't copied here; ${link(credit.link, `see it (${credit.credit})`)}`
-          : `no NASA photo; ${link(egg.link, 'see ESA\'s mission page')}`}</figcaption></figure>`;
+          : `no NASA photo; ${link(egg.link, egg.linkLabel || 'see ESA\'s mission page')}`}</figcaption></figure>`;
     panes.eggs.innerHTML = `
       <button type="button" class="ghost back">◂ BACK</button>
       <div class="egg-detail${got ? ' found' : ''}">
@@ -3229,6 +3395,7 @@
     'so-close': ['.rrrrr.', 'r.www.r', 'r.wrw.r', 'r.www.r', '.rrrrr.', '......y'],          // a dart just off the bullseye
     'cosmic-zoom': ['.vvvv..', 'v....v.', 'v.yy..v', 'v.y...v', '.v...v.', '..vvv..'],         // a spiral, the universe
     'lost-in-orbit': ['..www..', '.woooww', '.woooww', '..www.m', '.wwwwm.', '.w.w...'],      // an astronaut, tether loose
+    'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
     'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
@@ -3670,6 +3837,7 @@
     'so-close': 'Galileo drew Neptune in 1612 and took it for a star: so close, 234 years before its discovery.',
     'cosmic-zoom': 'The observable universe is about 93 billion light-years across; Kepler looked a few thousand into it.',
     'lost-in-orbit': 'Astronauts on spacewalks stay tethered; in 1984 Bruce McCandless flew free, 100 metres from the Shuttle.',
+    'dwarf-king': 'The IAU recognises five dwarf planets; dozens more Kuiper Belt worlds may one day join them.',
     speedrun: 'Voyager 1 travels about 17 km every second.',
     goodnight: "Kepler's last command was sent on 15 November 2018.",
     'launch-day': 'Kepler launched on a Delta II rocket from Cape Canaveral on 7 March 2009.',

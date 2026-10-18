@@ -8,9 +8,23 @@ const EGGS = [
   { id: 'sun', name: 'Solar System', kind: 'sun', ref: 'pale-blue-dot', query: 'Solar System', toast: 'HOME SWEET HOME',
     clue: 'Eight worlds circle me, and on one of them, someone is reading this.',
     story: 'The Sun and its planets formed about 4.6 billion years ago from a collapsing cloud of gas and dust. It is the only system we know of with life, and the only one Kepler could never see: its view looked away from home.' },
-  { id: 'pluto', name: 'Pluto', kind: 'pluto', ref: 'pluto', query: 'Pluto', toast: 'DWARF PLANET DISCOVERED',
+  { id: 'pluto', name: 'Pluto', kind: 'dwarf', ref: 'pluto', query: 'Pluto', toast: 'DWARF PLANET DISCOVERED',
     clue: 'A planet for 76 years, then demoted. I still wear a heart.',
     story: 'Clyde Tombaugh found Pluto in 1930 at Lowell Observatory by comparing photographs night after night. In 2006 the IAU made it a dwarf planet. In July 2015 New Horizons flew past and found mountains of water ice and a heart-shaped plain of nitrogen ice, Tombaugh Regio.' },
+  { id: 'ceres', name: 'Ceres', kind: 'dwarf', ref: 'ceres', query: 'Ceres', toast: 'QUEEN OF THE BELT',
+    clue: 'Found on New Year\'s Day 1801 and called a planet, then an asteroid, now something in between. I live among the rocks between Mars and Jupiter.',
+    story: 'Giuseppe Piazzi found Ceres on 1 January 1801. About 940 km across, it is the largest object in the asteroid belt. NASA\'s Dawn orbited it from 2015 to 2018 and found that the bright spots in Occator crater are salts left by briny water seeping up from below.' },
+  { id: 'haumea', name: 'Haumea', kind: 'dwarf', ref: null, query: 'Haumea', toast: 'SPINNING EGG',
+    clue: 'I spin so fast that I\'ve been stretched into an egg, and I wear a ring.',
+    story: 'Haumea turns once every 3.9 hours, so fast that it has stretched into an egg about 2,300 km long. A ring was found around it in 2017, the first around a dwarf planet. Its two moons are named after daughters of the Hawaiian goddess Haumea.',
+    link: 'https://science.nasa.gov/dwarf-planets/haumea/', linkLabel: "see NASA's Haumea page" },
+  { id: 'makemake', name: 'Makemake', kind: 'dwarf', ref: null, query: 'Makemake', toast: 'EASTER DISCOVERY',
+    clue: 'Found just after Easter, I\'m named after a god of the island famous for its giant stone heads.',
+    story: 'Mike Brown\'s team found Makemake in 2005, just after Easter, and named it after the creator god of Rapa Nui (Easter Island). Reddish-brown and coated in frozen methane, it is about 1,430 km across. Hubble spotted a small dark moon around it in 2016.',
+    link: 'https://science.nasa.gov/dwarf-planets/makemake/', linkLabel: "see NASA's Makemake page" },
+  { id: 'eris', name: 'Eris', kind: 'dwarf', ref: 'eris', query: 'Eris', toast: 'GODDESS OF DISCORD',
+    clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
+    story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
   { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
     clue: 'I stared at one patch of sky for four years. Every pixel on this map is a star I watched. (I may be hiding on the map.)',
     story: 'Launched in March 2009, Kepler watched about 150,000 stars in Cygnus and Lyra for the tiny dips of passing planets. When two of its four reaction wheels failed, engineers balanced it against sunlight for the K2 mission. It ran out of fuel in 2018; its last command, on 15 November, was a "goodnight".' },
@@ -122,6 +136,7 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'jupiter-crew', title: "JUPITER'S ENTOURAGE", how: 'Find Juno, Europa Clipper, JUICE and Lucy.' },
   { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
   { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
+  { g: 'EASTER EGGS', id: 'dwarf-king', title: 'DWARF KING', how: 'Find all five dwarf planets.' },
   { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find the two missions heading out of the Solar System.' },
   { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
   { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
@@ -150,7 +165,7 @@ const ACHIEVEMENTS = [
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
          'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom'],
-  epic: ['census', 'cartographer', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+  epic: ['census', 'cartographer', 'dwarf-king', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
          'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
 for (const a of ACHIEVEMENTS) {
@@ -166,6 +181,7 @@ const EGG_SETS = {
   'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
   l2: ['jwst', 'euclid'],
   interstellar: ['voyager', 'newHorizons'],
+  'dwarf-king': ['pluto', 'ceres', 'haumea', 'makemake', 'eris'],
 };
 const PYRAMID_LY = 4600;   // the Great Pyramid of Giza is about 4,600 years old
 const session = { unknown: 0, hops: 0, highlights: new Set(), cards: new Set(), unlocks: [] };   // this visit only
@@ -299,7 +315,7 @@ function unlockEgg(id) {
 
 // Which easter egg a search found (called by lookup() after it opened one).
 function eggForQuery(q) {
-  if (/^(the )?pluto$/i.test(q)) return 'pluto';
+  if (dwarfFor(q)) return dwarfFor(q);
   if (HOME_QUERY.test(q)) return 'sun';
   if (ISS_QUERY.test(q)) return 'iss';
   if (KEPLER_QUERY.test(q)) return 'kepler';
@@ -414,8 +430,8 @@ function drawEggArt(canvas, egg, t, silhouette) {
     }
     disc(ctx, cx, cy, r, '#ffd34d');
     disc(ctx, cx - 1, cy - 1, Math.max(1, r - 2), '#fff1b0');
-  } else if (egg.kind === 'pluto') {
-    solarPlanet(ctx, cx, cy, { art: 'pluto', size: Math.floor(h / 3) }, -0.8, -0.6, t * 2);
+  } else if (egg.kind === 'dwarf') {
+    dwarfBody(ctx, cx, cy, Math.floor(h / 3), DWARFS[egg.id], -0.8, -0.6, t * 2);
   } else if (egg.kind === 'kepler') {
     const px = Math.max(1, Math.min(Math.floor((w - 4) / KEPLER_W), Math.floor((h - 4) / KEPLER_H)));
     keplerSprite(ctx, cx - Math.floor(KEPLER_W * px / 2), cy - Math.floor(KEPLER_H * px / 2), px, silhouette ? null : (t / 3) % 1);
@@ -490,7 +506,7 @@ function renderDetail(egg) {
         <figcaption>THE REAL THING · ${esc(credit.what)} · ${link(credit.link, `credit: ${credit.credit}`)}</figcaption></figure>`
     : `<figure class="no-photo"><figcaption>THE REAL THING · ${credit
         ? `${esc(credit.what)}: the picture is credited to ESA, so it isn't copied here; ${link(credit.link, `see it (${credit.credit})`)}`
-        : `no NASA photo; ${link(egg.link, 'see ESA\'s mission page')}`}</figcaption></figure>`;
+        : `no NASA photo; ${link(egg.link, egg.linkLabel || 'see ESA\'s mission page')}`}</figcaption></figure>`;
   panes.eggs.innerHTML = `
     <button type="button" class="ghost back">◂ BACK</button>
     <div class="egg-detail${got ? ' found' : ''}">

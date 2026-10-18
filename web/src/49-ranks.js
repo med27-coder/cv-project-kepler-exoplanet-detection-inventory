@@ -84,6 +84,7 @@ const SYMBOLS = {
   'so-close': ['.rrrrr.', 'r.www.r', 'r.wrw.r', 'r.www.r', '.rrrrr.', '......y'],          // a dart just off the bullseye
   'cosmic-zoom': ['.vvvv..', 'v....v.', 'v.yy..v', 'v.y...v', '.v...v.', '..vvv..'],         // a spiral, the universe
   'lost-in-orbit': ['..www..', '.woooww', '.woooww', '..www.m', '.wwwwm.', '.w.w...'],      // an astronaut, tether loose
+  'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
   'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
