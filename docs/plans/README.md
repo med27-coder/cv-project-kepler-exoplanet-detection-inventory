@@ -6,9 +6,10 @@ still open. (Merged into `main` in October 2026.)
 | # | Plan | Status | Next step |
 |---|---|---|---|
 | - | [BACKGROUND.md](BACKGROUND.md): pixel night-sky page background | **done** (October 2026, `web/src/55-backdrop.js`) | - |
-| 1 | [HIGHLIGHTS.md](HIGHLIGHTS.md): accurate, explained highlights (Kopparapu habitable zone, facts vs predictions, radius errors), 9 new filters, combined filters with a results list | planned, numbers measured | the user answers its 4 decisions; data first, then an independent data audit |
-| 2 | [ACHIEVEMENTS_V2.md](ACHIEVEMENTS_V2.md): 13 chapters as real constellations, 35 new achievements, planets up close, Project Hail Mary (Tau Ceti, secret Erid), "What the alien doing", comets/asteroids/UFO sky events, rewards and titles | planned, concept art done | the user answers its 5 decisions, then build in its 5 steps |
-| 3 | [CONSTELLATIONS.md](CONSTELLATIONS.md): the constellation data (d3-celestial, BSD) and how figures draw | data checked; pairing superseded by #2 | built as part of #2 |
+| 1 | [WORLDS_MOONS_AND_SCREENS.md](WORLDS_MOONS_AND_SCREENS.md): hidden spacecraft until named, "lost in orbit" empty screen, a loading screen (a rock with moons), dwarf planets + their moons, exomoon candidates, water worlds from published studies | planned, concept art done | 3 decisions, then build |
+| 2 | [HIGHLIGHTS.md](HIGHLIGHTS.md): accurate, explained highlights (Kopparapu habitable zone, facts vs predictions, radius errors), 9 new filters, combined filters with a results list | planned, numbers measured | the user answers its 4 decisions; data first, then an independent data audit |
+| 3 | [ACHIEVEMENTS_V2.md](ACHIEVEMENTS_V2.md): 13 chapters as real constellations, 35 new achievements, planets up close, Project Hail Mary (Tau Ceti, secret Erid), "What the alien doing", comets/asteroids/UFO sky events, rewards and titles | planned, concept art done | the user answers its 5 decisions, then build in its 5 steps |
+| 4 | [CONSTELLATIONS.md](CONSTELLATIONS.md): the constellation data (d3-celestial, BSD) and how figures draw | data checked; pairing superseded by #2 | built as part of #2 |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 
