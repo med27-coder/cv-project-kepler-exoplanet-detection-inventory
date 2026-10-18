@@ -268,8 +268,11 @@ function select(s, updateHash = true) {
   if (updateHash) history.replaceState(null, '', '#' + encodeURIComponent(s[COL.name]));
 }
 
+// The search takes names, not pictures: emojis (and their joiners, skin tones and flags) are dropped everywhere.
+const EMOJI = /[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\p{Emoji_Modifier}\u200D\uFE0F\u20E3]/gu;
+const noEmoji = text => String(text).replace(EMOJI, '');
 function lookup(query, updateHash = true) {
-  query = String(query).slice(0, MAX_QUERY);
+  query = noEmoji(query).slice(0, MAX_QUERY);
   if (!query.trim()) return;
   // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
   // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.

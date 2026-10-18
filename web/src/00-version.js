@@ -1,12 +1,13 @@
 // ---------------------------------------------------------------- the site's version
 // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
-// stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: stay on 1.x (MINOR for
-// new features, PATCH for fixes). HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
+// stylesheet links, and tests check it matches the top of CHANGELOG.md. Versions count up in the last number, one step per release
+// (1.9.1, 1.9.2, 1.9.3...), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
-  { v: '1.10.0', date: '18 Oct 2026', notes: [
+  { v: '1.9.1', date: '18 Oct 2026', notes: [
     'New: an UPDATES tab in this transmission, with everything added and fixed, version by version.',
+    'Fixed: the search box now ignores emojis.',
   ] },
   { v: '1.9.0', date: '18 Oct 2026', notes: [
     "New: two more rovers to find, NASA's twins of 2004, each with its own scene on Mars.",

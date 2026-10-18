@@ -71,7 +71,15 @@ function choose(s) {
   select(s);
 }
 
-input.addEventListener('input', showSuggestions);
+input.addEventListener('input', () => {   // emojis typed or pasted into the search box disappear at once
+  const clean = noEmoji(input.value);
+  if (clean !== input.value) {
+    const at = noEmoji(input.value.slice(0, input.selectionStart ?? input.value.length)).length;
+    input.value = clean;
+    input.setSelectionRange(at, at);
+  }
+  showSuggestions();
+});
 input.addEventListener('focus', showSuggestions);
 input.addEventListener('keydown', e => {
   if (suggest.hidden) return;

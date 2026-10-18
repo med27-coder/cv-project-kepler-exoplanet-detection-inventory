@@ -116,13 +116,14 @@
 
   // ---------------------------------------------------------------- the site's version
   // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
-  // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: stay on 1.x (MINOR for
-  // new features, PATCH for fixes). HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
+  // stylesheet links, and tests check it matches the top of CHANGELOG.md. Versions count up in the last number, one step per release
+  // (1.9.1, 1.9.2, 1.9.3...), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
-    { v: '1.10.0', date: '18 Oct 2026', notes: [
+    { v: '1.9.1', date: '18 Oct 2026', notes: [
       'New: an UPDATES tab in this transmission, with everything added and fixed, version by version.',
+      'Fixed: the search box now ignores emojis.',
     ] },
     { v: '1.9.0', date: '18 Oct 2026', notes: [
       "New: two more rovers to find, NASA's twins of 2004, each with its own scene on Mars.",
@@ -1824,8 +1825,11 @@
     if (updateHash) history.replaceState(null, '', '#' + encodeURIComponent(s[COL.name]));
   }
 
+  // The search takes names, not pictures: emojis (and their joiners, skin tones and flags) are dropped everywhere.
+  const EMOJI = /[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\p{Emoji_Modifier}\u200D\uFE0F\u20E3]/gu;
+  const noEmoji = text => String(text).replace(EMOJI, '');
   function lookup(query, updateHash = true) {
-    query = String(query).slice(0, MAX_QUERY);
+    query = noEmoji(query).slice(0, MAX_QUERY);
     if (!query.trim()) return;
     // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
     // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
@@ -5771,7 +5775,15 @@
     select(s);
   }
 
-  input.addEventListener('input', showSuggestions);
+  input.addEventListener('input', () => {   // emojis typed or pasted into the search box disappear at once
+    const clean = noEmoji(input.value);
+    if (clean !== input.value) {
+      const at = noEmoji(input.value.slice(0, input.selectionStart ?? input.value.length)).length;
+      input.value = clean;
+      input.setSelectionRange(at, at);
+    }
+    showSuggestions();
+  });
   input.addEventListener('focus', showSuggestions);
   input.addEventListener('keydown', e => {
     if (suggest.hidden) return;

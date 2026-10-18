@@ -815,3 +815,18 @@ def test_loading_screen_picks_one_of_two_scenes(browser, site):
         assert page.get_attribute('#loading img', 'src') == gif
         assert page.locator('.loading-title').inner_text().startswith(title)
         page.close()
+
+
+def test_search_rejects_emojis(browser, site):
+    """Emojis typed or pasted into the search box are dropped, and a search made only of emojis does nothing."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'Kepler-90 🚀🇺🇸⭐️')
+    page.dispatch_event('#query', 'input')
+    assert page.input_value('#query') == 'Kepler-90 '
+    page.press('#query', 'Enter')
+    page.wait_for_function("() => document.getElementById('sys-title').textContent.includes('KEPLER-90')")
+    page.fill('#query', '👽👨‍🚀')
+    page.dispatch_event('#query', 'input')
+    assert page.input_value('#query') == ''
+    assert not errors, errors
