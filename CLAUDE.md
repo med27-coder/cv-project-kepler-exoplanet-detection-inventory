@@ -23,10 +23,15 @@ CI (`.github/workflows/tests.yml`) runs ruff, mypy, pytest with coverage, `build
 `node --check web/starmap.js`. Dependencies are hash-locked (`requirements*.lock`, regenerated with
 `scripts/tools/lock_requirements.py`; never let it bump unrelated pins silently).
 
-Tooling: the project enables Anthropic's `pyright-lsp`, `typescript-lsp` and `security-guidance` plugins
+Tooling: the project enables Anthropic's `pyright-lsp`, `typescript-lsp`, `security-guidance`, `frontend-design`,
+`claude-md-management` and `claude-security` plugins
 (`.claude/settings.json`; configs: `[tool.pyright]` in `pyproject.toml`, root `jsconfig.json`), so edits come back
 with diagnostics. Pyright is advisory (8 known numpy/pandas typing quirks); mypy is the type check of record.
 The GitHub CLI (`gh`) is installed: use `gh run list` / `gh run view --log-failed` for CI.
+Hooks (`.claude/hooks/`, wired in `.claude/settings.json`): `guard_secrets.py` blocks any git add of the key folder or
+key, pem and env files, and any commit while one is staged; `check_web.py` rebuilds `web/starmap.js` after every edit
+in `web/src/` and reports a syntax error at once. `/release [minor|patch|major] [notes]` (`.claude/commands/release.md`)
+runs the whole release routine below.
 
 Shell gotcha: heredocs passed through the Bash tool mangle backslashes and some quotes. For multi-line Python
 patches, write a script file (scratchpad) and run it, or use the Edit tool.
