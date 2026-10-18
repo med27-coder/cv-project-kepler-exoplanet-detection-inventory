@@ -7,6 +7,13 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.3.0] - 2026-10-18
+
+### Added
+- **Card arrows in the Galleria:** an open easter-egg card has ◀ ▶ on its edges (they stay in view while you
+  scroll), and the left and right arrow keys do the same, stepping through every card and wrapping round, so you
+  no longer need BACK between cards. The card's number shows at the top (CARD 13 / 30).
+
 ## [1.2.1] - 2026-10-18
 
 ### Fixed
@@ -67,6 +74,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.3.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.3.0
 [1.2.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.1
 [1.2.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.0
 [1.1.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.1.0
