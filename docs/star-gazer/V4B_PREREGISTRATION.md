@@ -47,4 +47,6 @@ If the primary endpoint passes, V3 and the combined system score every CANDIDATE
 
 ## 6. Changes after registration
 
-(none yet)
+(none)
+
+Results: [V4B_RESULTS.md](V4B_RESULTS.md) (primary passed, non-inferiority failed; not adopted).

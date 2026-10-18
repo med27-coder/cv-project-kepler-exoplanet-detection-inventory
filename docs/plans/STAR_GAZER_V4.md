@@ -1,5 +1,8 @@
 # Plan: Star Gazer V4
 
+**Colossus 2 (18 October 2026): primary passed (86% vs 81% of giants), non-inferiority failed; not adopted.** See
+[../star-gazer/V4B_RESULTS.md](../star-gazer/V4B_RESULTS.md). The lead: V3's network with the physics features (V3.1).
+
 **Result (17 October 2026): the registered test failed.** Colossus found 72% of giant planets at V3's false-alarm
 rate against V3's 81%, so it is not adopted. Full results and what a next attempt would need:
 [../V4_RESULTS.md](../star-gazer/V4_RESULTS.md).
