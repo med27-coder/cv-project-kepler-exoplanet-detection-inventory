@@ -9,7 +9,7 @@ States (https://www.nasa.gov/nasa-brand-center/images-and-media/). Images whose 
 only linked in SOURCES.md, not copied into this public repository. JUICE and BepiColombo (ESA) have no picture in NASA's
 library, so their sprites follow ESA's published designs and no copy is kept here.
 
-The star map's Galleria shows the real thing next to the pixel art, so smaller copies (240 pixels wide)
+The star map's Galleria shows the real thing next to the pixel art, so smaller copies (480 pixels wide)
 also go to web/gallery/, with their credits in web/data/gallery.js.
 """
 
@@ -27,7 +27,7 @@ OUT = ROOT / 'pixel-art' / 'references'
 API = 'https://images-api.nasa.gov'
 MAX_W = 640
 WEB = ROOT / 'web' / 'gallery'
-WEB_W = 240
+WEB_W = 480   # twice the 240 pixels they're shown at, so they stay sharp on high-density screens
 CREDITS = ROOT / 'web' / 'data' / 'gallery.js'
 
 # (folder, file name, NASA ID, what it shows)
@@ -56,7 +56,7 @@ PICKS = [
     ('solar-system', 'pale-blue-dot', 'PIA23645', ('The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), '
                                                    'photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020)')),
     ('solar-system', 'sun', 'GSFC_20171208_Archive_e000923', 'The Sun in visible light with a giant sunspot (SDO, 2014)'),
-    ('solar-system', 'mercury', 'GSFC_20171208_Archive_e001922', "Mercury's surface from orbit, first colour image (MESSENGER, 2011)"),
+    ('solar-system', 'mercury', 'PIA02418', 'Mercury, most of a hemisphere, as Mariner 10 left it (1974)'),
     ('solar-system', 'venus', 'PIA23791', 'Venus and its clouds (Mariner 10, 1974, reprocessed)'),
     ('solar-system', 'earth', 'epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o',
      'Earth, Africa and Europe, from 1.5 million km (DSCOVR EPIC, 2015)'),
@@ -95,6 +95,9 @@ PICKS = [
     ('trophies', 'brown-dwarf', 'PIA21752', 'A brown dwarf, too small to be a star, with banded weather (artist concept)'),
     ('trophies', 'two-suns-kepler-16', 'PIA14724', 'Kepler-16 b, where the sun sets twice (artist concept)'),
 ]
+# Part of the picture to keep, as fractions (left, top, right, bottom): NASA's Venus is a pair, the plain view on the
+# left and a contrast-enhanced copy on the right.
+CROP = {'venus': (0, 0, 0.49, 1)}
 WEB_FOLDERS = {'spacecraft', 'solar-system'}   # the Galleria's photos; 'stars' are concept references only
 EXTRA = [   # not in the NASA library search: (folder, file, URL, credit, what it shows)
     ('solar-system', 'earth-blue-marble',
@@ -108,8 +111,10 @@ def get(url):
         return r.read()
 
 
-def save_image(data, path, width=MAX_W, quality=85):
+def save_image(data, path, width=MAX_W, quality=85, crop=None):
     img = Image.open(io.BytesIO(data)).convert('RGB')
+    if crop:
+        img = img.crop(tuple(round(f * (img.width if k % 2 == 0 else img.height)) for k, f in enumerate(crop)))
     if img.width > width:
         img = img.resize((width, round(img.height * width / img.width)), Image.LANCZOS)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -138,13 +143,13 @@ def main():
             print(f'{name}: ESA credit, linked only')
             continue
         data = get(pick.replace('http://', 'https://'))
-        save_image(data, path)
+        save_image(data, path, crop=CROP.get(name))
         if folder not in WEB_FOLDERS:
             rows.append((f'{folder}/{name}.jpg', what, f"[{nasa_id}](https://images.nasa.gov/details/{nasa_id})",
                          credit, meta.get('date_created', '')[:10]))
             print(f'{folder}/{name}.jpg  <- {nasa_id}')
             continue
-        save_image(data, WEB / f'{name}.jpg', WEB_W, 80)
+        save_image(data, WEB / f'{name}.jpg', WEB_W, 74, crop=CROP.get(name))
         gallery[name] = {'img': f'gallery/{name}.jpg', 'credit': credit,
                          'link': f'https://images.nasa.gov/details/{nasa_id}', 'what': what}
         rows.append((f'{folder}/{name}.jpg', what, f"[{nasa_id}](https://images.nasa.gov/details/{nasa_id})",

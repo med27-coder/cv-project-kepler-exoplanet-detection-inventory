@@ -67,6 +67,45 @@ def open_page(browser, url, errors, init_script=None):
     return page
 
 
+def test_galleria_photos_fit_and_slider_stays(browser, site):
+    """Galleria photos: sharp copies (480 wide), tall ones shrink to fit, the planet strip shows whole planets, and
+    earning PHOTO FINISH (which redraws the Galleria) leaves the slider on the pixel art."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {kepler: '2026-10-14', sun: '2026-10-14'},"
+                  " ach: {}, systems: [], toured: true}))")
+    page.reload()
+    page.click('#open-gallery')
+    page.click('.egg-card[data-egg="kepler"]')
+    page.wait_for_function("document.querySelector('.morph canvas').width >= 480")
+    box = page.locator('.morph canvas').bounding_box()
+    assert box['height'] <= 284 and box['width'] <= 244                                       # tall photo shrinks
+    page.fill('.morph input', '100')
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('photo-finish')")
+    assert page.input_value('.morph input') == '100'
+    page.click('#gallery-close')
+    page.click('#open-gallery')
+    page.click('.egg-card[data-egg="sun"]')
+    assert page.eval_on_selector('.planet-strip img', "i => getComputedStyle(i).objectFit") == 'contain'
+    assert not errors, errors
+
+
+def test_phone_controls_fit_on_screen(browser, site):
+    """On a 375-pixel phone every visible button sits inside the screen (the system tools once ran off the edge)."""
+    errors = []
+    page = browser.new_page(viewport={'width': 375, 'height': 740}, is_mobile=True, has_touch=True)
+    page.on('pageerror', lambda e: errors.append(str(e)))
+    page.goto(site)
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.wait_for_selector('#sys-tools:not([hidden])')
+    outside = page.evaluate("""() => [...document.querySelectorAll('button')].filter(b => b.offsetParent && !b.closest('dialog'))
+        .filter(b => { const r = b.getBoundingClientRect(); return r.left < 0 || r.right > innerWidth; }).map(b => b.id || b.textContent)""")
+    assert outside == [], outside
+    page.click('#sys-in', timeout=3000)                               # and it can be tapped
+    assert not errors, errors
+
+
 def test_page_checks(browser, site):
     """The full in-page check list (search, zoom, highlights, system view, easter egg, case files...)."""
     errors = []

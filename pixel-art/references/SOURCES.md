@@ -31,7 +31,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `spacecraft/iss.jpg` | The ISS photographed from a departing Soyuz (2018) | [iss056e201248](https://images.nasa.gov/details/iss056e201248) | NASA JSC | 2018-10-04 |
 | `solar-system/pale-blue-dot.jpg` | The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020) | [PIA23645](https://images.nasa.gov/details/PIA23645) | NASA/JPL-Caltech | 2020-02-12 |
 | `solar-system/sun.jpg` | The Sun in visible light with a giant sunspot (SDO, 2014) | [GSFC_20171208_Archive_e000923](https://images.nasa.gov/details/GSFC_20171208_Archive_e000923) | NASA GSFC | 2017-12-08 |
-| `solar-system/mercury.jpg` | Mercury's surface from orbit, first colour image (MESSENGER, 2011) | [GSFC_20171208_Archive_e001922](https://images.nasa.gov/details/GSFC_20171208_Archive_e001922) | NASA GSFC | 2017-12-08 |
+| `solar-system/mercury.jpg` | Mercury, most of a hemisphere, as Mariner 10 left it (1974) | [PIA02418](https://images.nasa.gov/details/PIA02418) | NASA/JPL/Northwestern University | 1999-10-07 |
 | `solar-system/venus.jpg` | Venus and its clouds (Mariner 10, 1974, reprocessed) | [PIA23791](https://images.nasa.gov/details/PIA23791) | NASA/JPL-Caltech | 2020-06-08 |
 | `solar-system/earth.jpg` | Earth, Africa and Europe, from 1.5 million km (DSCOVR EPIC, 2015) | [epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o](https://images.nasa.gov/details/epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o) | NASA GSFC | 2015-07-29 |
 | `solar-system/moon.jpg` | The full Moon | [GSFC_20171208_Archive_e000868](https://images.nasa.gov/details/GSFC_20171208_Archive_e000868) | NASA GSFC | 2017-12-08 |
