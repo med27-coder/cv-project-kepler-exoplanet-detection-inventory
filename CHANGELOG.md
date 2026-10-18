@@ -7,6 +7,12 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.2.1] - 2026-10-18
+
+### Fixed
+- The astronaut's wardrobe: the outfit buttons are small pixel chips again (they used the page's big button style),
+  and the count no longer reads "0 of 15" when the dwarf king's crown is owned: it says the crown is a special extra.
+
 ## [1.2.0] - 2026-10-18
 
 ### Changed
@@ -61,6 +67,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.2.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.1
 [1.2.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.0
 [1.1.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.1.0
 [1.0.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.0.0
