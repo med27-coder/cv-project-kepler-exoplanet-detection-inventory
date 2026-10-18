@@ -1,5 +1,9 @@
 # Plan: Star Gazer V4
 
+**Result (17 October 2026): the registered test failed.** Colossus found 72% of giant planets at V3's false-alarm
+rate against V3's 81%, so it is not adopted. Full results and what a next attempt would need:
+[../V4_RESULTS.md](../V4_RESULTS.md).
+
 **Status: plan** (17 October 2026). **Direction chosen by the user: two specialists.** V3 stays as it is and
 keeps the small planets it already finds 96-100% of the time; V4 is a new **giant-planet specialist, Colossus**, that takes
 over for big objects. V3 stays frozen (`docs/AUDIT_V3.md`): V4 is a new version with its own
