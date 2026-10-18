@@ -75,6 +75,9 @@ PICKS = [
     ('stars', '7-supernova', 'PIA06908', "Kepler's Supernova Remnant: the star Johannes Kepler saw explode in 1604 (Chandra)"),
     ('stars', '8-neutron-star', 'PIA21085', 'A pulsar: a spinning neutron star sweeping beams (artist concept)'),
     ('stars', '9-black-hole', 'PIA16695', 'A black hole with its glowing disk and jet (artist concept)'),
+    ('concepts', 'comet-neowise', 'NHQ202007120001', 'Comet NEOWISE over Washington, July 2020 (for the passing comets)'),
+    ('concepts', 'comet-hale-bopp', 'PIA01289', 'Comet Hale-Bopp seen by Hubble (for the passing comets)'),
+    ('concepts', 'asteroid-eros', 'PIA02900', 'Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids)'),
     ('stars', '9-black-hole-m87', 'PIA23122', 'Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset)'),
 ]
 WEB_FOLDERS = {'spacecraft', 'solar-system'}   # the Galleria's photos; 'stars' are concept references only
