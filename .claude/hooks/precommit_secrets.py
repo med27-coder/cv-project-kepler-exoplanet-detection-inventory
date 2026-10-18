@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SECRET = re.compile(r'(^|/)(\.secrets(/|$)|[^/]*\.(key|pem)$|\.env(\.[\w-]+)?$)')
+SECRET = re.compile(r'(^|/)(\.secrets(/|$)|[^/]*\.(key|pem)$|\.env(\.[\w-]+)?$)', re.IGNORECASE)   # Windows ignores case
 HOOK = '#!/bin/sh\n# Installed by .claude/hooks/precommit_secrets.py --install\nroot="$(git rev-parse --show-toplevel)"\n' \
        'exec "$root/.venv/Scripts/python.exe" "$root/.claude/hooks/precommit_secrets.py"\n'
 
