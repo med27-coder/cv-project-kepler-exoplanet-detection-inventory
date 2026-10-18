@@ -211,8 +211,53 @@ def background(t, w=320, h=180):
     return f
 
 
+# ---- loading screen: a rock with moons (like asteroid Ida and its moon Dactyl), and "lost in orbit"
+def loading(t, w=96, h=54):
+    f = Frame(w, h, seed=13)
+    cx, cy = 48, 24
+    rot = t * 2 * math.pi
+    for y in range(-7, 8):   # a lumpy potato-shaped rock, slowly turning
+        for x in range(-11, 12):
+            if (x / 11) ** 2 + (y / 7) ** 2 > 1 + 0.18 * math.sin(3 * math.atan2(y, x) + rot):
+                continue
+            crater = (round(x + rot * 3) % 6 == 0 and y % 4 == 1)
+            f.put(cx + x, cy + y, '#5d5a55' if crater else '#b8b0a4' if x + y < -3 else '#8a8278')
+    for k, (r, ry, speed, col) in enumerate([(17, 6, 1, '#d6dae2'), (24, 8, -0.6, '#c9a86a'), (30, 10, 0.4, '#9fd8ff')]):
+        a = rot * speed + k * 2
+        behind = math.sin(a) < 0
+        x, y = cx + r * math.cos(a), cy + ry * math.sin(a)
+        if behind and abs(x - cx) < 11 and abs(y - cy) < 7:
+            continue
+        f.disc(x, y, 1.6 if k == 1 else 1.2, lambda dx, dy, q, c=col: c)
+    for k in range(int(t * 4) % 4):   # LOADING dots
+        f.put(60 + k * 3, 46, '#ffd34d')
+    for i, ch in enumerate('LOADING'):   # simple 3x5 letters (concept only)
+        f.put(30 + i * 4, 46, '#ffd34d')
+    return f
+
+
+def lost_in_orbit(t, w=96, h=54):
+    f = Frame(w, h, seed=17)
+    cx, cy = 48 + 6 * math.sin(t * 2 * math.pi), 26 + 3 * math.cos(t * 2 * math.pi)
+    spin = t * 2 * math.pi
+    suit = ['.www.', 'wooow', 'wooow', '.www.', 'wwwww', 'wwwww', '.w.w.', '.w.w.']   # helmet with an orange visor, body, legs
+    ink = {'w': '#e6ecff', 'o': '#ff9a3c'}
+    for r, row in enumerate(suit):
+        for c, ch in enumerate(row):
+            if ch == '.':
+                continue
+            x, y = c - 2, r - 4
+            rx, ry = x * math.cos(spin) - y * math.sin(spin), x * math.sin(spin) + y * math.cos(spin)
+            f.put(cx + rx, cy + ry, ink[ch])
+    for k in range(18):   # a loose tether drifting off
+        f.put(cx + 4 + k * 1.6, cy + 2 + math.sin(k / 3 + t * 6) * 2, '#4a5590')
+    return f
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    save_gif([loading(k / 16) for k in range(16)], 'draft_loading_rock.gif', scale=5)
+    save_gif([lost_in_orbit(k / 20) for k in range(20)], 'draft_lost_in_orbit.gif', scale=5)
     save_gif([background(k / 12) for k in range(12)], 'draft_background.gif', scale=3, ms=140)
     save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif')
     save_gif([comet(k / 20) for k in range(20)], 'draft_comet.gif', ms=80)
