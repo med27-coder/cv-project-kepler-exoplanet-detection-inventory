@@ -18,9 +18,8 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.venv/Scripts/python.exe\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_secrets.py\"",
-            "if": "Bash(git *)",
             "timeout": 15,
-            "statusMessage": "Checking the commit for secrets"
+            "statusMessage": "Checking for secrets"
           }
         ]
       }

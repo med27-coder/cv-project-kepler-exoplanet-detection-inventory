@@ -28,8 +28,9 @@ Tooling: the project enables Anthropic's `pyright-lsp`, `typescript-lsp`, `secur
 (`.claude/settings.json`; configs: `[tool.pyright]` in `pyproject.toml`, root `jsconfig.json`), so edits come back
 with diagnostics. Pyright is advisory (8 known numpy/pandas typing quirks); mypy is the type check of record.
 The GitHub CLI (`gh`) is installed: use `gh run list` / `gh run view --log-failed` for CI.
-Hooks (`.claude/hooks/`, wired in `.claude/settings.json`): `guard_secrets.py` blocks any git add of the key folder or
-key, pem and env files, and any commit while one is staged; `check_web.py` rebuilds `web/starmap.js` after every edit
+Hooks (`.claude/hooks/`, wired in `.claude/settings.json`): `guard_secrets.py` blocks any git command that stages the
+key folder or key, pem and env files, and any commit while one is staged; `precommit_secrets.py` is the git
+pre-commit hook that checks the real index on every commit (install once per clone with `--install`); `check_web.py` rebuilds `web/starmap.js` after every edit
 in `web/src/` and reports a syntax error at once. `/release [minor|patch|major] [notes]` (`.claude/commands/release.md`)
 runs the whole release routine below.
 
