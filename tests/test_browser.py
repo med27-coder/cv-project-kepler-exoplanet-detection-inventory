@@ -90,6 +90,36 @@ def test_galleria_photos_fit_and_slider_stays(browser, site):
     assert not errors, errors
 
 
+def test_universe_sectors_and_lost_astronaut(browser, site):
+    """UNIVERSE swaps the map for the zoom-out ladder; ◀ ▶ and the arrow keys step through six sectors (COSMIC
+    ZOOM); a flare drifts by (forced with ?astronaut) and catching it is LOST IN ORBIT."""
+    errors = []
+    page = open_page(browser, site + '?astronaut', errors)
+    page.click('#universe')
+    assert page.locator('#uni-title').inner_text().startswith('SECTOR 2 / 6')
+    assert page.locator('#map').is_hidden() and page.locator('#universe-view').is_visible()
+    lit = "() => { const c = document.getElementById('universe-view'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 200) n++; return n; }"
+    page.wait_for_function(f"({lit})() > 100")
+    for _ in range(4):
+        page.keyboard.press('ArrowRight')                             # focus is on the universe view
+    assert page.locator('#uni-title').inner_text().endswith('THE OBSERVABLE UNIVERSE')
+    assert page.locator('#uni-out').is_disabled()
+    page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in')
+    assert page.locator('#map').is_visible()                            # sector 1 is the map itself
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('cosmic-zoom')")
+    page.click('#uni-out')
+    page.wait_for_function("() => { const f = document.getElementById('universe-view').dataset.flare;"
+                           " return Boolean(f) && +f.split(',')[0] > 12 && +f.split(',')[0] < 180; }")   # drifted onto the canvas
+    x, y = map(int, page.get_attribute('#universe-view', 'data-flare').split(','))
+    box = page.locator('#universe-view').bounding_box()
+    page.mouse.click(box['x'] + x * box['width'] / 192, box['y'] + y * box['height'] / 192)
+    page.wait_for_selector('.toast:has-text("LOST IN ORBIT")')
+    assert 'lost-in-orbit' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    page.click('#universe')                                             # and back to the map
+    assert page.locator('#map').is_visible() and page.locator('#uni-nav').is_hidden()
+    assert not errors, errors
+
+
 def test_phone_controls_fit_on_screen(browser, site):
     """On a 375-pixel phone every visible button sits inside the screen (the system tools once ran off the edge)."""
     errors = []
@@ -277,7 +307,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/58'
+    assert page.locator('#rank-count').inner_text() == '12/60'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1

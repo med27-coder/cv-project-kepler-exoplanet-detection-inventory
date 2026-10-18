@@ -37,7 +37,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (58, in groups), trophies, badges and your star
+### Achievements (60, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -74,6 +74,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | HIGHLIGHTER | Try all five highlight filters in one visit |
 | | SKY PHOTOGRAPHER | Open a star's real sky photo |
 | | ECO MODE | Set the animation to battery saver |
+| | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
 | Easter eggs | CURIOUS MIND / MISSION CONTROL / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all 24 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
@@ -91,6 +92,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
 | | NO SIGNAL | Search for five things that aren't there in one visit |
 | | SO CLOSE | Search a hidden name with a letter or two wrong |
+| | LOST IN ORBIT | Catch the flare drifting across the universe view: it's an astronaut |
 | | WARP SPEED | Find three new easter eggs within a minute |
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |

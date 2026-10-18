@@ -1,6 +1,8 @@
 # Plan: the observable universe, in sectors (a zoom-out ladder, then the whole sky)
 
-**Status: plan** (17 October 2026). The user chose both: **the zoom-out ladder first**, then **the whole sky in
+**Status: the ladder is built** (`web/src/56-universe.js`, 17 October 2026); the whole sky (section 3) is next.
+Decisions: the UNIVERSE button swaps the map; 12 sky sectors; the secret is a flare that turns out to be the
+"lost in orbit" astronaut (LOST IN ORBIT). The user chose both: **the zoom-out ladder first**, then **the whole sky in
 sectors** as one of its steps. Ground rule, as everywhere: every number has a source, and illustrations are
 labelled as illustrations.
 
@@ -38,8 +40,8 @@ the sector says so in one line.
 
 - The sky split into **12 sectors**: 6 slices around the sky (4 hours of right ascension each), north and south.
   Each is named after its best-known constellations ("CYGNUS & LYRA" holds Kepler's field).
-- In each sector: **every star with a known planet** from NASA's table (about 6,000 planets around about 4,500
-  stars, from every mission: Kepler, K2, TESS, ground surveys). Colour by how it was found (transit, wobble,
+- In each sector: **every star with a known planet** from NASA's table (6,451 planets around 4,847
+  stars (NASA, 17 October 2026), from every mission: Kepler, K2, TESS, ground surveys). Colour by how it was found (transit, wobble,
   imaging, microlensing), with a legend. Kepler's own field is outlined.
 - Click a star for a small card (name, distance, planets, how they were found, discovery year). Kepler systems
   open in the main view as now.
@@ -69,8 +71,9 @@ the sector says so in one line.
 3. The whole sky (export, 12 sky sectors, cards).
 4. Achievements, tests, the data check; concept art first for the Milky Way, the Local Group and the edge.
 
-## 7. Decisions for you
+## 7. Decisions (answered 17 October 2026)
 
-1. Where does it open: the UNIVERSE button swapping the map (recommended), or its own page section?
-2. 12 sky sectors (recommended), or more and smaller (24)?
-3. The secret at the edge of the universe: which joke?
+1. The UNIVERSE button swaps the map.
+2. 12 sky sectors.
+3. The secret: a flare drifts across the universe view now and then; catch it and it's the "lost in orbit"
+   astronaut (LOST IN ORBIT, a secret achievement). Concept: `pixel-art/concepts/draft_universe_lost_in_orbit.png`.
