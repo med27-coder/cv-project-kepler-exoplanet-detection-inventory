@@ -7,6 +7,13 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.6] - 2026-10-18
+
+### Changed
+- **Smoother astronaut spin** (a player's idea): the spin steps through 24 frames turned once in advance, each sampled
+  pixel by pixel, instead of rotating the picture on every frame, so the edges stay crisp instead of shimmering, and
+  drawing it costs only an image copy.
+
 ## [1.9.5] - 2026-10-18
 
 ### Changed
@@ -186,6 +193,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.6]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.6
 [1.9.5]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.5
 [1.9.4]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.4
 [1.9.3]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.3

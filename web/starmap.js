@@ -121,6 +121,9 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.6', date: '18 Oct 2026', notes: [
+      'Fixed: the lost astronaut spins more smoothly, with crisp edges.',
+    ] },
     { v: '1.9.5', date: '18 Oct 2026', notes: [
       "New: one of the dwarf planets has a fresh look, closer to NASA's, with its two moons on their tilted orbits.",
     ] },
@@ -2888,12 +2891,45 @@
     }
     return astronautCanvases.get(key);
   }
-  function drawAstronaut(ctx, x, y, angle, scale = 1) {   // rotated as one image, so it stays solid at every angle
+  // The spin uses 24 frames turned once, in advance (15 degrees apart), each sampled pixel by pixel from the sprite,
+  // instead of rotating the picture on every frame: the edges stay crisp instead of shimmering as it turns, and the
+  // animation only copies a ready image. Frames are cached per outfit.
+  const SPIN_STEPS = 24, PIVOT_X = ASTRO_W / 2, PIVOT_Y = 24;
+  const SPIN_SIZE = 2 * Math.ceil(Math.hypot(Math.max(PIVOT_X, ASTRO_W - PIVOT_X), Math.max(PIVOT_Y, ASTRO_H - PIVOT_Y))) + 2;
+  const spinCache = new Map();
+  function astronautFrames(outfitId = progress.outfit) {
+    const key = outfitId || '';
+    if (spinCache.has(key)) return spinCache.get(key);
+    const sprite = astronautSprite(outfitId);
+    const src = sprite.getContext('2d').getImageData(0, 0, ASTRO_W, ASTRO_H).data;
+    const frames = Array.from({ length: SPIN_STEPS }, (_, k) => {
+      const a = (k / SPIN_STEPS) * 2 * Math.PI, cos = Math.cos(a), sin = Math.sin(a), half = SPIN_SIZE / 2;
+      const out = document.createElement('canvas');
+      out.width = out.height = SPIN_SIZE;
+      const octx = out.getContext('2d'), img = octx.createImageData(SPIN_SIZE, SPIN_SIZE);
+      for (let y = 0; y < SPIN_SIZE; y++) {
+        for (let x = 0; x < SPIN_SIZE; x++) {   // where this pixel comes from, turned back by the angle
+          const dx = x + 0.5 - half, dy = y + 0.5 - half;
+          const sx = Math.floor(PIVOT_X + dx * cos + dy * sin), sy = Math.floor(PIVOT_Y - dx * sin + dy * cos);
+          if (sx < 0 || sy < 0 || sx >= ASTRO_W || sy >= ASTRO_H) continue;
+          const i = (sy * ASTRO_W + sx) * 4, o = (y * SPIN_SIZE + x) * 4;
+          if (src[i + 3] < 128) continue;
+          img.data[o] = src[i]; img.data[o + 1] = src[i + 1]; img.data[o + 2] = src[i + 2]; img.data[o + 3] = 255;
+        }
+      }
+      octx.putImageData(img, 0, 0);
+      return out;
+    });
+    spinCache.set(key, frames);
+    return frames;
+  }
+  function drawAstronaut(ctx, x, y, angle, scale = 1) {   // one ready-turned frame, so it stays solid and crisp at every angle
+    const frames = astronautFrames();
+    const k = ((Math.round(angle / (2 * Math.PI) * SPIN_STEPS) % SPIN_STEPS) + SPIN_STEPS) % SPIN_STEPS;
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    ctx.translate(Math.round(x), Math.round(y));
-    ctx.rotate(angle);
-    ctx.drawImage(astronautSprite(), -ASTRO_W / 2 * scale, -24 * scale, ASTRO_W * scale, ASTRO_H * scale);
+    const s = SPIN_SIZE * scale;
+    ctx.drawImage(frames[k], Math.round(x - s / 2), Math.round(y - s / 2), s, s);
     ctx.restore();
   }
 
