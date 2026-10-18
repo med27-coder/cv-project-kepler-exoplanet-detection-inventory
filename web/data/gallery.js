@@ -204,6 +204,42 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA17307",
   "what": "Eris and its moon Dysnomia (artist concept: no spacecraft has visited)"
  },
+ "martian-gardens": {
+  "img": "gallery/martian-gardens.jpg",
+  "credit": "NASA/Dimitri Gerondidakis",
+  "link": "https://images.nasa.gov/details/KSC-20160815-PH_DNG01_0003",
+  "what": "Martian Gardens: crops grown in simulated Martian soil (NASA Kennedy and Florida Tech, 2016)"
+ },
+ "mars-habitat": {
+  "img": "gallery/mars-habitat.jpg",
+  "credit": "NASA",
+  "link": "https://images.nasa.gov/details/PIA23302",
+  "what": "First humans on Mars: astronauts and habitats (artist concept)"
+ },
+ "mars-greenhouse": {
+  "img": "gallery/mars-greenhouse.jpg",
+  "credit": "NASA/JPL-Caltech",
+  "link": "https://images.nasa.gov/details/PIA23343",
+  "what": "Aerogel greenhouses: a proposal for warming patches of Mars to grow plants (concept)"
+ },
+ "acidalia": {
+  "img": "gallery/acidalia.jpg",
+  "credit": "NASA/JPL/MSSS",
+  "link": "https://images.nasa.gov/details/PIA02000",
+  "what": "Acidalia and Chryse Plains, where the novel puts the Ares 3 base (Mars Global Surveyor)"
+ },
+ "pathfinder": {
+  "img": "gallery/pathfinder.jpg",
+  "credit": "NASA/JPL",
+  "link": "https://images.nasa.gov/details/PIA00621",
+  "what": "Mars Pathfinder and Sojourner in 1997, the lander the story uses to phone home"
+ },
+ "veggie": {
+  "img": "gallery/veggie.jpg",
+  "credit": "NASA/Dan Casper",
+  "link": "https://images.nasa.gov/details/KSC-20180227-PH_DAC01_0044",
+  "what": "Seeds placed into pods for Veggie, the space station's garden (2018)"
+ },
  "universe-deep-field": {
   "img": null,
   "credit": "NASA GSFC (NASA; ESA; G. Illingworth, D. Magee, and P. Oesch, University of California, Santa Cruz; R. Bouwens, Leiden University; and the HUDF09 Team)",

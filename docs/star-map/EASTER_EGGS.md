@@ -27,7 +27,7 @@ bar finds it:
   (an official NASA photo, credited; ESA-credited pictures are linked instead) and a short history.
   The Solar System's card adds a strip of real photos of the Sun, every planet and the Moon.
 
-28 eggs: the Solar System, the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Voyager, New Horizons, Webb, Euclid, SOHO, Parker Solar
+29 eggs: the Solar System, The Martian (a farm on Mars), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Voyager, New Horizons, Webb, Euclid, SOHO, Parker Solar
 Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OSIRIS-APEX, MRO, Mars
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
@@ -37,7 +37,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (63, in groups), trophies, badges and your star
+### Achievements (64, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -73,9 +73,10 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | CARTOGRAPHER | Hop 25 stars in a row with the arrow keys (a click resets the count) |
 | | HIGHLIGHTER | Try all five highlight filters in one visit |
 | | SKY PHOTOGRAPHER | Open a star's real sky photo |
+| | SPACE FARMER | Watch The Martian's farm bring in a whole crop (a minute) |
 | | ECO MODE | Set the animation to battery saver |
 | | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
-| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 28 |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 29 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
 | | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |

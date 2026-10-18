@@ -27,6 +27,7 @@ const ARTIFACT_LOG = {
   'dwarf-king': 'The IAU recognises five dwarf planets; dozens more Kuiper Belt worlds may one day join them.',
   houston: 'Apollo 13, 13 April 1970: "Houston, we\'ve had a problem." The crew made it home four days later.',
   'space-wardrobe': 'A real spacesuit, NASA\'s EMU, weighs about 145 kg on Earth and is made to measure.',
+  'space-farmer': 'NASA\'s Veggie garden on the ISS gave astronauts their first space-grown salad in August 2015.',
   speedrun: 'Voyager 1 travels about 17 km every second.',
   goodnight: "Kepler's last command was sent on 15 November 2018.",
   'launch-day': 'Kepler launched on a Delta II rocket from Cape Canaveral on 7 March 2009.',
