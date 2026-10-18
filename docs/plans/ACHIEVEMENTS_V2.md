@@ -96,6 +96,16 @@ Unlocks are switches in Settings (any combination), so nothing is forced on anyo
 
 ## 6. Decisions for you
 
+**Answered 18 October 2026:**
+1. Keep the 13 chapters and their constellations.
+2. Keep all 35 new achievements.
+3. Hail Mary: **no spoiler warning** (those who know the book and film will find it); the Erid egg stays secret.
+4. Sky events: as answered in SKY_EVENTS_DRAFTS.md.
+5. Rewards, in order of priority: **titles, the orrery, Kepler fly-bys, colour palettes**.
+
+The questions as first asked:
+
+
 1. The 13 chapters and their constellations: keep, or swap any?
 2. The 35 new achievements: all, or trim some (e.g. the sky-event dates)?
 3. Hail Mary: spoiler warning on, and is the Erid egg secret (as planned)?

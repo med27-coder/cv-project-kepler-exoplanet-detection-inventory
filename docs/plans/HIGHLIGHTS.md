@@ -76,6 +76,18 @@ any disagreement before anything ships.
 
 ## 7. Decisions for you
 
+**Answered 18 October 2026:**
+1. The conservative (strict) habitable zone.
+2. Predictions get a **switch between Star Gazer and Colossus**, so visitors can compare the two models. Colossus is
+   shown labelled as experimental (its registered tests: `docs/star-gazer/V4_RESULTS.md`, `V4B_RESULTS.md`), and new
+   achievements reward finding each model (searching "star gazer" and "colossus"). Still to confirm: predictions off
+   until switched on.
+3. The first set: rocky + habitable, hot Jupiters, ultra-short orbits, the radius valley.
+4. The grouped panel with a results list.
+
+The questions as first asked:
+
+
 1. Habitable zone: conservative by default with optimistic as a toggle (recommended), or show both always?
 2. Star Gazer's predictions in the highlights: off by default (recommended), or on?
 3. Which new highlights: all nine, or a first set (e.g. rocky + habitable, hot Jupiters, ultra-short, radius valley)?
