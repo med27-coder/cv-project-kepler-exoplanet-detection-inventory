@@ -41,6 +41,8 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `solar-system/uranus.jpg` | Uranus (Voyager 2, 1986) | [PIA18182](https://images.nasa.gov/details/PIA18182) | NASA/JPL-Caltech | 1986-12-18 |
 | `solar-system/neptune.jpg` | Neptune and its Great Dark Spot (Voyager 2, 1989) | [PIA01492](https://images.nasa.gov/details/PIA01492) | NASA/JPL | 1998-10-30 |
 | `solar-system/pluto.jpg` | Pluto by New Horizons (enhanced colour), heart and all | [PIA19952](https://images.nasa.gov/details/PIA19952) | NASA/Johns Hopkins University Applied Physics Laboratory/Southwest Research Institute | 2015-09-24 |
+| `solar-system/ceres.jpg` | Ceres from NASA's Dawn spacecraft (2017) | [PIA21906](https://images.nasa.gov/details/PIA21906) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA | 2017-09-20 |
+| `solar-system/eris.jpg` | Eris and its moon Dysnomia (artist concept: no spacecraft has visited) | [PIA17307](https://images.nasa.gov/details/PIA17307) | NASA/JPL-Caltech | 2011-04-11 |
 | `stars/1-nebula.jpg` | Stellar nursery: dust pillars in the Carina Nebula (Spitzer, infrared) | [PIA03515](https://images.nasa.gov/details/PIA03515) | NASA/JPL-Caltech/University of Colorado<br /> Animation: NASA/JPL-Caltech/NOAO/AURA/NSF | 2005-05-30 |
 | `stars/2-protostar.jpg` | A protostar flaring as it grows, in Orion (Spitzer) | [PIA18928](https://images.nasa.gov/details/PIA18928) | NASA/JPL-Caltech/Univ. of Toledo; background: E. Safron et al. | 2015-03-23 |
 | `stars/4-red-giant.jpg` | Mira, a red giant shedding a 13-light-year tail (GALEX ultraviolet) | [PIA09070](https://images.nasa.gov/details/PIA09070) | NASA/CXC/STScI/JPL-Caltech/UIUC/Univ. of Minn. | 2006-12-08 |

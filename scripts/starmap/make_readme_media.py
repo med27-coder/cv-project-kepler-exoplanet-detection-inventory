@@ -96,7 +96,7 @@ PREVIEW = {'pad': 56, 'gap': 40, 'rule': True, 'titleSize': 34, 'lineSize': 34, 
 SITE_PREVIEW = {**PREVIEW, 'w': 1200, 'h': 630, 'title': 'KEPLER STAR MAP',
                 'lines': [['3,600+ planet systems from NASA\'s Kepler mission', '#c8d0ff'],
                           ['Search one and watch its planets orbit', '#c8d0ff'],
-                          ['24 easter eggs to find, 60 achievements', '#9aa6d6'],
+                          ['Easter eggs to find, achievements to earn', '#9aa6d6'],
                           ['med27-coder.github.io', '#ffd34d']]}
 REPO_PREVIEW = {**PREVIEW, 'w': 1280, 'h': 640, 'title': 'STAR GAZER',
                 'lines': [['Finding exoplanets in NASA Kepler data', '#c8d0ff'],

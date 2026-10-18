@@ -200,7 +200,7 @@ def test_gallery_photos():
 SHIPPED_IDS = {
     'eggs': {'sun', 'pluto', 'kepler', 'iss', 'voyager', 'newHorizons', 'jwst', 'euclid', 'soho', 'parker',
              'solarOrbiter', 'bepi', 'juno', 'clipper', 'juice', 'lucy', 'psyche', 'apex', 'mro', 'odyssey', 'mex',
-             'tgo', 'curiosity', 'perseverance'},
+             'tgo', 'curiosity', 'perseverance', 'ceres', 'haumea', 'makemake', 'eris'},
     'ach': {'first-light', 'star-hopper', 'census', 'dice', 'ghost', 'oracle', 'link', 'first-rock', 'eight-worlds',
             'cousin', 'eden', 'puff', 'tiny', 'goldilocks', 'double', 'lava', 'ancient', 'flare', 'transit', 'scale',
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
@@ -208,7 +208,7 @@ SHIPPED_IDS = {
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
             'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
             'contrarian', 'patience', 'daily', 'streak', 'so-close', 'cosmic-zoom',
-            'lost-in-orbit'},
+            'lost-in-orbit', 'dwarf-king'},
 }
 
 

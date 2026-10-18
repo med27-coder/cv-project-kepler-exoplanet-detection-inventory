@@ -192,6 +192,18 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA19952",
   "what": "Pluto by New Horizons (enhanced colour), heart and all"
  },
+ "ceres": {
+  "img": "gallery/ceres.jpg",
+  "credit": "NASA/JPL-Caltech/UCLA/MPS/DLR/IDA",
+  "link": "https://images.nasa.gov/details/PIA21906",
+  "what": "Ceres from NASA's Dawn spacecraft (2017)"
+ },
+ "eris": {
+  "img": "gallery/eris.jpg",
+  "credit": "NASA/JPL-Caltech",
+  "link": "https://images.nasa.gov/details/PIA17307",
+  "what": "Eris and its moon Dysnomia (artist concept: no spacecraft has visited)"
+ },
  "universe-deep-field": {
   "img": null,
   "credit": "NASA GSFC (NASA; ESA; G. Illingworth, D. Magee, and P. Oesch, University of California, Santa Cruz; R. Bouwens, Leiden University; and the HUDF09 Team)",

@@ -154,6 +154,20 @@ def test_loading_screen_and_lost_in_orbit(browser, site):
     assert not errors, errors
 
 
+def test_dwarf_planets_and_dwarf_king(browser, site):
+    """Each of the five dwarf planets opens its close-up when named; finding all five earns DWARF KING."""
+    errors = []
+    page = open_page(browser, site, errors)
+    for name in ['Ceres', 'haumea', 'MAKEMAKE', 'the eris', 'Pluto']:
+        page.fill('#query', name)
+        page.press('#query', 'Enter')
+        page.wait_for_function(f"document.getElementById('sys-title').textContent === '{name.split()[-1].upper()}'")
+        assert 'DWARF PLANET' in page.locator('#info').inner_text()
+    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('dwarf-king')")
+    page.wait_for_timeout(300)                                          # a few frames of the close-up: no errors
+    assert not errors, errors
+
+
 def test_page_checks(browser, site):
     """The full in-page check list (search, zoom, highlights, system view, easter egg, case files...)."""
     errors = []
@@ -275,7 +289,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 24
+    assert page.locator('.egg-card').count() == 28
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -329,7 +343,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/60'
+    assert page.locator('#rank-count').inner_text() == '12/61'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1

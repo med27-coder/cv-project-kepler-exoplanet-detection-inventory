@@ -24,6 +24,7 @@ const ARTIFACT_LOG = {
   'so-close': 'Galileo drew Neptune in 1612 and took it for a star: so close, 234 years before its discovery.',
   'cosmic-zoom': 'The observable universe is about 93 billion light-years across; Kepler looked a few thousand into it.',
   'lost-in-orbit': 'Astronauts on spacewalks stay tethered; in 1984 Bruce McCandless flew free, 100 metres from the Shuttle.',
+  'dwarf-king': 'The IAU recognises five dwarf planets; dozens more Kuiper Belt worlds may one day join them.',
   speedrun: 'Voyager 1 travels about 17 km every second.',
   goodnight: "Kepler's last command was sent on 15 November 2018.",
   'launch-day': 'Kepler launched on a Delta II rocket from Cape Canaveral on 7 March 2009.',

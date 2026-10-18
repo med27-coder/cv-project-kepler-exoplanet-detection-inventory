@@ -67,6 +67,8 @@ PICKS = [
     ('solar-system', 'uranus', 'PIA18182', 'Uranus (Voyager 2, 1986)'),
     ('solar-system', 'neptune', 'PIA01492', 'Neptune and its Great Dark Spot (Voyager 2, 1989)'),
     ('solar-system', 'pluto', 'PIA19952', 'Pluto by New Horizons (enhanced colour), heart and all'),
+    ('solar-system', 'ceres', 'PIA21906', 'Ceres from NASA\'s Dawn spacecraft (2017)'),
+    ('solar-system', 'eris', 'PIA17307', 'Eris and its moon Dysnomia (artist concept: no spacecraft has visited)'),
     # A star's life, for the rank emblems (docs/STAR_GAZER_MISSION.md); concept references, not on the site yet.
     ('stars', '1-nebula', 'PIA03515', 'Stellar nursery: dust pillars in the Carina Nebula (Spitzer, infrared)'),
     ('stars', '2-protostar', 'PIA18928', 'A protostar flaring as it grows, in Orion (Spitzer)'),
