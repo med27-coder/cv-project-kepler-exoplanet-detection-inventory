@@ -1569,14 +1569,16 @@
   function lookup(query, updateHash = true) {
     query = String(query).slice(0, MAX_QUERY);
     if (!query.trim()) return;
-    const q = query.trim();   // easter eggs first; finding one unlocks it in the Galleria (48-gallery.js)
+    // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
+    // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
+    const q = query.trim().replace(/[-_.]/g, ' ');
     if (HOME_QUERY.test(q) || /^(the )?pluto$/i.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
     if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
     if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
     if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
     if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
     const s = find(query);
-    if (s) select(s, updateHash); else showUnknown(query);
+    if (s) select(s, updateHash); else { showUnknown(query); nearMiss(q); }
   }
 
   // ---------------------------------------------------------------- easter eggs: spacecraft and the ISS
@@ -1587,18 +1589,21 @@
   const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?)$/i;
   // Search words for one spacecraft -> its name in data/spacecraft.js (or a rover's): the view then
   // highlights it and shows its pixel art.
+  // ("the" in front is always allowed; lookup() has already turned hyphens, underscores and dots into spaces.)
   const CRAFT_ALIASES = [
-    [/^(the )?(jwst|webb|james webb( space telescope)?)$/i, 'James Webb Space Telescope'],
-    [/^voyager( ?1)?$/i, 'Voyager 1'], [/^voyager ?2$/i, 'Voyager 2'], [/^new horizons$/i, 'New Horizons'],
-    [/^parker( solar probe)?$/i, 'Parker Solar Probe'], [/^juno$/i, 'Juno'], [/^europa clipper$/i, 'Europa Clipper'],
-    [/^soho$/i, 'SOHO'], [/^euclid$/i, 'Euclid'], [/^solar orbiter$/i, 'Solar Orbiter'],
-    [/^bepi ?colombo$/i, 'BepiColombo'], [/^juice$/i, 'JUICE'], [/^lucy$/i, 'Lucy'], [/^psyche$/i, 'Psyche'],
-    [/^osiris[- ]?(apex|rex)$/i, 'OSIRIS-APEX'], [/^(mro|mars reconnaissance orbiter)$/i, 'Mars Reconnaissance Orbiter'],
-    [/^(mars )?odyssey$/i, 'Mars Odyssey'], [/^mars express$/i, 'Mars Express'],
-    [/^(tgo|exomars( trace gas orbiter)?|trace gas orbiter)$/i, 'ExoMars Trace Gas Orbiter'],
-    [/^curiosity$/i, 'Curiosity'], [/^perseverance$/i, 'Perseverance'],
+    [/^(jwst|(james )?webb( space)?( telescope)?)$/i, 'James Webb Space Telescope'],
+    [/^voyager( ?(1|i|one))?$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
+    [/^new horizons( probe| spacecraft)?$/i, 'New Horizons'],
+    [/^parker( solar)?( probe)?$/i, 'Parker Solar Probe'], [/^juno( probe)?$/i, 'Juno'], [/^(europa )?clipper$/i, 'Europa Clipper'],
+    [/^(soho|solar and heliospheric observatory)$/i, 'SOHO'], [/^euclid( telescope)?$/i, 'Euclid'],
+    [/^(solar orbiter|solo)$/i, 'Solar Orbiter'], [/^bepi ?colombo$/i, 'BepiColombo'],
+    [/^(juice|jupiter icy moons explorer)$/i, 'JUICE'], [/^lucy( probe)?$/i, 'Lucy'], [/^psyche( probe)?$/i, 'Psyche'],
+    [/^osiris ?(apex|rex)$/i, 'OSIRIS-APEX'], [/^(mro|mars reconnaissance orbiter)$/i, 'Mars Reconnaissance Orbiter'],
+    [/^(2001 )?(mars )?odyssey$/i, 'Mars Odyssey'], [/^(mars express|mex)$/i, 'Mars Express'],
+    [/^(tgo|exomars( tgo| trace gas orbiter)?|trace gas orbiter)$/i, 'ExoMars Trace Gas Orbiter'],
+    [/^curiosity( rover)?$/i, 'Curiosity'], [/^(perseverance|percy)( rover)?$/i, 'Perseverance'],
   ];
-  const craftFocus = q => CRAFT_ALIASES.find(([re]) => re.test(q))?.[1] ?? null;
+  const craftFocus = q => { const t = q.replace(/^the /i, ''); return CRAFT_ALIASES.find(([re]) => re.test(t))?.[1] ?? null; };
   const CRAFT_QUERY = { test: q => CRAFT_GENERAL.test(q) || craftFocus(q) != null };
   const ISS_QUERY = /^(the )?(iss|international space station|space station)$/i;
   const CRAFT_SPOT = '#e8f4ff', CRAFT_LABEL = '#9fd8ff';
@@ -2346,6 +2351,7 @@
     { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
     { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
+    { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
     { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
     { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
     { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -2574,6 +2580,38 @@
     if (detail.planets.some(p => (p.teq ?? 0) >= 1500)) achieve('lava');
   }
   function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
+
+  // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
+  const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager'], ['Parker', 'parker'],
+    ['Osiris Rex', 'apex'], ['Tatooine', null]];
+  const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
+  function editDistance(a, b) {   // Levenshtein, one row at a time
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const row = [i];
+      for (let j = 1; j <= b.length; j++) row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = row;
+    }
+    return prev[b.length];
+  }
+  function nearMiss(query) {   // from lookup(), after NO SIGNAL
+    const q = nearForm(query);
+    if (q.length < 4) return;
+    let best = null, bestD = Infinity;
+    for (const [name, id] of NEAR_NAMES) {
+      const n = nearForm(name);
+      if (/\d/.test(q) && !/\d/.test(n)) continue;   // "kepler 1234" is a catalogue number, not a misspelt "kepler"
+      const d = editDistance(q, n);
+      if (d < bestD) { best = [name, id]; bestD = d; }
+    }
+    if (!best || bestD > (q.length >= 7 ? 2 : 1)) return;
+    const [name, id] = best, found = id ? progress.eggs[id] : progress.ach.tatooine;
+    // Already found: name it. Not found yet: only say it's close, so the hunt stays a hunt.
+    if (found) toast('egg', 'DID YOU MEAN…', `${id ? EGG.get(id).name : name}? Check the spelling and search again.`, id ? EGG.get(id) : null);
+    else toast('egg', 'SO CLOSE!', "That's a letter or two off something hidden here. Check the spelling and try again.");
+    achieve('so-close');
+  }
   function arrowHop() { if (++session.hops >= 25) achieve('cartographer'); }
   function highlightTried(key) {
     session.highlights.add(key);
@@ -3139,6 +3177,7 @@
     patient: ['.......', '..www..', '.wwkww.', '..www..', '.......', '.......'],               // an eye that waits
     night: ['..yy...', '.yy....', '.yy....', '.yy..w.', '..yy...', '.......'],                 // a crescent moon
     hollow: ['...m...', '.b.m.b.', 'b..m..b', '.b.m.b.', '..mmm..', '.......'],                // an antenna, no reply
+    'so-close': ['.rrrrr.', 'r.www.r', 'r.wrw.r', 'r.www.r', '.rrrrr.', '......y'],          // a dart just off the bullseye
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
     'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
@@ -3572,6 +3611,7 @@
     patient: 'Kepler stared at the same patch of sky for four years without looking away.',
     night: 'Most telescopes only work in the dark: astronomy is a night shift.',
     hollow: 'People have listened for signals from the stars since 1960. No reply yet.',
+    'so-close': 'Galileo drew Neptune in 1612 and took it for a star: so close, 234 years before its discovery.',
     speedrun: 'Voyager 1 travels about 17 km every second.',
     goodnight: "Kepler's last command was sent on 15 November 2018.",
     'launch-day': 'Kepler launched on a Delta II rocket from Cape Canaveral on 7 March 2009.',
@@ -3582,6 +3622,7 @@
     patient: 'Kepler never looked away. Can you hold your gaze on one system?',
     night: 'Some astronomers only work when the Sun is down… far down.',
     hollow: 'Keep calling into the void, even when nothing answers.',
+    'so-close': 'A near miss counts too. Search a hidden name, and slip a letter.',
     speedrun: 'Some discoveries arrive in a rush, one after another.',
     goodnight: 'A telescope said goodbye on a November night. Visit on that day.',
     'launch-day': 'Return on the day it all began, in March.',

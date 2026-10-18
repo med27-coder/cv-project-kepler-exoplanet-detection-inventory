@@ -138,6 +138,7 @@ const ACHIEVEMENTS = [
   { g: 'SECRET', id: 'patient', title: 'PATIENT OBSERVER', how: 'Watch one system for two minutes. Kepler watched for four years.', secret: true },
   { g: 'SECRET', id: 'night', title: 'NIGHT SHIFT', how: 'Go stargazing after midnight.', secret: true },
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
+  { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
   { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
   { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
   { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -366,6 +367,38 @@ function systemDetailShown(detail) {   // showSystem / showUnconfirmed, once the
   if (detail.planets.some(p => (p.teq ?? 0) >= 1500)) achieve('lava');
 }
 function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
+
+// ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
+const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager'], ['Parker', 'parker'],
+  ['Osiris Rex', 'apex'], ['Tatooine', null]];
+const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
+function editDistance(a, b) {   // Levenshtein, one row at a time
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = row;
+  }
+  return prev[b.length];
+}
+function nearMiss(query) {   // from lookup(), after NO SIGNAL
+  const q = nearForm(query);
+  if (q.length < 4) return;
+  let best = null, bestD = Infinity;
+  for (const [name, id] of NEAR_NAMES) {
+    const n = nearForm(name);
+    if (/\d/.test(q) && !/\d/.test(n)) continue;   // "kepler 1234" is a catalogue number, not a misspelt "kepler"
+    const d = editDistance(q, n);
+    if (d < bestD) { best = [name, id]; bestD = d; }
+  }
+  if (!best || bestD > (q.length >= 7 ? 2 : 1)) return;
+  const [name, id] = best, found = id ? progress.eggs[id] : progress.ach.tatooine;
+  // Already found: name it. Not found yet: only say it's close, so the hunt stays a hunt.
+  if (found) toast('egg', 'DID YOU MEAN…', `${id ? EGG.get(id).name : name}? Check the spelling and search again.`, id ? EGG.get(id) : null);
+  else toast('egg', 'SO CLOSE!', "That's a letter or two off something hidden here. Check the spelling and try again.");
+  achieve('so-close');
+}
 function arrowHop() { if (++session.hops >= 25) achieve('cartographer'); }
 function highlightTried(key) {
   session.highlights.add(key);

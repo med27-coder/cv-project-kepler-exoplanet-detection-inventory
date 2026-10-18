@@ -6,18 +6,21 @@
 const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?)$/i;
 // Search words for one spacecraft -> its name in data/spacecraft.js (or a rover's): the view then
 // highlights it and shows its pixel art.
+// ("the" in front is always allowed; lookup() has already turned hyphens, underscores and dots into spaces.)
 const CRAFT_ALIASES = [
-  [/^(the )?(jwst|webb|james webb( space telescope)?)$/i, 'James Webb Space Telescope'],
-  [/^voyager( ?1)?$/i, 'Voyager 1'], [/^voyager ?2$/i, 'Voyager 2'], [/^new horizons$/i, 'New Horizons'],
-  [/^parker( solar probe)?$/i, 'Parker Solar Probe'], [/^juno$/i, 'Juno'], [/^europa clipper$/i, 'Europa Clipper'],
-  [/^soho$/i, 'SOHO'], [/^euclid$/i, 'Euclid'], [/^solar orbiter$/i, 'Solar Orbiter'],
-  [/^bepi ?colombo$/i, 'BepiColombo'], [/^juice$/i, 'JUICE'], [/^lucy$/i, 'Lucy'], [/^psyche$/i, 'Psyche'],
-  [/^osiris[- ]?(apex|rex)$/i, 'OSIRIS-APEX'], [/^(mro|mars reconnaissance orbiter)$/i, 'Mars Reconnaissance Orbiter'],
-  [/^(mars )?odyssey$/i, 'Mars Odyssey'], [/^mars express$/i, 'Mars Express'],
-  [/^(tgo|exomars( trace gas orbiter)?|trace gas orbiter)$/i, 'ExoMars Trace Gas Orbiter'],
-  [/^curiosity$/i, 'Curiosity'], [/^perseverance$/i, 'Perseverance'],
+  [/^(jwst|(james )?webb( space)?( telescope)?)$/i, 'James Webb Space Telescope'],
+  [/^voyager( ?(1|i|one))?$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
+  [/^new horizons( probe| spacecraft)?$/i, 'New Horizons'],
+  [/^parker( solar)?( probe)?$/i, 'Parker Solar Probe'], [/^juno( probe)?$/i, 'Juno'], [/^(europa )?clipper$/i, 'Europa Clipper'],
+  [/^(soho|solar and heliospheric observatory)$/i, 'SOHO'], [/^euclid( telescope)?$/i, 'Euclid'],
+  [/^(solar orbiter|solo)$/i, 'Solar Orbiter'], [/^bepi ?colombo$/i, 'BepiColombo'],
+  [/^(juice|jupiter icy moons explorer)$/i, 'JUICE'], [/^lucy( probe)?$/i, 'Lucy'], [/^psyche( probe)?$/i, 'Psyche'],
+  [/^osiris ?(apex|rex)$/i, 'OSIRIS-APEX'], [/^(mro|mars reconnaissance orbiter)$/i, 'Mars Reconnaissance Orbiter'],
+  [/^(2001 )?(mars )?odyssey$/i, 'Mars Odyssey'], [/^(mars express|mex)$/i, 'Mars Express'],
+  [/^(tgo|exomars( tgo| trace gas orbiter)?|trace gas orbiter)$/i, 'ExoMars Trace Gas Orbiter'],
+  [/^curiosity( rover)?$/i, 'Curiosity'], [/^(perseverance|percy)( rover)?$/i, 'Perseverance'],
 ];
-const craftFocus = q => CRAFT_ALIASES.find(([re]) => re.test(q))?.[1] ?? null;
+const craftFocus = q => { const t = q.replace(/^the /i, ''); return CRAFT_ALIASES.find(([re]) => re.test(t))?.[1] ?? null; };
 const CRAFT_QUERY = { test: q => CRAFT_GENERAL.test(q) || craftFocus(q) != null };
 const ISS_QUERY = /^(the )?(iss|international space station|space station)$/i;
 const CRAFT_SPOT = '#e8f4ff', CRAFT_LABEL = '#9fd8ff';
