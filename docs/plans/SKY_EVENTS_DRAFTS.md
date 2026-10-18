@@ -49,3 +49,15 @@ The questions as first asked:
 2. The rare asteroid version: how rare? Suggestion: 1 in 10 UFO sightings, so WHAT WAS THAT? is a real find.
 3. Comets and asteroids as their own sky events (plan: one every 3 to 6 minutes), and meteors only over planets
    (the ISS and Earth views, the Solar System)?
+
+## Meteors: the "both" option (draft, 18 October 2026)
+
+`pixel-art/concepts/draft_meteors_both.png` shows the suggestion side by side:
+
+- **A, from orbit (v3a), over Earth:** in the ISS view and the Solar System view, now and then, a meteor burns
+  through the green airglow above the night side. Clicking one catches it; ten earn **METEOR CATCHER**.
+- **B, from the ground (v3b), the page background:** replaces today's generic blue shooting star with a real-looking
+  meteor (green-white head, cooling trail, fading green train), now and then rather than every nine seconds.
+  Decoration only, not catchable.
+
+**Question for the user:** both (A and B), only one, or neither? Nothing is built until then.

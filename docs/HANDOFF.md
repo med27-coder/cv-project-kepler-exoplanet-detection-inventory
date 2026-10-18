@@ -36,7 +36,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 
 ## Open decisions and next steps
 
-- Meteors over the planets: pick draft v3a (from orbit), v3b (from the ground) or both.
+- Meteors: approve the "both" draft (`pixel-art/concepts/draft_meteors_both.png`, explained in plans/SKY_EVENTS_DRAFTS.md), or pick one.
 - Star Gazer / Colossus switch in the highlights: Colossus shown as EXPERIMENTAL?
 - Commit identity (only the med27-coder account): see [plans/COMMIT_IDENTITY.md](plans/COMMIT_IDENTITY.md).
 - The loop's work list: [plans/LOOP_BACKLOG.md](plans/LOOP_BACKLOG.md).
