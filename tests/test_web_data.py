@@ -254,3 +254,12 @@ def test_version_agrees_everywhere():
     assert re.search(r'^## \[(\d+\.\d+\.\d+)\]', log, re.MULTILINE)[1] == v, 'add the version to CHANGELOG.md'
     html = (WEB / 'index.html').read_text(encoding='utf-8')
     assert f'src="starmap.js?v={v}"' in html and f'href="style.css?v={v}"' in html, 'run scripts/starmap/build_web.py'
+
+
+def test_every_easter_egg_has_fun_facts():
+    """Each found card in the Galleria shows FUN FACTS and WHY IT'S HERE (web/src/48c-egg-facts.js)."""
+    eggs = set(re.findall(r"\{ id: '([\w-]+)', name:", (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8')))
+    facts = (WEB / 'src' / '48c-egg-facts.js').read_text(encoding='utf-8')
+    have = set(re.findall(r"^  (?:'([\w-]+)'|(\w+)): \{$", facts, re.MULTILINE))
+    have = {a or b for a, b in have}
+    assert eggs and eggs == have, (eggs - have, have - eggs)
