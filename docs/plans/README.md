@@ -11,6 +11,7 @@ still open. (Merged into `main` in October 2026.)
 | 3 | [ACHIEVEMENTS_V2.md](ACHIEVEMENTS_V2.md): 13 chapters as real constellations, 35 new achievements, planets up close, Project Hail Mary (Tau Ceti, secret Erid), "What the alien doing", comets/asteroids/UFO sky events, rewards and titles | planned, concept art done | the user answers its 5 decisions, then build in its 5 steps |
 | 4 | [CONSTELLATIONS.md](CONSTELLATIONS.md): the constellation data (d3-celestial, BSD) and how figures draw | data checked; pairing superseded by #2 | built as part of #2 |
 | 5 | [TROPHIES_AND_DATA.md](TROPHIES_AND_DATA.md): **version updates** (semantic versions, changelog, GitHub Releases, "what's new in vX"), Gaia-based planet sizes, star types and life stages, brown dwarfs, the trophy ladder (new **nebula** tier, the **universe cup** for secrets), unique trophies, levelled achievements (DWARF KING, DWARF STAR) | planned, references fetched | 4 decisions; version updates can go first |
+| 6 | [UNIVERSE_SECTORS.md](UNIVERSE_SECTORS.md): the observable universe in sectors, ◀ ▶ / ↑ ↓ to move: a zoom-out ladder (Kepler's field → neighbourhood → Milky Way → Local Group → Laniakea → the observable universe), then the whole sky in 12 sectors with every known exoplanet | planned | 3 decisions, then build (ladder first) |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 
