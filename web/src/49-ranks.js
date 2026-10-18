@@ -407,6 +407,11 @@ function starSeen(s) {
   seenStars.add(key);
   progress.seen = [...seenStars].join(',');
   saveProgress();
+  if (highlightSets.unseen?.delete(s)) {   // the UNSEEN highlight updates as you go: the star goes dark, the count drops
+    const chip = document.querySelector('#highlights [data-key="unseen"]');
+    if (chip) chip.textContent = `unseen (${fmt(highlightSets.unseen.size)})`;
+    if (highlight === 'unseen') renderBase();
+  }
   const n = gazeCount();
   checkLevels();
   if (n >= GAZE_REVEAL) ensureUnseenChip();
