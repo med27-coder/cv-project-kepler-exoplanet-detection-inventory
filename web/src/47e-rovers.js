@@ -194,17 +194,20 @@ function drawOpportunityScene(ctx, w, h, t) {
   pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
 }
 
-function marsSky(ctx, w, horizon) {
+// The Mars sky and plain, shared by every Mars scene (these rovers and the Martian farm, 47d-martian.js).
+function marsSky(ctx, w, horizon) {   // butterscotch, paler near the ground
   for (let y = 0; y < horizon; y++) {
     const f = y / horizon;
     ctx.fillStyle = f < 0.35 ? '#c99a70' : f < 0.7 ? '#d8ac80' : '#e6c29a';
     ctx.fillRect(0, y, w, 1);
   }
 }
-function marsGround(ctx, w, h, horizon, seed) {
+// The rusty plain and its rocks; `seed` places the rocks, `beforeRocks` draws anything that belongs behind them.
+function marsGround(ctx, w, h, horizon, seed, rocks = 110, beforeRocks = null) {
   ctx.fillStyle = '#b5623a';
   ctx.fillRect(0, horizon, w, h - horizon);
-  for (let k = 0; k < 110; k++) {
+  if (beforeRocks) beforeRocks();
+  for (let k = 0; k < rocks; k++) {
     ctx.fillStyle = k % 3 ? '#9a4f2c' : '#7d3b20';
     ctx.fillRect(Math.floor(hash(`${seed}r${k}`) * w), horizon + 2 + Math.floor(hash(`${seed}s${k}`) * (h - horizon - 2)), k % 5 ? 1 : 2, 1);
   }

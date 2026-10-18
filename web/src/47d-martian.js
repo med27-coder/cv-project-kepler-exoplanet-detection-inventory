@@ -11,11 +11,7 @@ let martianSince = 0, cropDone = false;
 
 function drawMartianBase(ctx, w, h, t, growth) {
   const horizon = Math.round(h * 0.6);
-  for (let y = 0; y < horizon; y++) {   // a butterscotch sky, paler near the ground
-    const f = y / horizon;
-    ctx.fillStyle = f < 0.35 ? '#c99a70' : f < 0.7 ? '#d8ac80' : '#e6c29a';
-    ctx.fillRect(0, y, w, 1);
-  }
+  marsSky(ctx, w, horizon);   // shared with the rover scenes (47e-rovers.js)
   ctx.fillStyle = '#f6eedb';   // a small, pale Sun: Mars is half again as far out as Earth
   ctx.fillRect(Math.round(w * 0.82), Math.round(h * 0.12), 3, 3);
   for (let x = 0; x < w; x++) {   // far hills, then the rusty plain with rocks
@@ -23,13 +19,8 @@ function drawMartianBase(ctx, w, h, t, growth) {
     ctx.fillStyle = '#9a5634';
     ctx.fillRect(x, hill, 1, horizon - hill);
   }
-  ctx.fillStyle = '#b5623a';
-  ctx.fillRect(0, horizon, w, h - horizon);
-  drawFarRovers(ctx, w, horizon, t);   // the rovers you have found, rolling by far off (47e-rovers.js)
-  for (let k = 0; k < 90; k++) {
-    ctx.fillStyle = k % 3 ? '#9a4f2c' : '#7d3b20';
-    ctx.fillRect(Math.floor(hash(`mr${k}`) * w), horizon + 2 + Math.floor(hash(`ms${k}`) * (h - horizon - 2)), k % 5 ? 1 : 2, 1);
-  }
+  // the plain (same rocks as before: seed 'm'), with the rovers you have found rolling by far off behind them
+  marsGround(ctx, w, h, horizon, 'm', 90, () => drawFarRovers(ctx, w, horizon, t));
   const base = horizon + Math.round(h * 0.12);
   // the Hab: a squat white dome with an airlock and an antenna
   const hx = Math.round(w * 0.16), hw = Math.round(w * 0.2), hh = Math.round(h * 0.13);
