@@ -101,6 +101,12 @@ const EGGS = [
   { id: 'perseverance', name: 'Perseverance', kind: 'craft', art: 'perseverance', ref: 'perseverance', query: 'Perseverance', toast: 'LIFTOFF ON MARS',
     clue: 'I collect rock samples in tubes, and I brought a little helicopter along.',
     story: 'Perseverance landed in Jezero Crater, an ancient river delta, on 18 February 2021. It seals rock samples in tubes for a future trip to Earth, and it carried Ingenuity, the first aircraft to fly on another planet: 72 flights instead of the planned five.' },
+  { id: 'spirit', name: 'Spirit', kind: 'craft', art: 'spirit', ref: 'mer-rover', query: 'Spirit', toast: 'TWIN ON THE HILLS',
+    clue: 'One of twins sent in 2004. I climbed a hill named after an astronaut, and kept driving backwards on a broken wheel.',
+    story: 'Spirit landed in Gusev Crater on 4 January 2004, the first of NASA\'s twin Mars Exploration Rovers. Built to last 90 sols, it explored for six years, climbed Husband Hill, and even its broken wheel made a discovery: dragging through the soil, it uncovered silica left by ancient hot springs.' },
+  { id: 'opportunity', name: 'Opportunity', kind: 'craft', art: 'opportunity', ref: 'opportunity-rover', query: 'Opportunity', toast: 'MARATHON ON MARS',
+    clue: 'The other twin of 2004. Built for 90 days, I lasted over 14 years and drove more than a marathon. My friends called me Oppy.',
+    story: 'Opportunity landed on Meridiani Planum on 25 January 2004 and found blueberry-sized balls of hematite that formed in water. It drove 45.16 km, crossed crater after crater, and worked for 5,111 sols until a planet-wide dust storm darkened its solar panels in June 2018.' },
   { id: 'sojourner', name: 'Sojourner', kind: 'craft', art: 'sojourner', ref: 'pathfinder', query: 'Sojourner', toast: 'FIRST WHEELS ON MARS',
     clue: 'The first wheels on another planet: I rolled off my lander on 4 July 1997, no bigger than a microwave oven.',
     story: 'Mars Pathfinder landed in Ares Vallis on 4 July 1997, bouncing in on airbags, and its little rover Sojourner became the first to drive on another planet. Planned for a week, it worked for 83 sols, studying rocks named after cartoon characters. In The Martian, the stranded astronaut digs up Pathfinder and uses it to talk to Earth.' },
@@ -415,7 +421,7 @@ function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
 
 // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
 const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Parker', 'parker'],
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
   ['Osiris Rex', 'apex'], ['Tatooine', null]];
 const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
 function editDistance(a, b) {   // Levenshtein, one row at a time

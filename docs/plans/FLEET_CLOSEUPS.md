@@ -45,6 +45,35 @@ Status to be re-checked at build; as known in October 2026:
 Searching a robot finds it like any easter egg; non-NASA robots use their agencies' public images where the
 licence allows, otherwise a link (as for ESA today).
 
+### 3A. The rover roster (user's list, 18 October 2026)
+
+Every rover that has driven (or tried to) on another world, as easter eggs with their own animated scenes, like the
+Mars rovers already built. Set achievements for each destination, one per agency set, and one for all of them
+(decisions answered 18 October). Facts checked against the agencies' pages; corrections to the list are in the notes.
+
+| Destination | Rover | Agency, year | Notes | Status |
+|---|---|---|---|---|
+| Mars | Sojourner (Mars Pathfinder) | NASA, 1997 | first rover on another planet | **built v1.7.0** |
+| Mars | Spirit | NASA, 2004 | landed 4 January 2004; last contact March 2010 | **built v1.9.0** |
+| Mars | Opportunity | NASA, 2004 | landed 25 January 2004, three weeks after Spirit (not the same day); last contact June 2018, ended February 2019 | **built v1.9.0** |
+| Mars | Curiosity | NASA, 2012 | | **built v1.4.0** |
+| Mars | Perseverance (with Ingenuity) | NASA, 2021 | | **built v1.4.0** |
+| Mars | Zhurong (Tianwen-1) | China (CNSA), 2021 | landed May 2021 in Utopia Planitia; dormant since May 2022 | to build |
+| Moon | Lunokhod 1 (Luna 17) | USSR, 1970 | the first rover on another world | to build |
+| Moon | Lunokhod 2 (Luna 21) | USSR, 1973 | | to build |
+| Moon | Yutu (Chang'e 3) | China, 2013 | | to build |
+| Moon | Yutu-2 (Chang'e 4) | China, 2019 | the first rover on the far side | to build |
+| Moon | Pragyan | India (ISRO), 2023 | flew on Chandrayaan-2 in 2019 but never left its lander, which crashed; it drove on Chandrayaan-3 in August 2023 | to build |
+| Moon | Rashid | UAE, 2023 | lost when its lander, ispace's Hakuto-R, crashed in April 2023: an "attempt" card | to build |
+| Moon | SORA-Q (LEV-2) and LEV-1 | Japan (JAXA), 2024 | rode on SLIM; SORA-Q photographed SLIM lying on its side | to build |
+| Moon | Apollo Lunar Roving Vehicles | NASA, 1971-72 | the only rovers people have driven, on Apollo 15, 16 and 17 | to build (optional) |
+| Asteroid Ryugu | MINERVA-II-1A and 1B | Japan (JAXA), 2018 | hopping rovers from Hayabusa2: the first rovers to move on an asteroid | to build |
+| Asteroid Ryugu | MASCOT | Germany (DLR) and France (CNES), 2018 | a hopping lander-rover on Hayabusa2 | to build |
+| Asteroid Itokawa | MINERVA | Japan (JAXA), 2005 | released by Hayabusa but drifted away into space | to build: an "attempt" card |
+
+Pictures: NASA's are copied as references; other agencies' images only where their licences allow, otherwise linked
+(as for ESA). Waves: Mars first (Zhurong next), then the Moon, then the small bodies.
+
 ## 4. Special trophies
 
 Each with its own symbol on the cup (as SYMBOLS do today):

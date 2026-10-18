@@ -240,6 +240,30 @@ const CRAFT_ART = {
     '.xmx..xmx....xmx....',
     '.xxx..xxx....xxx....',
   ],
+  spirit: [   // a Mars Exploration Rover: the wide flat solar deck, the camera mast, six wheels
+    '..........lwl......',
+    '...........m.......',
+    '..l........m.......',
+    '..m.sl.....m.......',
+    'PpPpPpPpPpPpPpPpPpP',
+    '.....wwwwwwwww.....',
+    '.....sssssssss.....',
+    '....mmmmmmmmmmm....',
+    '...xx...xx...xx....',
+    '...xm...xm...xm....',
+  ],
+  opportunity: [   // Spirit's twin, its solar deck dusty red-brown before a gust of wind cleans it
+    '..........lwl......',
+    '...........m.......',
+    '..l........m.......',
+    '..m.sl.....m.......',
+    'rrPprrPprrPprrPprrP',
+    '.....wwwwwwwww.....',
+    '.....sssssssss.....',
+    '....mmmmmmmmmmm....',
+    '...xx...xx...xx....',
+    '...xm...xm...xm....',
+  ],
   sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
     '.m.........',
     '.m.........',
@@ -283,7 +307,7 @@ const CRAFT_SPRITE = {
   'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
   JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
   'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
-  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner',
+  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner', Spirit: 'spirit', Opportunity: 'opportunity',
 };
 
 const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];

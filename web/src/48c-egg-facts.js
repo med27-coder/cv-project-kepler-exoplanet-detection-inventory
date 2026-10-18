@@ -183,6 +183,18 @@ const EGG_FACTS = {
           'It carries chips with the names of 10.9 million people.'],
     why: 'The rover collecting pieces of Mars to bring home one day, with the first aircraft on another planet as its sidekick. Search it to watch them work.',
   },
+  spirit: {
+    fun: ['Spirit and Opportunity were named by Sofi Collis, a 9-year-old from Arizona, in a NASA essay contest.',
+          'Its landing site was named Columbia Memorial Station, and the hills nearby after the seven astronauts of Space Shuttle Columbia.',
+          'It was built to drive about 600 metres; it drove more than 7.7 km.'],
+    why: 'The twin that never gave up: when a wheel broke it drove backwards, and the broken wheel itself found signs of hot springs. Sojourner, Spirit, Opportunity, Curiosity and Perseverance together tell the whole story of driving on Mars.',
+  },
+  opportunity: {
+    fun: ['Its last data in 2018 was summed up by a reporter as "My battery is low and it\'s getting dark". The rover never sent those words, but the line made people around the world cry.',
+          'It landed inside a crater only 22 metres wide, by pure luck: an "interplanetary hole in one".',
+          'Wind gusts cleaned its solar panels again and again, which is why it kept going for so long.'],
+    why: 'The record holder: built for 90 days, it lasted more than 14 years. A favourite of everyone who followed it, and Spirit\'s twin.',
+  },
   sojourner: {
     fun: ['Sojourner\'s top speed was about 1 cm a second: crossing a tennis court would have taken it about 40 minutes.',
           'Pathfinder\'s pictures were among the most popular things on the early web: its website had hundreds of millions of hits in a month.',

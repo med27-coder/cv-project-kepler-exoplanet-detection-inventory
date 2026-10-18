@@ -7,6 +7,16 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.0] - 2026-10-18
+
+### Added
+- **Spirit and Opportunity** (33 easter eggs), NASA's twin Mars Exploration Rovers, each with its own scene: Spirit
+  in Gusev Crater below Husband Hill, driving backwards on its stuck wheel (which scrapes up bright silica) while a
+  dust devil wanders past; Opportunity ("oppy") on Meridiani Planum among hematite "blueberries", its dusty solar
+  panels swept clean by a gust of wind. Sprites, Galleria cards with NASA photos, fun facts. All found rovers now
+  roll by behind the Martian farm.
+- The planner lists every rover on another world (Moon, Mars, asteroids) for the spacecraft close-ups.
+
 ## [1.8.0] - 2026-10-18
 
 ### Added
@@ -127,6 +137,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.0
 [1.8.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.8.0
 [1.7.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.7.0
 [1.6.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.6.0

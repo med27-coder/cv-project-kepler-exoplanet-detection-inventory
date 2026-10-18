@@ -342,7 +342,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 31
+    assert page.locator('.egg-card').count() == 33
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -770,8 +770,12 @@ def test_rovers_at_work_on_mars(browser, site):
     assert page.locator('#sys-title').inner_text() == 'PERSEVERANCE'
     search('mars pathfinder')
     assert page.locator('#sys-title').inner_text() == 'SOJOURNER'
+    search('spirit rover')
+    assert page.locator('#sys-title').inner_text() == 'SPIRIT'
+    search('oppy')
+    assert page.locator('#sys-title').inner_text() == 'OPPORTUNITY'
     saved = page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1'))")
-    assert {'curiosity', 'perseverance', 'sojourner'} <= set(saved['eggs'])
+    assert {'curiosity', 'perseverance', 'sojourner', 'spirit', 'opportunity'} <= set(saved['eggs'])
     search('martian man')
     page.wait_for_timeout(500)
     search('mars rovers')
