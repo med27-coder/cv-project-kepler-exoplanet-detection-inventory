@@ -9,7 +9,8 @@
 | [EXPERIMENTS_V3.md](star-gazer/EXPERIMENTS_V3.md) | Follow-up experiments: the TESS transfer test and the feature ablations (Gaia, `koi_count`) |
 | [V4_PREREGISTRATION.md](star-gazer/V4_PREREGISTRATION.md) | V4, Colossus (a giant-planet specialist): the design, data and decision rules, fixed before training |
 | [V4_RESULTS.md](star-gazer/V4_RESULTS.md) | Colossus's result: the primary endpoint failed (72% vs V3's 81% giant recall), and what was learned |
-| [V4B_PREREGISTRATION.md](star-gazer/V4B_PREREGISTRATION.md) | Colossus 2: V3's network reading the light curve, with physics features, fine-tuned on giants (registered; running) |
+| [V4B_PREREGISTRATION.md](star-gazer/V4B_PREREGISTRATION.md) | Colossus 2: V3's network reading the light curve, with physics features, fine-tuned on giants |
+| [V4B_RESULTS.md](star-gazer/V4B_RESULTS.md) | Colossus 2's result: more giants found (86% vs 81%), but miscalibrated, so overall accuracy failed; Stage A (physics inside V3) is the lead |
 
 ## The site: Kepler Star Map ([star-map/](star-map/))
 
