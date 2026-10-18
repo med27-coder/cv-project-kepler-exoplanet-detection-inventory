@@ -10,8 +10,8 @@ import re
 import subprocess
 import sys
 
-SECRET = re.compile(r'''(^|[\s/\\"'=])(\.secrets([/\\]|\s|$)|[^\s"']*\.(key|pem)\b|\.env(\.\w+)?\b)''')
-GIT = r'\bgit(?:\s+(?:-C|-c|--git-dir|--work-tree|--namespace)\s+\S+|\s+--?[\w-]+(?:=\S+)?)*\s+'
+SECRET = re.compile(r'''(^|[\s/\\"'=])(\.secrets([/\\]|\s|$)|[^\s"']*\.(key|pem)\b|\.env(\.\w+)?\b)''', re.IGNORECASE)
+GIT = r'(?i:\bgit(?:\.exe)?)(?:\s+(?:-C|-c|--git-dir|--work-tree|--namespace)\s+\S+|\s+--?[\w-]+(?:=\S+)?)*\s+'
 QUOTED = re.compile(r'''"(?:\\.|[^"\\])*"|'[^']*'|<<-?\s*'?(\w+)'?.*?^\1$''', re.DOTALL | re.MULTILINE)
 
 
@@ -24,8 +24,10 @@ def deny(reason):
 
 def main():
     cmd = (json.load(sys.stdin).get('tool_input') or {}).get('command', '')
-    if not re.search(r'\bgit\b', cmd):
+    if not re.search(r'\bgit(\.exe)?\b', cmd, re.IGNORECASE):
         return
+    if re.search(r'hooksPath', cmd, re.IGNORECASE):
+        deny('changing core.hooksPath would bypass the git pre-commit hook that guards the key.')
     for args in re.findall(GIT + r'(?:add|stage|update-index)\b([^|;&\n]*)', cmd):
         if SECRET.search(args):
             deny('this git command stages a secret (.secrets/, *.key, *.pem or .env). The Star Gazer key must never '
@@ -35,6 +37,8 @@ def main():
         for args in re.findall(GIT + r'commit\b([^|;&\n]*)', bare):
             if SECRET.search(args):
                 deny('this git commit names a secret file.')
+            if re.search(r'(^|\s)(--no-verify\b|-[A-Za-z]*n[A-Za-z]*\b)', args):
+                deny('git commit --no-verify (-n) would skip the pre-commit hook that guards the key.')
         out = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True, check=False)
         if out.returncode != 0:
             return   # not in a repository here: the git pre-commit hook still guards the real commit
