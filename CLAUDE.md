@@ -70,7 +70,7 @@ patches, write a script file (scratchpad) and run it, or use the Edit tool.
 - Roles: `40-home.js` `lookup()` routes searches (easter eggs before the catalog). `48-gallery.js` owns progress,
   achievements and easter eggs. `48b-predictions`, `48c-egg-facts` (each egg's fun facts and why it's here; every egg needs one), `49-ranks` (emblems, badges, header), `49b-trophies`,
   `49c-ui`, `49d-connect` add on to it; `49e-thanks` is the antenna's thank-you note. `56-universe.js` is the UNIVERSE view (sectors on their own canvas); `47b-dwarfs` the dwarf planets;
-  `47c-astronaut` the lost astronaut and outfits, `47d-martian` the Mars farm, `47e-rovers` Curiosity and Perseverance at work (anything a `#hash` search needs must load before `50-wiring`). `60-loop.js` is the only animation loop (it stops when idle or hidden;
+  `47c-astronaut` the lost astronaut and outfits, `47d-martian` the Mars farm, `47e-rovers` the Mars rovers at work, `47f-hubble` Hubble on its orbit (anything a `#hash` search needs must load before `50-wiring`). `60-loop.js` is the only animation loop (it stops when idle or hidden;
   every drawing hooks into it).
 - **Strict CSP**: no inline scripts, styles or `style=` attributes in HTML strings (set `el.style` from JS);
   escape every interpolated value with `esc()`.

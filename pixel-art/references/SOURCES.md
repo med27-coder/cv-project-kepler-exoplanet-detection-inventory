@@ -30,6 +30,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `spacecraft/perseverance.jpg` | Perseverance selfie with Ingenuity | [PIA24542](https://images.nasa.gov/details/PIA24542) | NASA/JPL-Caltech/MSSS | 2021-04-07 |
 | `spacecraft/mer-rover.jpg` | A Mars Exploration Rover, Spirit's and Opportunity's design (artist concept) | [PIA04413](https://images.nasa.gov/details/PIA04413) | NASA/JPL/Cornell University | 2003-02-26 |
 | `spacecraft/opportunity-rover.jpg` | Opportunity's self-portrait just after the wind cleaned its solar panels (2014) | [PIA18079](https://images.nasa.gov/details/PIA18079) | NASA/JPL-Caltech/Cornell Univ./Arizona State Univ. | 2014-04-17 |
+| `spacecraft/hubble.jpg` | The Hubble Space Telescope over Earth, seen from Space Shuttle Columbia (2002) | [S109E5882](https://images.nasa.gov/details/S109E5882) | NASA JSC | 2002-03-09 |
 | `spacecraft/iss.jpg` | The ISS photographed from a departing Soyuz (2018) | [iss056e201248](https://images.nasa.gov/details/iss056e201248) | NASA JSC | 2018-10-04 |
 | `solar-system/solar-system-montage.jpg` | The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008) | [PIA10969](https://images.nasa.gov/details/PIA10969) | NASA/JPL | 2008-07-21 |
 | `solar-system/pale-blue-dot.jpg` | The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020) | [PIA23645](https://images.nasa.gov/details/PIA23645) | NASA/JPL-Caltech | 2020-02-12 |

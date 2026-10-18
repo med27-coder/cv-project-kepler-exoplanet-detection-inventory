@@ -12,7 +12,7 @@ full list for anyone maintaining the site. Search is case-insensitive.
 | ☀☀ **Tatooine** | Kepler-16, a real planet with two suns: a "YES, IT'S REAL" pop-up, both stars drawn orbiting each other (they eclipse in KEPLER'S VIEW), and the TATOOINE achievement | `tatooine` (also "the tatooine") | `#Tatooine` |
 | 🏠 **The International Space Station** | "★ PEOPLE LIVE UP HERE ★": the real continents (NASA's Blue Marble) on a turning, tilted pixel Earth with the ISS on a to-scale orbit and its pixel art in the corner (sped up ~460×), NASA's facts and a link to Spot the Station | `iss`, `space station`, `international space station` (also with "the") | `#ISS` |
 
-Earth-orbit satellites are left out on purpose; the ISS is the only exception.
+Earth-orbit satellites are left out on purpose; the ISS and the **Hubble Space Telescope** (`hubble`, `hst`, `hubble (space) telescope`: a pixel Earth with Hubble on its orbit) are the exceptions.
 
 Dwarf planets you have found (Ceres, Haumea, Makemake, Eris) also appear in the Solar System view, on their real
 orbits; Pluto is always there.
@@ -30,7 +30,7 @@ bar finds it:
   (an official NASA photo, credited; ESA-credited pictures are linked instead) and a short history.
   The Solar System's card adds a strip of real photos of the Sun, every planet and the Moon.
 
-33 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
+34 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Hubble, Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
 Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OSIRIS-APEX, MRO, Mars
 Odyssey, Mars Express, ExoMars, Curiosity, Perseverance, Sojourner, Spirit and Opportunity (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
@@ -79,7 +79,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | SPACE FARMER | Search "martian man" and watch the farm bring in a whole crop (a minute) |
 | | ECO MODE | Set the animation to battery saver |
 | | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
-| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 33 |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 34 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
 | | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |
