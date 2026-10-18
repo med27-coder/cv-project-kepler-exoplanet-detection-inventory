@@ -81,6 +81,9 @@ function drawMartianBase(ctx, w, h, t, growth) {
     ctx.fillStyle = '#5a6a9a'; ctx.fillRect(px + k * 9, base - 6, 7, 1);
     ctx.fillStyle = '#8a8f9a'; ctx.fillRect(px + k * 9 + 3, base - 3, 1, 3);
   }
+  // Pathfinder and Sojourner, dug up and brought back to the Hab to talk to Earth (47e-rovers.js)
+  const big = w >= 200 ? 1 : 0.5;
+  if (big === 1) { drawPathfinder(ctx, Math.round(w * 0.1), base + Math.round(h * 0.2), 1); drawSojourner(ctx, Math.round(w * 0.1) + 18, base + Math.round(h * 0.2), 1, t, false); }
   const rx = Math.round(w * 0.36), ry = base + Math.round(h * 0.12);
   ctx.fillStyle = '#ece8e0'; ctx.fillRect(rx, ry - 6, 14, 4);
   ctx.fillStyle = '#9fd8ff'; ctx.fillRect(rx + 10, ry - 5, 3, 2);

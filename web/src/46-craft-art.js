@@ -240,6 +240,15 @@ const CRAFT_ART = {
     '.xmx..xmx....xmx....',
     '.xxx..xxx....xxx....',
   ],
+  sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
+    '.m.........',
+    '.m.........',
+    'PpPpPpPpPp.',
+    '.sssssssg..',
+    '.lllllllg..',
+    'xx..xx..xx.',
+    'xm..xm..xm.',
+  ],
   perseverance: [   // like Curiosity (its twin design) with the Ingenuity helicopter beside it
     '..............lwwl..........',
     '...............mk...........',
@@ -274,7 +283,7 @@ const CRAFT_SPRITE = {
   'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
   JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
   'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
-  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance',
+  'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner',
 };
 
 const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];

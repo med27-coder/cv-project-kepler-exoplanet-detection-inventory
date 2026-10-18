@@ -2,10 +2,13 @@
 // Searching "curiosity" or "perseverance" (or "percy") opens the rover at work on Mars, animated like the Martian
 // farm (47d-martian.js): Curiosity climbing past Mount Sharp in Gale Crater, stopping to drill and to look around;
 // Perseverance by the old river delta in Jezero Crater, leaving sample tubes on the ground while the Ingenuity
-// helicopter takes off, flies and lands. Rovers you have found also roll by in the background of the Martian farm.
+// helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
+// Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
 // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy)( rover)?$/i;
-const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? (m[2].toLowerCase() === 'curiosity' ? 'curiosity' : 'perseverance') : null; };
+const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder)( rover)?$/i;
+const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
+                   'mars pathfinder': 'sojourner', pathfinder: 'sojourner' };
+const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
 const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
 // A rover side-on, facing right, its wheels on the ground at (x, y); s: pixels per rover pixel.
@@ -52,6 +55,67 @@ function drawFarRovers(ctx, w, horizon, t) {
     const x = Math.round(((t * 3 + k * (w + 40) / 2) % (w + 40)) - 20);
     drawRoverTiny(ctx, x, horizon + 3 + k);
   });
+}
+
+// Mars Pathfinder after landing, centred on (x, y) at ground level: three solar petals opened flat, the deflated
+// airbags bunched round them, the camera mast (IMP) in the middle and a ramp down to the ground.
+function drawPathfinder(ctx, x, y, s = 1) {
+  const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+  put(-11, -2, 22, 2, '#c4beb3');                  // deflated airbags, bunched under the petals
+  put(-12, -1, 2, 1, '#9a948a'); put(10, -1, 2, 1, '#9a948a');
+  put(-10, -3, 7, 1, '#2f4fae'); put(3, -3, 7, 1, '#2f4fae');   // the two side petals, solar cells up
+  put(-10, -3, 1, 1, '#5d7bd6'); put(9, -3, 1, 1, '#5d7bd6');
+  put(-3, -4, 6, 2, '#d9a441');                    // the base petal and the gold body
+  put(-2, -5, 4, 1, '#9c6b22');
+  put(0, -11, 1, 6, '#8a8f9a');                    // the camera mast
+  put(-1, -12, 3, 1, '#eef2f8'); put(-1, -12, 1, 1, '#151a2c');
+  put(3, -6, 1, 1, '#eef2f8'); put(4, -7, 2, 1, '#d6dae2');      // the low-gain antenna and the dish
+  put(10, -2, 4, 1, '#7d8596');                    // the ramp down to the ground
+}
+// Sojourner: a microwave-oven-sized rover, six small wheels, a flat solar panel on top, its antenna whip.
+function drawSojourner(ctx, x, y, s, t, moving) {
+  const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+  const bob = k => (moving && !REDUCED_MOTION ? Math.round(Math.sin(t * 7 + k * 2) * 0.5) : 0);
+  for (const [k, wx] of [[0, -4], [1, -1], [2, 2]]) { put(wx, -2 + bob(k), 2, 2, '#2a2a30'); put(wx, -1 + bob(k), 1, 1, '#8a8f9a'); }
+  put(-4, -4, 8, 2, '#d6dae2');                    // the body (the "warm electronics box")
+  put(-4, -3, 8, 1, '#b8bfcc');
+  put(-5, -5, 10, 1, '#2f4fae');                   // the solar panel on top
+  put(-5, -5, 2, 1, '#5d7bd6');
+  put(-4, -9, 1, 4, '#8a8f9a');                    // the antenna
+  put(4, -4, 1, 2, '#d9a441');                     // the APXS on its little arm at the back
+}
+
+function drawSojournerScene(ctx, w, h, t) {
+  const horizon = Math.round(h * 0.55);
+  marsSky(ctx, w, horizon);
+  for (let x = 0; x < w; x++) {   // Twin Peaks, two small hills on the horizon, and the far plain of Ares Vallis
+    const peak = Math.max(0, 1 - Math.abs(x - w * 0.62) / 18) * 14 + Math.max(0, 1 - Math.abs(x - w * 0.76) / 16) * 12;
+    const top = horizon - 2 - Math.round(peak) - Math.round(1.5 * hash(`tp${x >> 3}`));
+    ctx.fillStyle = peak > 0 ? '#a8643e' : '#9a5634';
+    ctx.fillRect(x, top, 1, horizon - top);
+  }
+  marsGround(ctx, w, h, horizon, 'ares');
+  for (let k = 0; k < 24; k++) {   // the flood plain is strewn with rocks
+    const rx = Math.floor(hash(`ar${k}`) * w), ry = horizon + 6 + Math.floor(hash(`ay${k}`) * (h - horizon - 16));
+    ctx.fillStyle = '#7d3b20'; ctx.fillRect(rx, ry, 2 + (k % 3), 2);
+    ctx.fillStyle = '#c27c52'; ctx.fillRect(rx, ry, 1, 1);
+  }
+  const ground = h - 30, lx = Math.round(w * 0.3);
+  drawPathfinder(ctx, lx, ground, 2);
+  const yogi = Math.round(w * 0.78);   // the rock Yogi, its first big target
+  ctx.fillStyle = '#7d3b20'; ctx.fillRect(yogi, ground - 9, 16, 9);
+  ctx.fillStyle = '#9a5634'; ctx.fillRect(yogi + 2, ground - 11, 11, 2); ctx.fillRect(yogi, ground - 9, 3, 5);
+  // Sojourner: down the ramp, across to Yogi, a pause to measure it with its APXS, then a slow way back
+  const c = REDUCED_MOTION ? 0 : t % 28, x0 = lx + 28, x1 = yogi - 12;
+  const f = c < 10 ? c / 10 : c < 18 ? 1 : 1 - (c - 18) / 10;
+  const sx = Math.round(x0 + (x1 - x0) * f);
+  for (let x = x0; x < sx - 8; x += 2) { ctx.fillStyle = '#9a4f2c'; ctx.fillRect(x, ground - 1, 1, 1); }   // its tracks
+  drawSojourner(ctx, sx, ground, 2, t, c < 10 || c >= 18);
+  pixelText(ctx, 'ARES VALLIS', 4, h - 10, '#fff1d6');
+  pixelText(ctx, 'TWIN PEAKS', Math.round(w * 0.69) - 20, 4, '#5a2a14');
+  pixelText(ctx, 'YOGI', yogi, ground - 20, '#fff1d6');
+  const sol = `SOL ${Math.min(83, 1 + Math.floor((REDUCED_MOTION ? 0 : t) / 3))}`;
+  pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
 }
 
 function marsSky(ctx, w, horizon) {
@@ -162,6 +226,18 @@ const ROVERS = {
       'Its ChemCam laser zaps rocks from up to 7 metres away to read what they are made of.',
     ],
     link: 'https://science.nasa.gov/mission/msl-curiosity/',
+  },
+  sojourner: {
+    title: 'SOJOURNER', big: '★ SOJOURNER IN ARES VALLIS ★', draw: drawSojournerScene, hash: 'sojourner',
+    intro: 'The first rover on another planet. Mars Pathfinder bounced down on airbags on 4 July 1997, opened like a flower, and Sojourner, about the size of a microwave oven, rolled down a ramp to study the rocks around it. Watch it drive to the rock Yogi and measure it.',
+    facts: [
+      'Pathfinder landed on 4 July 1997 in Ares Vallis, an ancient flood channel, cushioned by giant airbags that bounced about 15 times.',
+      'Sojourner weighed 10.6 kg and drove at about 1 cm a second; it never went more than about 12 metres from its lander.',
+      'It was planned for 7 sols and worked for 83; the lander for nearly three months.',
+      'Its instrument, the APXS, read what rocks are made of; the team named the rocks after cartoon characters, like Yogi and Barnacle Bill.',
+      'It is named after Sojourner Truth, the American abolitionist, picked in a schools essay contest.',
+    ],
+    link: 'https://science.nasa.gov/mission/mars-pathfinder/',
   },
   perseverance: {
     title: 'PERSEVERANCE', big: '★ PERSEVERANCE IN JEZERO CRATER ★', draw: drawPerseveranceScene, hash: 'perseverance',

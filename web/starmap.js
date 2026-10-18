@@ -119,11 +119,11 @@
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
   // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
   // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.6.0';
+  const VERSION = '1.7.0';
   const RELEASE_NOTES = [
+    'A new easter egg: the very first rover on Mars, from 1997. Can you find it? (The Martian farm has a clue outside its Hab.)',
     'New pixel art for every spacecraft and rover: bigger, shaded, and easier to tell apart.',
     'Every found easter egg in the Galleria now has FUN FACTS and the story of why it was hidden here.',
-    'Rovers at work: find Curiosity or Perseverance and watch them on Mars, drilling, sampling, with Ingenuity flying nearby.',
   ];
 
   // ---------------------------------------------------------------- sky events: comets, asteroids, the odd UFO
@@ -2281,6 +2281,15 @@
       '.xmx..xmx....xmx....',
       '.xxx..xxx....xxx....',
     ],
+    sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
+      '.m.........',
+      '.m.........',
+      'PpPpPpPpPp.',
+      '.sssssssg..',
+      '.lllllllg..',
+      'xx..xx..xx.',
+      'xm..xm..xm.',
+    ],
     perseverance: [   // like Curiosity (its twin design) with the Ingenuity helicopter beside it
       '..............lwwl..........',
       '...............mk...........',
@@ -2315,7 +2324,7 @@
     'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
     JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
     'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
-    'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance',
+    'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner',
   };
 
   const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];
@@ -2938,6 +2947,9 @@
       ctx.fillStyle = '#5a6a9a'; ctx.fillRect(px + k * 9, base - 6, 7, 1);
       ctx.fillStyle = '#8a8f9a'; ctx.fillRect(px + k * 9 + 3, base - 3, 1, 3);
     }
+    // Pathfinder and Sojourner, dug up and brought back to the Hab to talk to Earth (47e-rovers.js)
+    const big = w >= 200 ? 1 : 0.5;
+    if (big === 1) { drawPathfinder(ctx, Math.round(w * 0.1), base + Math.round(h * 0.2), 1); drawSojourner(ctx, Math.round(w * 0.1) + 18, base + Math.round(h * 0.2), 1, t, false); }
     const rx = Math.round(w * 0.36), ry = base + Math.round(h * 0.12);
     ctx.fillStyle = '#ece8e0'; ctx.fillRect(rx, ry - 6, 14, 4);
     ctx.fillStyle = '#9fd8ff'; ctx.fillRect(rx + 10, ry - 5, 3, 2);
@@ -2988,10 +3000,13 @@
   // Searching "curiosity" or "perseverance" (or "percy") opens the rover at work on Mars, animated like the Martian
   // farm (47d-martian.js): Curiosity climbing past Mount Sharp in Gale Crater, stopping to drill and to look around;
   // Perseverance by the old river delta in Jezero Crater, leaving sample tubes on the ground while the Ingenuity
-  // helicopter takes off, flies and lands. Rovers you have found also roll by in the background of the Martian farm.
+  // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
+  // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
   // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy)( rover)?$/i;
-  const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? (m[2].toLowerCase() === 'curiosity' ? 'curiosity' : 'perseverance') : null; };
+  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder)( rover)?$/i;
+  const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
+                     'mars pathfinder': 'sojourner', pathfinder: 'sojourner' };
+  const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
   const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
   // A rover side-on, facing right, its wheels on the ground at (x, y); s: pixels per rover pixel.
@@ -3038,6 +3053,67 @@
       const x = Math.round(((t * 3 + k * (w + 40) / 2) % (w + 40)) - 20);
       drawRoverTiny(ctx, x, horizon + 3 + k);
     });
+  }
+
+  // Mars Pathfinder after landing, centred on (x, y) at ground level: three solar petals opened flat, the deflated
+  // airbags bunched round them, the camera mast (IMP) in the middle and a ramp down to the ground.
+  function drawPathfinder(ctx, x, y, s = 1) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    put(-11, -2, 22, 2, '#c4beb3');                  // deflated airbags, bunched under the petals
+    put(-12, -1, 2, 1, '#9a948a'); put(10, -1, 2, 1, '#9a948a');
+    put(-10, -3, 7, 1, '#2f4fae'); put(3, -3, 7, 1, '#2f4fae');   // the two side petals, solar cells up
+    put(-10, -3, 1, 1, '#5d7bd6'); put(9, -3, 1, 1, '#5d7bd6');
+    put(-3, -4, 6, 2, '#d9a441');                    // the base petal and the gold body
+    put(-2, -5, 4, 1, '#9c6b22');
+    put(0, -11, 1, 6, '#8a8f9a');                    // the camera mast
+    put(-1, -12, 3, 1, '#eef2f8'); put(-1, -12, 1, 1, '#151a2c');
+    put(3, -6, 1, 1, '#eef2f8'); put(4, -7, 2, 1, '#d6dae2');      // the low-gain antenna and the dish
+    put(10, -2, 4, 1, '#7d8596');                    // the ramp down to the ground
+  }
+  // Sojourner: a microwave-oven-sized rover, six small wheels, a flat solar panel on top, its antenna whip.
+  function drawSojourner(ctx, x, y, s, t, moving) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    const bob = k => (moving && !REDUCED_MOTION ? Math.round(Math.sin(t * 7 + k * 2) * 0.5) : 0);
+    for (const [k, wx] of [[0, -4], [1, -1], [2, 2]]) { put(wx, -2 + bob(k), 2, 2, '#2a2a30'); put(wx, -1 + bob(k), 1, 1, '#8a8f9a'); }
+    put(-4, -4, 8, 2, '#d6dae2');                    // the body (the "warm electronics box")
+    put(-4, -3, 8, 1, '#b8bfcc');
+    put(-5, -5, 10, 1, '#2f4fae');                   // the solar panel on top
+    put(-5, -5, 2, 1, '#5d7bd6');
+    put(-4, -9, 1, 4, '#8a8f9a');                    // the antenna
+    put(4, -4, 1, 2, '#d9a441');                     // the APXS on its little arm at the back
+  }
+
+  function drawSojournerScene(ctx, w, h, t) {
+    const horizon = Math.round(h * 0.55);
+    marsSky(ctx, w, horizon);
+    for (let x = 0; x < w; x++) {   // Twin Peaks, two small hills on the horizon, and the far plain of Ares Vallis
+      const peak = Math.max(0, 1 - Math.abs(x - w * 0.62) / 18) * 14 + Math.max(0, 1 - Math.abs(x - w * 0.76) / 16) * 12;
+      const top = horizon - 2 - Math.round(peak) - Math.round(1.5 * hash(`tp${x >> 3}`));
+      ctx.fillStyle = peak > 0 ? '#a8643e' : '#9a5634';
+      ctx.fillRect(x, top, 1, horizon - top);
+    }
+    marsGround(ctx, w, h, horizon, 'ares');
+    for (let k = 0; k < 24; k++) {   // the flood plain is strewn with rocks
+      const rx = Math.floor(hash(`ar${k}`) * w), ry = horizon + 6 + Math.floor(hash(`ay${k}`) * (h - horizon - 16));
+      ctx.fillStyle = '#7d3b20'; ctx.fillRect(rx, ry, 2 + (k % 3), 2);
+      ctx.fillStyle = '#c27c52'; ctx.fillRect(rx, ry, 1, 1);
+    }
+    const ground = h - 30, lx = Math.round(w * 0.3);
+    drawPathfinder(ctx, lx, ground, 2);
+    const yogi = Math.round(w * 0.78);   // the rock Yogi, its first big target
+    ctx.fillStyle = '#7d3b20'; ctx.fillRect(yogi, ground - 9, 16, 9);
+    ctx.fillStyle = '#9a5634'; ctx.fillRect(yogi + 2, ground - 11, 11, 2); ctx.fillRect(yogi, ground - 9, 3, 5);
+    // Sojourner: down the ramp, across to Yogi, a pause to measure it with its APXS, then a slow way back
+    const c = REDUCED_MOTION ? 0 : t % 28, x0 = lx + 28, x1 = yogi - 12;
+    const f = c < 10 ? c / 10 : c < 18 ? 1 : 1 - (c - 18) / 10;
+    const sx = Math.round(x0 + (x1 - x0) * f);
+    for (let x = x0; x < sx - 8; x += 2) { ctx.fillStyle = '#9a4f2c'; ctx.fillRect(x, ground - 1, 1, 1); }   // its tracks
+    drawSojourner(ctx, sx, ground, 2, t, c < 10 || c >= 18);
+    pixelText(ctx, 'ARES VALLIS', 4, h - 10, '#fff1d6');
+    pixelText(ctx, 'TWIN PEAKS', Math.round(w * 0.69) - 20, 4, '#5a2a14');
+    pixelText(ctx, 'YOGI', yogi, ground - 20, '#fff1d6');
+    const sol = `SOL ${Math.min(83, 1 + Math.floor((REDUCED_MOTION ? 0 : t) / 3))}`;
+    pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
   }
 
   function marsSky(ctx, w, horizon) {
@@ -3148,6 +3224,18 @@
         'Its ChemCam laser zaps rocks from up to 7 metres away to read what they are made of.',
       ],
       link: 'https://science.nasa.gov/mission/msl-curiosity/',
+    },
+    sojourner: {
+      title: 'SOJOURNER', big: '★ SOJOURNER IN ARES VALLIS ★', draw: drawSojournerScene, hash: 'sojourner',
+      intro: 'The first rover on another planet. Mars Pathfinder bounced down on airbags on 4 July 1997, opened like a flower, and Sojourner, about the size of a microwave oven, rolled down a ramp to study the rocks around it. Watch it drive to the rock Yogi and measure it.',
+      facts: [
+        'Pathfinder landed on 4 July 1997 in Ares Vallis, an ancient flood channel, cushioned by giant airbags that bounced about 15 times.',
+        'Sojourner weighed 10.6 kg and drove at about 1 cm a second; it never went more than about 12 metres from its lander.',
+        'It was planned for 7 sols and worked for 83; the lander for nearly three months.',
+        'Its instrument, the APXS, read what rocks are made of; the team named the rocks after cartoon characters, like Yogi and Barnacle Bill.',
+        'It is named after Sojourner Truth, the American abolitionist, picked in a schools essay contest.',
+      ],
+      link: 'https://science.nasa.gov/mission/mars-pathfinder/',
     },
     perseverance: {
       title: 'PERSEVERANCE', big: '★ PERSEVERANCE IN JEZERO CRATER ★', draw: drawPerseveranceScene, hash: 'perseverance',
@@ -3287,6 +3375,9 @@
     { id: 'perseverance', name: 'Perseverance', kind: 'craft', art: 'perseverance', ref: 'perseverance', query: 'Perseverance', toast: 'LIFTOFF ON MARS',
       clue: 'I collect rock samples in tubes, and I brought a little helicopter along.',
       story: 'Perseverance landed in Jezero Crater, an ancient river delta, on 18 February 2021. It seals rock samples in tubes for a future trip to Earth, and it carried Ingenuity, the first aircraft to fly on another planet: 72 flights instead of the planned five.' },
+    { id: 'sojourner', name: 'Sojourner', kind: 'craft', art: 'sojourner', ref: 'pathfinder', query: 'Sojourner', toast: 'FIRST WHEELS ON MARS',
+      clue: 'The first wheels on another planet: I rolled off my lander on 4 July 1997, no bigger than a microwave oven.',
+      story: 'Mars Pathfinder landed in Ares Vallis on 4 July 1997, bouncing in on airbags, and its little rover Sojourner became the first to drive on another planet. Planned for a week, it worked for 83 sols, studying rocks named after cartoon characters. In The Martian, the stranded astronaut digs up Pathfinder and uses it to talk to Earth.' },
   ];
   const EGG = new Map(EGGS.map(e => [e.id, e]));
   const CRAFT_EGGS = EGGS.filter(e => e.kind === 'craft' && e.id !== 'iss').length;
@@ -4339,6 +4430,12 @@
             'Its helicopter Ingenuity carried a tiny piece of fabric from the Wright brothers\' first airplane.',
             'It carries chips with the names of 10.9 million people.'],
       why: 'The rover collecting pieces of Mars to bring home one day, with the first aircraft on another planet as its sidekick. Search it to watch them work.',
+    },
+    sojourner: {
+      fun: ['Sojourner\'s top speed was about 1 cm a second: crossing a tennis court would have taken it about 40 minutes.',
+            'Pathfinder\'s pictures were among the most popular things on the early web: its website had hundreds of millions of hits in a month.',
+            'The rover\'s name came from a 12-year-old\'s essay about Sojourner Truth, chosen from about 3,500 entries.'],
+      why: 'Where every Mars rover began. In The Martian, the stranded astronaut drives out to dig up Pathfinder and uses it as his radio to Earth, so it now sits outside the Hab on the Martian farm too.',
     },
   };
 

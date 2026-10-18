@@ -101,6 +101,9 @@ const EGGS = [
   { id: 'perseverance', name: 'Perseverance', kind: 'craft', art: 'perseverance', ref: 'perseverance', query: 'Perseverance', toast: 'LIFTOFF ON MARS',
     clue: 'I collect rock samples in tubes, and I brought a little helicopter along.',
     story: 'Perseverance landed in Jezero Crater, an ancient river delta, on 18 February 2021. It seals rock samples in tubes for a future trip to Earth, and it carried Ingenuity, the first aircraft to fly on another planet: 72 flights instead of the planned five.' },
+  { id: 'sojourner', name: 'Sojourner', kind: 'craft', art: 'sojourner', ref: 'pathfinder', query: 'Sojourner', toast: 'FIRST WHEELS ON MARS',
+    clue: 'The first wheels on another planet: I rolled off my lander on 4 July 1997, no bigger than a microwave oven.',
+    story: 'Mars Pathfinder landed in Ares Vallis on 4 July 1997, bouncing in on airbags, and its little rover Sojourner became the first to drive on another planet. Planned for a week, it worked for 83 sols, studying rocks named after cartoon characters. In The Martian, the stranded astronaut digs up Pathfinder and uses it to talk to Earth.' },
 ];
 const EGG = new Map(EGGS.map(e => [e.id, e]));
 const CRAFT_EGGS = EGGS.filter(e => e.kind === 'craft' && e.id !== 'iss').length;
