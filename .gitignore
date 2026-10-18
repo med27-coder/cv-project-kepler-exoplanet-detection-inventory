@@ -26,6 +26,8 @@ flagged/
 
 # V3 Star Gazer: model + detailed results are committed only encrypted (secure/*.enc)
 results/v3/
+# V4 giant specialist: out-of-fold predictions and analysis (a public summary goes in docs once audited)
+results/v4/
 .secrets/
 
 # Hugging Face Space bundle (scripts/tools/make_hf_space.py)
