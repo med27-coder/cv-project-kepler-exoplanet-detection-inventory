@@ -208,7 +208,8 @@ SHIPPED_IDS = {
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
             'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
             'contrarian', 'patience', 'daily', 'streak', 'so-close', 'cosmic-zoom',
-            'lost-in-orbit', 'dwarf-king', 'houston', 'space-wardrobe', 'space-farmer'},
+            'lost-in-orbit', 'dwarf-king', 'houston', 'space-wardrobe', 'space-farmer', 'first-outfit',
+            'visiting-hours', 'rare-threads', 'runway', 'walk-in-closet'},
 }
 
 

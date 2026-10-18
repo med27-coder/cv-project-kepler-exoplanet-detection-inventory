@@ -146,6 +146,13 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
   { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
   { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
+  { g: 'WARDROBE', id: 'first-outfit', title: 'DRESS-UP DAY', how: 'Visit the lost astronaut again and see them in their first outfit.' },
+  { g: 'WARDROBE', id: 'visiting-hours', title: 'VISITING HOURS', how: 'Visit the lost astronaut on three different days.' },
+  { g: 'WARDROBE', id: 'rare-threads', title: 'RARE THREADS', how: 'Find a rare outfit in the astronaut\'s wardrobe.' },
+  { g: 'WARDROBE', id: 'runway', title: 'STAR OF THE RUNWAY', how: 'Find an epic outfit in the astronaut\'s wardrobe.' },
+  { g: 'WARDROBE', id: 'walk-in-closet', title: 'WALK-IN CLOSET', how: 'Collect seven outfits.' },
+  { g: 'WARDROBE', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'Collect all fifteen outfits.' },
+  { g: 'WARDROBE', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Find the legendary Texas cowboy hat, the rarest outfit of all.', secret: true },
   { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
   { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
   { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
@@ -161,8 +168,6 @@ const ACHIEVEMENTS = [
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
   { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
   { g: 'SECRET', id: 'lost-in-orbit', title: 'LOST IN ORBIT', how: 'Catch the flare drifting across the universe.', secret: true },
-  { g: 'SECRET', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Look up the lost astronaut again, and see what they are wearing.', secret: true },
-  { g: 'SECRET', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'See every outfit in the lost astronaut\'s wardrobe.', secret: true },
   { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
   { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
   { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -171,8 +176,8 @@ const ACHIEVEMENTS = [
 // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom'],
-  epic: ['census', 'cartographer', 'dwarf-king', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet'],
+  epic: ['census', 'cartographer', 'dwarf-king', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
          'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
 for (const a of ACHIEVEMENTS) {
@@ -205,7 +210,7 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    toured: false,   // first-visit tour (49c-ui.js)
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                    backdrop: 'animated',   // page background (55-backdrop.js)
-                   outfit: '', outfits: [] };   // the lost astronaut's outfits (56-universe.js)
+                   outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [] };   // the lost astronaut's wardrobe (47c-astronaut.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -227,6 +232,10 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
   if (saved.whiteHole === true) progress.whiteHole = true;
   if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
+  for (const k of ['astroVisits', 'astroLastRoll', 'astroDry']) {
+    if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
+  }
+  if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
   if (Array.isArray(saved.outfits)) progress.outfits = [...new Set([...progress.outfits, ...saved.outfits.filter(o => typeof o === 'string' && ID.test(o))])].slice(0, 40);
   const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
   for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins

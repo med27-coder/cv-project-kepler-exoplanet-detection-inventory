@@ -37,7 +37,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (64, in groups), trophies, badges and your star
+### Achievements (69, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -94,8 +94,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | NO SIGNAL | Search for five things that aren't there in one visit |
 | | SO CLOSE | Search a hidden name with a letter or two wrong |
 | | LOST IN ORBIT | Catch the flare drifting across the universe view: it's an astronaut |
-| | HOUSTON, WE HAVE A PROBLEM | Search "astronaut" after LOST IN ORBIT: a new outfit each time, the cowboy hat first |
-| | SPACE WARDROBE | See all six outfits (a seventh, a crown, comes with DWARF KING) |
+
 | | WARP SPEED | Find three new easter eggs within a minute |
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |
@@ -180,3 +179,21 @@ Search words are regular expressions near the top of `web/src/40-home.js` (`HOME
 catalog. Keep them out of the type-ahead so they stay hidden, add a browser test in `tests/test_browser.py`,
 add a row to this page, and rebuild with `scripts/starmap/build_web.py`. New sprites: re-run
 `scripts/starmap/export_pixel_art.py` so [pixel-art/](../../pixel-art) shows them.
+
+## The lost astronaut's wardrobe
+
+After LOST IN ORBIT (catch the flare in the UNIVERSE view), searching "astronaut" visits them. The 1st visit brings no
+outfit, the 2nd always a common one; after that each visit (at most one every 15 minutes) has a 50% chance of an
+outfit: common 60%, rare 28%, epic 9%, legendary 3% (so the cowboy hat is about 1.5% a visit). Six visits in a row with
+nothing new guarantees something new (never the legendary). Owned outfits can be worn from the card.
+
+| Tier | Outfits |
+|---|---|
+| Common | party hat, NASA cap, chef's hat, headphones, knit beanie |
+| Rare | top hat, pirate hat, propeller beanie, graduation cap, flower crown |
+| Epic | wizard hat, Viking helmet, Santa hat, halo |
+| Legendary | Texas cowboy hat (HOUSTON, WE HAVE A PROBLEM) |
+| Special | the dwarf king's crown, given with DWARF KING |
+
+WARDROBE achievements (their own constellation): DRESS-UP DAY, VISITING HOURS (3 days), RARE THREADS, STAR OF THE
+RUNWAY, WALK-IN CLOSET (7 outfits), SPACE WARDROBE (all 15), HOUSTON, WE HAVE A PROBLEM (secret).

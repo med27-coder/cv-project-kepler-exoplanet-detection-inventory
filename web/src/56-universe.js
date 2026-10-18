@@ -274,9 +274,11 @@ function updateFlare(now) {
 function drawFlare(now) {
   if (caught && now - caught < 4000) {   // caught: the astronaut, big, tumbling slowly
     const spin = REDUCED_MOTION ? 0 : (now - caught) / 900, cx = UCX, cy = UCY;
-    drawAstronaut(uctx, cx, cy, spin);
+    uctx.fillStyle = 'rgba(7, 11, 26, 0.78)';   // the sector dims, so the astronaut and the words stand out
+    uctx.fillRect(0, 0, UW, UH);
+    drawAstronaut(uctx, cx, cy, spin, 1.5);
     for (let k = 0; k < 20; k++) { uctx.fillStyle = '#4a5590'; uctx.fillRect(Math.round(cx + 8 + k * 2), Math.round(cy + 6 + Math.sin(k / 3 + now / 300) * 3), 1, 1); }
-    uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 22, '#ff9a3c');
+    uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 30, '#ff9a3c');
     return;
   }
   if (!flare) return;

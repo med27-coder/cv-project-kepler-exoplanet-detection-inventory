@@ -2407,29 +2407,61 @@
     if (updateHash) history.replaceState(null, '', '#' + d.name);
   }
 
-  // ---------------------------------------------------------------- the lost astronaut and their outfits
+  // ---------------------------------------------------------------- the lost astronaut and their wardrobe
   // The astronaut of LOST IN ORBIT (the empty system view, the UNIVERSE view's flare). Once caught, searching
-  // "astronaut" shows them up close in the next outfit (HOUSTON, WE HAVE A PROBLEM; SPACE WARDROBE). This part
-  // loads before 50-wiring.js, whose search can run while the page is still loading (a #astronaut link).
+  // "astronaut" visits them. The 2nd visit always brings an outfit, so players learn the game; after that each
+  // visit rolls for one (at most every 15 minutes): rare finds, with the Texas cowboy hat (HOUSTON, WE HAVE A
+  // PROBLEM) the rarest. Outfits you own can be worn from the card; whichever they wear shows everywhere they
+  // appear. This part loads before 50-wiring.js, whose search can run while the page is still loading.
   const ASTRONAUT = ['.www.', 'wooow', 'wooow', '.www.', 'wwwww', 'wwwww', '.w.w.', '.w.w.'];
-  // Once found, searching "astronaut" dresses them in the next outfit (a hat over the helmet, 7 x 4 art pixels).
+  // Hats: 7 x 4 art pixels over the helmet (the last row sits on the helmet's top).
   const OUTFITS = [
-    { id: 'cowboy', name: 'Texas cowboy hat', rows: ['.......', '..bbb..', '..kkk..', 'bbbbbbb'],
-      caption: 'Mission Control for NASA\'s crewed flights is in Houston, Texas, so a Stetson felt right.' },
-    { id: 'party', name: 'party hat', rows: ['...y...', '..ppp..', '.pypyp.', '.......'],
+    // common
+    { id: 'party', tier: 'common', name: 'party hat', rows: ['...y...', '..ppp..', '..pyp..', '.ppppp.'],
       caption: 'Somewhere in the universe it is always somebody\'s birthday.' },
-    { id: 'tophat', name: 'top hat', rows: ['..kkk..', '..kkk..', '..rrr..', '.kkkkk.'],
+    { id: 'cap', tier: 'common', name: 'NASA cap', rows: ['.......', '..uuu..', '..uwu..', '.uuuuuu'],
+      caption: 'Standard issue, for the off-duty hours.' },
+    { id: 'chef', tier: 'common', name: 'chef\'s hat', rows: ['.WWWWW.', '.WWWWW.', '..WWW..', '..mmm..'],
+      caption: 'Space food has come a long way since the tubes and cubes of the 1960s.' },
+    { id: 'headphones', tier: 'common', name: 'headphones', rows: ['.......', '..kkk..', '.k...k.', '.r...r.'],
+      caption: 'Sound needs air to travel; inside the helmet, the music plays just fine.' },
+    { id: 'beanie', tier: 'common', name: 'knit beanie', rows: ['...W...', '..rrr..', '.rrrrr.', '.WWWWW.'],
+      caption: 'Out in the shade, a spacesuit has to keep its wearer warm.' },
+    // rare
+    { id: 'tophat', tier: 'rare', name: 'top hat', rows: ['..kkk..', '..kkk..', '..rrr..', '.kkkkk.'],
       caption: 'Dressed for a very formal spacewalk.' },
-    { id: 'propeller', name: 'propeller beanie', rows: ['rrr.uuu', '...w...', '..rgu..', '.ryyur.'],
-      caption: 'A propeller does nothing in empty space: Mars\'s helicopter Ingenuity needed the thin Martian air to fly.' },
-    { id: 'pirate', name: 'pirate hat', rows: ['.......', '..kkk..', '.kkwkk.', 'kkkkkkk'],
+    { id: 'pirate', tier: 'rare', name: 'pirate hat', rows: ['.......', '..kkk..', '.kkWkk.', 'kkkkkkk'],
       caption: 'No survey has detected a space pirate. Yet.' },
-    { id: 'graduate', name: 'graduation cap', rows: ['.......', 'kkkkkkk', '..kkk.y', '......y'],
+    { id: 'propeller', tier: 'rare', name: 'propeller beanie', rows: ['.rrkuu.', '...k...', '..ryu..', '.rryuu.'],
+      caption: 'A propeller does nothing in empty space: Mars\'s helicopter Ingenuity needed the thin Martian air to fly.' },
+    { id: 'graduate', tier: 'rare', name: 'graduation cap', rows: ['...y...', 'kkkkkky', '..kkk.y', '......y'],
       caption: 'Graduated in Computer Vision (ITAI 1378), with honours in drifting.' },
-    { id: 'crown', name: 'dwarf king\'s crown', needs: 'dwarf-king', rows: ['.......', '.y.y.y.', '.yyyyy.', '.yrybg.'],
+    { id: 'flowers', tier: 'rare', name: 'flower crown', rows: ['.......', '.......', '.p.y.r.', 'gpgygrg'],
+      caption: 'The first flower grown in space bloomed on the space station in January 2016: a zinnia.' },
+    // epic
+    { id: 'wizard', tier: 'epic', name: 'wizard hat', rows: ['...v...', '..vvv..', '..vyv..', '.vvvvv.'],
+      caption: 'Any sufficiently advanced technology is indistinguishable from magic (Arthur C. Clarke).' },
+    { id: 'viking', tier: 'epic', name: 'Viking helmet', rows: ['i.....i', 'i.mmm.i', '.immmi.', '.mmmmm.'],
+      caption: 'NASA\'s first Mars landers, in 1976, were called Viking.' },
+    { id: 'santa', tier: 'epic', name: 'Santa hat', rows: ['.....rW', '..rrrr.', '.rrrr..', '.WWWWW.'],
+      caption: 'On Christmas Eve 1968, Apollo 8 sent home a reading from lunar orbit.' },
+    { id: 'halo', tier: 'epic', name: 'halo', rows: ['..yyy..', '.y...y.', '..yyy..', '.......'],
+      caption: 'Halos around the Sun and Moon are real: ice crystals in high clouds bend the light.' },
+    // legendary
+    { id: 'cowboy', tier: 'legendary', name: 'Texas cowboy hat', rows: ['.......', '..bbb..', '..kkk..', 'bbbbbbb'],
+      caption: 'Mission Control for NASA\'s crewed flights is in Houston, Texas: the rarest find in the wardrobe.' },
+    // special: not dropped, given for DWARF KING
+    { id: 'crown', tier: 'special', name: 'dwarf king\'s crown', needs: 'dwarf-king', rows: ['.......', '.y.y.y.', '.yyyyy.', '.yrybg.'],
       caption: 'Crowned by all five dwarf planets: you found them.' },
   ];
-  const OUTFIT_INK = { w: '#e6ecff', o: '#ff9a3c', b: '#8a5a2b', k: '#1a1a24', y: '#ffd34d', p: '#ff6ec7', r: '#e04a4a', g: '#4fd17a', u: '#3b8cff' };
+  const OUTFIT_INK = { w: '#e6ecff', W: '#ffffff', o: '#ff9a3c', b: '#8a5a2b', k: '#1a1a24', y: '#ffd34d', p: '#ff6ec7',
+                       r: '#e04a4a', g: '#4fd17a', u: '#3b8cff', v: '#8a5ad6', i: '#f0e6c8', m: '#9aa6b8' };
+  // The drop table (the per-visit odds are shown to players on the card)
+  const DROP_CHANCE = 0.5, DROP_COOLDOWN_MS = 15 * 60 * 1000, PITY_AFTER = 6;
+  const TIER_WEIGHTS = [['common', 0.60], ['rare', 0.28], ['epic', 0.09], ['legendary', 0.03]];
+  const TIER_WORD = { common: 'COMMON', rare: 'RARE', epic: 'EPIC', legendary: 'LEGENDARY', special: 'SPECIAL' };
+  const DROPPABLE = OUTFITS.filter(o => o.tier !== 'special');
+
   const ASTRO_W = 21, ASTRO_H = 36;   // 7 x 12 art pixels at 3 x 3: hat rows on top of the 5 x 8 astronaut
   const astronautCanvases = new Map();
   function astronautSprite(outfitId = progress.outfit) {
@@ -2454,27 +2486,67 @@
     ctx.drawImage(astronautSprite(), -ASTRO_W / 2 * scale, -24 * scale, ASTRO_W * scale, ASTRO_H * scale);
     ctx.restore();
   }
-  // "astronaut" (after LOST IN ORBIT): the astronaut up close, in the next outfit.
+
+  // ---- a visit: maybe a new outfit
+  function rollOutfit() {
+    const owned = new Set(progress.outfits), unseen = list => list.filter(o => !owned.has(o.id));
+    if (progress.astroDry >= PITY_AFTER) {   // bad-luck protection: something new, never the legendary hat
+      const pool = unseen(DROPPABLE.filter(o => o.tier !== 'legendary'));
+      if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
+    }
+    if (Math.random() >= DROP_CHANCE) return null;
+    let r = Math.random(), tier = TIER_WEIGHTS[0][0];
+    for (const [name, weight] of TIER_WEIGHTS) { if (r < weight) { tier = name; break; } r -= weight; }
+    const inTier = DROPPABLE.filter(o => o.tier === tier), fresh = unseen(inTier);
+    const pool = fresh.length ? fresh : inTier;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function visitAstronaut() {   // what this visit brings: { outfit, isNew, note }
+    const now = Date.now(), day = new Date(now).toISOString().slice(0, 10);
+    progress.astroVisits = (progress.astroVisits || 0) + 1;
+    if (!progress.astroDays.includes(day)) progress.astroDays = [...progress.astroDays, day].slice(-30);
+    const crown = OUTFITS.find(o => o.id === 'crown');
+    if (progress.ach['dwarf-king'] && !progress.outfits.includes('crown')) return { outfit: crown, isNew: true };
+    if (progress.astroVisits === 1) return { outfit: null, note: 'first' };
+    let outfit = null;
+    if (progress.astroVisits === 2) {   // always something on the 2nd visit, so the idea is clear
+      const pool = DROPPABLE.filter(o => o.tier === 'common' && !progress.outfits.includes(o.id));
+      outfit = pool[Math.floor(Math.random() * pool.length)] || DROPPABLE[0];
+    } else if (now - (progress.astroLastRoll || 0) < DROP_COOLDOWN_MS) {
+      return { outfit: null, note: 'soon' };
+    } else {
+      outfit = rollOutfit();
+    }
+    progress.astroLastRoll = now;
+    const isNew = Boolean(outfit && !progress.outfits.includes(outfit.id));
+    progress.astroDry = isNew ? 0 : (progress.astroDry || 0) + 1;
+    return { outfit, isNew, note: outfit ? '' : 'nothing' };
+  }
+  function wardrobeAchievements() {
+    const owned = OUTFITS.filter(o => progress.outfits.includes(o.id));
+    if (owned.length) achieve('first-outfit');
+    if (owned.some(o => o.tier === 'rare')) achieve('rare-threads');
+    if (owned.some(o => o.tier === 'epic')) achieve('runway');
+    if (owned.some(o => o.id === 'cowboy')) achieve('houston');
+    if (owned.filter(o => o.tier !== 'special').length >= 7) achieve('walk-in-closet');
+    if (DROPPABLE.every(o => progress.outfits.includes(o.id))) achieve('space-wardrobe');
+    if (progress.astroDays.length >= 3) achieve('visiting-hours');
+  }
+
+  // "astronaut" (after LOST IN ORBIT): a visit.
   const ASTRO_QUERY = /^(the )?(lost )?(astronaut|spaceman|spacewoman|lost in orbit)$/i;
   function showAstronaut(updateHash = true) {
-    const owned = OUTFITS.filter(o => !o.needs || progress.ach[o.needs]);
-    const at = owned.findIndex(o => o.id === progress.outfit);
-    const outfit = owned[(at + 1) % owned.length];
-    progress.outfit = outfit.id;
-    if (!progress.outfits.includes(outfit.id)) progress.outfits.push(outfit.id);
+    const visit = visitAstronaut();
+    if (visit.outfit) {
+      progress.outfit = visit.outfit.id;
+      if (!progress.outfits.includes(visit.outfit.id)) progress.outfits.push(visit.outfit.id);
+    }
     saveProgress();
-    if (outfit.id === 'cowboy') achieve('houston');
-    if (OUTFITS.filter(o => !o.needs).every(o => progress.outfits.includes(o.id))) achieve('space-wardrobe');
+    wardrobeAchievements();
     selected = null;
     ++selectToken;
     title.textContent = 'LOST IN ORBIT';
-    const seen = OUTFITS.filter(o => progress.outfits.includes(o.id)).length;
-    info.innerHTML = `
-      <p class="big">★ MISSION CONTROL, HOUSTON ★</p>
-      <p>Still drifting, still in good spirits. Today's outfit: <b>${esc(outfit.name)}</b>. ${esc(outfit.caption)}</p>
-      <p>Search <b>astronaut</b> again for another outfit (${seen} of ${OUTFITS.length} found).</p>
-      <p class="note">The real line from Apollo 13, on 13 April 1970, was "Houston, we've had a problem"; the 1995 film
-        made it "we have".</p>`;
+    renderAstronautCard(visit);
     setScene({ custom: seconds => {
       const t = REDUCED_MOTION ? 0 : seconds;
       sctx.fillStyle = '#070b1a';
@@ -2487,11 +2559,44 @@
       sctx.fillStyle = '#4a5590';
       for (let k = 0; k < 30; k++) sctx.fillRect(Math.round(cx + 16 + k * 2), Math.round(cy + 14 + Math.sin(k / 3 + t * 1.5) * 3 + k * 0.5), 1, 1);
       drawAstronaut(sctx, cx, cy, t * 0.35, 2);
-      const label = `OUTFIT: ${outfit.name.toUpperCase().replace(/'/g, '')}`;
-      pixelText(sctx, label, Math.round((SW - textWidth(label)) / 2), SH - 14, '#ffd34d');
+      const wearing = OUTFITS.find(o => o.id === progress.outfit);
+      const label = wearing ? `${TIER_WORD[wearing.tier]}: ${wearing.name.toUpperCase().replace(/'/g, '')}` : 'NO OUTFIT YET';
+      pixelText(sctx, label, Math.round((SW - textWidth(label)) / 2), SH - 14, wearing && wearing.tier === 'legendary' ? '#ffd34d' : '#c8d0ff');
     } });
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
     if (updateHash) history.replaceState(null, '', '#astronaut');
+  }
+
+  function renderAstronautCard(visit) {
+    const wearing = OUTFITS.find(o => o.id === progress.outfit);
+    const news = visit.note === 'first'
+      ? 'They\'re just glad to see a friendly face. They have been rummaging through the supply crates, though: come back and see what turns up.'
+      : visit.note === 'soon'
+        ? `Still wearing ${wearing ? `the ${wearing.name}` : 'their plain suit'}. They're busy right now: come back in a little while.`
+        : visit.note === 'wear'
+          ? `Now wearing ${wearing ? `the <b>${esc(wearing.name)}</b>` : 'their plain suit'}.`
+        : visit.note === 'nothing'
+          ? `They tried something on, but went back to ${wearing ? `the ${wearing.name}` : 'the plain suit'}. Maybe next time.`
+          : visit.isNew ? `New in the wardrobe: <b>${esc(visit.outfit.name)}</b> (${esc(TIER_WORD[visit.outfit.tier].toLowerCase())}). ${esc(visit.outfit.caption)}`
+            : `The <b>${esc(visit.outfit.name)}</b> again: a favourite.`;
+    const owned = OUTFITS.filter(o => progress.outfits.includes(o.id));
+    const buttons = owned.map(o => `<button type="button" class="ghost outfit-pick" data-outfit="${esc(o.id)}"
+        aria-pressed="${o.id === progress.outfit}">${esc(o.name)}</button>`).join(' ');
+    info.innerHTML = `
+      <p class="big">★ MISSION CONTROL, HOUSTON ★</p>
+      <p>${news}</p>
+      <p>Wardrobe: <b>${owned.filter(o => o.tier !== 'special').length} of ${DROPPABLE.length}</b> found.
+         ${owned.length ? 'Choose what they wear:' : ''}</p>
+      ${owned.length ? `<p class="outfit-picks">${buttons}<button type="button" class="ghost outfit-pick" data-outfit=""
+        aria-pressed="${!progress.outfit}">plain suit</button></p>` : ''}
+      <p class="note">Visit every so often: each visit (at most one every 15 minutes) has a 50% chance of an outfit.
+        Of those: common 60%, rare 28%, epic 9%, legendary 3%. Six visits in a row with nothing new, and the next one
+        brings something new. The real line from Apollo 13, on 13 April 1970, was "Houston, we've had a problem".</p>`;
+    info.querySelectorAll('[data-outfit]').forEach(b => b.addEventListener('click', () => {
+      progress.outfit = b.dataset.outfit;
+      saveProgress();
+      renderAstronautCard({ outfit: null, note: 'wear' });
+    }));
   }
 
   // ---------------------------------------------------------------- easter egg: The Martian (a fan nod)
@@ -2557,7 +2662,7 @@
     }
     const walk = REDUCED_MOTION ? 0 : Math.sin(t * 0.35);   // the farmer walks the rows, kneeling now and then
     const kneel = !REDUCED_MOTION && Math.abs(Math.cos(t * 0.35)) > 0.97;
-    drawAstronaut(ctx, dx0 + walk * (dr - 10), base - (kneel ? 5 : 7), 0, 1 / 3);
+    drawAstronaut(ctx, dx0 + walk * (dr - 12), base - (kneel ? 6 : 9), 0, w >= 200 ? 2 / 3 : 1 / 3);   // smaller on the Galleria thumbnail
     for (let a = 0; a <= Math.PI; a += 0.02) {   // the glass: a faint fill and a bright rim with a highlight
       const x = Math.round(dx0 + dr * Math.cos(a)), y = Math.round(base - dh * Math.sin(a));
       ctx.fillStyle = a > 1.9 && a < 2.4 ? '#ffffff' : '#cfe8ff';
@@ -2769,6 +2874,13 @@
     { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
     { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
     { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
+    { g: 'WARDROBE', id: 'first-outfit', title: 'DRESS-UP DAY', how: 'Visit the lost astronaut again and see them in their first outfit.' },
+    { g: 'WARDROBE', id: 'visiting-hours', title: 'VISITING HOURS', how: 'Visit the lost astronaut on three different days.' },
+    { g: 'WARDROBE', id: 'rare-threads', title: 'RARE THREADS', how: 'Find a rare outfit in the astronaut\'s wardrobe.' },
+    { g: 'WARDROBE', id: 'runway', title: 'STAR OF THE RUNWAY', how: 'Find an epic outfit in the astronaut\'s wardrobe.' },
+    { g: 'WARDROBE', id: 'walk-in-closet', title: 'WALK-IN CLOSET', how: 'Collect seven outfits.' },
+    { g: 'WARDROBE', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'Collect all fifteen outfits.' },
+    { g: 'WARDROBE', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Find the legendary Texas cowboy hat, the rarest outfit of all.', secret: true },
     { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
     { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
     { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
@@ -2784,8 +2896,6 @@
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
     { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
     { g: 'SECRET', id: 'lost-in-orbit', title: 'LOST IN ORBIT', how: 'Catch the flare drifting across the universe.', secret: true },
-    { g: 'SECRET', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Look up the lost astronaut again, and see what they are wearing.', secret: true },
-    { g: 'SECRET', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'See every outfit in the lost astronaut\'s wardrobe.', secret: true },
     { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
     { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
     { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -2794,8 +2904,8 @@
   // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom'],
-    epic: ['census', 'cartographer', 'dwarf-king', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet'],
+    epic: ['census', 'cartographer', 'dwarf-king', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
            'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
   };
   for (const a of ACHIEVEMENTS) {
@@ -2828,7 +2938,7 @@
                      toured: false,   // first-visit tour (49c-ui.js)
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                      backdrop: 'animated',   // page background (55-backdrop.js)
-                     outfit: '', outfits: [] };   // the lost astronaut's outfits (56-universe.js)
+                     outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [] };   // the lost astronaut's wardrobe (47c-astronaut.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2850,6 +2960,10 @@
     if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
     if (saved.whiteHole === true) progress.whiteHole = true;
     if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
+    for (const k of ['astroVisits', 'astroLastRoll', 'astroDry']) {
+      if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
+    }
+    if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
     if (Array.isArray(saved.outfits)) progress.outfits = [...new Set([...progress.outfits, ...saved.outfits.filter(o => typeof o === 'string' && ID.test(o))])].slice(0, 40);
     const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
     for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
@@ -3631,8 +3745,10 @@
     'cosmic-zoom': ['.vvvv..', 'v....v.', 'v.yy..v', 'v.y...v', '.v...v.', '..vvv..'],         // a spiral, the universe
     'lost-in-orbit': ['..www..', '.woooww', '.woooww', '..www.m', '.wwwwm.', '.w.w...'],      // an astronaut, tether loose
     'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
-    houston: ['..bbb..', '..kkk..', 'bbbbbbb', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
-    'space-wardrobe': ['ppp.kkk', 'ppp.kkk', '.......', 'bbb.yyy', 'bbb.yyy', '.......'],   // four hats on the rack
+    houston: ['..TTT..', '..kkk..', 'TTTTTTT', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
+    'space-wardrobe': ['rrr.kkk', 'rrr.kkk', '.......', 'TTT.yyy', 'TTT.yyy', '.......'],   // four hats on the rack
+    runway: ['...y...', '..yyy..', 'yyyyyyy', '..yyy..', '.y...y.', '.......'],         // a star of the runway
+    'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
     'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
@@ -3727,6 +3843,13 @@
       discArt(put, 8, 8, 2.8, (dx, dy) => (dx + dy < -1 ? '#fff1b0' : '#ffc93c'));
       ringArt(put, 8, 3, 2.5, 1, '#eef2f8', a => Math.sin(a) > -0.5);
       put(8, 4, '#d6dae2');
+    } },
+    WARDROBE: { name: 'THE COAT HANGER', art: put => {   // a hanger with a little scarf
+      put(8, 2, '#d6dae2'); put(9, 2, '#d6dae2'); put(9, 3, '#d6dae2'); put(8, 4, '#d6dae2');
+      for (let k = 0; k < 6; k++) { put(8 - k, 5 + k, '#ffc93c'); put(8 + k, 5 + k, '#ffc93c'); }
+      for (let x = 2; x <= 14; x++) put(x, 11, '#ffc93c');
+      for (let y = 8; y < 14; y++) { put(7, y, '#e04a4a'); put(9, y, '#e04a4a'); }
+      put(8, 9, '#ff6ec7'); put(8, 12, '#ff6ec7');
     } },
     'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
       discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));
@@ -4078,6 +4201,8 @@
     'dwarf-king': 'The IAU recognises five dwarf planets; dozens more Kuiper Belt worlds may one day join them.',
     houston: 'Apollo 13, 13 April 1970: "Houston, we\'ve had a problem." The crew made it home four days later.',
     'space-wardrobe': 'A real spacesuit, NASA\'s EMU, weighs about 145 kg on Earth and is made to measure.',
+    runway: 'Spacesuits are white to reflect sunlight: in direct Sun, a dark suit would overheat.',
+    'walk-in-closet': 'Astronauts on the space station can\'t wash clothes; worn clothing is packed away as rubbish.',
     'space-farmer': 'NASA\'s Veggie garden on the ISS gave astronauts their first space-grown salad in August 2015.',
     speedrun: 'Voyager 1 travels about 17 km every second.',
     goodnight: "Kepler's last command was sent on 15 November 2018.",
@@ -5010,9 +5135,11 @@
   function drawFlare(now) {
     if (caught && now - caught < 4000) {   // caught: the astronaut, big, tumbling slowly
       const spin = REDUCED_MOTION ? 0 : (now - caught) / 900, cx = UCX, cy = UCY;
-      drawAstronaut(uctx, cx, cy, spin);
+      uctx.fillStyle = 'rgba(7, 11, 26, 0.78)';   // the sector dims, so the astronaut and the words stand out
+      uctx.fillRect(0, 0, UW, UH);
+      drawAstronaut(uctx, cx, cy, spin, 1.5);
       for (let k = 0; k < 20; k++) { uctx.fillStyle = '#4a5590'; uctx.fillRect(Math.round(cx + 8 + k * 2), Math.round(cy + 6 + Math.sin(k / 3 + now / 300) * 3), 1, 1); }
-      uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 22, '#ff9a3c');
+      uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 30, '#ff9a3c');
       return;
     }
     if (!flare) return;

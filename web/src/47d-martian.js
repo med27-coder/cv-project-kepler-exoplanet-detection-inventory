@@ -61,7 +61,7 @@ function drawMartianBase(ctx, w, h, t, growth) {
   }
   const walk = REDUCED_MOTION ? 0 : Math.sin(t * 0.35);   // the farmer walks the rows, kneeling now and then
   const kneel = !REDUCED_MOTION && Math.abs(Math.cos(t * 0.35)) > 0.97;
-  drawAstronaut(ctx, dx0 + walk * (dr - 10), base - (kneel ? 5 : 7), 0, 1 / 3);
+  drawAstronaut(ctx, dx0 + walk * (dr - 12), base - (kneel ? 6 : 9), 0, w >= 200 ? 2 / 3 : 1 / 3);   // smaller on the Galleria thumbnail
   for (let a = 0; a <= Math.PI; a += 0.02) {   // the glass: a faint fill and a bright rim with a highlight
     const x = Math.round(dx0 + dr * Math.cos(a)), y = Math.round(base - dh * Math.sin(a));
     ctx.fillStyle = a > 1.9 && a < 2.4 ? '#ffffff' : '#cfe8ff';
