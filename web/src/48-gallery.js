@@ -519,12 +519,20 @@ function renderEggs() {
   panes.eggs.querySelectorAll('.egg-card').forEach(b => {
     const egg = EGG.get(b.dataset.egg);
     drawEggArt(b.querySelector('canvas'), egg, 1, !progress.eggs[egg.id]);
-    b.addEventListener('click', () => {
-      detailEgg = egg;
-      if (progress.eggs[egg.id]) { session.cards.add(egg.id); if (session.cards.size >= 10) achieve('curator'); }
-      renderDetail(egg);
-    });
+    b.addEventListener('click', () => openEggCard(egg));
   });
+}
+
+function openEggCard(egg) {
+  detailEgg = egg;
+  if (progress.eggs[egg.id]) { session.cards.add(egg.id); if (session.cards.size >= 10) achieve('curator'); }
+  renderDetail(egg);
+}
+// ◀ ▶ on the card's edges (and the arrow keys) step through every card, wrapping round, found or not.
+function stepEggCard(dir) {
+  if (!detailEgg) return;
+  openEggCard(EGGS[(EGGS.indexOf(detailEgg) + dir + EGGS.length) % EGGS.length]);
+  panes.eggs.querySelector(dir > 0 ? '.egg-step.next' : '.egg-step.prev')?.focus();
 }
 
 function renderDetail(egg) {
@@ -540,8 +548,14 @@ function renderDetail(egg) {
     : `<figure class="no-photo"><figcaption>THE REAL THING · ${credit
         ? `${esc(credit.what)}: the picture is credited to ESA, so it isn't copied here; ${link(credit.link, `see it (${credit.credit})`)}`
         : `no NASA photo; ${link(egg.link, egg.linkLabel || 'see ESA\'s mission page')}`}</figcaption></figure>`;
+  const at = EGGS.indexOf(egg), nameOf = e => (progress.eggs[e.id] ? e.name : 'a hidden egg');
+  const prev = EGGS[(at - 1 + EGGS.length) % EGGS.length], next = EGGS[(at + 1) % EGGS.length];
   panes.eggs.innerHTML = `
-    <button type="button" class="ghost back">◂ BACK</button>
+    <p class="egg-top"><button type="button" class="ghost back">◂ BACK</button>
+      <span class="egg-count">CARD ${at + 1} / ${EGGS.length}</span></p>
+    <div class="egg-nav">
+    <button type="button" class="ghost egg-step prev" aria-label="Previous card: ${esc(nameOf(prev))}" title="Previous card (←)">◀</button>
+    <div class="egg-body">
     <div class="egg-detail${got ? ' found' : ''}">
       <figure><canvas width="128" height="80" aria-hidden="true"></canvas>
         <figcaption>${got ? 'PIXEL ART' : 'NOT FOUND YET'}</figcaption></figure>
@@ -553,7 +567,10 @@ function renderDetail(egg) {
     ${got ? `<p class="egg-badge">★ ${esc(egg.toast)} · found ${esc(progress.eggs[egg.id])}</p><p>${esc(egg.story)}</p>
         <button type="button" class="show-me">SHOW ME</button>`
       : `<p class="egg-clue big-clue">${esc(egg.clue)}</p>
-        <p>Know it? Type its name in the search bar.</p><button type="button" class="guess">TAKE A GUESS</button>`}`;
+        <p>Know it? Type its name in the search bar.</p><button type="button" class="guess">TAKE A GUESS</button>`}
+    </div>
+    <button type="button" class="ghost egg-step next" aria-label="Next card: ${esc(nameOf(next))}" title="Next card (→)">▶</button>
+    </div>`;
   const canvas = panes.eggs.querySelector('.egg-detail canvas');
   cancelAnimationFrame(detailFrame);
   let last = 0;
@@ -567,6 +584,8 @@ function renderDetail(egg) {
   if (morph) photoToPixels(morph, credit.img, egg);
   if (got && !REDUCED_MOTION) detailFrame = requestAnimationFrame(step);
   panes.eggs.querySelector('.back').addEventListener('click', () => { detailEgg = null; renderEggs(); });
+  panes.eggs.querySelector('.egg-step.prev').addEventListener('click', () => stepEggCard(-1));
+  panes.eggs.querySelector('.egg-step.next').addEventListener('click', () => stepEggCard(1));
   panes.eggs.querySelector('.show-me')?.addEventListener('click', () => {
     galleryDialog.close();
     input.value = egg.query;
@@ -783,6 +802,11 @@ document.getElementById('open-gallery').addEventListener('click', () => {
 document.getElementById('gallery-close').addEventListener('click', () => galleryDialog.close());
 galleryDialog.addEventListener('click', e => { if (e.target === galleryDialog) galleryDialog.close(); });   // click outside
 galleryDialog.addEventListener('close', () => cancelAnimationFrame(detailFrame));
+galleryDialog.addEventListener('keydown', e => {
+  if (!detailEgg || panes.eggs.hidden || !['ArrowLeft', 'ArrowRight'].includes(e.key) || e.target.closest('input, select, textarea, [role="tab"]')) return;
+  e.preventDefault();
+  stepEggCard(e.key === 'ArrowRight' ? 1 : -1);
+});
 
 const soundSetting = document.getElementById('set-sound');
 soundSetting.checked = progress.sound;

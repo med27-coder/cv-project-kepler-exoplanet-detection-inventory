@@ -735,3 +735,23 @@ def test_fanfare_is_on_by_default_and_can_be_switched_off(browser, site):
     page.click('#tab-set')
     assert not page.is_checked('#set-sound')
     assert not errors, errors
+
+
+def test_egg_cards_step_with_edge_arrows_and_keys(browser, site):
+    """An open Galleria card has ◀ ▶ on its edges and answers the arrow keys, wrapping round all the cards."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.click('#open-gallery')
+    page.click('.egg-card >> nth=0')
+    count = lambda: page.locator('.egg-count').inner_text()
+    assert count().startswith('CARD 1 /')
+    page.click('.egg-step.next')
+    assert count().startswith('CARD 2 /')
+    page.keyboard.press('ArrowLeft')
+    assert count().startswith('CARD 1 /')
+    page.keyboard.press('ArrowLeft')                     # wraps to the last card
+    total = count().split('/ ')[1]
+    assert count() == f'CARD {total} / {total}'
+    page.click('.back')
+    assert page.locator('.egg-card').count() == int(total)
+    assert not errors, errors
