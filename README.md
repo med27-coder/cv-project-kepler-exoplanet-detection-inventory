@@ -120,7 +120,7 @@ Every variant was trained on the same star-grouped split (4,855 train / 1,214 va
 | **Star Gazer** (final model) | all views + catalog parameters | **97.23%** | **0.994** |
 | Star Gazer + NASA diagnostics | adds NASA's Robovetter statistics (partly circular, ablation only) | 96.64% | 0.994 |
 
-**Reading the ablation.** The light-curve views carry most of the signal: the odd/even, centroid and secondary-eclipse views lift the AstroNet-style baseline from 93.2% to 96.4%. The 22 catalog numbers alone reach 92.4%, and combining both gives the best model. Two notes keep this fair. First, Star Gazer's row is the 5-network ensemble while the other rows are single networks; Star Gazer's own single networks score 96.5–97.4%, so roughly half a point of its lead comes from averaging. Second, single-split differences move by about ±0.4 points from seed to seed, so only gaps of about a point or more mean anything. Adding NASA's own Robovetter diagnostics doesn't help (96.6%, same AUC): the light curves already hold that information. Feature ablations are in [docs/EXPERIMENTS_V3.md](docs/EXPERIMENTS_V3.md): adding Gaia stellar properties lands within the normal seed-to-seed range (no clear gain), and removing `koi_count` barely changes anything, so the model doesn't lean on that flagged input.
+**Reading the ablation.** The light-curve views carry most of the signal: the odd/even, centroid and secondary-eclipse views lift the AstroNet-style baseline from 93.2% to 96.4%. The 22 catalog numbers alone reach 92.4%, and combining both gives the best model. Two notes keep this fair. First, Star Gazer's row is the 5-network ensemble while the other rows are single networks; Star Gazer's own single networks score 96.5–97.4%, so roughly half a point of its lead comes from averaging. Second, single-split differences move by about ±0.4 points from seed to seed, so only gaps of about a point or more mean anything. Adding NASA's own Robovetter diagnostics doesn't help (96.6%, same AUC): the light curves already hold that information. Feature ablations are in [docs/star-gazer/EXPERIMENTS_V3.md](docs/star-gazer/EXPERIMENTS_V3.md): adding Gaia stellar properties lands within the normal seed-to-seed range (no clear gain), and removing `koi_count` barely changes anything, so the model doesn't lean on that flagged input.
 
 The decision threshold that maximises validation accuracy is 0.70. At that threshold the test accuracy is 97.63%. The web app uses this threshold.
 
@@ -137,7 +137,7 @@ A single test split can be lucky. `scripts/pipeline/cross_validate.py` repeats t
 
 **Main estimate:** a single Star Gazer network scores **97.1% ± 0.4** across the 5 folds, in line with the headline split (fold 1 *is* the headline split; the other four are new). The 5-network ensemble adds roughly half a point on top. Cross-validation here trains single networks, not the ensemble.
 
-**Independently audited:** a separate review rebuilt the split, recomputed every metric and checked for leakage, test-set tuning and repeated re-runs; verdict, caveats and baselines in [docs/AUDIT_V3.md](docs/AUDIT_V3.md). In short: genuine (95% interval for accuracy ≈ 96.4–98.1%), measured on already-resolved KOIs, not on brand-new signals.
+**Independently audited:** a separate review rebuilt the split, recomputed every metric and checked for leakage, test-set tuning and repeated re-runs; verdict, caveats and baselines in [docs/star-gazer/AUDIT_V3.md](docs/star-gazer/AUDIT_V3.md). In short: genuine (95% interval for accuracy ≈ 96.4–98.1%), measured on already-resolved KOIs, not on brand-new signals.
 
 ### Comparison with published models
 
@@ -159,9 +159,9 @@ The label sets differ (TCEs vs KOIs, Autovetter vs archive dispositions), so thi
 
 **What the saliency shows.** On average the evidence for "planet" sits in the transit itself: the dip in the global view and the transit window in the close-up, with the odd- and even-transit channels both supporting it (a planet's transits are identical; an eclipsing binary's alternate). The centroid channel argues slightly against "planet" when it moves, as it should. The secondary-eclipse view contributes little on average, about 1/100 of the transit's effect, because only a minority of false positives show one. Among the catalog numbers the largest effects come from the star's metallicity and the number of KOIs on the star. The independent audit flags the second as partly reflecting how NASA confirmed planets (multi-planet systems were validated in bulk). False positives also more often carry default stellar values, so part of the metallicity signal may be the same kind of bookkeeping artefact rather than astrophysics. The `no-koi-count` ablation measures it.
 
-**Through another telescope (TESS).** For 40 confirmed Kepler planets that NASA's TESS satellite saw again, views built from TESS light curves give the same verdict as Kepler's own for 85% (7 of 7 for planets never seen in training). It also exposed a weakness: these are mostly giant planets with deep transits, and even with Kepler data only 75% of them are called planets, well below the 96.7% recall on the full test set. Details: [docs/EXPERIMENTS_V3.md](docs/EXPERIMENTS_V3.md).
+**Through another telescope (TESS).** For 40 confirmed Kepler planets that NASA's TESS satellite saw again, views built from TESS light curves give the same verdict as Kepler's own for 85% (7 of 7 for planets never seen in training). It also exposed a weakness: these are mostly giant planets with deep transits, and even with Kepler data only 75% of them are called planets, well below the 96.7% recall on the full test set. Details: [docs/star-gazer/EXPERIMENTS_V3.md](docs/star-gazer/EXPERIMENTS_V3.md).
 
-**Where it succeeds and fails.** Broken down by planet size, signal strength, period and star ([docs/DATA_ANALYSIS.md](docs/DATA_ANALYSIS.md)), Star Gazer finds 96–100% of small planets (under 4 Earth radii) but only 1 of the 7 real giant planets above 15 Earth radii in the test set, because nearly every KOI that big is an eclipsing binary. That is the main target for V4.
+**Where it succeeds and fails.** Broken down by planet size, signal strength, period and star ([docs/star-gazer/DATA_ANALYSIS.md](docs/star-gazer/DATA_ANALYSIS.md)), Star Gazer finds 96–100% of small planets (under 4 Earth radii) but only 1 of the 7 real giant planets above 15 Earth radii in the test set, because nearly every KOI that big is an eclipsing binary. That is the main target for V4.
 
 ### Scoring the unlabelled candidates
 
@@ -234,9 +234,9 @@ Library (Galleria photos) and Star Gazer's candidate scores:
 .venv\Scripts\python scripts\starmap\make_sky_backdrop.py   # -> web/sky.png (only if the star list changes)
 ```
 
-One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. There are many more: the Galleria shows each one as a silhouette with a clue. (Spoilers: [docs/EASTER_EGGS.md](docs/EASTER_EGGS.md).)
+One familiar system is hidden in the search even though it isn't in the Kepler field. Hint: every star on the map is seen from there. There are many more: the Galleria shows each one as a silhouette with a clue. (Spoilers: [docs/star-map/EASTER_EGGS.md](docs/star-map/EASTER_EGGS.md).)
 
-Roadmap: [docs/STARMAP_PLAN.md](docs/STARMAP_PLAN.md). The game's design: [docs/STAR_GAZER_MISSION.md](docs/STAR_GAZER_MISSION.md). Data files: [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md). All documentation: [docs/README.md](docs/README.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
+Roadmap: [docs/star-map/STARMAP_PLAN.md](docs/star-map/STARMAP_PLAN.md). The game's design: [docs/star-map/STAR_GAZER_MISSION.md](docs/star-map/STAR_GAZER_MISSION.md). Data files: [docs/star-map/DATA_DICTIONARY.md](docs/star-map/DATA_DICTIONARY.md). All documentation: [docs/README.md](docs/README.md). Contributing (architecture, setup, checks): [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -407,6 +407,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 ├── README.md                     ← You are here
 ├── SECURITY.md                   ← Security measures and how to report a problem
 ├── TERMS_OF_USE.md               ← Terms of Use (accepted in notebooks / scripts / app)
+├── LICENSE, NOTICE.md           ← PolyForm Noncommercial 1.0.0; third-party material and its terms
 ├── requirements.txt              ← Local (VS Code) dependencies
 ├── pyproject.toml                ← `pip install -e .` + pytest config
 ├── app.py                        ← Gradio web demo: Star Gazer, V2 or V1.5 (local by default)
@@ -421,6 +422,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── star_gazer.py             ← V3: features, star-grouped split, hybrid model, train/evaluate
 │   ├── training.py               ← V3: training variants, checkpoints, scoring (shared by the scripts)
 │   ├── saliency.py               ← V3: occlusion saliency (what drove a prediction)
+│   ├── giants.py                 ← V4 (Colossus): giant-planet physics features and the specialist
 │   ├── runtime.py                ← Low CPU priority + TensorFlow thread limits for long runs
 │   ├── plots.py                  ← All figures
 │   └── terms.py                  ← Terms of Use acceptance gate
@@ -447,13 +449,12 @@ cv-project-kepler-exoplanet-detection-inventory/
 │   ├── v3/                       ← Written by the V3 scripts (git-ignored; committed encrypted)
 │   └── v3_public/                ← A few V3 figures shown in this README
 └── docs/
-    ├── README.md                 ← Index of all docs (analysis, audit, easter eggs, roadmap)
-    ├── DATA_ANALYSIS.md          ← Where Star Gazer succeeds and fails
-    ├── AUDIT_V3.md               ← Independent check of the V3 results
-    ├── EASTER_EGGS.md            ← Spoilers: every easter egg and achievement
-    ├── STAR_GAZER_MISSION.md     ← The star map game: ranks, trophies, the final mission
-    ├── STARMAP_PLAN.md           ← Star map roadmap
-    ├── plans/                    ← Design plans for upcoming features
+    ├── README.md                 ← Index of all docs
+    ├── star-gazer/               ← The model: V3 audit, data analysis, experiments; V4 (Colossus) pre-registrations and results
+    ├── star-map/                 ← The site: data dictionary, easter eggs (spoilers), the game's design, roadmap
+    ├── plans/                    ← Plans for upcoming features (plans/README.md is the planner)
+    ├── media/                    ← README banner, screenshots and link previews (generated)
+    ├── IMPROVEMENTS.md           ← Project-wide backlog
     └── presentation/             ← Portfolio slides (.pptx) and the PDF
 ```
 

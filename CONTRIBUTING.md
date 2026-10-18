@@ -34,7 +34,7 @@ flowchart LR
 | Cross-validation | `scripts/pipeline/cross_validate.py` | `results/v3/cv_metrics.json` |
 | Everything, in order | `scripts/pipeline/run_pipeline.py` (`--from <step>` to resume) | logs in `logs/pipeline/` |
 
-The star map's data files are described in [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md).
+The star map's data files are described in [docs/star-map/DATA_DICTIONARY.md](docs/star-map/DATA_DICTIONARY.md).
 
 ## Setting up
 

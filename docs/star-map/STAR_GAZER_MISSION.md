@@ -3,11 +3,11 @@
 **Status: built (October 2026)** with the recommended choices: every system on the map, the staged reveal, the black-hole emblem and title, the white dwarf as an alternative final emblem and the white hole after a reset (web/src/49-ranks.js). This is the long-term endgame for the star map's Galleria
 ([EASTER_EGGS.md](EASTER_EGGS.md)): a final secret mission, a rank emblem that grows through the life of a
 star, and an achievements bar at the top of the page. Concept pixel art is in
-[`pixel-art/emblems/`](../pixel-art/emblems/) (made by `scripts/starmap/draft_emblems.py`); the official
-pictures each stage is based on are in [`pixel-art/references/stars/`](../pixel-art/references/stars/)
-(sources in [SOURCES.md](../pixel-art/references/SOURCES.md)).
+[`pixel-art/emblems/`](../../pixel-art/emblems) (made by `scripts/starmap/draft_emblems.py`); the official
+pictures each stage is based on are in [`pixel-art/references/stars/`](../../pixel-art/references/stars)
+(sources in [SOURCES.md](../../pixel-art/references/SOURCES.md)).
 
-![The ladder](../pixel-art/emblems/draft_ladder.png)
+![The ladder](../../pixel-art/emblems/draft_ladder.png)
 
 ## 1. The final mission: TRUE STAR GAZER
 
@@ -89,7 +89,7 @@ for the heaviest, a **black hole**. The ladder follows the heavy road so it can 
   over, but your emblem remembers. White holes are a solution of Einstein's equations that has never been
   observed, so the card says so; there is no photo of one.
 
-![Header mock-up](../pixel-art/emblems/draft_header.png)
+![Header mock-up](../../pixel-art/emblems/draft_header.png)
 
 ## 3. The achievements bar
 

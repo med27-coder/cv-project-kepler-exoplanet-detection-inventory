@@ -2,11 +2,11 @@
 
 **Result (17 October 2026): the registered test failed.** Colossus found 72% of giant planets at V3's false-alarm
 rate against V3's 81%, so it is not adopted. Full results and what a next attempt would need:
-[../V4_RESULTS.md](../V4_RESULTS.md).
+[../V4_RESULTS.md](../star-gazer/V4_RESULTS.md).
 
 **Status: plan** (17 October 2026). **Direction chosen by the user: two specialists.** V3 stays as it is and
 keeps the small planets it already finds 96-100% of the time; V4 is a new **giant-planet specialist, Colossus**, that takes
-over for big objects. V3 stays frozen (`docs/AUDIT_V3.md`): V4 is a new version with its own
+over for big objects. V3 stays frozen (`docs/star-gazer/AUDIT_V3.md`): V4 is a new version with its own
 design, decided **before** it is evaluated, judged by cross-validation on fresh star-grouped splits and by a
 **prospective test** (below), never by tuning on V3's test split.
 
@@ -14,7 +14,7 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
 
 | Weakness | Evidence | Source |
 |---|---|---|
-| **Giant planets** | above 15 Earth radii, only 1 of 7 real planets found (436 of 443 KOIs that big are eclipsing binaries) | `docs/DATA_ANALYSIS.md` |
+| **Giant planets** | above 15 Earth radii, only 1 of 7 real planets found (436 of 443 KOIs that big are eclipsing binaries) | `docs/star-gazer/DATA_ANALYSIS.md` |
 | **Deep, V-shaped transits** | recall 88% for SNR above 200; Kepler-13 b scores 0.03 | `DATA_ANALYSIS.md`, `EXPERIMENTS_V3.md` |
 | **Another telescope** | TESS light curves lose small signals (KOI-42.01: 0.99 with Kepler, 0.01 with TESS) | `EXPERIMENTS_V3.md` |
 | **Missing catalog values** | a missing fit can read as evidence of a false positive | `DATA_ANALYSIS.md` |

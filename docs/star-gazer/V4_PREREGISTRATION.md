@@ -2,7 +2,7 @@
 
 Written and committed on 17 October 2026, **before any V4 model was trained**. Design, data, metrics and the
 decision rules below are fixed; any change after training starts is listed in section 8 with its reason and
-date, and results are reported for the design as registered. Plan: [plans/STAR_GAZER_V4.md](plans/STAR_GAZER_V4.md).
+date, and results are reported for the design as registered. Plan: [plans/STAR_GAZER_V4.md](../plans/STAR_GAZER_V4.md).
 
 ## 1. Question
 

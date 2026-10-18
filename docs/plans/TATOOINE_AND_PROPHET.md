@@ -60,7 +60,7 @@ all public and official:
 |---|---|---|
 | **Kepler Eclipsing Binary Catalog** (~2,900 eclipsing binaries) | Labelled *hard negatives*: eclipsing binaries are the most common false positive, so more of them should sharpen the "not a planet" side | Villanova / MAST |
 | **DR25 simulated data** (injected transits, inverted and scrambled light curves) | Planet-like signals with known answers, and noise that only looks like planets: the same tests NASA used to measure its own pipeline | NASA Exoplanet Archive, Kepler DR25 |
-| **TESS TOIs** | A different telescope, for checking that the model generalises (already tried in V3, `docs/EXPERIMENTS_V3.md`) | NASA Exoplanet Archive |
+| **TESS TOIs** | A different telescope, for checking that the model generalises (already tried in V3, `docs/star-gazer/EXPERIMENTS_V3.md`) | NASA Exoplanet Archive |
 | **Circumbinary planets** | A small *held-out* test of unusual planets, to see how the model reacts, not for training | `pscomppars`, `cb_flag = 1` |
 
 (All from NASA and its partners. These are open science archives; nothing here needs an account.)

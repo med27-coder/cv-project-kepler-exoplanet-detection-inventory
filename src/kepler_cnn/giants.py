@@ -1,4 +1,4 @@
-"""Star Gazer V4, Colossus: the giant-planet specialist, as registered in docs/V4_PREREGISTRATION.md.
+"""Star Gazer V4, Colossus: the giant-planet specialist, as registered in docs/star-gazer/V4_PREREGISTRATION.md.
 
 V3 stays the model for small planets. For KOIs of 6 Earth radii and up, a gradient-boosted tree classifier
 looks at V3's catalog features, a "was missing" flag for each, and physics features that tell planets from
@@ -93,7 +93,7 @@ def fit(X, y, seed):
     return model
 
 
-# ---- Colossus 2 (docs/V4B_PREREGISTRATION.md): the physics features as extra inputs to V3's network
+# ---- Colossus 2 (docs/star-gazer/V4B_PREREGISTRATION.md): the physics features as extra inputs to V3's network
 LOG_PHYSICS = {'ruwe', 'n_gaia_within_2as'}
 
 

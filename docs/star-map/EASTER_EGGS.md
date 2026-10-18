@@ -178,4 +178,4 @@ Search words are regular expressions near the top of `web/src/40-home.js` (`HOME
 `web/src/45-spaceflight.js` (`CRAFT_QUERY`, `ISS_QUERY`) and `web/src/47-kepler.js` (`KEPLER_QUERY`). They are checked in `lookup()` before the Kepler
 catalog. Keep them out of the type-ahead so they stay hidden, add a browser test in `tests/test_browser.py`,
 add a row to this page, and rebuild with `scripts/starmap/build_web.py`. New sprites: re-run
-`scripts/starmap/export_pixel_art.py` so [pixel-art/](../pixel-art/) shows them.
+`scripts/starmap/export_pixel_art.py` so [pixel-art/](../../pixel-art) shows them.

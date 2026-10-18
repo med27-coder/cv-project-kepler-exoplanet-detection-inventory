@@ -135,7 +135,7 @@ Recipe **v3** fixes the secondary-eclipse search, which always looked at phase 0
 
 ## Extra data (not used for training yet)
 
-`scripts/data/fetch_extra_data.py` downloads public datasets for later experiments (see [docs/STARMAP_PLAN.md](../docs/STARMAP_PLAN.md), Phase 7):
+`scripts/data/fetch_extra_data.py` downloads public datasets for later experiments (see [docs/star-map/STARMAP_PLAN.md](../docs/star-map/STARMAP_PLAN.md), Phase 7):
 
 | Source | File | What it is |
 |---|---|---|
