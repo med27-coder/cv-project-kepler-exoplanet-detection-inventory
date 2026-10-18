@@ -49,6 +49,9 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `stars/7-supernova.jpg` | Kepler's Supernova Remnant: the star Johannes Kepler saw explode in 1604 (Chandra) | [PIA06908](https://images.nasa.gov/details/PIA06908) | Chandra X-Ray Observatory | 2004-10-06 |
 | `stars/8-neutron-star.jpg` | A pulsar: a spinning neutron star sweeping beams (artist concept) | [PIA21085](https://images.nasa.gov/details/PIA21085) | NASA/JPL-Caltech | 2017-01-06 |
 | `stars/9-black-hole.jpg` | A black hole with its glowing disk and jet (artist concept) | [PIA16695](https://images.nasa.gov/details/PIA16695) | NASA/JPL-Caltech | 2013-02-27 |
+| `concepts/comet-neowise.jpg` | Comet NEOWISE over Washington, July 2020 (for the passing comets) | [NHQ202007120001](https://images.nasa.gov/details/NHQ202007120001) | NASA/Bill Ingalls | 2020-07-12 |
+| `concepts/comet-hale-bopp.jpg` | Comet Hale-Bopp seen by Hubble (for the passing comets) | [PIA01289](https://images.nasa.gov/details/PIA01289) | NASA/JPL/STScI | 1998-08-02 |
+| `concepts/asteroid-eros.jpg` | Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids) | [PIA02900](https://images.nasa.gov/details/PIA02900) | NASA/JPL/JHUAPL | 2000-06-10 |
 | `stars/9-black-hole-m87.jpg` | Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset) | [PIA23122](https://images.nasa.gov/details/PIA23122) | NASA/JPL-Caltech/IPAC/Event Horizon Telescope Collaboration | 2019-04-25 |
 | `solar-system/earth-blue-marble.jpg` | Blue Marble map, the source of the pixel Earth | [Visible Earth](https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg) | NASA Goddard Space Flight Center / Visible Earth |  |
 
