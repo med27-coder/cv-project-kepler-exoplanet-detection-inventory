@@ -32,7 +32,12 @@ Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OS
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
-### Achievements (57, in groups), trophies, badges and your star
+Names ignore capitals, a leading "the", and hyphens, underscores or dots in place of spaces
+("new-horizons", "OSIRIS_REx"), and know common nicknames ("Voyager I", "Curiosity rover", "Percy",
+"ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
+**SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
+
+### Achievements (58, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -85,6 +90,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | Secret | PATIENT OBSERVER | Watch one system for two minutes |
 | | NIGHT SHIFT | Open a system between midnight and 4 a.m. |
 | | NO SIGNAL | Search for five things that aren't there in one visit |
+| | SO CLOSE | Search a hidden name with a letter or two wrong |
 | | WARP SPEED | Find three new easter eggs within a minute |
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |
@@ -105,8 +111,6 @@ The endgame (TRUE STAR GAZER, rank emblems, achievements bar) has its own design
 Not built yet; roughly from easiest to biggest.
 
 **Make the game deeper**
-- **Hot / cold guesses:** when a search almost matches a hidden name (one or two letters off), say
-  "So close!" instead of "not found".
 - **Hints that unlock over time:** after a few minutes on a card, reveal one letter, then the first word.
 - **Ranks:** Cadet → Observer → Astronomer → Flight Director → Mission Legend, from eggs + achievements, shown
   as a small badge on the ⚙ button.

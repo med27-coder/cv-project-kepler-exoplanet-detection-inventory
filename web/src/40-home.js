@@ -254,12 +254,14 @@ function select(s, updateHash = true) {
 function lookup(query, updateHash = true) {
   query = String(query).slice(0, MAX_QUERY);
   if (!query.trim()) return;
-  const q = query.trim();   // easter eggs first; finding one unlocks it in the Galleria (48-gallery.js)
+  // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
+  // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
+  const q = query.trim().replace(/[-_.]/g, ' ');
   if (HOME_QUERY.test(q) || /^(the )?pluto$/i.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
   if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
   if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
   if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
   if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
   const s = find(query);
-  if (s) select(s, updateHash); else showUnknown(query);
+  if (s) select(s, updateHash); else { showUnknown(query); nearMiss(q); }
 }

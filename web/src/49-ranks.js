@@ -81,6 +81,7 @@ const SYMBOLS = {
   patient: ['.......', '..www..', '.wwkww.', '..www..', '.......', '.......'],               // an eye that waits
   night: ['..yy...', '.yy....', '.yy....', '.yy..w.', '..yy...', '.......'],                 // a crescent moon
   hollow: ['...m...', '.b.m.b.', 'b..m..b', '.b.m.b.', '..mmm..', '.......'],                // an antenna, no reply
+  'so-close': ['.rrrrr.', 'r.www.r', 'r.wrw.r', 'r.www.r', '.rrrrr.', '......y'],          // a dart just off the bullseye
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
   'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket

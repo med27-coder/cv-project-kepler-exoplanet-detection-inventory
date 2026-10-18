@@ -238,7 +238,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/57'
+    assert page.locator('#rank-count').inner_text() == '12/58'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -357,6 +357,36 @@ def test_tour_icons_and_suggestions(browser, site):
     page.locator('#query').blur()
     page.locator('#query').focus()
     page.wait_for_selector('#suggest li:has-text("recently viewed")')
+    assert not errors, errors
+
+
+def test_search_spellings_and_so_close(browser, site):
+    """Easter-egg names ignore capitals, "the", hyphens, underscores and dots, and know common nicknames; extra
+    or missing spaces fail on purpose. A name a letter or two off says "SO CLOSE!" (and, once found, names it)."""
+    errors = []
+    page = open_page(browser, site, errors)
+    found = ['JWST', '  jwst  ', 'James-Webb', 'james webb telescope', 'Mars-Odyssey', 'Voyager I', 'voyager two',
+             'new-horizons', 'OSIRIS_REx', 'osiris rex', 'parker probe', 'space-station', 'solar-system',
+             'Europa-Clipper', 'Curiosity rover', 'the perseverance rover', 'ExoMars TGO', 'Kepler space telescope', 'PLUTO']
+    for q in found + ['James  Webb', 'NewHorizons', 'europaclipper']:
+        page.fill('#query', q)
+        page.press('#query', 'Enter')
+        title = page.locator('#sys-title').inner_text()
+        assert (title != 'NO SIGNAL') == (q in found), (q, title)
+    assert not errors, errors
+    page = open_page(browser, site, errors)                           # fresh, so pop-ups aren't queued behind 19 eggs
+    page.fill('#query', 'jwst')
+    page.press('#query', 'Enter')
+    page.fill('#query', 'Psychee')                                   # one letter off, not found yet: no name given
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.toast:has-text("SO CLOSE!")')
+    assert 'so-close' in page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).ach")
+    page.fill('#query', 'Jvst')                                       # found already: it says which one
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.toast:has-text("James Webb Space Telescope?")')
+    page.fill('#query', 'kepler 99999')                               # a catalogue number is not a near miss
+    page.press('#query', 'Enter')
+    assert page.locator('#sys-title').inner_text() == 'NO SIGNAL'
     assert not errors, errors
 
 
