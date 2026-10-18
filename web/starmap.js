@@ -831,12 +831,7 @@
     for (let k = 0; k < 24; k++) {   // the loose tether, drifting off
       sctx.fillRect(Math.round(cx + 9 + k * 2), Math.round(cy + 8 + Math.sin(k / 3 + t * 1.5) * 3 + k * 0.4), 1, 1);
     }
-    sctx.save();
-    sctx.imageSmoothingEnabled = false;
-    sctx.translate(Math.round(cx), Math.round(cy));
-    sctx.rotate(t * 0.5);
-    sctx.drawImage(astronautSprite(), -7.5, -12);
-    sctx.restore();
+    drawAstronaut(sctx, cx, cy, t * 0.5);
     const lost = 'LOST IN ORBIT', hint = title.textContent === 'NO SIGNAL' ? 'NO SIGNAL - TRY ANOTHER NAME' : 'PICK A STAR TO BEGIN';
     pixelText(sctx, lost, Math.round((SW - textWidth(lost)) / 2), SH - 34, '#ff9a3c');
     pixelText(sctx, hint, Math.round((SW - textWidth(hint)) / 2), SH - 24, '#9aa6d6');
@@ -1595,6 +1590,7 @@
     // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
     // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
     const q = query.trim().replace(/[-_.]/g, ' ');
+    if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
     const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
     if (dwarf) { showDwarf(dwarf, updateHash); unlockEgg(dwarf); return; }
     if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
@@ -2410,6 +2406,93 @@
     if (updateHash) history.replaceState(null, '', '#' + d.name);
   }
 
+  // ---------------------------------------------------------------- the lost astronaut and their outfits
+  // The astronaut of LOST IN ORBIT (the empty system view, the UNIVERSE view's flare). Once caught, searching
+  // "astronaut" shows them up close in the next outfit (HOUSTON, WE HAVE A PROBLEM; SPACE WARDROBE). This part
+  // loads before 50-wiring.js, whose search can run while the page is still loading (a #astronaut link).
+  const ASTRONAUT = ['.www.', 'wooow', 'wooow', '.www.', 'wwwww', 'wwwww', '.w.w.', '.w.w.'];
+  // Once found, searching "astronaut" dresses them in the next outfit (a hat over the helmet, 7 x 4 art pixels).
+  const OUTFITS = [
+    { id: 'cowboy', name: 'Texas cowboy hat', rows: ['.......', '..bbb..', '..kkk..', 'bbbbbbb'],
+      caption: 'Mission Control for NASA\'s crewed flights is in Houston, Texas, so a Stetson felt right.' },
+    { id: 'party', name: 'party hat', rows: ['...y...', '..ppp..', '.pypyp.', '.......'],
+      caption: 'Somewhere in the universe it is always somebody\'s birthday.' },
+    { id: 'tophat', name: 'top hat', rows: ['..kkk..', '..kkk..', '..rrr..', '.kkkkk.'],
+      caption: 'Dressed for a very formal spacewalk.' },
+    { id: 'propeller', name: 'propeller beanie', rows: ['rrr.uuu', '...w...', '..rgu..', '.ryyur.'],
+      caption: 'A propeller does nothing in empty space: Mars\'s helicopter Ingenuity needed the thin Martian air to fly.' },
+    { id: 'pirate', name: 'pirate hat', rows: ['.......', '..kkk..', '.kkwkk.', 'kkkkkkk'],
+      caption: 'No survey has detected a space pirate. Yet.' },
+    { id: 'graduate', name: 'graduation cap', rows: ['.......', 'kkkkkkk', '..kkk.y', '......y'],
+      caption: 'Graduated in Computer Vision (ITAI 1378), with honours in drifting.' },
+    { id: 'crown', name: 'dwarf king\'s crown', needs: 'dwarf-king', rows: ['.......', '.y.y.y.', '.yyyyy.', '.yrybg.'],
+      caption: 'Crowned by all five dwarf planets: you found them.' },
+  ];
+  const OUTFIT_INK = { w: '#e6ecff', o: '#ff9a3c', b: '#8a5a2b', k: '#1a1a24', y: '#ffd34d', p: '#ff6ec7', r: '#e04a4a', g: '#4fd17a', u: '#3b8cff' };
+  const ASTRO_W = 21, ASTRO_H = 36;   // 7 x 12 art pixels at 3 x 3: hat rows on top of the 5 x 8 astronaut
+  const astronautCanvases = new Map();
+  function astronautSprite(outfitId = progress.outfit) {
+    const outfit = OUTFITS.find(o => o.id === outfitId) || null, key = outfit ? outfit.id : '';
+    if (!astronautCanvases.has(key)) {
+      astronautCanvases.set(key, layer(ASTRO_W, ASTRO_H, put => {
+        const art = (rows, x0, y0) => rows.forEach((row, r) => [...row].forEach((ch, c) => {
+          if (ch === '.') return;
+          for (let k = 0; k < 9; k++) put((x0 + c) * 3 + (k % 3), (y0 + r) * 3 + Math.floor(k / 3), OUTFIT_INK[ch]);
+        }));
+        art(ASTRONAUT, 1, 4);
+        if (outfit) art(outfit.rows, 0, 1);
+      }));
+    }
+    return astronautCanvases.get(key);
+  }
+  function drawAstronaut(ctx, x, y, angle, scale = 1) {   // rotated as one image, so it stays solid at every angle
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(Math.round(x), Math.round(y));
+    ctx.rotate(angle);
+    ctx.drawImage(astronautSprite(), -ASTRO_W / 2 * scale, -24 * scale, ASTRO_W * scale, ASTRO_H * scale);
+    ctx.restore();
+  }
+  // "astronaut" (after LOST IN ORBIT): the astronaut up close, in the next outfit.
+  const ASTRO_QUERY = /^(the )?(lost )?(astronaut|spaceman|spacewoman|lost in orbit)$/i;
+  function showAstronaut(updateHash = true) {
+    const owned = OUTFITS.filter(o => !o.needs || progress.ach[o.needs]);
+    const at = owned.findIndex(o => o.id === progress.outfit);
+    const outfit = owned[(at + 1) % owned.length];
+    progress.outfit = outfit.id;
+    if (!progress.outfits.includes(outfit.id)) progress.outfits.push(outfit.id);
+    saveProgress();
+    if (outfit.id === 'cowboy') achieve('houston');
+    if (OUTFITS.filter(o => !o.needs).every(o => progress.outfits.includes(o.id))) achieve('space-wardrobe');
+    selected = null;
+    ++selectToken;
+    title.textContent = 'LOST IN ORBIT';
+    const seen = OUTFITS.filter(o => progress.outfits.includes(o.id)).length;
+    info.innerHTML = `
+      <p class="big">★ MISSION CONTROL, HOUSTON ★</p>
+      <p>Still drifting, still in good spirits. Today's outfit: <b>${esc(outfit.name)}</b>. ${esc(outfit.caption)}</p>
+      <p>Search <b>astronaut</b> again for another outfit (${seen} of ${OUTFITS.length} found).</p>
+      <p class="note">The real line from Apollo 13, on 13 April 1970, was "Houston, we've had a problem"; the 1995 film
+        made it "we have".</p>`;
+    setScene({ custom: seconds => {
+      const t = REDUCED_MOTION ? 0 : seconds;
+      sctx.fillStyle = '#070b1a';
+      sctx.fillRect(0, 0, SW, SH);
+      for (let k = 0; k < 70; k++) {
+        sctx.fillStyle = k % 6 ? '#1e2550' : '#4a5590';
+        sctx.fillRect(Math.floor(hash('as' + k) * SW), Math.floor(hash('at' + k) * SH), 1, 1);
+      }
+      const cx = SW / 2 + 8 * Math.sin(t * 0.4), cy = SH / 2 + 4 * Math.cos(t * 0.3);
+      sctx.fillStyle = '#4a5590';
+      for (let k = 0; k < 30; k++) sctx.fillRect(Math.round(cx + 16 + k * 2), Math.round(cy + 14 + Math.sin(k / 3 + t * 1.5) * 3 + k * 0.5), 1, 1);
+      drawAstronaut(sctx, cx, cy, t * 0.35, 2);
+      const label = `OUTFIT: ${outfit.name.toUpperCase().replace(/'/g, '')}`;
+      pixelText(sctx, label, Math.round((SW - textWidth(label)) / 2), SH - 14, '#ffd34d');
+    } });
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#astronaut');
+  }
+
   // ---------------------------------------------------------------- Galleria: the easter-egg game
   // The ⚙ button opens the Galleria. Every easter egg starts as a black silhouette with a question mark,
   // its name blanked out and a clue underneath; typing the right name in the search bar finds it: the
@@ -2568,6 +2651,8 @@
     { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
     { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
     { g: 'SECRET', id: 'lost-in-orbit', title: 'LOST IN ORBIT', how: 'Catch the flare drifting across the universe.', secret: true },
+    { g: 'SECRET', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Look up the lost astronaut again, and see what they are wearing.', secret: true },
+    { g: 'SECRET', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'See every outfit in the lost astronaut\'s wardrobe.', secret: true },
     { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
     { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
     { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -2609,7 +2694,8 @@
                      showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
                      toured: false,   // first-visit tour (49c-ui.js)
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
-                     backdrop: 'animated' };   // page background (55-backdrop.js)
+                     backdrop: 'animated',   // page background (55-backdrop.js)
+                     outfit: '', outfits: [] };   // the lost astronaut's outfits (56-universe.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2630,6 +2716,8 @@
     if (Array.isArray(saved.viewed)) progress.viewed = [...new Set([...progress.viewed, ...saved.viewed.filter(v => ID.test(v))])].slice(0, 300);
     if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
     if (saved.whiteHole === true) progress.whiteHole = true;
+    if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
+    if (Array.isArray(saved.outfits)) progress.outfits = [...new Set([...progress.outfits, ...saved.outfits.filter(o => typeof o === 'string' && ID.test(o))])].slice(0, 40);
     const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
     for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
       if (!/^K\d{5}\.\d{2}$/.test(koi) || !Array.isArray(c) || !['planet', 'not'].includes(c[0]) || !DATE.test(String(c[1]))) continue;
@@ -3396,6 +3484,8 @@
     'cosmic-zoom': ['.vvvv..', 'v....v.', 'v.yy..v', 'v.y...v', '.v...v.', '..vvv..'],         // a spiral, the universe
     'lost-in-orbit': ['..www..', '.woooww', '.woooww', '..www.m', '.wwwwm.', '.w.w...'],      // an astronaut, tether loose
     'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
+    houston: ['..bbb..', '..kkk..', 'bbbbbbb', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
+    'space-wardrobe': ['ppp.kkk', 'ppp.kkk', '.......', 'bbb.yyy', 'bbb.yyy', '.......'],   // four hats on the rack
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
     'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket
@@ -3838,6 +3928,8 @@
     'cosmic-zoom': 'The observable universe is about 93 billion light-years across; Kepler looked a few thousand into it.',
     'lost-in-orbit': 'Astronauts on spacewalks stay tethered; in 1984 Bruce McCandless flew free, 100 metres from the Shuttle.',
     'dwarf-king': 'The IAU recognises five dwarf planets; dozens more Kuiper Belt worlds may one day join them.',
+    houston: 'Apollo 13, 13 April 1970: "Houston, we\'ve had a problem." The crew made it home four days later.',
+    'space-wardrobe': 'A real spacesuit, NASA\'s EMU, weighs about 145 kg on Earth and is made to measure.',
     speedrun: 'Voyager 1 travels about 17 km every second.',
     goodnight: "Kepler's last command was sent on 15 November 2018.",
     'launch-day': 'Kepler launched on a Delta II rocket from Cape Canaveral on 7 March 2009.',
@@ -3850,6 +3942,8 @@
     hollow: 'Keep calling into the void, even when nothing answers.',
     'so-close': 'A near miss counts too. Search a hidden name, and slip a letter.',
     'lost-in-orbit': 'Not every flare in the dark is a star. Watch the universe long enough.',
+    houston: 'The one you found drifting might be glad of a visit.',
+    'space-wardrobe': 'Visit the lost one often enough and the wardrobe opens.',
     speedrun: 'Some discoveries arrive in a rush, one after another.',
     goodnight: 'A telescope said goodbye on a November night. Visit on that day.',
     'launch-day': 'Return on the day it all began, in March.',
@@ -4748,13 +4842,8 @@
   }
 
   // ---- lost in orbit: a flare that is really an astronaut
-  const ASTRONAUT = ['.www.', 'wooow', 'wooow', '.www.', 'wwwww', 'wwwww', '.w.w.', '.w.w.'];
-  let astronautCanvas = null;
-  const astronautSprite = () => astronautCanvas || (astronautCanvas = layer(15, 24, put => ASTRONAUT.forEach((row, r) => [...row].forEach((ch, c) => {
-    if (ch === '.') return;
-    for (let k = 0; k < 9; k++) put(c * 3 + (k % 3), r * 3 + Math.floor(k / 3), ch === 'o' ? '#ff9a3c' : '#e6ecff');   // 3 x 3 per pixel
-  }))));
-  const forceAstronaut =/[?&]astronaut\b/.test(location.search);
+  const forceAstronaut = /[?&]astronaut\b/.test(location.search);
+
   let flare = null, nextFlare = 0, caught = 0;
   function planFlare(now) { nextFlare = now + (forceAstronaut ? 300 : 20_000 + Math.random() * 50_000); }
   function updateFlare(now) {
@@ -4772,11 +4861,7 @@
   function drawFlare(now) {
     if (caught && now - caught < 4000) {   // caught: the astronaut, big, tumbling slowly
       const spin = REDUCED_MOTION ? 0 : (now - caught) / 900, cx = UCX, cy = UCY;
-      uctx.save();   // rotate the whole sprite as one image, so it stays solid at every angle
-      uctx.translate(cx, cy);
-      uctx.rotate(spin);
-      uctx.drawImage(astronautSprite(), -7.5, -12);
-      uctx.restore();
+      drawAstronaut(uctx, cx, cy, spin);
       for (let k = 0; k < 20; k++) { uctx.fillStyle = '#4a5590'; uctx.fillRect(Math.round(cx + 8 + k * 2), Math.round(cy + 6 + Math.sin(k / 3 + now / 300) * 3), 1, 1); }
       uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 22, '#ff9a3c');
       return;

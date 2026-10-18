@@ -386,12 +386,7 @@ function drawLostInOrbit(seconds) {
   for (let k = 0; k < 24; k++) {   // the loose tether, drifting off
     sctx.fillRect(Math.round(cx + 9 + k * 2), Math.round(cy + 8 + Math.sin(k / 3 + t * 1.5) * 3 + k * 0.4), 1, 1);
   }
-  sctx.save();
-  sctx.imageSmoothingEnabled = false;
-  sctx.translate(Math.round(cx), Math.round(cy));
-  sctx.rotate(t * 0.5);
-  sctx.drawImage(astronautSprite(), -7.5, -12);
-  sctx.restore();
+  drawAstronaut(sctx, cx, cy, t * 0.5);
   const lost = 'LOST IN ORBIT', hint = title.textContent === 'NO SIGNAL' ? 'NO SIGNAL - TRY ANOTHER NAME' : 'PICK A STAR TO BEGIN';
   pixelText(sctx, lost, Math.round((SW - textWidth(lost)) / 2), SH - 34, '#ff9a3c');
   pixelText(sctx, hint, Math.round((SW - textWidth(hint)) / 2), SH - 24, '#9aa6d6');
