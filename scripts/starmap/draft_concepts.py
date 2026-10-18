@@ -68,31 +68,93 @@ PEACE = [['g.g', 'g.g', '.g.', '.g.'], ['g..g', 'g..g', '.gg.', '.g..']]   # V s
 
 
 def aliens(t):
-    f = Frame(56, 38, seed=3)
+    """Two green aliens in a silver flying saucer under a glass dome, one at the controls, one flashing a peace
+    sign (after the user's reference, redrawn as pixel art; the reference itself is not committed)."""
+    W, H = 96, 64
+    f = Frame(W, H, seed=3)
+    for y in range(H):   # a daytime sky, lighter towards the bottom
+        c = '#3f86d6' if y < 20 else '#5a9be0' if y < 42 else '#79b2ea'
+        for x in range(W):
+            f.put(x, y, c)
+    for cx0, cy0, r0 in [(10, 50, 9), (20, 54, 7), (84, 46, 8), (92, 50, 7), (74, 10, 5), (82, 9, 4), (14, 12, 4)]:
+        f.disc(cx0, cy0, r0, lambda dx, dy, q: '#ffffff' if dy < 1 or q < 0.6 else '#dce9f7')   # puffy clouds
     bob = round(math.sin(t * 2 * math.pi) * 1.5)
-    cx, cy = 28, 22 + bob
-    if t % 0.5 < 0.25:   # tractor beam, now and then
-        for y in range(cy + 4, 38):
-            half = 3 + (y - cy) * 0.35
-            for x in range(round(cx - half), round(cx + half) + 1):
-                if (x + y) % 3 == 0:
-                    f.put(x, y, '#3a6a5a')
-    f.disc(cx, cy - 3, 10, lambda dx, dy, q: None if dy > 1 else ('#9fd8ff' if q > 0.88 else '#163a52'))   # glass dome
-    f.grid(DRIVER, cx - 7, cy - 9, ALIEN_INK)                                           # driver
-    for x in range(cx - 8, cx - 2):
-        f.put(x, cy - 3, '#7a5a3a')                                                     # steering wheel
-    f.put(cx - 5, cy - 4, '#7a5a3a')
-    f.grid(WAVER, cx + 2, cy - 9, ALIEN_INK)                                            # passenger
-    f.grid(PEACE[int(t * 8) % 2], cx + 7, cy - 14 + (int(t * 8) % 2), ALIEN_INK)       # ✌ above the dome
-    f.put(cx + 7, cy - 10, '#4fd17a'); f.put(cx + 7, cy - 9, '#4fd17a')                # arm
-    for x in range(cx - 18, cx + 19):                                                  # saucer body
-        e = abs(x - cx) / 18
-        for y in range(cy - 1, cy + 4):
-            if (y - cy - 1.5) ** 2 / 6 + e ** 2 <= 1:
-                f.put(x, y, '#d6dae2' if y < cy + 1 else '#7d8596')
-    lights = ['#ffd34d', '#ff6b5a', '#9fd8ff', '#4fd17a', '#b56cff']
-    for k in range(7):   # rim lights chase round
-        f.put(cx - 15 + k * 5, cy + 1, lights[(k + int(t * 10)) % len(lights)])
+    cx, cy = 48, 36 + bob
+    # the lower hull: a dark ring with vents and glowing pods underneath
+    for x in range(cx - 30, cx + 31):
+        e = (x - cx) / 30
+        for y in range(cy + 3, cy + 9):
+            if ((y - cy - 3) / 6) ** 2 + e ** 2 <= 1:
+                f.put(x, y, '#5d6878' if (x + y) % 5 else '#454b5e')
+    for k, col in enumerate(['#ff6ec7', '#4fd17a', '#9fd8ff']):
+        f.disc(cx - 10 + k * 10, cy + 9, 1.6, lambda dx, dy, q, c=col: c)
+    # the main saucer: silver with an iridescent sheen and panel lines
+    sheen = ['#eef2f8', '#d6dae2', '#e9d5ff', '#c9f0ee', '#d6dae2', '#b8c0cc']
+    for x in range(cx - 36, cx + 37):
+        e = (x - cx) / 36
+        for y in range(cy - 4, cy + 5):
+            if ((y - cy) / 4.5) ** 2 + e ** 2 <= 1:
+                band = sheen[int((x - cx + 36) / 12 + t * 2) % len(sheen)]
+                c = '#9aa6b8' if y >= cy + 2 else band
+                if (x - cx) % 11 == 0 and y < cy + 2:
+                    c = '#7d8596'   # panel seams
+                f.put(x, y, c)
+    lights = ['#4fd17a', '#ff6ec7', '#ffd34d', '#9fd8ff', '#ff9a3c']
+    for k in range(9):   # rim lights blink in a chase
+        x = cx - 32 + k * 8
+        on = (k + int(t * 12)) % 3 != 0
+        f.put(x, cy, lights[k % len(lights)] if on else '#7d8596')
+        f.put(x + 1, cy, lights[k % len(lights)] if on else '#7d8596')
+    # the aliens: big black eyes, green skin, silver suits
+    def alien(ax, ay, antennae, wave):
+        for y in range(ay + 7, ay + 12):   # shoulders in a silver suit
+            for x in range(ax - 4, ax + 5):
+                f.put(x, y, '#c9d2de' if abs(x - ax) < 4 else '#9aa6b8')
+        f.put(ax, ay + 8, '#4fd17a')   # suit badge
+        f.disc(ax, ay + 2, 5.2, lambda dx, dy, q: '#3fae4a' if dx > 2.5 else '#5fd06a')   # head
+        for ex in (-2.5, 2.5):   # the eyes: big black ovals with a glint
+            for y in range(ay + 1, ay + 4):
+                for x in range(round(ax + ex - 1), round(ax + ex + 1) + 1):
+                    f.put(x, y, '#0a0a12')
+            f.put(round(ax + ex - 1), ay + 1, '#ffffff')
+        f.put(ax - 1, ay + 5, '#2a6a30'); f.put(ax, ay + 6, '#2a6a30'); f.put(ax + 1, ay + 5, '#2a6a30')   # a smile
+        if antennae:
+            for k in range(3):
+                f.put(ax - 3 - k // 2, ay - 3 - k, '#5fd06a'); f.put(ax + 3 + k // 2, ay - 3 - k, '#5fd06a')
+            f.put(ax - 5, ay - 6, '#5fd06a'); f.put(ax + 5, ay - 6, '#5fd06a')
+        if wave is not None:   # the peace sign: an arm up, a palm, two fingers in a V that wiggles
+            hx, hy = ax + 9, ay - 1 + wave
+            for y in range(hy + 5, ay + 9):
+                f.put(ax + 5, y, '#c9d2de'); f.put(ax + 6, y, '#c9d2de')   # sleeve
+            for y in range(hy + 3, hy + 6):
+                for x in range(hx - 2, hx + 1):
+                    f.put(x, y, '#5fd06a')   # palm
+            f.put(hx + 1, hy + 4, '#5fd06a')   # thumb
+            for k in range(3):
+                f.put(hx - 2 - (k == 0), hy + 2 - k, '#5fd06a')   # index finger, leaning left
+                f.put(hx + (k == 0), hy + 2 - k, '#5fd06a')       # middle finger, leaning right
+            f.put(hx - 1, hy + 3, '#3fae4a')   # folded fingers
+    for y in range(cy - 23, cy - 3):   # the dome's glass, a faint tint behind the aliens
+        for x in range(cx - 19, cx + 20):
+            if math.hypot(x - cx, (y - cy + 4)) < 18.5 and (x + y) % 2 == 0:
+                f.put(x, y, '#a9d2f2')
+    wiggle = int(t * 8) % 2
+    alien(cx - 8, cy - 15, False, None)
+    for x in range(cx - 13, cx - 5):   # control stick and console glow
+        f.put(x, cy - 5, '#454b5e')
+    f.put(cx - 10, cy - 6, '#ff6ec7'); f.put(cx - 7, cy - 6, '#4fd17a')
+    alien(cx + 7, cy - 15, True, wiggle)
+    # the glass dome over both, with a bright highlight
+    for a in range(0, 181, 3):
+        r = math.radians(a)
+        x, y = round(cx + 19 * math.cos(r)), round(cy - 4 - 19 * math.sin(r))
+        f.put(x, y, '#ffffff' if 110 < a < 150 else '#cfe8ff')
+    # motion swirls around the hull
+    for k in range(16):
+        a = k / 16 * 2 * math.pi + t * 2 * math.pi
+        if math.sin(a) > 0.2:
+            continue
+        f.put(round(cx + 42 * math.cos(a)), round(cy + 2 + 9 * math.sin(a)), '#e8f4ff')
     return f
 
 
