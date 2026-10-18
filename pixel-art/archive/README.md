@@ -36,3 +36,9 @@ ones not picked move here.
 | [`solar-system/venus_until-2026-10-14_a2663a0.png`](solar-system/venus_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/venus.png` | Planet sprite before the real-Earth and reference-photo redraw |
 | [`spacecraft/iss_until-2026-10-14_a2663a0.png`](spacecraft/iss_until-2026-10-14_a2663a0.png) | `pixel-art/spacecraft/iss.png` | ISS sprite before the redraw from official references |
 | [`spacecraft/kepler_until-2026-10-14_a2663a0.png`](spacecraft/kepler_until-2026-10-14_a2663a0.png) | `pixel-art/spacecraft/kepler.png` | Kepler sprite before the redraw from official references |
+| [`concepts/draft_loading_rock_until-2026-10-18_8c1c3ba.gif`](concepts/draft_loading_rock_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_loading_rock.gif` | The loading-screen concept (a rock with moons); the site uses the Delta II rocket |
+| [`concepts/draft_aliens_until-2026-10-18_8c1c3ba.gif`](concepts/draft_aliens_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_aliens.gif` | Aliens draft 1, on a daytime sky; draft 2 (no background) and the space versions replaced it |
+| [`concepts/draft_comet_until-2026-10-18_8c1c3ba.gif`](concepts/draft_comet_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_comet.gif` | Comet draft 1; v3, drawn after real photos, is the one built |
+| [`concepts/draft_comet_v2_until-2026-10-18_8c1c3ba.gif`](concepts/draft_comet_v2_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_comet_v2.gif` | Comet draft 2 (the odd blue line and curve); replaced by v3 |
+| [`concepts/draft_asteroid_until-2026-10-18_8c1c3ba.gif`](concepts/draft_asteroid_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_asteroid.gif` | Asteroid draft 1; v2 (dark, tumbling, no glow) is the one built |
+| [`concepts/draft_meteor_v2_until-2026-10-18_8c1c3ba.gif`](concepts/draft_meteor_v2_until-2026-10-18_8c1c3ba.gif) | `pixel-art/concepts/draft_meteor_v2.gif` | Meteor draft 2; v3a and v3b replaced it |

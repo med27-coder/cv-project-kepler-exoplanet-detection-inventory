@@ -5,7 +5,7 @@ its pairing table: the achievement list is reorganised first, then every chapter
 exactly as many stars as it has achievements. Concept art: `pixel-art/concepts/` (`scripts/starmap/draft_concepts.py`);
 references: `pixel-art/references/concepts/`.
 
-![concepts](../../pixel-art/concepts/draft_aliens.gif)
+![concepts](../../pixel-art/concepts/draft_aliens_2.gif)
 
 ## 1. New easter eggs
 
@@ -26,12 +26,12 @@ using the star positions from the constellation data.
 
 ### C. "What the alien doing" (secret)
 Two green aliens in a flying saucer: one driving, one throwing a ✌, the saucer bobbing, rim lights chasing,
-a tractor beam flickering (concept: `draft_aliens.gif`). Found by searching **aliens, ufo, flying saucer,
+a tractor beam flickering (concept: `draft_aliens_2.gif`). Found by searching **aliens, ufo, flying saucer,
 little green men, what the alien doing**, or by clicking the saucer when it (rarely) zooms across the map.
 
 ### D. Sky events: comets, asteroids, the odd UFO
-Every few minutes something crosses the map: a **comet** (ion tail and dust tail, `draft_comet.gif`) or a
-tumbling **asteroid** (`draft_asteroid.gif`). Very rarely, after you've been around a while, the **saucer**.
+Every few minutes something crosses the map: a **comet** (ion tail and dust tail, `draft_comet_v3.gif`; built in v1.1.0) or a
+tumbling **asteroid** (`draft_asteroid_v2.gif`). Very rarely, after you've been around a while, the **saucer**.
 Click one while it's on screen to catch it. Light on power: drawn with the map (~8 fps), never while the
 page is idle or hidden, off with reduced motion, rarer in battery-saver mode.
 

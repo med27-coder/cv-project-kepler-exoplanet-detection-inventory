@@ -547,21 +547,16 @@ def lost_in_orbit(t, w=96, h=54):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    save_gif([loading(k / 16) for k in range(16)], 'draft_loading_rock.gif', scale=5)
+    # Drafts not used any more live in pixel-art/archive/ (the code that drew them stays above, for history).
     save_gif([lost_in_orbit(k / 20) for k in range(20)], 'draft_lost_in_orbit.gif', scale=5)
     save_gif([background(k / 12) for k in range(12)], 'draft_background.gif', scale=3, ms=140)
-    save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif', scale=5)
     save_gif([aliens(k / 16, sky=False) for k in range(16)], 'draft_aliens_2.gif', scale=5, transparent=True)
-    save_gif([comet(k / 20) for k in range(20)], 'draft_comet.gif', ms=80)
     save_gif([aliens(k / 24, space=True) for k in range(24)], 'draft_ufo_space_a.gif', scale=5)
     save_gif([aliens(k / 24, space=True, rare=True) for k in range(24)], 'draft_ufo_space_b.gif', scale=5)
     save_gif([asteroid_v2(k / 24) for k in range(24)], 'draft_asteroid_v2.gif', ms=110)
-    save_gif([comet_v2(k / 24) for k in range(24)], 'draft_comet_v2.gif', scale=5, ms=100)
     save_gif([comet_v3(k / 24) for k in range(24)], 'draft_comet_v3.gif', scale=5, ms=100)
-    save_gif([meteor_v2(k / 20) for k in range(20)], 'draft_meteor_v2.gif', scale=5, ms=70)
     save_gif([meteor_v3a(k / 24) for k in range(24)], 'draft_meteor_v3a.gif', scale=5, ms=80)
     save_gif([meteor_v3b(k / 24) for k in range(24)], 'draft_meteor_v3b.gif', scale=5, ms=80)
-    save_gif([asteroid(k / 20) for k in range(20)], 'draft_asteroid.gif', ms=90)
     save_gif([hail_mary(k / 16) for k in range(16)], 'draft_hail_mary.gif', scale=5)
 
 

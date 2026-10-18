@@ -19,14 +19,14 @@ are not committed. The fiery-asteroid look is really a meteor's, so fire is draw
 
 | Draft | What it shows |
 |---|---|
-| `draft_aliens.gif` | The UFO after the user's reference, on a daytime sky |
+| `archive/.../draft_aliens_until-...gif` | The UFO after the user's reference, on a daytime sky (archived) |
 | `draft_aliens_2.gif` | The same with no background (transparent) |
 | `draft_ufo_space_a.gif` | The UFO travelling through space: a steady starfield drifting past, nothing flashing |
 | `draft_ufo_space_b.gif` | The rare version: an asteroid tumbles past behind the saucer (achievement **WHAT WAS THAT?**) |
 | `draft_asteroid_v2.gif` | An asteroid as it really looks, with a small moon |
-| `draft_comet_v2.gif` | First comet try: coma, ion tail and curved dust tail, away from the Sun (superseded) |
+| `draft_comet_v2.gif` | First comet try: coma, ion tail and curved dust tail, away from the Sun (archived in `pixel-art/archive/concepts/`) |
 | `draft_comet_v3.gif` | The comet after real photos (Comet Lovejoy from the space station, 2011): a tiny bright head, a long dithered dust plume, a faint thin ion tail |
-| `draft_meteor_v2.gif` | First meteor try, from orbit over the horizon (superseded) |
+| `draft_meteor_v2.gif` | First meteor try, from orbit over the horizon (archived in `pixel-art/archive/concepts/`) |
 | `draft_meteor_v3a.gif` | From orbit over the night side: city lights, the green airglow band, a thin streak burning through it (both 70 to 120 km up), a flare and a fading train |
 | `draft_meteor_v3b.gif` | From the ground, after the 2021 Perseid photos: the Milky Way, a horizon glow, a tree line and the streak |
 
