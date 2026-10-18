@@ -1,6 +1,6 @@
 # Plan: water worlds, moons, dwarf planets, a loading screen, "lost in orbit", hidden spacecraft
 
-**Status: plan, with concept art (`pixel-art/concepts/draft_loading_rock.gif`, `draft_lost_in_orbit.gif`).**
+**Status: plan, with concept art (`pixel-art/concepts/draft_lost_in_orbit.gif`; the rock loading screen is archived in `pixel-art/archive/concepts/`).**
 Ground rule for everything here: **every claim carries its evidence level** (confirmed / likely / candidate)
 and a source, so the game never overstates the science. Data checked on 17 October 2026.
 
@@ -37,7 +37,7 @@ from New Horizons); the others only as artist concepts or dots, labelled so.
 ## 4. Loading screen: the rock with moons
 
 **Built, then reworked (17 October 2026):** the user asked for a rocket; it is now Kepler's own Delta II climbing
-(`scripts/starmap/make_loading_art.py`). The rock stays as concept art (`draft_loading_rock.gif`).
+(`scripts/starmap/make_loading_art.py`). The rock is archived (`pixel-art/archive/concepts/`).
 
 While the page's data loads (a few hundred KB), show a pixel **asteroid with little moons orbiting**, like Ida and
 its moon Dactyl, the first asteroid moon ever found (Galileo, 1993; NASA reference image to fetch), plus
