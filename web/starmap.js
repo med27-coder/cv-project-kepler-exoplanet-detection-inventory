@@ -1622,18 +1622,37 @@
     return sview.mode === 'true' ? au * sc.pxPerAU * sview.zoom : sc.logR(au) * sview.zoom;
   }
 
-  // Spacecraft as blinking crosses with labels that don't overlap (nearer the Sun wins; a searched-for
-  // spacecraft, `focus`, comes first and is drawn in yellow).
+  // Spacecraft you haven't found yet are nameless flashing lights; searching a name reveals one for good
+  // (docs/plans/FLEET_CLOSEUPS.md). Everything shows once GRAND TOUR is earned.
+  const craftEgg = c => CRAFT_SPRITE[c.name];
+  const craftFound = c => Boolean(progress.ach['grand-tour'] || progress.eggs[craftEgg(c)]);
+  // "Where" for a spacecraft still hidden, with any word of its name blanked ("asteroid Psyche" gives Psyche away).
+  const COMMON_WORDS = new Set(['mars', 'space', 'telescope', 'solar', 'probe', 'orbiter', 'trace', 'gas']);   // not giveaways
+  const hiddenWhere = c => c.name.split(/[\s-]+/).filter(w => w.length >= 4 && !COMMON_WORDS.has(w.toLowerCase()))
+    .reduce((text, w) => text.replace(new RegExp(`\\b${w.replace(/[^A-Za-z0-9]/g, '')}\\b`, 'gi'), '???'), c.where);
+
+  // Found spacecraft as blinking crosses with labels that don't overlap (nearer the Sun wins; a searched-for
+  // spacecraft, `focus`, comes first and is drawn in yellow); the rest as flashing lights, no name.
   function drawCraft(sc, crafts, seconds, focus) {
     const boxes = [];
     const free = (x, y, w) => !boxes.some(b => x < b[0] + b[2] + 2 && x + w + 2 > b[0] && Math.abs(y - b[1]) < 7);
-    const marsCrew = crafts.filter(c => c.where === 'orbiting Mars');
+    const marsCrew = crafts.filter(c => c.where === 'orbiting Mars' && craftFound(c));
     const order = [...crafts.filter(c => c.name === focus), ...crafts.filter(c => c.name !== focus)];
     for (const c of order) {
       const mine = c.name === focus;
       const R = screenRadius(sc, c.r_au), a = c.lon * Math.PI / 180;
       const x = Math.round(sc.cx + R * Math.cos(a)), y = Math.round(sc.cy + R * TILT * Math.sin(a));
       if (x < -2 || x > SW + 2 || y < -2 || y > SH - STRIP) continue;
+      if (!mine && !craftFound(c)) {   // a flashing light: a bright pulse with rays, never a name
+        const pulse = REDUCED_MOTION ? 1 : (Math.sin(seconds * 6 + c.lon * 3) + 1) / 2;
+        sctx.fillStyle = pulse > 0.5 ? '#ffffff' : '#9fd8ff';
+        sctx.fillRect(x, y, 1, 1);
+        if (pulse > 0.35) {
+          sctx.fillStyle = pulse > 0.75 ? '#9fd8ff' : '#3a5a8a';
+          for (const k of pulse > 0.75 ? [1, 2] : [1]) for (const [dx, dy] of [[k, 0], [-k, 0], [0, k], [0, -k]]) sctx.fillRect(x + dx, y + dy, 1, 1);
+        }
+        continue;
+      }
       const on = REDUCED_MOTION || Math.sin(seconds * 4 + c.lon) > -0.5;
       sctx.fillStyle = mine ? '#ffd34d' : on ? CRAFT_SPOT : '#6f86a8';
       for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) sctx.fillRect(x + dx, y + dy, 1, 1);
@@ -1667,7 +1686,10 @@
 
   function craftTable(data, focus) {
     const delay = min => (min < 1 ? `${fmt(min * 60)} s` : min < 120 ? `${fmt(min)} min` : `${fmt(min / 60, 1)} h`);
-    const rows = [...data.spacecraft].sort((a, b) => b.r_au - a.r_au).map(c => `
+    const rows = [...data.spacecraft].sort((a, b) => b.r_au - a.r_au).map(c => !craftFound(c) && c.name !== focus ? `
+      <tr class="unfound"><td aria-hidden="true">?</td><td>??? · find it by name</td>
+        <td>${esc(hiddenWhere(c))}</td><td class="num">${fmt(c.r_au, c.r_au < 10 ? 2 : 0)}</td>
+        <td class="num">${delay(c.light_min)}</td><td colspan="2" class="clue">${esc(EGG.get(craftEgg(c))?.clue || '')}</td></tr>` : `
       <tr${c.name === focus ? ' class="focus"' : ''}><td>${spriteIcon(CRAFT_SPRITE[c.name])}</td>
         <td><a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a></td>
         <td>${esc(c.where)}</td><td class="num">${fmt(c.r_au, c.r_au < 10 ? 2 : 0)}</td>
@@ -1688,14 +1710,18 @@
     if (updateHash) history.replaceState(null, '', focus ? '#' + encodeURIComponent(query) : '#Spacecraft');
     loadCraft().then(data => {
       if (token !== selectToken) return;
-      const rovers = data.rovers.map(r => `<li${r.name === focus ? ' class="focus"' : ''}>${spriteIcon(CRAFT_SPRITE[r.name])} <b><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></b>
+      const rovers = data.rovers.map(r => !craftFound(r) && r.name !== focus
+        ? `<li class="unfound">??? · a rover on Mars, still to be found by name. ${esc(EGG.get(craftEgg(r))?.clue || '')}</li>`
+        : `<li${r.name === focus ? ' class="focus"' : ''}>${spriteIcon(CRAFT_SPRITE[r.name])} <b><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></b>
         (${esc(r.agency)}): landed in ${esc(r.site)} on ${esc(r.landed)}${r.note ? `; ${esc(r.note)}` : ''}.</li>`).join('');
       info.innerHTML = `
         <p class="big">★ HUMANITY'S ROBOTS ★</p>
         <p>Where our spacecraft beyond Earth orbit were on <b>${esc(data.date)}</b>, from NASA JPL's Horizons system
-           (the planets are frozen at their real positions that day too). White crosses on the drawing; press FIT to
-           zoom out to the Voyagers, or TRUE SCALE and zoom into Earth to find the telescopes at L1 and L2.
-           Satellites orbiting Earth are left out; try searching <b>ISS</b>.</p>
+           (the planets are frozen at their real positions that day too). Spacecraft you've found are white crosses
+           with their names; the <b>flashing lights</b> are the ones still to find: search a name to reveal one
+           (${fmt(data.spacecraft.filter(craftFound).length)} of ${fmt(data.spacecraft.length)} found). Press FIT to zoom
+           out to the Voyagers, or TRUE SCALE and zoom into Earth to find the telescopes at L1 and L2. Satellites
+           orbiting Earth are left out; try searching <b>ISS</b>.</p>
         ${focus ? `<p>Found <b>${esc(focus)}</b>: it's the yellow cross${
           data.rovers.some(r => r.name === focus) ? ' on Mars' : ''}, highlighted in the table, with its pixel art
           in the corner of the drawing.</p>` : ''}
@@ -1713,7 +1739,7 @@
       });
       sc.frozen = true;
       const gallery = [...data.spacecraft, ...data.rovers]
-        .filter((c, i, all) => CRAFT_SPRITE[c.name] && all.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)
+        .filter((c, i, all) => CRAFT_SPRITE[c.name] && craftFound(c) && all.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)
         .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name], label: c.name === 'Voyager 1' ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
       if (focus) {   // the second Voyager shares the first's sprite
         const own = gallery.find(g => g.name === focus) || { name: focus, key: CRAFT_SPRITE[focus] };
