@@ -77,7 +77,7 @@ def test_galleria_photos_fit_and_slider_stays(browser, site):
     page.reload()
     page.click('#open-gallery')
     page.click('.egg-card[data-egg="kepler"]')
-    page.wait_for_function("document.querySelector('.morph canvas').width >= 480")
+    page.wait_for_function("() => document.querySelector('.morph canvas').width >= 480")
     box = page.locator('.morph canvas').bounding_box()
     assert box['height'] <= 284 and box['width'] <= 244                                       # tall photo shrinks
     page.fill('.morph input', '100')
@@ -147,7 +147,7 @@ def test_loading_screen_and_lost_in_orbit(browser, site):
         .getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] > 120 && d[i + 2] < 120) n++; return n; }""")
     assert lit > 20                                                     # the orange visor and LOST IN ORBIT
     page.click('#info [data-random]')
-    page.wait_for_function("document.getElementById('sys-title').textContent !== 'PICK A STAR'")
+    page.wait_for_function("() => document.getElementById('sys-title').textContent !== 'PICK A STAR'")
     page.fill('#query', 'nothing-here-at-all')
     page.press('#query', 'Enter')
     assert page.locator('#info [data-random]').count() == 1            # NO SIGNAL offers the jump too
@@ -161,7 +161,7 @@ def test_dwarf_planets_and_dwarf_king(browser, site):
     for name in ['Ceres', 'haumea', 'MAKEMAKE', 'the eris', 'Pluto']:
         page.fill('#query', name)
         page.press('#query', 'Enter')
-        page.wait_for_function(f"document.getElementById('sys-title').textContent === '{name.split()[-1].upper()}'")
+        page.wait_for_function(f"() => document.getElementById('sys-title').textContent === '{name.split()[-1].upper()}'")
         assert 'DWARF PLANET' in page.locator('#info').inner_text()
     page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('dwarf-king')")
     page.wait_for_timeout(300)                                          # a few frames of the close-up: no errors
@@ -243,7 +243,7 @@ def test_spacecraft_and_iss_easter_eggs(browser, site):
     page.click('#sys-fit')
     assert page.locator('canvas.craft-icon').count() == 0          # no pixel art until found
     page.goto(site + '#jwst')                                      # naming one reveals it
-    page.wait_for_function("document.getElementById('sys-title').textContent === 'JAMES WEBB SPACE TELESCOPE'")
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'JAMES WEBB SPACE TELESCOPE'")
     page.wait_for_selector('#info tr.focus')
     assert 'James Webb' in page.locator('#info tr.focus').inner_text()
     page.goto(site + '#Spacecraft')                                # ...and it stays revealed
@@ -264,15 +264,15 @@ def test_kepler_telescope_and_pluto(browser, site):
     """The Kepler easter egg opens from search and from its sprite on the map; Pluto joins the Sun's table."""
     errors = []
     page = open_page(browser, site + '#Kepler', errors)
-    page.wait_for_function("document.getElementById('sys-title').textContent === 'THE KEPLER SPACE TELESCOPE'")
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'THE KEPLER SPACE TELESCOPE'")
     assert 'Goodnight Kepler' in page.locator('#info').inner_text()
     assert page.locator('#sys-tools').is_hidden()
     page.goto(site + '#Kepler-90')
-    page.wait_for_function("document.getElementById('sys-title').textContent === 'KEPLER-90'")
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'KEPLER-90'")
     box = page.locator('#map').bounding_box()
     scale = box['width'] / 192                                  # the sprite sits at map pixel (5, 7), 22 x 10
     page.mouse.click(box['x'] + 15 * scale, box['y'] + 11 * scale)
-    page.wait_for_function("location.hash === '#Kepler'")
+    page.wait_for_function("() => location.hash === '#Kepler'")
     page.goto(site + '#Sun')
     page.wait_for_selector('#info table')
     assert 'Pluto' in page.locator('#info tbody').inner_text()
@@ -314,7 +314,7 @@ def test_galleria_game(browser, site):
     page.click('#open-gallery')
     assert page.locator('.egg-card.found').count() == 1
     page.click('#tab-set')
-    page.wait_for_function("document.getElementById('set-storage').textContent.includes('Saved in this browser')")
+    page.wait_for_function("() => document.getElementById('set-storage').textContent.includes('Saved in this browser')")
     with page.expect_download() as dl:                              # backup file
         page.click('#set-export')
     backup = Path(dl.value.path()).read_text(encoding='utf-8')
@@ -341,7 +341,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.evaluate("ids => localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, systems: [],"
                   " ach: Object.fromEntries(ids.map(i => [i, '2026-10-14']))}))", ids)
     page.reload()
-    page.wait_for_function("document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
+    page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
     assert page.locator('#rank-count').inner_text() == '12/61'
     page.click('#rank')                                                                           # opens the tab
@@ -383,13 +383,13 @@ def test_final_mission(browser, site):
     page.wait_for_selector('.toast.legend')
     assert 'true Star Gazers' in page.locator('.toast.legend').inner_text()
     assert page.locator('#highlights .chip.unseen').inner_text() == 'unseen (0)'                 # updates as you go
-    page.wait_for_function("document.getElementById('rank-name').textContent.startsWith('BLACK HOLE')")
+    page.wait_for_function("() => document.getElementById('rank-name').textContent.startsWith('BLACK HOLE')")
     page.click('#open-gallery')
     page.click('#tab-set')
     assert page.locator('#set-final').is_visible()                                                # white dwarf option
     page.click('#set-reset')
     page.click('#set-reset')
-    page.wait_for_function("document.getElementById('rank-name').textContent === 'WHITE HOLE'")   # new game +
+    page.wait_for_function("() => document.getElementById('rank-name').textContent === 'WHITE HOLE'")   # new game +
     assert not errors, errors
 
 
@@ -407,7 +407,7 @@ def test_tatooine(browser, site):
     page = open_page(browser, site, errors)
     page.fill('#query', 'tatooine')
     page.press('#query', 'Enter')
-    page.wait_for_function("document.getElementById('sys-title').textContent === 'KEPLER-16'")
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'KEPLER-16'")
     page.wait_for_selector('.toast.badge')
     assert 'Two suns' in page.locator('#info').inner_text()
     page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('tatooine')")
@@ -513,7 +513,7 @@ def test_daily_mystery_calls_and_card(browser, site):
     page.click('#gallery-close')
     page.click('button.chip:has-text("next planets")')
     page.click('#info .call[data-koi] button[data-call="planet"] >> nth=0')
-    page.wait_for_function("Object.keys(JSON.parse(localStorage.getItem('starmap.progress.v1')).calls).length === 1")
+    page.wait_for_function("() => Object.keys(JSON.parse(localStorage.getItem('starmap.progress.v1')).calls).length === 1")
     assert not errors, errors
 
 
