@@ -47,7 +47,7 @@ is famously cup-shaped: a cone flaring out from the Big Bang. So:
 - the bowl flares upward through a mottled band of the oldest light (the cosmic microwave background:
   `universe-cmb`, linked only), then a dark band, the "dark ages";
 - the first stars light up, then galaxies along the rim: tiny spirals and smudges like the Hubble deep field
-  (`universe-deep-field`, linked only; `universe-baby-galaxies.jpg`), with the Milky Way and Andromeda as the two
+  (`universe-deep-field`, linked only), with the Milky Way and Andromeda as the two
   biggest (`universe-milky-way.jpg`, `universe-andromeda.jpg`);
 - the bowl slowly fills with twinkling galaxies.
 
@@ -59,7 +59,7 @@ The harder achievements already get a symbol on their cup (`SYMBOLS` in `49-rank
 
 | Achievement | Trophy symbol | Reference |
 |---|---|---|
-| **DWARF KING** (all five dwarf planets) | a tiny crown over five dots in a row, the middle one with Pluto's heart | `dwarf-ceres.jpg`, `dwarf-eris.jpg`, Pluto |
+| **DWARF KING** (all five dwarf planets) | a tiny crown over five dots in a row, the middle one with Pluto's heart | the Galleria's Ceres, Eris and Pluto photos |
 | **DWARF STAR** (visit a red, an orange and a yellow dwarf) | three small suns in red, orange and yellow | `red-dwarf-flare.jpg`, `red-dwarf-trappist.jpg` |
 | **FAILED STAR** (secret: find Kepler-39 b, the brown dwarf) | a dim banded brown ball | `brown-dwarf.jpg` |
 | **GIANT'S COMPANION** (a planet around a red giant) | a huge red star with a speck beside it | `stars/4-red-giant.jpg` |

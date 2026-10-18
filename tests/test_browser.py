@@ -215,7 +215,7 @@ def test_the_martian(browser, site):
     page.click('#open-gallery')
     page.click('.egg-card[data-egg="martian"]')
     page.wait_for_selector('#pane-eggs .planet-strip img')
-    assert page.locator('#pane-eggs .planet-strip li').count() == 5
+    assert page.locator('#pane-eggs .planet-strip li').count() == 4
     page.goto(site + '#martian-man')                                    # a shared link opens it too
     page.wait_for_function("() => document.getElementById('sys-title').textContent === 'MARTIAN MAN'")
     assert not errors, errors

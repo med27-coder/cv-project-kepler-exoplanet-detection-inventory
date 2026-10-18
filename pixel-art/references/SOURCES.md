@@ -19,7 +19,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | (link only) | SOHO, artist concept | [PIA18170](https://images.nasa.gov/details/PIA18170) | ESA/NASA/SOHO | 2006-02-15 |
 | (link only) | Euclid, artist concept | [PIA16692](https://images.nasa.gov/details/PIA16692) | ESA/C. Carreau | 2013-02-12 |
 | (link only) | Solar Orbiter before launch | [KSC-20200108-PH-ESA01_0001](https://images.nasa.gov/details/KSC-20200108-PH-ESA01_0001) | ESA/U. Ragnit | 2020-01-08 |
-| `spacecraft/lucy.jpg` | Lucy before launch (arrays folded) | [KSC-20210929-PH-JBS01_0051](https://images.nasa.gov/details/KSC-20210929-PH-JBS01_0051) | NASA/Ben Smegelsky | 2021-09-29 |
+| `spacecraft/lucy.jpg` | Lucy in the clean room, with one of its round solar arrays (2021) | [KSC-20210819-PH-GEB01_0026](https://images.nasa.gov/details/KSC-20210819-PH-GEB01_0026) | NASA/Glenn Benson | 2021-08-19 |
 | `spacecraft/psyche.jpg` | Psyche, artist concept | [PIA23875](https://images.nasa.gov/details/PIA23875) | NASA/JPL-Caltech/ASU | 2020-07-07 |
 | `spacecraft/osiris-apex.jpg` | OSIRIS-REx (now OSIRIS-APEX) in testing | [GSFC_20171208_Archive_e000397](https://images.nasa.gov/details/GSFC_20171208_Archive_e000397) | NASA GSFC | 2017-12-08 |
 | `spacecraft/mars-reconnaissance-orbiter.jpg` | Mars Reconnaissance Orbiter, artist concept | [PIA04758](https://images.nasa.gov/details/PIA04758) | NASA/JPL | 2003-09-25 |
@@ -51,24 +51,19 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `stars/7-supernova.jpg` | Kepler's Supernova Remnant: the star Johannes Kepler saw explode in 1604 (Chandra) | [PIA06908](https://images.nasa.gov/details/PIA06908) | Chandra X-Ray Observatory | 2004-10-06 |
 | `stars/8-neutron-star.jpg` | A pulsar: a spinning neutron star sweeping beams (artist concept) | [PIA21085](https://images.nasa.gov/details/PIA21085) | NASA/JPL-Caltech | 2017-01-06 |
 | `stars/9-black-hole.jpg` | A black hole with its glowing disk and jet (artist concept) | [PIA16695](https://images.nasa.gov/details/PIA16695) | NASA/JPL-Caltech | 2013-02-27 |
-| `concepts/comet-neowise.jpg` | Comet NEOWISE over Washington, July 2020 (for the passing comets) | [NHQ202007120001](https://images.nasa.gov/details/NHQ202007120001) | NASA/Bill Ingalls | 2020-07-12 |
-| `concepts/comet-hale-bopp.jpg` | Comet Hale-Bopp seen by Hubble (for the passing comets) | [PIA01289](https://images.nasa.gov/details/PIA01289) | NASA/JPL/STScI | 1998-08-02 |
+| `concepts/comet-neowise.jpg` | Comet NEOWISE in July 2020, with the space station streaking past (for the passing comets) | [NHQ202007180001](https://images.nasa.gov/details/NHQ202007180001) | NASA/Bill Ingalls | 2020-07-18 |
+| `concepts/comet-hale-bopp.jpg` | Comet Hale-Bopp over Earth's limb, seen from the Space Shuttle in 1997 (for the passing comets) | [sts084-389-024](https://images.nasa.gov/details/sts084-389-024) | NASA JSC | 1997-07-09 |
 | `concepts/asteroid-eros.jpg` | Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids) | [PIA02900](https://images.nasa.gov/details/PIA02900) | NASA/JPL/JHUAPL | 2000-06-10 |
-| `stars/9-black-hole-m87.jpg` | Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset) | [PIA23122](https://images.nasa.gov/details/PIA23122) | NASA/JPL-Caltech/IPAC/Event Horizon Telescope Collaboration | 2019-04-25 |
 | `martian/martian-gardens.jpg` | Martian Gardens: crops grown in simulated Martian soil (NASA Kennedy and Florida Tech, 2016) | [KSC-20160815-PH_DNG01_0003](https://images.nasa.gov/details/KSC-20160815-PH_DNG01_0003) | NASA/Dimitri Gerondidakis | 2016-08-15 |
 | `martian/mars-habitat.jpg` | First humans on Mars: astronauts and habitats (artist concept) | [PIA23302](https://images.nasa.gov/details/PIA23302) | NASA | 2019-06-12 |
-| `martian/mars-greenhouse.jpg` | Aerogel greenhouses: a proposal for warming patches of Mars to grow plants (concept) | [PIA23343](https://images.nasa.gov/details/PIA23343) | NASA/JPL-Caltech | 2019-07-15 |
 | `martian/acidalia.jpg` | Acidalia and Chryse Plains, where the novel puts the Ares 3 base (Mars Global Surveyor) | [PIA02000](https://images.nasa.gov/details/PIA02000) | NASA/JPL/MSSS | 2000-06-14 |
 | `martian/pathfinder.jpg` | Mars Pathfinder and Sojourner in 1997, the lander the story uses to phone home | [PIA00621](https://images.nasa.gov/details/PIA00621) | NASA/JPL | 1997-07-05 |
 | `martian/veggie.jpg` | Lettuce and mustard greens growing in Veggie, the space station's plant chamber: a real greenhouse in space (2017) | [KSC-20171017-PH_ISS01_0001](https://images.nasa.gov/details/KSC-20171017-PH_ISS01_0001) | NASA | 2017-10-17 |
 | (link only) | Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky | [GSFC_20171208_Archive_e001651](https://images.nasa.gov/details/GSFC_20171208_Archive_e001651) | NASA GSFC (NASA; ESA; G. Illingworth, D. Magee, and P. Oesch, University of California, Santa Cruz; R. Bouwens, Leiden University; and the HUDF09 Team) | 2017-12-08 |
 | (link only) | The oldest light in the universe, the cosmic microwave background (Planck) | [PIA16874](https://images.nasa.gov/details/PIA16874) | NASA/JPL-Caltech/ESA | 2013-03-21 |
-| `trophies/universe-baby-galaxies.jpg` | Young galaxies across the universe (GALEX, Spitzer) | [PIA07142](https://images.nasa.gov/details/PIA07142) | NASA/JPL-Caltech | 2004-12-21 |
 | `trophies/universe-milky-way.jpg` | Our Milky Way from outside, with its central bar (artist concept) | [PIA10748](https://images.nasa.gov/details/PIA10748) | NASA/JPL-Caltech | 2008-06-03 |
 | `trophies/universe-andromeda.jpg` | The Andromeda galaxy in ultraviolet (GALEX) | [PIA04921](https://images.nasa.gov/details/PIA04921) | NASA/JPL/California Institute of Technology | 2003-12-10 |
 | `trophies/nebula-eagle.jpg` | The Eagle Nebula, home of the Pillars of Creation (WISE, infrared) | [PIA25433](https://images.nasa.gov/details/PIA25433) | NASA/JPL-Caltech | 2022-11-11 |
-| `trophies/dwarf-ceres.jpg` | Ceres from the Dawn spacecraft, 2015 | [PIA19167](https://images.nasa.gov/details/PIA19167) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA | 2015-01-19 |
-| `trophies/dwarf-eris.jpg` | Eris and its moon Dysnomia (artist concept) | [PIA17307](https://images.nasa.gov/details/PIA17307) | NASA/JPL-Caltech | 2011-04-11 |
 | `trophies/moon-ida-dactyl.jpg` | Asteroid Ida and its moon Dactyl, the first asteroid moon found (Galileo, 1993) | [PIA00069](https://images.nasa.gov/details/PIA00069) | NASA/JPL | 1996-01-29 |
 | `trophies/red-dwarf-flare.jpg` | A red dwarf unleashing a giant flare (artist concept) | [GSFC_20171208_Archive_e002073](https://images.nasa.gov/details/GSFC_20171208_Archive_e002073) | NASA GSFC | 2017-12-08 |
 | `trophies/red-dwarf-trappist.jpg` | TRAPPIST-1, a red dwarf and its seven worlds, to scale with Jupiter's moons | [PIA22096](https://images.nasa.gov/details/PIA22096) | NASA/JPL-Caltech | 2018-02-05 |

@@ -62,9 +62,9 @@ window.STARMAP_GALLERY = {
  },
  "lucy": {
   "img": "gallery/lucy.jpg",
-  "credit": "NASA/Ben Smegelsky",
-  "link": "https://images.nasa.gov/details/KSC-20210929-PH-JBS01_0051",
-  "what": "Lucy before launch (arrays folded)"
+  "credit": "NASA/Glenn Benson",
+  "link": "https://images.nasa.gov/details/KSC-20210819-PH-GEB01_0026",
+  "what": "Lucy in the clean room, with one of its round solar arrays (2021)"
  },
  "psyche": {
   "img": "gallery/psyche.jpg",
@@ -215,12 +215,6 @@ window.STARMAP_GALLERY = {
   "credit": "NASA",
   "link": "https://images.nasa.gov/details/PIA23302",
   "what": "First humans on Mars: astronauts and habitats (artist concept)"
- },
- "mars-greenhouse": {
-  "img": "gallery/mars-greenhouse.jpg",
-  "credit": "NASA/JPL-Caltech",
-  "link": "https://images.nasa.gov/details/PIA23343",
-  "what": "Aerogel greenhouses: a proposal for warming patches of Mars to grow plants (concept)"
  },
  "acidalia": {
   "img": "gallery/acidalia.jpg",
