@@ -19,6 +19,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'pixel-art' / 'concepts'
 BG = (7, 11, 26)
+KEY = (255, 0, 255)   # transparent in the background-free drafts
 
 
 def hexc(h):
@@ -54,9 +55,19 @@ class Frame:
                     self.put(x0 + c, y0 + r, ink[ch])
 
 
-def save_gif(frames, name, scale=6, ms=110):
+def save_gif(frames, name, scale=6, ms=110, transparent=False):
     imgs = [f.img.resize((f.w * scale, f.h * scale), Image.NEAREST) for f in frames]
-    imgs[0].save(OUT / name, save_all=True, append_images=imgs[1:], duration=ms, loop=0)
+    if transparent:   # the KEY colour becomes transparent in every frame
+        pal = [im.quantize(colors=255, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE) for im in imgs]
+        out = []
+        for im in pal:
+            idx = next((i for i, c in enumerate(im.getpalette()[:765:3]) if tuple(im.getpalette()[i * 3:i * 3 + 3]) == KEY), 0)
+            im.info['transparency'] = idx
+            out.append(im)
+        out[0].save(OUT / name, save_all=True, append_images=out[1:], duration=ms, loop=0, disposal=2,
+                    transparency=out[0].info['transparency'])
+    else:
+        imgs[0].save(OUT / name, save_all=True, append_images=imgs[1:], duration=ms, loop=0)
     print(f'{(OUT / name).relative_to(ROOT)}  {len(frames)} frames')
 
 
@@ -67,16 +78,18 @@ WAVER = ['.ggg.', 'gkgkg', 'ggggg', '.ggg.', '..g..']
 PEACE = [['g.g', 'g.g', '.g.', '.g.'], ['g..g', 'g..g', '.gg.', '.g..']]   # V sign, wiggling
 
 
-def aliens(t):
+def aliens(t, sky=True):
     """Two green aliens in a silver flying saucer under a glass dome, one at the controls, one flashing a peace
     sign (after the user's reference, redrawn as pixel art; the reference itself is not committed)."""
     W, H = 96, 64
     f = Frame(W, H, seed=3)
-    for y in range(H):   # a daytime sky, lighter towards the bottom
+    if not sky:   # draft 2: no sky, a key colour that becomes transparent (to fly over the site's night sky)
+        f.img.paste(KEY, (0, 0, W, H))
+    for y in range(H if sky else 0):   # a daytime sky, lighter towards the bottom
         c = '#3f86d6' if y < 20 else '#5a9be0' if y < 42 else '#79b2ea'
         for x in range(W):
             f.put(x, y, c)
-    for cx0, cy0, r0 in [(10, 50, 9), (20, 54, 7), (84, 46, 8), (92, 50, 7), (74, 10, 5), (82, 9, 4), (14, 12, 4)]:
+    for cx0, cy0, r0 in ([(10, 50, 9), (20, 54, 7), (84, 46, 8), (92, 50, 7), (74, 10, 5), (82, 9, 4), (14, 12, 4)] if sky else []):
         f.disc(cx0, cy0, r0, lambda dx, dy, q: '#ffffff' if dy < 1 or q < 0.6 else '#dce9f7')   # puffy clouds
     bob = round(math.sin(t * 2 * math.pi) * 1.5)
     cx, cy = 48, 36 + bob
@@ -321,7 +334,8 @@ def main():
     save_gif([loading(k / 16) for k in range(16)], 'draft_loading_rock.gif', scale=5)
     save_gif([lost_in_orbit(k / 20) for k in range(20)], 'draft_lost_in_orbit.gif', scale=5)
     save_gif([background(k / 12) for k in range(12)], 'draft_background.gif', scale=3, ms=140)
-    save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif')
+    save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif', scale=5)
+    save_gif([aliens(k / 16, sky=False) for k in range(16)], 'draft_aliens_2.gif', scale=5, transparent=True)
     save_gif([comet(k / 20) for k in range(20)], 'draft_comet.gif', ms=80)
     save_gif([asteroid(k / 20) for k in range(20)], 'draft_asteroid.gif', ms=90)
     save_gif([hail_mary(k / 16) for k in range(16)], 'draft_hail_mary.gif', scale=5)
