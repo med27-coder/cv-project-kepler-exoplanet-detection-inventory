@@ -31,7 +31,7 @@ does. (If a name still doesn't work, note exactly what was typed.)
 ## 3. Dwarf planets
 The five the IAU recognises, each an easter egg card (Pluto exists): **Ceres** (the asteroid belt), **Pluto**,
 **Haumea** (spins every 4 hours, egg-shaped, has a ring), **Makemake**, **Eris** (the most massive dwarf
-planet). Achievement **DWARF COUNCIL**: find all five by name. NASA images where they exist (Ceres from Dawn, Pluto
+planet). Achievement **DWARF KING**: find all five by name. NASA images where they exist (Ceres from Dawn, Pluto
 from New Horizons); the others only as artist concepts or dots, labelled so.
 
 ## 4. Loading screen: the rock with moons
@@ -56,7 +56,7 @@ version (everything shown) stays available after GRAND TOUR, or with a "show all
 ## 7. Build order
 1. Hidden spacecraft (small, makes the game consistent).
 2. "Lost in orbit" and the loading screen.
-3. Dwarf planets and their moons (eggs + DWARF COUNCIL); planet close-ups come with ACHIEVEMENTS_V2.
+3. Dwarf planets and their moons (eggs + DWARF KING); planet close-ups come with ACHIEVEMENTS_V2.
 4. Water worlds (density column, labels, OCEAN WORLD) and exomoon candidates (MOON HUNTER), with an
    independent data check, as in HIGHLIGHTS.md.
 

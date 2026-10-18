@@ -35,7 +35,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `solar-system/venus.jpg` | Venus and its clouds (Mariner 10, 1974, reprocessed) | [PIA23791](https://images.nasa.gov/details/PIA23791) | NASA/JPL-Caltech | 2020-06-08 |
 | `solar-system/earth.jpg` | Earth, Africa and Europe, from 1.5 million km (DSCOVR EPIC, 2015) | [epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o](https://images.nasa.gov/details/epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o) | NASA GSFC | 2015-07-29 |
 | `solar-system/moon.jpg` | The full Moon | [GSFC_20171208_Archive_e000868](https://images.nasa.gov/details/GSFC_20171208_Archive_e000868) | NASA GSFC | 2017-12-08 |
-| `solar-system/mars.jpg` | Mars near its close approach (Hubble) | [GSFC_20171208_Archive_e000332](https://images.nasa.gov/details/GSFC_20171208_Archive_e000332) | NASA GSFC | 2017-12-08 |
+| `solar-system/mars.jpg` | Mars, a global colour mosaic from the Viking orbiters | [PIA04304](https://images.nasa.gov/details/PIA04304) | NASA/USGS | 2003-02-05 |
 | `solar-system/jupiter.jpg` | Jupiter and the Great Red Spot (Cassini, 2000) | [PIA04866](https://images.nasa.gov/details/PIA04866) | NASA/JPL/Space Science Institute | 2003-11-13 |
 | `solar-system/saturn.jpg` | Saturn with its moon Titan in front (Cassini, 2012) | [PIA14922](https://images.nasa.gov/details/PIA14922) | NASA/JPL-Caltech/Space Science Institute | 2012-08-29 |
 | `solar-system/uranus.jpg` | Uranus (Voyager 2, 1986) | [PIA18182](https://images.nasa.gov/details/PIA18182) | NASA/JPL-Caltech | 1986-12-18 |
@@ -53,6 +53,19 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `concepts/comet-hale-bopp.jpg` | Comet Hale-Bopp seen by Hubble (for the passing comets) | [PIA01289](https://images.nasa.gov/details/PIA01289) | NASA/JPL/STScI | 1998-08-02 |
 | `concepts/asteroid-eros.jpg` | Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids) | [PIA02900](https://images.nasa.gov/details/PIA02900) | NASA/JPL/JHUAPL | 2000-06-10 |
 | `stars/9-black-hole-m87.jpg` | Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset) | [PIA23122](https://images.nasa.gov/details/PIA23122) | NASA/JPL-Caltech/IPAC/Event Horizon Telescope Collaboration | 2019-04-25 |
+| (link only) | Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky | [GSFC_20171208_Archive_e001651](https://images.nasa.gov/details/GSFC_20171208_Archive_e001651) | NASA GSFC (NASA; ESA; G. Illingworth, D. Magee, and P. Oesch, University of California, Santa Cruz; R. Bouwens, Leiden University; and the HUDF09 Team) | 2017-12-08 |
+| (link only) | The oldest light in the universe, the cosmic microwave background (Planck) | [PIA16874](https://images.nasa.gov/details/PIA16874) | NASA/JPL-Caltech/ESA | 2013-03-21 |
+| `trophies/universe-baby-galaxies.jpg` | Young galaxies across the universe (GALEX, Spitzer) | [PIA07142](https://images.nasa.gov/details/PIA07142) | NASA/JPL-Caltech | 2004-12-21 |
+| `trophies/universe-milky-way.jpg` | Our Milky Way from outside, with its central bar (artist concept) | [PIA10748](https://images.nasa.gov/details/PIA10748) | NASA/JPL-Caltech | 2008-06-03 |
+| `trophies/universe-andromeda.jpg` | The Andromeda galaxy in ultraviolet (GALEX) | [PIA04921](https://images.nasa.gov/details/PIA04921) | NASA/JPL/California Institute of Technology | 2003-12-10 |
+| `trophies/nebula-eagle.jpg` | The Eagle Nebula, home of the Pillars of Creation (WISE, infrared) | [PIA25433](https://images.nasa.gov/details/PIA25433) | NASA/JPL-Caltech | 2022-11-11 |
+| `trophies/dwarf-ceres.jpg` | Ceres from the Dawn spacecraft, 2015 | [PIA19167](https://images.nasa.gov/details/PIA19167) | NASA/JPL-Caltech/UCLA/MPS/DLR/IDA | 2015-01-19 |
+| `trophies/dwarf-eris.jpg` | Eris and its moon Dysnomia (artist concept) | [PIA17307](https://images.nasa.gov/details/PIA17307) | NASA/JPL-Caltech | 2011-04-11 |
+| `trophies/moon-ida-dactyl.jpg` | Asteroid Ida and its moon Dactyl, the first asteroid moon found (Galileo, 1993) | [PIA00069](https://images.nasa.gov/details/PIA00069) | NASA/JPL | 1996-01-29 |
+| `trophies/red-dwarf-flare.jpg` | A red dwarf unleashing a giant flare (artist concept) | [GSFC_20171208_Archive_e002073](https://images.nasa.gov/details/GSFC_20171208_Archive_e002073) | NASA GSFC | 2017-12-08 |
+| `trophies/red-dwarf-trappist.jpg` | TRAPPIST-1, a red dwarf and its seven worlds, to scale with Jupiter's moons | [PIA22096](https://images.nasa.gov/details/PIA22096) | NASA/JPL-Caltech | 2018-02-05 |
+| `trophies/brown-dwarf.jpg` | A brown dwarf, too small to be a star, with banded weather (artist concept) | [PIA21752](https://images.nasa.gov/details/PIA21752) | NASA/JPL-Caltech | 2017-08-17 |
+| `trophies/two-suns-kepler-16.jpg` | Kepler-16 b, where the sun sets twice (artist concept) | [PIA14724](https://images.nasa.gov/details/PIA14724) | NASA/JPL-Caltech | 2011-09-15 |
 | `solar-system/earth-blue-marble.jpg` | Blue Marble map, the source of the pixel Earth | [Visible Earth](https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg) | NASA Goddard Space Flight Center / Visible Earth |  |
 
 JUICE and BepiColombo (ESA) have no image in the NASA library; their sprites follow ESA's published
