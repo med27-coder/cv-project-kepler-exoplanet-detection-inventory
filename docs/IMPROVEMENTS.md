@@ -1,7 +1,7 @@
 # 🛠️ Improvement notes
 
 A backlog of what could make Star Gazer and the Kepler Star Map better. These are ideas, not commitments.
-The star map's feature roadmap lives in [STARMAP_PLAN.md](STARMAP_PLAN.md). This file covers the
+The star map's feature roadmap lives in [STARMAP_PLAN.md](star-map/STARMAP_PLAN.md). This file covers the
 whole project: data and model, pixel art and UX, performance, security, encryption, code quality
 and testing.
 

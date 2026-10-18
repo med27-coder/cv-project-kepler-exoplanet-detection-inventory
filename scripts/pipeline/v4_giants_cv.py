@@ -2,7 +2,7 @@
 
     .venv\\Scripts\\python scripts\\pipeline\\v4_giants_cv.py
 
-Follows docs/V4_PREREGISTRATION.md exactly: V3's own CV folds; G1 (registered) and G2 (ablation) trained on the
+Follows docs/star-gazer/V4_PREREGISTRATION.md exactly: V3's own CV folds; G1 (registered) and G2 (ablation) trained on the
 giant KOIs of each fold's training stars; out-of-fold predictions saved to results/v4/cv_oof_giants.npz. When V3's
 out-of-fold predictions exist (cross_validate.py --variants hybrid --save-oof), it also computes the registered
 endpoints and writes results/v4/analysis.json.

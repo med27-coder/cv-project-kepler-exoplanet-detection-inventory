@@ -10,7 +10,7 @@ by chance, so the intervals matter more than the bar height.
 
 ## By planet size and signal strength
 
-![Accuracy and recall by planet radius and by signal strength](../results/v3_public/analysis_size_signal.png)
+![Accuracy and recall by planet radius and by signal strength](../../results/v3_public/analysis_size_signal.png)
 
 | Planet radius (Earths) | KOIs | Real planets | Accuracy | Recall (planets found) | False positives called planets |
 |---|---|---|---|---|---|
@@ -32,7 +32,7 @@ found 96–100% of the time.
 
 ## By orbital period, star brightness and planets per star
 
-![Accuracy and recall by orbital period, star brightness and number of KOIs on the star](../results/v3_public/analysis_period_star.png)
+![Accuracy and recall by orbital period, star brightness and number of KOIs on the star](../../results/v3_public/analysis_period_star.png)
 
 | Slice | Weakest group | Note |
 |---|---|---|
@@ -70,7 +70,7 @@ observations. Star Gazer can't see either. Most confident misses are giant or ve
 | Agreement with NASA's own vetting score (where it exists) | 61% (correlation 0.39) |
 
 Candidates are, by definition, the cases nobody has settled, so the lower agreement with NASA here is expected
-(on the decided test set the two agree far more). The [scoreboard](../results/scoreboard/) will show over time
+(on the decided test set the two agree far more). The [scoreboard](../../results/scoreboard) will show over time
 which of the two was right.
 
 ## What this means for V4

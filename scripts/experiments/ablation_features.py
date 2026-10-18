@@ -6,7 +6,7 @@
 gaia:          adds Berger et al. 2020's Gaia-based stellar properties (radius, mass, density,
                luminosity, temperature, gravity, metallicity, age, distance).
 no-koi-count:  drops koi_count (number of KOIs on the star). The independent audit
-               (docs/AUDIT_V3.md) flagged it as partly reflecting how NASA confirmed planets
+               (docs/star-gazer/AUDIT_V3.md) flagged it as partly reflecting how NASA confirmed planets
                (multi-planet systems were validated in bulk), so this measures how much the model
                leans on it.
 

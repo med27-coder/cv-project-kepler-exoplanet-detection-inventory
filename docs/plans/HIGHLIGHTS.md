@@ -29,7 +29,7 @@ All "planet" counts today include candidates that Star Gazer calls planets (`cou
 3. **Radius uncertainty:** export the KOI radius errors (`koi_prad_err1/2`). "Earth-sized" requires the whole
    error bar to sit inside 0.5-1.6 Earth radii, or shows "probably" otherwise.
 4. **Definitions on screen:** an ⓘ on every chip explains the rule and cites the source; the same text goes in
-   `docs/DATA_DICTIONARY.md`.
+   `docs/star-map/DATA_DICTIONARY.md`.
 5. **Tests that pin the science:** Kopparapu limits reproduce the published solar values (1.107 / 0.356);
    Kepler-186f and Kepler-452b land in the habitable zone; a hot Jupiter does not.
 

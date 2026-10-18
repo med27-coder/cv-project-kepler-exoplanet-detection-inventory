@@ -2,7 +2,7 @@
 
     .venv\\Scripts\\python scripts\\starmap\\draft_emblems.py
 
-Drafts for docs/STAR_GAZER_MISSION.md, not used by the site yet. Each emblem is 16 x 16 pixels (the size it
+Drafts for docs/star-map/STAR_GAZER_MISSION.md, not used by the site yet. Each emblem is 16 x 16 pixels (the size it
 would have in the page header), drawn from simple shapes so the look is easy to tune, and saved enlarged
 10x as draft_<stage>.png, plus a labelled ladder (draft_ladder.png), a mock-up of the header with the
 achievements bar (draft_header.png) and short animated GIFs of the moving ones. References for each stage
@@ -177,7 +177,7 @@ def white_hole(t=0):
     return g
 
 
-LADDER = [   # stage file name, title, how it is reached (docs/STAR_GAZER_MISSION.md)
+LADDER = [   # stage file name, title, how it is reached (docs/star-map/STAR_GAZER_MISSION.md)
     ('0-stardust', stardust, 'STARDUST', 'start'),
     ('1-protostar', protostar, 'PROTOSTAR', '1 achievement'),
     ('2-main-sequence', main_sequence, 'YOUNG STAR', '5'),

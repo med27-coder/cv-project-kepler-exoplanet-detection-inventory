@@ -3398,7 +3398,7 @@
   queueMicrotask(checkPredictions);
 
   // ---------------------------------------------------------------- ranks: trophies, badges and a star's life
-  // Pixel art for the achievements and the rank shown in the page header (docs/STAR_GAZER_MISSION.md):
+  // Pixel art for the achievements and the rank shown in the page header (docs/star-map/STAR_GAZER_MISSION.md):
   // a trophy per difficulty (bronze, silver, gold, a galaxy cup for secrets), a space lock for locked ones,
   // a badge per completed set, and your rank as the life of a star, from stardust to a black hole. Concept
   // art: pixel-art/icons/, pixel-art/emblems/.

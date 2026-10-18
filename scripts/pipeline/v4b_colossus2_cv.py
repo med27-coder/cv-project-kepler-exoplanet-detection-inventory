@@ -1,4 +1,4 @@
-"""Star Gazer V4b, Colossus 2: the registered cross-validation (docs/V4B_PREREGISTRATION.md).
+"""Star Gazer V4b, Colossus 2: the registered cross-validation (docs/star-gazer/V4B_PREREGISTRATION.md).
 
     .venv\\Scripts\\python scripts\\pipeline\\v4b_colossus2_cv.py
 
