@@ -205,15 +205,19 @@ def test_spacecraft_and_iss_easter_eggs(browser, site):
     page = open_page(browser, site + '#Spacecraft', errors)
     page.wait_for_selector('#info table')
     names = page.locator('#info tbody tr td:nth-child(2)').all_inner_texts()
-    assert 'Voyager 1' in names and 'James Webb Space Telescope' in names
+    assert all(n == '??? · find it by name' for n in names) and len(names) >= 17   # nothing found yet: all hidden
     assert page.locator('#sys-title').inner_text() == 'SPACECRAFT'
     assert not page.locator('#sys-tools').is_hidden()        # zoom / FIT work on the frozen Solar System
     page.click('#sys-fit')
-    assert page.locator('canvas.craft-icon').count() >= 19         # pixel art for every spacecraft
-    page.goto(site + '#jwst')                                      # one spacecraft: highlighted
+    assert page.locator('canvas.craft-icon').count() == 0          # no pixel art until found
+    page.goto(site + '#jwst')                                      # naming one reveals it
     page.wait_for_function("document.getElementById('sys-title').textContent === 'JAMES WEBB SPACE TELESCOPE'")
     page.wait_for_selector('#info tr.focus')
     assert 'James Webb' in page.locator('#info tr.focus').inner_text()
+    page.goto(site + '#Spacecraft')                                # ...and it stays revealed
+    page.wait_for_selector('#info table')
+    names = page.locator('#info tbody tr td:nth-child(2)').all_inner_texts()
+    assert 'James Webb Space Telescope' in names and names.count('??? · find it by name') == len(names) - 1
     page.goto(site + '#ISS')
     page.wait_for_timeout(200)
     page.evaluate("document.getElementById('query').value = 'space station';"

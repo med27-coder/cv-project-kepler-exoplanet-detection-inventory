@@ -212,6 +212,8 @@ button.linkish { background: none; border: none; box-shadow: none; padding: 0; c
 /* Spacecraft pixel art in the easter-egg tables (drawn by starmap.js, 46-craft-art.js) */
 canvas.craft-icon { display: inline-block; width: 50px; height: 22px; border: 0; vertical-align: middle; background: transparent; }
 tr.focus td { background: rgba(255, 211, 77, 0.12); }
+tr.unfound td, li.unfound { color: var(--ink-2); }   /* spacecraft still to find by name */
+tr.unfound td.clue { font-style: italic; }
 tr.focus td a, li.focus a { color: var(--accent); }
 
 /* ---- Galleria (48-gallery.js): the easter-egg game behind the ⚙ button */
