@@ -505,7 +505,7 @@ The star map is a static site with a strict Content Security Policy (only its ow
 
 ## Terms of Use
 
-Use of this project is governed by [TERMS_OF_USE.md](TERMS_OF_USE.md): educational / non-commercial use, model output is **not** a scientific classification, no warranty, and responsible use of NASA/MAST services. The notebooks, scripts and web app ask for acceptance before downloading data or making predictions.
+The project's own code, pixel art and docs are licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE) (free for personal, educational and research use with credit; commercial use needs permission); third-party data and images keep their own terms ([NOTICE.md](NOTICE.md)). Use is also governed by [TERMS_OF_USE.md](TERMS_OF_USE.md): educational / non-commercial use, model output is **not** a scientific classification, no warranty, and responsible use of NASA/MAST services. The notebooks, scripts and web app ask for acceptance before downloading data or making predictions.
 
 ---
 
