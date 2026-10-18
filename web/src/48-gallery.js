@@ -279,17 +279,9 @@ function achieve(id) {
   refreshGallery();
 }
 
-const eggsSeenAgain = new Set();   // "already found" notes, once per egg per visit
 function unlockEgg(id) {
   const egg = EGG.get(id);
-  if (!egg) return;
-  if (progress.eggs[id]) {   // found before: say so, instead of staying silent
-    if (!eggsSeenAgain.has(id)) {
-      eggsSeenAgain.add(id);
-      toast('egg', 'ALREADY FOUND', `${egg.name} is in your Galleria (found ${niceDate(progress.eggs[id])}).`, egg);
-    }
-    return;
-  }
+  if (!egg || progress.eggs[id]) return;   // found before: its view opening is answer enough, no pop-up
   progress.eggs[id] = today();
   saveProgress();
   glow();

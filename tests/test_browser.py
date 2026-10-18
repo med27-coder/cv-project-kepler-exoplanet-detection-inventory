@@ -420,9 +420,10 @@ def test_tour_icons_and_suggestions(browser, site):
     page.press('#query', 'Enter')
     page.fill('#query', 'lucy')
     page.press('#query', 'Enter')                                     # finds the Lucy easter egg
-    page.fill('#query', 'lucy')                                       # searching a found egg again says so
+    page.fill('#query', 'lucy')                                       # searching a found egg again: its view, no pop-up
     page.press('#query', 'Enter')
-    page.wait_for_selector('.toast:has-text("ALREADY FOUND")')
+    page.wait_for_timeout(300)
+    assert page.locator('.toast:has-text("TROJAN TOUR")').count() <= 1
     page.fill('#query', 'luc')
     page.wait_for_selector('#suggest li:has-text("easter egg you found")')
     page.fill('#query', '')
