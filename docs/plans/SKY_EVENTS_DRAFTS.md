@@ -34,6 +34,16 @@ red from the air itself, cooling along the trail.
 
 ## Decisions for the user
 
+**Answered 18 October 2026:**
+1. Yes: version a (space) is the normal UFO sighting, about once an hour of use.
+2. The rare asteroid version shows up **2 in 5** UFO sightings (40%), since the scene is short.
+3. Yes: a comet or asteroid every 3 to 6 minutes, meteors only over planets. **New:** passing comets, asteroids
+   and meteors can be caught (clicked); catching enough earns **ASTEROID CATCHER** and **METEOR CATCHER**
+   (suggested: 10 each; a COMET CATCHER can join them).
+
+The questions as first asked:
+
+
 1. The UFO: version a (space) as the normal sighting? Its rarity (plan: about once an hour of use)?
 2. The rare asteroid version: how rare? Suggestion: 1 in 10 UFO sightings, so WHAT WAS THAT? is a real find.
 3. Comets and asteroids as their own sky events (plan: one every 3 to 6 minutes), and meteors only over planets
