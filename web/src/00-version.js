@@ -5,6 +5,9 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.2', date: '18 Oct 2026', notes: [
+    'Fixed: a star still loading could replace the page you had moved on to.',
+  ] },
   { v: '1.9.1', date: '18 Oct 2026', notes: [
     'New: an UPDATES tab in this transmission, with everything added and fixed, version by version.',
     'Fixed: the search box now ignores emojis.',

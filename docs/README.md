@@ -11,6 +11,8 @@
 | [V4_RESULTS.md](star-gazer/V4_RESULTS.md) | Colossus's result: the primary endpoint failed (72% vs V3's 81% giant recall), and what was learned |
 | [V4B_PREREGISTRATION.md](star-gazer/V4B_PREREGISTRATION.md) | Colossus 2: V3's network reading the light curve, with physics features, fine-tuned on giants |
 | [V4B_RESULTS.md](star-gazer/V4B_RESULTS.md) | Colossus 2's result: more giants found (86% vs 81%), but miscalibrated, so overall accuracy failed; Stage A (physics inside V3) is the lead |
+| [V3_1_PREREGISTRATION.md](star-gazer/V3_1_PREREGISTRATION.md) | Star Gazer V3.1 (V3 plus the physics features), registered before training, judged on new folds |
+| [V3_1_RESULTS.md](star-gazer/V3_1_RESULTS.md) | V3.1's result: both primary endpoints failed on fresh folds; the earlier lead did not replicate; V3 stays |
 
 ## The site: Kepler Star Map ([star-map/](star-map/))
 
