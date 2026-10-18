@@ -1,6 +1,8 @@
 # Plan: Star Gazer V4
 
-**Status: plan** (17 October 2026). V3 stays frozen (`docs/AUDIT_V3.md`): V4 is a new version with its own
+**Status: plan** (17 October 2026). **Direction chosen by the user: two specialists.** V3 stays as it is and
+keeps the small planets it already finds 96-100% of the time; V4 is a new **giant-planet specialist** that takes
+over for big objects. V3 stays frozen (`docs/AUDIT_V3.md`): V4 is a new version with its own
 design, decided **before** it is evaluated, judged by cross-validation on fresh star-grouped splits and by a
 **prospective test** (below), never by tuning on V3's test split.
 
@@ -15,7 +17,19 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
 | **Contamination** | the confident false alarms point to light from a neighbouring star | `DATA_ANALYSIS.md` |
 | **Bookkeeping signals** | `koi_count` and default stellar values partly reflect how NASA confirmed planets | `AUDIT_V3.md` |
 
-## 2. What V4 adds
+## 2. Two specialists: V3 for small planets, V4 for giants
+
+- **V3, unchanged** (frozen), scores everything as today.
+- **V4, the giant specialist**, is trained and judged only on big objects: the KOIs above 6 Earth radii
+  (2,570 labelled, of which **184 confirmed planets**, 7%; above 15 Earth radii only **24 planets among 2,165**).
+  That scarcity is the whole problem, so V4 leans on physics inputs (below) rather than pattern-matching, and adds
+  confirmed giant planets from TESS (TFOPWG-confirmed hot Jupiters) to its training set.
+- **The hand-off:** a KOI's radius is itself uncertain (it depends on the star's radius), so there is no hard cut.
+  Below 6 Earth radii V3 answers; above 10, V4; in between, a blend weighted by radius. The blend's rule is fixed
+  before evaluation (section 3).
+- **The star map** shows which specialist answered ("small-planet model" / "giant-planet model").
+
+## 3. What the giant specialist uses
 
 1. **Physics that separates planets from binaries** (the giant-planet fix):
    - *stellar density check:* the transit's shape implies a star density; compare it with Gaia's. An eclipsing
@@ -36,29 +50,31 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
 6. **Uncertainty you can trust:** calibrated probabilities (temperature scaling on validation) and a
    *conformal* "not sure" band: the model says "can't tell" instead of guessing, with a guaranteed error rate.
 
-## 3. How it will be judged (fixed in advance)
+## 4. How it will be judged (fixed in advance)
 
 - **Pre-registered:** the variants, metrics and decision rules are written into this plan and committed before
   any V4 training. No variant is chosen by its test score.
-- **Primary metric:** 5-fold star-grouped cross-validation (as V3's headline), plus **recall on giant planets**
-  and on SNR above 200 as named secondary metrics.
+- **Primary metric:** 5-fold star-grouped cross-validation **on the giant KOIs** (V4 alone, then V3 + V4
+  combined over all KOIs, which must not fall below V3 on small planets), plus recall on SNR above 200.
 - **Prospective test (new):** every candidate NASA rules on **after** the V4 design is frozen
   (`web/data/resolutions.js` records them, dated). V3's and V4's predictions are saved beforehand, then
   compared as rulings arrive. This is the only test no design choice could have seen.
 - **An independent audit** (a fresh agent), as for V3, before any V4 number goes in the README.
 
-## 4. Build order
+## 5. Build order
 
-1. Data: stellar density check, shape metrics, Gaia RUWE, missing flags (cheap, from tables and existing views).
-2. CV of V3 + the new features (the giant-planet fix), against V3's CV numbers.
+1. Data: stellar density check, shape metrics, Gaia RUWE, missing flags for the giant KOIs (cheap, from tables and
+   existing views); TESS-confirmed giant planets as extra training examples.
+2. Train the giant specialist; CV on giants against V3's giant recall; fix the hand-off rule.
 3. Difference-image pilot (500 stars); full build only if the pilot helps in CV.
 4. Calibration and the conformal band; freeze the design; save predictions for the prospective test.
 5. Optional V4.1: TESS fine-tuning and its own evaluation.
 6. Audit, README, star map (Star Gazer V4 scores on the map, with the "not sure" band shown honestly).
 
-## 5. Decisions for you
+## 6. Decisions for you
 
-1. Scope: Kepler only for V4 (recommended), with TESS as a later V4.1? Or TESS from the start?
+1. TESS: the giant specialist needs TESS's confirmed giants as extra examples (recommended); the full TESS
+   fine-tuning stays a later V4.1. OK?
 2. Difference images: worth the heavier downloads (a pilot first, recommended)?
-3. Should the star map show V4 next to V3 (a switch), or replace V3 once V4 is audited?
+3. A name for the giant specialist (e.g. "Star Gazer Giants")?
 4. Compute: a laptop CPU like V3 (days of building and training), or would you use a free cloud GPU?
