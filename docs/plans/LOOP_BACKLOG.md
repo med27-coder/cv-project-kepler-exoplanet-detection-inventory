@@ -16,6 +16,10 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
    Add it as an easter egg like the ISS (an Earth-orbit exception): a pixel Earth with Hubble on its orbit, its
    sprite, Galleria card with NASA's photo, fun facts, search words (hubble, hst, hubble telescope, hubble space
    telescope). New egg id `hubble` (add to SHIPPED_IDS).
+0b. **Haumea after NASA's Eyes on the Solar System** (user's screenshots, reference only, not committed): redraw
+   Haumea's pixel globe as the stretched egg it is, grey-brown with the darker patch, and show its two moons on their
+   tilted orbits (Hi'iaka, the larger and farther; Namaka, closer, on a strongly inclined orbit) in its close-up and
+   Galleria card; check facts against NASA's Haumea page.
 1. **Astronaut spin as one sprite rotating** (user idea, low priority): draw the astronaut once to a small offscreen
    canvas and rotate that image, instead of re-plotting pixels at each angle, so it spins smoothly and costs less.
    Draft both side by side first; ship if it looks better.
