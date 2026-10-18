@@ -70,4 +70,4 @@ Kepler found outside the KOI list; its star and planets come only from NASA's co
 | `ccd.js` | `window.STARMAP_CCD`: 21 polygons (RA, Dec corners) of Kepler's CCD modules | `scripts/starmap/make_ccd_footprint.py` (K2fov) |
 | `../sky.png` | Map background: Gaia DR3 colour map in the map's projection, 192×192, 9-colour palette | `scripts/starmap/make_sky_backdrop.py` |
 | `../sky/*.jpg` | 40×40 DSS2 / Pan-STARRS1 / 2MASS photos for the 14 spotlight systems | `scripts/starmap/make_sky_thumbs.py` |
-| `../og.png` | Social preview image | `scripts/starmap/make_og_image.py` |
+| `../og.png` | Link preview image (1200×630) | `scripts/starmap/make_readme_media.py` (fallback: `make_og_image.py`) |

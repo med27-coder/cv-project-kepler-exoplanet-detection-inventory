@@ -623,7 +623,9 @@ def main():
           f'({sum(chunk_sizes) / 1024:.0f} KB, largest {max(chunk_sizes) / 1024:.0f} KB)')
     if size > MAX_BYTES or max(chunk_sizes) > CHUNK_MAX_BYTES:
         print('Warning: over the size budget; raise CHUNKS or trim fields.')
-    if args.out == OUT_FILE:   # keep the social preview image in step with the published data
+    if args.out == OUT_FILE and not (OUT_FILE.parents[1] / 'og.png').exists():
+        # The link preview is made by make_readme_media.py (it shows no counts that go stale); this plain one is
+        # only a fallback when it's missing.
         import make_og_image
         make_og_image.main()
 

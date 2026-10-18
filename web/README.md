@@ -16,7 +16,7 @@ system or framework: the page also works opened straight from disk.
 | `data/gallery.js`, `gallery/*.jpg` | Credits and small copies (240 px) of the official NASA photos shown in the Galleria | `scripts/starmap/fetch_references.py` |
 | `data/earth.js` | Earth's surface as a 128 × 64 pixel map (NASA Blue Marble), wrapped onto the pixel Earth | `scripts/starmap/make_earth_map.py` |
 | `sky.png`, `sky/*.jpg` | Milky Way backdrop (ESA Gaia DR3) and sky photos for the 14 featured systems | `scripts/starmap/make_sky_backdrop.py`, `make_sky_thumbs.py` |
-| `og.png` | Social preview image | `scripts/starmap/make_og_image.py` |
+| `og.png` | Link preview image (1200×630) | `scripts/starmap/make_readme_media.py` (fallback: `make_og_image.py`) |
 | `fonts/` | Press Start 2P and VT323 (SIL Open Font License, self-hosted) | |
 
 The sprites, enlarged, are in [pixel-art/](../pixel-art/) (`scripts/starmap/export_pixel_art.py`).

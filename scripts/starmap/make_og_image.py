@@ -1,4 +1,7 @@
-"""Draw the star map's social preview image (web/og.png, 1200×630) from web/data/systems.js.
+"""A plain fallback for the star map's link preview (web/og.png, 1200×630), from web/data/systems.js.
+
+The published preview is made by make_readme_media.py (matching the README banner); export_starmap.py runs
+this only when web/og.png is missing. make_sky_backdrop.py and make_sky_thumbs.py import its helpers.
 
     .venv\\Scripts\\python scripts\\starmap\\make_og_image.py
 
