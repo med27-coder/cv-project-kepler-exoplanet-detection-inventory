@@ -171,7 +171,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .legend .dot { width: 8px; height: 8px; }
 .legend [hidden] { display: none; }
 
-footer { color: var(--ink-2); font-size: 18px; margin-top: 20px; }
+footer { color: var(--ink-2); font-size: 18px; margin-top: 20px; padding: 4px 14px;
+  background: rgba(14, 21, 48, 0.93); border: 2px solid var(--edge); }   /* a panel, like the others: readable over the sky */
 footer .disclaimer { border-top: 1px solid var(--edge); padding-top: 10px; }
 a { color: var(--accent); }
 
