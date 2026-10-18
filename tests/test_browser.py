@@ -873,3 +873,20 @@ def test_orbit_inside_the_star_is_explained(browser, site):
     page.wait_for_function("() => document.getElementById('sys-title').textContent.includes('KEPLER-90')")
     assert page.locator('#info .callout:has-text("inside the star")').count() == 0
     assert not errors, errors
+
+
+def test_next_planets_list_is_not_replaced_by_a_late_system(browser, site):
+    """Opening the next-planets list while a system is still loading keeps the list (no late overwrite)."""
+    errors, held = [], []
+    page = open_page(browser, site, errors)
+    page.route('**/data/details/*.js', lambda route: held.append(route))   # hold the system's data back
+    page.fill('#query', 'Kepler-1649')
+    page.press('#query', 'Enter')
+    page.wait_for_function("() => document.getElementById('info').textContent.includes('Loading')")
+    page.click('button.chip:has-text("next planets")')
+    assert page.locator('#sys-title').inner_text() == 'NEXT PLANETS'
+    for route in held:                                            # now let the late data arrive
+        route.continue_()
+    page.wait_for_timeout(600)
+    assert page.locator('#sys-title').inner_text() == 'NEXT PLANETS'
+    assert not errors, errors

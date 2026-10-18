@@ -46,3 +46,4 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 - 0a. Project Hail Mary at Tau Ceti: v1.9.4 (plus the orbit-inside-the-star note, a user report).
 - 0b. Haumea after NASA's Eyes: v1.9.5.
 - 1. Astronaut spin from pre-turned frames: v1.9.6.
+- 2. Bug sweep (slow-load races, duplicate listeners): v1.9.7, one race fixed in the next-planets list.

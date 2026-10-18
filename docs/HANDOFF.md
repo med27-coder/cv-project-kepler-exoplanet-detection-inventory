@@ -5,7 +5,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 
 ## State
 
-- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.6**. Every version is in
+- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.7**. Every version is in
   [CHANGELOG.md](../CHANGELOG.md), tagged and published as a GitHub Release; players see the same history, in plain
   words, in the antenna's UPDATES tab (`HISTORY` in `web/src/00-version.js`).
 - **The game:** 35 easter eggs (Hubble in 1.9.3, the Hail Mary at Tau Ceti in 1.9.4), 75 achievements, sky events (comets, asteroids, a rare UFO), animated scenes for the

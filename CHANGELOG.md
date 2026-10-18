@@ -7,6 +7,12 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.7] - 2026-10-18
+
+### Fixed
+- The next-planets list could be replaced by a system still loading when it arrived (the same race fixed for NO
+  SIGNAL and the Solar System in 1.9.2); a bug sweep found no other page with it, and no listeners added twice.
+
 ## [1.9.6] - 2026-10-18
 
 ### Changed
@@ -193,6 +199,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.7]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.7
 [1.9.6]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.6
 [1.9.5]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.5
 [1.9.4]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.4

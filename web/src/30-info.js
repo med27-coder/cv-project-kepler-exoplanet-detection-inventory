@@ -222,6 +222,7 @@ function showSoon(s) {
 function showLeaderboard() {
   achieve('oracle');
   selected = null;
+  ++selectToken;   // a system still loading must not replace the list when it arrives
   title.textContent = 'NEXT PLANETS';
   const pct = v => (v == null ? '-' : `${fmt(Math.round(v * 100))}%`);
   const table = (rows, caption) => !rows.length ? '' : `
