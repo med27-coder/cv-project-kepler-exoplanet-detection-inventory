@@ -31,6 +31,8 @@ def main():
     parser.add_argument('--epochs', type=int, default=60)
     parser.add_argument('--quick', action='store_true', help='5 epochs, for testing the pipeline')
     parser.add_argument('--threads', type=int, default=None, help='TensorFlow CPU threads')
+    parser.add_argument('--save-oof', action='store_true',
+                        help='also save every KOI\'s out-of-fold P(planet) to results/v3/cv_oof.npz (the V4 baseline)')
     args = parser.parse_args()
     epochs = 5 if args.quick else args.epochs
 
@@ -48,7 +50,10 @@ def main():
         sys.exit('No current-version views found; run scripts/pipeline/build_full_dataset.py first.')
     outer = StratifiedGroupKFold(n_splits=args.folds, shuffle=True, random_state=C.SEED)
     folds = {name: [] for name in args.variants}
+    oof = {name: np.full(len(y), np.nan) for name in args.variants}   # each KOI scored by the fold that held it out
+    fold_of = np.full(len(y), -1)
     for k, (trainval, te) in enumerate(outer.split(np.zeros(len(y)), y, groups)):
+        fold_of[te] = k
         tr, va = S.split_train_val(y, groups, trainval, seed=C.SEED + k)
         assert not set(groups[te]) & set(groups[trainval]), 'a star is in both train and test'
         print(f'fold {k + 1}/{args.folds}: train {len(tr)}  val {len(va)}  test {len(te)}', flush=True)
@@ -59,6 +64,7 @@ def main():
             _, p_val = S.evaluate([model], ds, feats, va)
             thr = S.best_threshold(y[va], p_val)
             m05, p_te = S.evaluate([model], ds, feats, te, threshold=0.5)
+            oof[name][te] = p_te
             m05['accuracy_val_threshold'] = S.metrics(y[te], p_te, thr)['accuracy']
             m05['val_threshold'] = thr
             folds[name].append(m05)
@@ -75,6 +81,14 @@ def main():
         print(f'{name:10s} accuracy {a["mean"]:.4f} ± {a["std"]:.4f}   AUC {u["mean"]:.4f} ± {u["std"]:.4f}')
 
     S.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    if args.save_oof:   # a re-run for the V4 baseline: leaves V3's published cv_metrics.json and chart alone
+        arrays = {'names': ds['names'], 'y': y, 'fold': fold_of, **{f'p_{name}': p for name, p in oof.items()}}
+        np.savez(S.RESULTS_DIR / 'cv_oof.npz', **arrays)
+        out = S.RESULTS_DIR / 'cv_oof_metrics.json'
+        out.write_text(json.dumps({'folds': args.folds, 'epochs_max': epochs, 'n_kois': len(y),
+                                   'summary': summary, 'per_fold': folds}, indent=2), encoding='utf-8')
+        print(f'Saved out-of-fold predictions to cv_oof.npz and {C.rel(out)}')
+        return
     out = S.RESULTS_DIR / 'cv_metrics.json'
     out.write_text(json.dumps({'folds': args.folds, 'epochs_max': epochs, 'n_kois': len(y),
                                'summary': summary, 'per_fold': folds}, indent=2), encoding='utf-8')
