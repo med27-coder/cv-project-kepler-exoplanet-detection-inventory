@@ -12,6 +12,9 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 
 ## Queue (top first)
 
+**Queue finished 18 October 2026.** What is left needs the user: the meteor choice, the Moon rover drafts, and
+the Star Gazer / Colossus switch (see docs/HANDOFF.md).
+
 0. **Hubble Space Telescope** (user report: searching "hubble space telescope" or "hubble telescope" finds nothing).
    Add it as an easter egg like the ISS (an Earth-orbit exception): a pixel Earth with Hubble on its orbit, its
    sprite, Galleria card with NASA's photo, fun facts, search words (hubble, hst, hubble telescope, hubble space
@@ -50,4 +53,7 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 - 3. Shared Mars sky/ground helpers (the farm now uses the rover scenes' code; same pixels): no release needed.
 - 5. Zhurong: built as an easter egg, v1.9.8 (agencies and robots were already approved).
 - 6. Moon rover drafts: `draft_lunokhod.gif`, `draft_yutu2.gif`, waiting for the user's go-ahead.
+- 7. Performance check (390 x 844 phone viewport, CPU slowed 4x): ready in 1.4 s; 95% of frames on time (16.7 ms);
+  main thread busy 22% on the map (with or without a passing comet) and 36% on the Martian farm, mostly painting,
+  script 4 to 7%. No work needed.
 - 4. Meteor "both" draft: `pixel-art/concepts/draft_meteors_both.png`, waiting for the user's choice.
