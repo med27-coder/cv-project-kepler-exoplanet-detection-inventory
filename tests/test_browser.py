@@ -81,7 +81,7 @@ def test_galleria_photos_fit_and_slider_stays(browser, site):
     box = page.locator('.morph canvas').bounding_box()
     assert box['height'] <= 284 and box['width'] <= 244                                       # tall photo shrinks
     page.fill('.morph input', '100')
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('photo-finish')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('photo-finish')")
     assert page.input_value('.morph input') == '100'
     page.click('#gallery-close')
     page.click('#open-gallery')
@@ -106,7 +106,7 @@ def test_universe_sectors_and_lost_astronaut(browser, site):
     assert page.locator('#uni-out').is_disabled()
     page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in'); page.click('#uni-in')
     assert page.locator('#map').is_visible()                            # sector 1 is the map itself
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('cosmic-zoom')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('cosmic-zoom')")
     page.click('#uni-out')
     page.wait_for_function("() => { const f = document.getElementById('universe-view').dataset.flare;"
                            " return Boolean(f) && +f.split(',')[0] > 12 && +f.split(',')[0] < 180; }")   # drifted onto the canvas
@@ -163,7 +163,7 @@ def test_dwarf_planets_and_dwarf_king(browser, site):
         page.press('#query', 'Enter')
         page.wait_for_function(f"() => document.getElementById('sys-title').textContent === '{name.split()[-1].upper()}'")
         assert 'DWARF PLANET' in page.locator('#info').inner_text()
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('dwarf-king')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('dwarf-king')")
     page.wait_for_timeout(300)                                          # a few frames of the close-up: no errors
     assert not errors, errors
 
@@ -328,7 +328,7 @@ def test_galleria_game(browser, site):
     page.click('#gallery-close')
     page.fill('#query', 'Kepler-90')                                # a famous world
     page.press('#query', 'Enter')
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('eight-worlds')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('eight-worlds')")
     page.click('#open-gallery')
     page.click('#tab-ach')
     earned = page.locator('.ach-list li.on').all_inner_texts()
@@ -349,7 +349,7 @@ def test_galleria_game(browser, site):
     page.click('#tab-set')
     page.set_input_files('#set-import-file', files=[{'name': 'p.json', 'mimeType': 'application/json',
                                                      'buffer': backup.encode()}])
-    page.wait_for_function("(document.getElementById('set-reset-note').textContent || '').includes('loaded')")
+    page.wait_for_function("() => (document.getElementById('set-reset-note').textContent || '').includes('loaded')")
     page.click('#tab-eggs')
     assert page.locator('.egg-card.found').count() == 1               # restored from the file
     assert not errors, errors
@@ -433,7 +433,7 @@ def test_tatooine(browser, site):
     page.wait_for_function("() => document.getElementById('sys-title').textContent === 'KEPLER-16'")
     page.wait_for_selector('.toast.badge')
     assert 'Two suns' in page.locator('#info').inner_text()
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('tatooine')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('tatooine')")
     assert page.locator('#highlights .chip:has-text("two suns")').count() == 1
     page.wait_for_timeout(300)
     assert not errors, errors
@@ -449,7 +449,7 @@ def test_predictions(browser, site):
     page.press('#query', 'Enter')
     page.wait_for_selector('.call[data-koi="K03444.01"]')
     page.click('.call[data-koi="K03444.01"] button[data-call="planet"]')
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('K03444.01')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('K03444.01')")
     assert 'first-call' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
     ruling = ('window.STARMAP_RESOLUTIONS = {"since": "2026-10-14", '
               '"resolved": {"K03444.01": ["confirmed", "2099-01-01"]}};')   # NASA confirms it, after the call
@@ -457,7 +457,7 @@ def test_predictions(browser, site):
     page.reload()
     page.wait_for_selector('.toast:has-text("NASA RULED")')
     assert 'you called it' in page.locator('.toast:has-text("NASA RULED")').inner_text()
-    page.wait_for_function("(localStorage.getItem('starmap.progress.v1') || '').includes('prophet')")
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('prophet')")
     page.click('#open-gallery')
     page.click('#tab-pred')
     assert '1RIGHT' in ''.join(page.locator('#pane-pred .gallery-progress').inner_text().split())
