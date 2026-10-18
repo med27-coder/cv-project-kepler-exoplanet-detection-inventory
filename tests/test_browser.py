@@ -342,7 +342,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 33
+    assert page.locator('.egg-card').count() == 34
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -829,4 +829,16 @@ def test_search_rejects_emojis(browser, site):
     page.fill('#query', '👽👨‍🚀')
     page.dispatch_event('#query', 'input')
     assert page.input_value('#query') == ''
+    assert not errors, errors
+
+
+def test_hubble_is_found(browser, site):
+    """"hubble space telescope", "hubble telescope", "hubble" and "hst" all find Hubble (user report)."""
+    errors = []
+    page = open_page(browser, site, errors)
+    for q in ('hubble space telescope', 'Hubble telescope', 'HST', 'hubble'):
+        page.fill('#query', q)
+        page.press('#query', 'Enter')
+        assert page.locator('#sys-title').inner_text() == 'HUBBLE SPACE TELESCOPE', q
+    assert 'hubble' in page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).eggs")
     assert not errors, errors

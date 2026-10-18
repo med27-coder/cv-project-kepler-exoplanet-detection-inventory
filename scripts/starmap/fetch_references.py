@@ -53,6 +53,7 @@ PICKS = [
     ('spacecraft', 'perseverance', 'PIA24542', 'Perseverance selfie with Ingenuity'),
     ('spacecraft', 'mer-rover', 'PIA04413', 'A Mars Exploration Rover, Spirit\'s and Opportunity\'s design (artist concept)'),
     ('spacecraft', 'opportunity-rover', 'PIA18079', 'Opportunity\'s self-portrait just after the wind cleaned its solar panels (2014)'),
+    ('spacecraft', 'hubble', 'S109E5882', 'The Hubble Space Telescope over Earth, seen from Space Shuttle Columbia (2002)'),
     ('spacecraft', 'iss', 'iss056e201248', 'The ISS photographed from a departing Soyuz (2018)'),
     # Real photos in natural colour where one exists (not artist montages or false-colour ultraviolet).
     ('solar-system', 'solar-system-montage', 'PIA10969', 'The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008)'),

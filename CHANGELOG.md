@@ -7,6 +7,16 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.3] - 2026-10-18
+
+### Added
+- **The Hubble Space Telescope** (34 easter eggs; a player report): "hubble", "hst" or "hubble (space) telescope"
+  opens a pixel Earth with Hubble on its orbit, like the ISS (the two Earth-orbit exceptions), with its sprite, a
+  Galleria card with NASA's 2002 photo, and fun facts.
+
+### Fixed
+- Clearer wording for a fun fact on the Martian card ("advised" read like "advertised").
+
 ## [1.9.2] - 2026-10-18
 
 ### Fixed
@@ -157,6 +167,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.3]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.3
 [1.9.2]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.2
 [1.9.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.1
 [1.9.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.0

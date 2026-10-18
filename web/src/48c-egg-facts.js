@@ -42,7 +42,7 @@ const EGG_FACTS = {
   martian: {
     fun: ['Andy Weir first posted The Martian free on his website, one chapter at a time, before it became a book and a film.',
           'The dust storm that strands the hero could not really topple a rocket: Mars\'s air is too thin. Weir has said it was the one thing he changed on purpose.',
-          'NASA scientists advised the 2015 film.'],
+          'NASA scientists helped the 2015 film get the science right, working with the filmmakers as consultants.'],
     why: 'A nod to a story that made real Mars science popular: growing food is one of the hardest problems for a crew on Mars, and NASA really studies it.',
   },
   kepler: {
@@ -56,6 +56,12 @@ const EGG_FACTS = {
           'It is about as long as a football field, 109 metres end to end.',
           'You can see it from your back yard: it looks like a bright, steady star gliding across the sky.'],
     why: 'The one place in space where people live, and the only Earth-orbit spacecraft in the game. You can go outside and find it for real.',
+  },
+  hubble: {
+    fun: ['Hubble is about the size of a school bus: 13.2 metres long.',
+          'Its Deep Field picture of 1995 aimed at a dark speck of sky and found about 3,000 galaxies.',
+          'It was the only telescope ever serviced by astronauts in orbit: five shuttle missions between 1993 and 2009.'],
+    why: 'The most famous telescope ever built, and Kepler\'s elder cousin in space. Searching for it found nothing until a player asked, so here it is, beside the space station: the two Earth-orbit exceptions.',
   },
   voyager: {
     fun: ['Voyager 1\'s computers have about 70 kilobytes of memory, less than one photo on a phone.',

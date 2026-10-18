@@ -35,4 +35,4 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 
 ## Done
 
-(none yet)
+- 0. Hubble Space Telescope: v1.9.3.

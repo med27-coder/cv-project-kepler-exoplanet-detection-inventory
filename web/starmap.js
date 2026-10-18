@@ -121,6 +121,10 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.3', date: '18 Oct 2026', notes: [
+      'New: the Hubble Space Telescope can be found now, circling the Earth.',
+      'Fixed: clearer wording in a Galleria fun fact.',
+    ] },
     { v: '1.9.2', date: '18 Oct 2026', notes: [
       'Fixed: a star still loading could replace the page you had moved on to.',
     ] },
@@ -1841,6 +1845,7 @@
     const q = query.trim().replace(/[-_.]/g, ' ');
     if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
     if (MARTIAN_QUERY.test(q)) { showMartian(updateHash); unlockEgg('martian'); return; }   // 47d-martian.js
+    if (HUBBLE_QUERY.test(q)) { showHubble(updateHash); unlockEgg('hubble'); return; }   // 47f-hubble.js
     const rover = roverFor(q);   // Curiosity and Perseverance at work on Mars (47e-rovers.js)
     if (rover) { showRover(rover, updateHash); unlockEgg(rover); return; }
     const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
@@ -2375,6 +2380,14 @@
       '....mmmmmmmmmmm....',
       '...xx...xx...xx....',
       '...xm...xm...xm....',
+    ],
+    hubble: [   // the silver tube with its open aperture door, two blue solar wings, the high-gain antennas
+      'PpP..............PpP',
+      'pbp..lssssssssw..pbp',
+      'PpPmlsssssssssskmPpP',
+      'pbp.lllllllllllk.pbp',
+      'PpP..mm......mm..PpP',
+      '.....s........s.....',
     ],
     sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
       '.m.........',
@@ -3467,6 +3480,79 @@
     if (updateHash) history.replaceState(null, '', `#${r.hash}`);
   }
 
+  // ---------------------------------------------------------------- easter egg: the Hubble Space Telescope
+  // Like the ISS, Hubble is an Earth-orbit exception (45-spaceflight.js): "hubble", "hst" or "hubble (space)
+  // telescope" opens a pixel Earth with Hubble circling it on its real orbit, about 520 km up and tilted 28.5 degrees
+  // to the equator, sped up; its sprite (CRAFT_ART.hubble) shows in the corner. The Galleria card uses NASA's photo
+  // from the 2002 servicing mission.
+  const HUBBLE_QUERY = /^(the )?(hubble( space)?( telescope)?|hst)$/i;
+  const HUBBLE_ALT_KM = 520, HUBBLE_ORBIT_S = 95 * 60 / 460;   // a 95-minute orbit, sped up like the ISS's
+
+  function drawHubble(seconds) {
+    sctx.fillStyle = '#070b1a';
+    sctx.fillRect(0, 0, SW, SH);
+    for (let k = 0; k < 90; k++) {   // the deep sky Hubble looks into: faint stars and a few smudges of galaxies
+      sctx.fillStyle = k % 9 === 0 ? '#8a6aa8' : k % 5 === 0 ? '#4a5590' : '#1e2550';
+      sctx.fillRect(Math.floor(hash('hb' + k) * SW), Math.floor(hash('hy' + k) * SH), k % 9 === 0 ? 2 : 1, 1);
+    }
+    const t = REDUCED_MOTION ? 0 : seconds, cx = CX, cy = Math.round(SH / 2);
+    const R = EARTH_R_PX * (EARTH_KM + HUBBLE_ALT_KM) / EARTH_KM;
+    const tilt = 0.5, turn = 0.25;   // seen from a little above, the orbit's plane tipped 28.5 degrees
+    const at = th => {
+      const x = R * Math.cos(th), y = R * tilt * Math.sin(th);
+      return [cx + x * Math.cos(turn) - y * Math.sin(turn), cy + x * Math.sin(turn) + y * Math.cos(turn), Math.sin(th) < 0];
+    };
+    const orbit = behind => {
+      sctx.fillStyle = '#4a3a78';
+      for (let k = 0; k < 120; k += 2) {
+        const [x, y, back] = at((k / 120) * 2 * Math.PI);
+        if (back === behind && (!back || Math.hypot(x - cx, y - cy) > EARTH_R_PX + 0.5)) sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+      }
+    };
+    const [hx, hy, behind] = at((t / HUBBLE_ORBIT_S) * 2 * Math.PI);
+    const hidden = behind && Math.hypot(hx - cx, hy - cy) <= EARTH_R_PX + 1;
+    const scope = (x, y) => {   // a tiny Hubble on its orbit: the silver tube between two blue wings
+      sctx.fillStyle = '#2f4fae'; sctx.fillRect(Math.round(x) - 4, Math.round(y) - 1, 2, 3); sctx.fillRect(Math.round(x) + 3, Math.round(y) - 1, 2, 3);
+      sctx.fillStyle = '#d6dae2'; sctx.fillRect(Math.round(x) - 2, Math.round(y), 5, 2);
+      sctx.fillStyle = '#151a2c'; sctx.fillRect(Math.round(x) + 2, Math.round(y), 1, 2);
+    };
+    orbit(true);
+    if (behind && !hidden) scope(hx, hy);
+    solarPlanet(sctx, cx, cy, { art: 'earth', size: EARTH_R_PX, seed: 'hst', noMoon: true }, -0.9, -0.3, t * 0.4);
+    orbit(false);
+    if (!behind) scope(hx, hy);
+    if (!hidden) pixelText(sctx, 'HUBBLE', Math.round(hx) + 7, Math.round(hy) - 8, '#ffd34d');
+    drawCraftInset([{ name: 'Hubble', key: 'hubble', label: 'HUBBLE' }], 'Hubble', seconds);
+    pixelText(sctx, 'ORBIT 95 MIN', 4, SH - 9, '#5a6a8a');
+  }
+
+  function showHubble(updateHash = true) {
+    selected = null;
+    ++selectToken;
+    title.textContent = 'HUBBLE SPACE TELESCOPE';
+    info.innerHTML = `
+      <p class="big">★ THE EYE ABOVE THE AIR ★</p>
+      <p>NASA and ESA's Hubble Space Telescope, on its orbit about ${HUBBLE_ALT_KM} km above the ground, above the
+         blurring air. The animation is sped up about 460 times.</p>
+      <ul class="facts">
+        <li>Launched on <b>24 April 1990</b> aboard Space Shuttle Discovery.</li>
+        <li>Its 2.4-metre mirror was made slightly the wrong shape; astronauts fitted corrective optics in <b>1993</b>.
+          Five shuttle servicing missions kept it going, the last in <b>2009</b>.</li>
+        <li>Circles Earth about every <b>95 minutes</b>, at about 7.5 km per second.</li>
+        <li>Its observations helped show that the universe's expansion is <b>speeding up</b>, and pinned down its age:
+          about <b>13.8 billion years</b>.</li>
+        <li>It sees visible and ultraviolet light; Webb, its successor, sees infrared.</li>
+      </ul>
+      <p>${['https://science.nasa.gov/mission/hubble/|NASA: the Hubble mission',
+            'https://hubblesite.org/|HubbleSite: Hubble\'s pictures']
+        .map(s => s.split('|')).map(([u, t]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join(' · ')}</p>
+      <p class="note">Sources: NASA's Hubble facts · the orbit shown is illustrative, not the live position · you found an
+        easter egg!</p>`;
+    setScene({ custom: drawHubble });
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
+    if (updateHash) history.replaceState(null, '', '#hubble');
+  }
+
   // ---------------------------------------------------------------- Galleria: the easter-egg game
   // The ⚙ button opens the Galleria. Every easter egg starts as a black silhouette with a question mark,
   // its name blanked out and a clue underneath; typing the right name in the search bar finds it: the
@@ -3505,6 +3591,9 @@
     { id: 'iss', name: 'International Space Station', kind: 'craft', art: 'iss', ref: 'iss', query: 'ISS', toast: 'CREW ABOARD',
       clue: 'Sixteen sunrises a day, and people have lived inside me since the year 2000.',
       story: 'Built in orbit from 1998 by the space agencies of the United States, Russia, Europe, Japan and Canada, piece by piece over dozens of launches. Crews have lived aboard without a break since November 2000, and it is big enough to see from the ground with your own eyes.' },
+    { id: 'hubble', name: 'Hubble Space Telescope', kind: 'craft', art: 'hubble', ref: 'hubble', query: 'Hubble', toast: 'DEEP FIELD',
+      clue: 'Above the air since 1990, I was launched with a blurry mirror, fixed by astronauts, and showed us the age of the universe.',
+      story: 'NASA and ESA\'s Hubble Space Telescope was carried up by Space Shuttle Discovery on 24 April 1990. Its mirror turned out to be slightly the wrong shape, and in 1993 astronauts fitted it with corrective optics in orbit. Five servicing missions later, it has taken more than a million observations, from the Hubble Deep Field to the expanding universe.' },
     { id: 'voyager', name: 'Voyager 1', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 1', toast: 'INTERSTELLAR SIGNAL',
       clue: 'The farthest human-made object. I took the Pale Blue Dot, and in 2012 I was first to leave the Sun\'s bubble.',
       story: 'Launched on 5 September 1977, Voyager 1 flew past Jupiter (1979) and Saturn (1980), then headed up out of the planets\' plane. On 14 February 1990 it turned round and took the Pale Blue Dot, Earth from 6 billion km. In August 2012 it became the first spacecraft in interstellar space. It carries a Golden Record of sounds and pictures of Earth, and its signal takes most of a day to reach us.' },
@@ -3890,7 +3979,7 @@
 
   // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
   const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
     ['Osiris Rex', 'apex'], ['Tatooine', null]];
   const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
   function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -4491,7 +4580,7 @@
     martian: {
       fun: ['Andy Weir first posted The Martian free on his website, one chapter at a time, before it became a book and a film.',
             'The dust storm that strands the hero could not really topple a rocket: Mars\'s air is too thin. Weir has said it was the one thing he changed on purpose.',
-            'NASA scientists advised the 2015 film.'],
+            'NASA scientists helped the 2015 film get the science right, working with the filmmakers as consultants.'],
       why: 'A nod to a story that made real Mars science popular: growing food is one of the hardest problems for a crew on Mars, and NASA really studies it.',
     },
     kepler: {
@@ -4505,6 +4594,12 @@
             'It is about as long as a football field, 109 metres end to end.',
             'You can see it from your back yard: it looks like a bright, steady star gliding across the sky.'],
       why: 'The one place in space where people live, and the only Earth-orbit spacecraft in the game. You can go outside and find it for real.',
+    },
+    hubble: {
+      fun: ['Hubble is about the size of a school bus: 13.2 metres long.',
+            'Its Deep Field picture of 1995 aimed at a dark speck of sky and found about 3,000 galaxies.',
+            'It was the only telescope ever serviced by astronauts in orbit: five shuttle missions between 1993 and 2009.'],
+      why: 'The most famous telescope ever built, and Kepler\'s elder cousin in space. Searching for it found nothing until a player asked, so here it is, beside the space station: the two Earth-orbit exceptions.',
     },
     voyager: {
       fun: ['Voyager 1\'s computers have about 70 kilobytes of memory, less than one photo on a phone.',

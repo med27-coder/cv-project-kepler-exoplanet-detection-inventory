@@ -5,6 +5,10 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.3', date: '18 Oct 2026', notes: [
+    'New: the Hubble Space Telescope can be found now, circling the Earth.',
+    'Fixed: clearer wording in a Galleria fun fact.',
+  ] },
   { v: '1.9.2', date: '18 Oct 2026', notes: [
     'Fixed: a star still loading could replace the page you had moved on to.',
   ] },

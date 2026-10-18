@@ -126,6 +126,12 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA18079",
   "what": "Opportunity's self-portrait just after the wind cleaned its solar panels (2014)"
  },
+ "hubble": {
+  "img": "gallery/hubble.jpg",
+  "credit": "NASA JSC",
+  "link": "https://images.nasa.gov/details/S109E5882",
+  "what": "The Hubble Space Telescope over Earth, seen from Space Shuttle Columbia (2002)"
+ },
  "iss": {
   "img": "gallery/iss.jpg",
   "credit": "NASA JSC",

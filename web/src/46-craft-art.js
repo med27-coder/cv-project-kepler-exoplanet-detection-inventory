@@ -264,6 +264,14 @@ const CRAFT_ART = {
     '...xx...xx...xx....',
     '...xm...xm...xm....',
   ],
+  hubble: [   // the silver tube with its open aperture door, two blue solar wings, the high-gain antennas
+    'PpP..............PpP',
+    'pbp..lssssssssw..pbp',
+    'PpPmlsssssssssskmPpP',
+    'pbp.lllllllllllk.pbp',
+    'PpP..mm......mm..PpP',
+    '.....s........s.....',
+  ],
   sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
     '.m.........',
     '.m.........',
