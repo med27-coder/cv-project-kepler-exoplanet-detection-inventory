@@ -777,3 +777,31 @@ def test_rovers_at_work_on_mars(browser, site):
     search('mars rovers')
     page.wait_for_selector('#info table')                      # the spacecraft table (loaded on demand)
     assert not errors, errors
+
+
+def test_found_dwarf_planets_join_the_solar_system(browser, site):
+    """Ceres, Haumea, Makemake and Eris appear in the Solar System's drawing and table only once found."""
+    errors = []
+    page = open_page(browser, site, errors)
+    rows = lambda: page.locator('#info table tbody tr').count()
+    page.fill('#query', 'solar system')
+    page.press('#query', 'Enter')
+    assert rows() == 9                                    # eight planets and Pluto
+    page.fill('#query', 'eris')
+    page.press('#query', 'Enter')
+    page.fill('#query', 'solar system')
+    page.press('#query', 'Enter')
+    assert rows() == 10 and 'Eris' in page.locator('#info table').inner_text()
+    assert not errors, errors
+
+
+def test_loading_screen_picks_one_of_two_scenes(browser, site):
+    """web/loading.js shows the rocket or the astronomer at random (here held on screen by never loading the map)."""
+    for rand, gif, title in ((0.1, 'loading.gif', 'LAUNCHING'), (0.9, 'loading-astronomer.gif', 'SCANNING')):
+        page = browser.new_page()
+        page.add_init_script(f'Math.random = () => {rand};')
+        page.route('**/starmap.js*', lambda route: route.abort())
+        page.goto(site)
+        assert page.get_attribute('#loading img', 'src') == gif
+        assert page.locator('.loading-title').inner_text().startswith(title)
+        page.close()

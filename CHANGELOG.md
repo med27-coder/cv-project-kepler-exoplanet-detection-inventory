@@ -7,6 +7,15 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.8.0] - 2026-10-18
+
+### Added
+- **Found dwarf planets join the Solar System:** Ceres (in the asteroid belt), Haumea, Makemake and Eris appear on
+  the drawing and in the planet table, on their real orbits, once each is found; a note says how many are still
+  hidden. Pluto was already there.
+- **A second loading screen:** an astronomer at a telescope on a hill, with stars glimmering far off and the odd
+  shooting star. Each visit picks it or the Delta II rocket at random (`web/loading.js`); the words change with it.
+
 ## [1.7.0] - 2026-10-18
 
 ### Added
@@ -118,6 +127,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.8.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.8.0
 [1.7.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.7.0
 [1.6.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.6.0
 [1.5.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.5.0
