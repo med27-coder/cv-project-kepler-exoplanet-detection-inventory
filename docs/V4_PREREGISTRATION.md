@@ -70,3 +70,5 @@ before anything goes in the README.
 ## 8. Changes after registration
 
 - 17 October 2026: the specialist is named **Colossus** (the user's choice). A name only; nothing in the design changed.
+
+Results: [V4_RESULTS.md](V4_RESULTS.md) (primary endpoint failed; reported as registered).
