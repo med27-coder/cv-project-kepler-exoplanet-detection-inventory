@@ -1,4 +1,4 @@
-"""Star Gazer V4: the giant-planet specialist, as registered in docs/V4_PREREGISTRATION.md.
+"""Star Gazer V4, Colossus: the giant-planet specialist, as registered in docs/V4_PREREGISTRATION.md.
 
 V3 stays the model for small planets. For KOIs of 6 Earth radii and up, a gradient-boosted tree classifier
 looks at V3's catalog features, a "was missing" flag for each, and physics features that tell planets from
