@@ -10,8 +10,9 @@ progress is saved; default `minor`. Anything after it describes what changed).
 1. Read `web/src/00-version.js` and the top of `CHANGELOG.md`; work out the new version from the bump.
 2. Look at the commits since the last tag (`git log $(git describe --tags --abbrev=0)..HEAD --oneline`) and the
    working tree, and summarise what changed for players, in plain words, no spoilers for secret easter eggs.
-3. Update `web/src/00-version.js`: the new `VERSION`, and `RELEASE_NOTES` with 2 or 3 highlights (the newest first;
-   keep the list at 3 at most). Use double quotes for any note containing an apostrophe.
+3. Add the new version at the top of `HISTORY` in `web/src/00-version.js` (it sets VERSION and the antenna's WHAT'S
+   NEW): date and 1 to 3 player-facing notes starting "New:" or "Fixed:", no spoilers, no technical or security
+   details. Use double quotes for any note containing an apostrophe. Stay on 1.x.
 4. Add the `## [X.Y.Z] - <today>` entry to `CHANGELOG.md` (Added / Changed / Fixed) and its link at the bottom.
 5. Run `.venv/Scripts/python scripts/starmap/build_web.py`, then `--check`, `node --check web/starmap.js`,
    `.venv/Scripts/python -m ruff check .` and the full test suite (`.venv/Scripts/python -m pytest -q`). If anything

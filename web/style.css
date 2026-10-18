@@ -475,3 +475,11 @@ dialog#thanks .news { border: 2px solid var(--edge); padding: 4px 12px; margin: 
 dialog#thanks .news h3 { font: 11px/1.7 var(--pixel); color: var(--accent); margin: 8px 0 4px; }
 dialog#thanks .news ul { margin: 4px 0; padding-left: 18px; }
 dialog#thanks .news li { margin: 4px 0; }
+/* the antenna's UPDATES tab: every version, newest first */
+dialog#thanks .tabs { margin: 8px 0 12px; }
+dialog#thanks .updates { list-style: none; padding: 0; margin: 0; max-height: 60vh; overflow-y: auto; }
+dialog#thanks .updates > li { border-top: 2px solid var(--edge); padding: 8px 0; }
+dialog#thanks .updates h3 { font: 11px/1.7 var(--pixel); color: var(--accent); margin: 0 0 2px; }
+dialog#thanks .updates h3 span { color: var(--ink-2); font-size: 9px; margin-left: 8px; }
+dialog#thanks .updates ul { margin: 2px 0; padding-left: 18px; }
+dialog#thanks .tabs [role="tab"] { padding: 8px 14px; line-height: 1.2; font-size: 11px; }
