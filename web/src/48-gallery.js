@@ -567,7 +567,8 @@ function renderDetail(egg) {
     ${got && egg.film ? `<p class="note">Film stills belong to the studio, so they aren't copied here: see ${link(egg.film[0], egg.film[1])}</p>` : ''}
     <h3 class="facts-title">${got ? esc(egg.name.toUpperCase()) : esc(blanks(egg.name))}</h3>
     ${got ? `<p class="egg-badge">★ ${esc(egg.toast)} · found ${esc(progress.eggs[egg.id])}</p><p>${esc(egg.story)}</p>
-        <button type="button" class="show-me">SHOW ME</button>`
+        <button type="button" class="show-me">SHOW ME</button>
+        ${eggFactsHtml(egg)}`
       : `<p class="egg-clue big-clue">${esc(egg.clue)}</p>
         <p>Know it? Type its name in the search bar.</p><button type="button" class="guess">TAKE A GUESS</button>`}
     </div>
