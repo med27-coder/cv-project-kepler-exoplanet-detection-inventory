@@ -545,6 +545,82 @@ def lost_in_orbit(t, w=96, h=54):
     return f
 
 
+
+def moon_ground(f, W, H, horizon, seed):
+    """The grey lunar plain under a black sky: no air, so no haze and a sharp horizon; small craters and rocks."""
+    for y in range(horizon, H):
+        for x in range(W):
+            f.put(x, y, '#8a8a8a' if (x * 7 + y * 13 + seed) % 23 else '#7a7a7a')
+    for k in range(9):   # little craters: a dark rim on the far side, a lit rim on the near side
+        cx, cy = (k * 41 + seed) % W, horizon + 4 + (k * 17 + seed) % (H - horizon - 6)
+        r = 1 + k % 3
+        for a in range(0, 360, 20):
+            x, y = cx + r * math.cos(math.radians(a)) * 1.6, cy + r * math.sin(math.radians(a)) * 0.6
+            f.put(x, y, '#5a5a5a' if a < 180 else '#b0b0b0')
+
+
+def lunokhod(t):
+    """Lunokhod 1 (USSR, 1970), the first rover on another world: a pressurised "bathtub" body on eight wire-mesh
+    wheels, its round lid swung open to show the solar cells on its inside, and an antenna spike. Earth is in the sky."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=3)
+    for y in range(H):   # black sky (the Frame's stars are kept, sparse)
+        pass
+    f.disc(78, 10, 5, lambda dx, dy, q: ('#2f6fd6' if (dx * 3 + dy) % 5 else '#ffffff') if dx < 2 else '#0d1d40')   # Earth, half lit
+    horizon = 30
+    moon_ground(f, W, H, horizon, 5)
+    x0 = 20 + round(t * 40)   # it drives slowly to the right
+    for k in range(4):   # eight wheels: four on this side
+        f.disc(x0 + 2 + k * 6, horizon + 9, 2.2, lambda dx, dy, q: '#3a3a3a' if q > 0.6 else '#6a6a6a')
+    for x in range(x0, x0 + 24):   # the tub: wider at the top
+        for y in range(horizon + 1, horizon + 7):
+            if x - x0 >= (y - horizon - 1) // 2 and x0 + 24 - x > (y - horizon - 1) // 2:
+                f.put(x, y, '#c9c4b0' if y < horizon + 3 else '#a8a490')
+    for k in range(18):   # the lid, opened backwards: blue solar cells on its inside
+        f.put(x0 - 3 + k // 3, horizon - 1 - (k % 3) - k // 4, '#2f4fae' if k % 2 else '#5d7bd6')
+    f.put(x0 + 20, horizon - 1, '#d6dae2'); f.put(x0 + 20, horizon - 2, '#d6dae2'); f.put(x0 + 20, horizon - 3, '#eef2f8')   # antenna
+    f.put(x0 + 22, horizon + 3, '#151a2c'); f.put(x0 + 23, horizon + 3, '#151a2c')   # the TV cameras' eyes
+    for x in range(10, x0 - 2, 3):   # tracks
+        f.put(x, horizon + 11, '#6a6a6a')
+    return f
+
+
+def yutu2(t):
+    """Yutu-2 (China, 2019), the first rover on the Moon's far side, in Von Karman crater: a small rover with two solar
+    wings and a mast; the Chang'e 4 lander behind it. Earth never rises here, so the sky is only stars."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=9)
+    horizon = 28
+    for x in range(W):   # the far crater rim, low on the horizon
+        top = horizon - 2 - round(2 * math.sin(x / 11) + (x * 7) % 3 * 0.5)
+        for y in range(top, horizon):
+            f.put(x, y, '#6a6a6a')
+    moon_ground(f, W, H, horizon, 11)
+    lx = 14   # the lander: a gold box on legs, with its own solar wings
+    for x in range(lx, lx + 12):
+        for y in range(horizon + 2, horizon + 7):
+            f.put(x, y, '#d9a441' if y < horizon + 5 else '#9c6b22')
+    for y in range(horizon + 7, horizon + 10):
+        f.put(lx, y, '#b8bfcc'); f.put(lx + 11, y, '#b8bfcc')
+    for x in range(lx - 6, lx):
+        f.put(x, horizon + 3, '#2f4fae'); f.put(x + 18, horizon + 3, '#2f4fae')
+    x0 = 38 + round(t * 30)   # Yutu-2 rolls out across the grey
+    for k in range(3):
+        f.disc(x0 + 2 + k * 5, horizon + 12, 1.8, lambda dx, dy, q: '#3a3a3a' if q > 0.5 else '#6a6a6a')
+    for x in range(x0, x0 + 14):
+        for y in range(horizon + 7, horizon + 11):
+            f.put(x, y, '#d9a441' if y < horizon + 9 else '#c9c4b0')
+    for x in range(x0 - 5, x0):   # one solar wing out to the side, one tipped up
+        f.put(x, horizon + 7, '#2f4fae')
+    for k in range(5):
+        f.put(x0 + 14 + k // 2, horizon + 6 - k, '#5d7bd6')
+    for y in range(horizon, horizon + 7):   # the mast and its cameras
+        f.put(x0 + 10, y, '#b8bfcc')
+    f.put(x0 + 9, horizon - 1, '#eef2f8'); f.put(x0 + 10, horizon - 1, '#eef2f8'); f.put(x0 + 11, horizon - 1, '#151a2c')
+    for x in range(lx + 18, x0 - 1, 2):   # tracks from the lander's ramp
+        f.put(x, horizon + 14, '#6a6a6a')
+    return f
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     # Drafts not used any more live in pixel-art/archive/ (the code that drew them stays above, for history).
@@ -558,6 +634,8 @@ def main():
     save_gif([meteor_v3a(k / 24) for k in range(24)], 'draft_meteor_v3a.gif', scale=5, ms=80)
     save_gif([meteor_v3b(k / 24) for k in range(24)], 'draft_meteor_v3b.gif', scale=5, ms=80)
     save_gif([hail_mary(k / 16) for k in range(16)], 'draft_hail_mary.gif', scale=5)
+    save_gif([lunokhod(k / 20) for k in range(20)], 'draft_lunokhod.gif', scale=5, ms=120)
+    save_gif([yutu2(k / 20) for k in range(20)], 'draft_yutu2.gif', scale=5, ms=120)
 
 
 if __name__ == '__main__':

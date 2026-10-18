@@ -37,6 +37,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 ## Open decisions and next steps
 
 - Meteors: approve the "both" draft (`pixel-art/concepts/draft_meteors_both.png`, explained in plans/SKY_EVENTS_DRAFTS.md), or pick one.
+- Moon rovers: approve the drafts (`pixel-art/concepts/draft_lunokhod.gif`, `draft_yutu2.gif`) to build them as eggs.
 - Star Gazer / Colossus switch in the highlights: Colossus shown as EXPERIMENTAL?
 - Commit identity (only the med27-coder account): see [plans/COMMIT_IDENTITY.md](plans/COMMIT_IDENTITY.md).
 - The loop's work list: [plans/LOOP_BACKLOG.md](plans/LOOP_BACKLOG.md).
