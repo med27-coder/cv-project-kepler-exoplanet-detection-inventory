@@ -539,19 +539,20 @@ function renderDetail(egg) {
 // Pixelation slider: drag from the real photo (0) to the pixel art (100). Up to 80 the photo is drawn
 // at lower and lower resolution (blocks of 1 to 16 pixels) with fewer and fewer colours; from 80 on it
 // fades into the sprite. The photo comes from this site, so the canvas may read its pixels.
+let morphHold = null;   // PHOTO FINISH redraws the Galleria; the card it was earned on keeps its slider at the end
 function photoToPixels(fig, src, egg) {
   const canvas = fig.querySelector('canvas'), slider = fig.querySelector('input');
   const ctx = canvas.getContext('2d'), photo = new Image();
   const small = document.createElement('canvas'), sctx2 = small.getContext('2d', { willReadFrequently: true });
   const sprite = document.createElement('canvas');
   const draw = () => {
-    const v = Number(slider.value), W = canvas.width, H = canvas.height;
+    const v = Number(slider.value), W = canvas.width, H = canvas.height, k = W / 240;   // k: canvas pixels per shown pixel
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#070b1a';
     ctx.fillRect(0, 0, W, H);
     if (!photo.complete || !photo.naturalWidth) return;
     const f = Math.min(v, 80) / 80;
-    const block = Math.max(1, Math.round(1 + f ** 1.6 * 15));
+    const block = Math.max(1, Math.round((1 + f ** 1.6 * 15) * k));
     if (block === 1) ctx.drawImage(photo, 0, 0, W, H);
     else {
       small.width = Math.ceil(W / block); small.height = Math.ceil(H / block);
@@ -573,18 +574,23 @@ function photoToPixels(fig, src, egg) {
       ctx.globalAlpha = a;
       ctx.fillStyle = '#070b1a';
       ctx.fillRect(0, 0, W, H);
-      sprite.width = Math.floor(W / 3); sprite.height = Math.floor(H / 3);
+      sprite.width = Math.floor(W / 3 / k); sprite.height = Math.floor(H / 3 / k);
       drawEggArt(sprite, egg, 1, false);
-      ctx.drawImage(sprite, 0, 0, sprite.width * 3, sprite.height * 3);
+      ctx.drawImage(sprite, 0, 0, sprite.width * 3 * k, sprite.height * 3 * k);
       ctx.globalAlpha = 1;
     }
   };
   photo.addEventListener('load', () => {
+    canvas.width = Math.max(240, photo.naturalWidth);   // the photo's own resolution, shown 240 wide (or less if tall)
     canvas.height = Math.round(canvas.width * photo.naturalHeight / photo.naturalWidth);
     draw();
   });
   photo.src = src;
-  slider.addEventListener('input', () => { draw(); if (slider.value === slider.max) achieve('photo-finish'); });
+  if (morphHold === egg.id) slider.value = slider.max;   // redrawn by the achievement below: stay on the pixel art
+  slider.addEventListener('input', () => {
+    draw();
+    if (slider.value === slider.max) { morphHold = egg.id; achieve('photo-finish'); morphHold = null; }
+  });
   draw();
 }
 

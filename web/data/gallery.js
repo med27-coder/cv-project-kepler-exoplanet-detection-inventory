@@ -134,9 +134,9 @@ window.STARMAP_GALLERY = {
  },
  "mercury": {
   "img": "gallery/mercury.jpg",
-  "credit": "NASA GSFC",
-  "link": "https://images.nasa.gov/details/GSFC_20171208_Archive_e001922",
-  "what": "Mercury's surface from orbit, first colour image (MESSENGER, 2011)"
+  "credit": "NASA/JPL/Northwestern University",
+  "link": "https://images.nasa.gov/details/PIA02418",
+  "what": "Mercury, most of a hemisphere, as Mariner 10 left it (1974)"
  },
  "venus": {
   "img": "gallery/venus.jpg",

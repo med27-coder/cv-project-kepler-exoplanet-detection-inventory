@@ -182,6 +182,7 @@ a { color: var(--accent); }
 
 /* System view controls */
 .panel-head { flex-wrap: wrap; gap: 6px; }
+.zoom { flex-wrap: wrap; max-width: 100%; }   /* phones: the system tools wrap instead of running off the edge */
 .zoom[hidden] { display: none; }
 .zoom button.ghost { box-shadow: none; padding: 4px 6px; }
 .zoom button.ghost[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
@@ -251,7 +252,7 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 .big-clue { font-size: 24px; color: var(--ink); }
 .planet-strip { list-style: none; padding: 0; margin: 12px 0 0; display: flex; gap: 6px; flex-wrap: wrap; }
 .planet-strip a { display: flex; flex-direction: column; align-items: center; font-size: 14px; color: var(--ink-2); text-decoration: none; }
-.planet-strip img { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--edge); }
+.planet-strip img { width: 64px; height: 64px; object-fit: contain; background: #000; border: 2px solid var(--edge); }   /* whole planet, never cropped */
 .ach-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .ach-list li { display: flex; gap: 10px; align-items: center; padding: 6px 8px; border: 2px solid var(--edge); color: var(--ink-2); }
 .ach-list li.on { border-color: var(--accent); color: var(--ink); }
@@ -288,7 +289,7 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 #gallery button.ghost { font-size: 12px; }
 #gallery #gallery-close { font-size: 18px; padding: 2px 10px; }
 #gallery .egg-card { padding: 8px; }
-.morph canvas { width: 240px; height: auto; border: 2px solid var(--edge); background: var(--bg); }
+.morph canvas { width: auto; height: auto; max-width: 240px; max-height: 280px; border: 2px solid var(--edge); background: var(--bg); }   /* tall photos shrink to fit */
 .morph input[type="range"] { display: block; width: 240px; margin: 6px 0 0; accent-color: var(--accent); }
 .morph-ends { display: flex; justify-content: space-between; width: 240px; font: 9px var(--pixel); color: var(--ink-2); }
 #pane-ach .facts-title { margin: 14px 0 6px; }
