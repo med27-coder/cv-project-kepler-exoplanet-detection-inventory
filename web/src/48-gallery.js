@@ -25,6 +25,10 @@ const EGGS = [
   { id: 'eris', name: 'Eris', kind: 'dwarf', ref: 'eris', query: 'Eris', toast: 'GODDESS OF DISCORD',
     clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
     story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
+  { id: 'martian', name: 'The Martian', kind: 'martian', ref: 'martian-gardens', query: 'The Martian', toast: 'BOTANIST OF MARS',
+    refs: [['mars-habitat', 'BASE'], ['mars-greenhouse', 'GLASS'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'VEGGIE']],
+    clue: 'Left behind on the red planet, I grew potatoes to stay alive, and called home through a lander from 1997.',
+    story: 'A nod to Andy Weir\'s 2011 novel and the 2015 film. The real science: Martian soil holds toxic perchlorates that a farm would have to wash out, NASA has grown crops in simulated Martian soil, and astronauts first ate space-grown lettuce on the ISS in August 2015. The pictures are NASA\'s, used as references for the pixel farm.' },
   { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
     clue: 'I stared at one patch of sky for four years. Every pixel on this map is a star I watched. (I may be hiding on the map.)',
     story: 'Launched in March 2009, Kepler watched about 150,000 stars in Cygnus and Lyra for the tiny dips of passing planets. When two of its four reaction wheels failed, engineers balanced it against sunlight for the K2 mission. It ran out of fuel in 2018; its last command, on 15 November, was a "goodnight".' },
@@ -129,6 +133,7 @@ const ACHIEVEMENTS = [
   { g: 'MAP AND TOOLS', id: 'highlighter', title: 'HIGHLIGHTER', how: 'Try every highlight filter under the map in one visit.' },
   { g: 'MAP AND TOOLS', id: 'sky', title: 'SKY PHOTOGRAPHER', how: 'Open the real sky photo of a star.' },
   { g: 'MAP AND TOOLS', id: 'cosmic-zoom', title: 'COSMIC ZOOM', how: 'Step through every sector of the universe, from Kepler\'s field to the oldest light.' },
+  { g: 'MAP AND TOOLS', id: 'space-farmer', title: 'SPACE FARMER', how: 'Watch the farm on Mars bring in a whole crop.' },
   { g: 'MAP AND TOOLS', id: 'eco', title: 'ECO MODE', how: 'Switch the animation to battery saver.' },
   { g: 'EASTER EGGS', id: 'curious', title: 'CURIOUS MIND', how: 'Find your first easter egg.' },
   { g: 'EASTER EGGS', id: 'mission-control', title: 'MISSION CONTROL', how: 'Find five spacecraft.' },
@@ -435,6 +440,8 @@ function drawEggArt(canvas, egg, t, silhouette) {
     }
     disc(ctx, cx, cy, r, '#ffd34d');
     disc(ctx, cx - 1, cy - 1, Math.max(1, r - 2), '#fff1b0');
+  } else if (egg.kind === 'martian') {
+    drawMartianBase(ctx, w, h, t, 0.75);
   } else if (egg.kind === 'dwarf') {
     dwarfBody(ctx, cx, cy, Math.floor(h / 3), DWARFS[egg.id], -0.8, -0.6, t * 2);
   } else if (egg.kind === 'kepler') {
@@ -520,6 +527,7 @@ function renderDetail(egg) {
       ${real}
     </div>
     ${got && egg.id === 'sun' ? planetStrip() : ''}
+    ${got && egg.refs ? refStrip(egg) : ''}
     <h3 class="facts-title">${got ? esc(egg.name.toUpperCase()) : esc(blanks(egg.name))}</h3>
     ${got ? `<p class="egg-badge">★ ${esc(egg.toast)} · found ${esc(progress.eggs[egg.id])}</p><p>${esc(egg.story)}</p>
         <button type="button" class="show-me">SHOW ME</button>`
@@ -619,6 +627,17 @@ function planetStrip() {
       <span>${esc(k.toUpperCase())}</span></a></li>`).join('');
   return items ? `<ul class="planet-strip" aria-label="Real photos of the Sun and planets">${items}</ul>
     <p class="note">Real photos in natural colour (NASA): hover or tap one for its source. Sizes not to scale.</p>` : '';
+}
+
+// More references for one easter egg (e.g. The Martian): NASA pictures shown as concept work beside the pixel art.
+function refStrip(egg) {
+  const credits = window.STARMAP_GALLERY || {};
+  const items = egg.refs.filter(([k]) => credits[k]?.img).map(([k, label]) => `
+    <li><a href="${esc(credits[k].link)}" target="_blank" rel="noopener noreferrer" title="${esc(credits[k].what)} · ${esc(credits[k].credit)}">
+      <img src="${esc(credits[k].img)}" alt="${esc(credits[k].what)}" loading="lazy" width="64" height="64">
+      <span>${esc(label)}</span></a></li>`).join('');
+  return items ? `<ul class="planet-strip" aria-label="References">${items}</ul>
+    <p class="note">References used for the pixel art (NASA): hover or tap one for what it shows and its source.</p>` : '';
 }
 
 function renderAchievements() {

@@ -32,7 +32,7 @@
 
 | Star Gazer accuracy | Area under ROC | Kepler systems mapped | The star map's game |
 |:---:|:---:|:---:|:---:|
-| **97.1% ± 0.4**<br><sub>5-fold cross-validation, held-out stars</sub> | **0.994**<br><sub>test split; ensemble accuracy 97.23%</sub> | **3,600+**<br><sub>every star with a planet or candidate</sub> | **28 easter eggs, 63 achievements**<br><sub>progress saved in your browser</sub> |
+| **97.1% ± 0.4**<br><sub>5-fold cross-validation, held-out stars</sub> | **0.994**<br><sub>test split; ensemble accuracy 97.23%</sub> | **3,600+**<br><sub>every star with a planet or candidate</sub> | **29 easter eggs, 64 achievements**<br><sub>progress saved in your browser</sub> |
 
 > **V3 "Star Gazer" (October 2026):** every Kepler quarter of every labelled star (~7,586 KOIs), AstroNet / ExoMiner-style views, and NASA catalog parameters in one hybrid network: **97.23% test accuracy, AUC 0.994**, up from 73.3% / 0.830 in V2. See [Results across versions](#results-across-versions) and [How to Run](#how-to-run-vs-code). Use is subject to the [Terms of Use](TERMS_OF_USE.md).
 
@@ -215,8 +215,8 @@ planets Kepler found outside its usual candidate list, like Kepler-16 b, a real 
 
 The **UNIVERSE** button zooms out in six sectors (◀ ▶ or the arrow keys): Kepler's field, the Sun's neighbourhood (every star with confirmed planets within 13 light-years, from NASA's table), the Milky Way, the Local Group (real galaxy distances, McConnachie 2012), Laniakea and the observable universe, each with its sources.
 
-**It's also a game.** The gear button opens the **Galleria**: 28 hidden easter eggs to find by name (each shows its
-pixel art next to the real NASA photo, with a slider that turns one into the other), 63 achievements with
+**It's also a game.** The gear button opens the **Galleria**: 29 hidden easter eggs to find by name (each shows its
+pixel art next to the real NASA photo, with a slider that turns one into the other), 64 achievements with
 trophies by difficulty, set badges and a constellation per group, and a hologram close-up of every trophy. Your
 achievements grow **your star** in the page header, from stardust to a black hole for the final mission (open
 every system on the map). Visitors can **make their own predictions** on candidates (planet or not?), scored

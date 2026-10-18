@@ -258,6 +258,7 @@ function lookup(query, updateHash = true) {
   // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
   const q = query.trim().replace(/[-_.]/g, ' ');
   if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
+  if (MARTIAN_QUERY.test(q)) { showMartian(updateHash); unlockEgg('martian'); return; }   // 47d-martian.js
   const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
   if (dwarf) { showDwarf(dwarf, updateHash); unlockEgg(dwarf); return; }
   if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }

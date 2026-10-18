@@ -191,6 +191,26 @@ def test_astronaut_outfits(browser, site):
     assert not errors, errors
 
 
+def test_the_martian(browser, site):
+    """The Martian: the farm opens from search (and from its #the-martian link), the egg is found, and the Galleria
+    card shows the NASA references; a full crop earns SPACE FARMER (time fast-forwarded)."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'the martian')
+    page.press('#query', 'Enter')
+    assert page.locator('#sys-title').inner_text() == 'THE MARTIAN'
+    assert 'martian' in page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).eggs")
+    page.clock.run_for(61_000)                                          # a whole crop
+    page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('space-farmer')")
+    page.click('#open-gallery')
+    page.click('.egg-card[data-egg="martian"]')
+    page.wait_for_selector('#pane-eggs .planet-strip img')
+    assert page.locator('#pane-eggs .planet-strip li').count() == 5
+    page.goto(site + '#the-martian')                                    # a shared link opens it too
+    page.wait_for_function("() => document.getElementById('sys-title').textContent === 'THE MARTIAN'")
+    assert not errors, errors
+
+
 def test_page_checks(browser, site):
     """The full in-page check list (search, zoom, highlights, system view, easter egg, case files...)."""
     errors = []
@@ -312,7 +332,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 28
+    assert page.locator('.egg-card').count() == 29
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -366,7 +386,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/63'
+    assert page.locator('#rank-count').inner_text() == '12/64'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1

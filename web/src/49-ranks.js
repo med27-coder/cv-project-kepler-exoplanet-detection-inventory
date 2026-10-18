@@ -87,6 +87,7 @@ const SYMBOLS = {
   'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
   houston: ['..bbb..', '..kkk..', 'bbbbbbb', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
   'space-wardrobe': ['ppp.kkk', 'ppp.kkk', '.......', 'bbb.yyy', 'bbb.yyy', '.......'],   // four hats on the rack
+  'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
   'launch-day': ['...w...', '..wbw..', '..www..', '.rwwwr.', '...o...', '..o.o..'],          // a rocket

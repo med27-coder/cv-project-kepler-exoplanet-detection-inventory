@@ -82,6 +82,14 @@ PICKS = [
     ('concepts', 'comet-hale-bopp', 'PIA01289', 'Comet Hale-Bopp seen by Hubble (for the passing comets)'),
     ('concepts', 'asteroid-eros', 'PIA02900', 'Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids)'),
     ('stars', '9-black-hole-m87', 'PIA23122', 'Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset)'),
+    # The Martian easter egg (a fan reference to Andy Weir's novel and the 2015 film): real NASA work on farming Mars.
+    # No film stills (the studio's copyright); these are NASA's own pictures, shown as references in the Galleria.
+    ('martian', 'martian-gardens', 'KSC-20160815-PH_DNG01_0003', "Martian Gardens: crops grown in simulated Martian soil (NASA Kennedy and Florida Tech, 2016)"),
+    ('martian', 'mars-habitat', 'PIA23302', 'First humans on Mars: astronauts and habitats (artist concept)'),
+    ('martian', 'mars-greenhouse', 'PIA23343', 'Aerogel greenhouses: a proposal for warming patches of Mars to grow plants (concept)'),
+    ('martian', 'acidalia', 'PIA02000', 'Acidalia and Chryse Plains, where the novel puts the Ares 3 base (Mars Global Surveyor)'),
+    ('martian', 'pathfinder', 'PIA00621', 'Mars Pathfinder and Sojourner in 1997, the lander the story uses to phone home'),
+    ('martian', 'veggie', 'KSC-20180227-PH_DAC01_0044', "Seeds placed into pods for Veggie, the space station's garden (2018)"),
     # Trophies (docs/plans/TROPHIES_AND_DATA.md): the universe cup, the nebula tier, and unique trophies.
     ('trophies', 'universe-deep-field', 'GSFC_20171208_Archive_e001651', 'Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky'),
     ('trophies', 'universe-cmb', 'PIA16874', 'The oldest light in the universe, the cosmic microwave background (Planck)'),
@@ -100,7 +108,7 @@ PICKS = [
 # Part of the picture to keep, as fractions (left, top, right, bottom): NASA's Venus is a pair, the plain view on the
 # left and a contrast-enhanced copy on the right.
 CROP = {'venus': (0, 0, 0.49, 1)}
-WEB_FOLDERS = {'spacecraft', 'solar-system'}   # the Galleria's photos; 'stars' are concept references only
+WEB_FOLDERS = {'spacecraft', 'solar-system', 'martian'}   # the Galleria's photos; 'stars' are concept references only
 EXTRA = [   # not in the NASA library search: (folder, file, URL, credit, what it shows)
     ('solar-system', 'earth-blue-marble',
      'https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57752/land_shallow_topo_2048.jpg',
