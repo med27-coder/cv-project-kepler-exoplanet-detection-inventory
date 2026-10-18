@@ -112,6 +112,15 @@ so nobody loses what they've earned.
 
 ## 7. Decisions for you
 
+**Answered 18 October 2026: yes to all four.**
+1. The new tier is **Nebula** (between gold and secret).
+2. Levelled achievements become a nebula cup at their last level.
+3. Versions start at **v1.0.0**, with a CHANGELOG and GitHub Releases; the antenna announces each big update.
+4. The universe cup (the Big Bang cone) goes to concept art.
+
+The questions as first asked:
+
+
 1. The new tier's name: **Nebula** (recommended), or something else?
 2. Should levelled achievements upgrade to the nebula cup at their last level?
 3. Version numbering: start today at v1.0.0, and publish GitHub Releases (recommended)?

@@ -68,6 +68,12 @@ version (everything shown) stays available after GRAND TOUR, or with a "show all
    independent data check, as in HIGHLIGHTS.md.
 
 ## 8. Decisions for you
+
+**Answered 18 October 2026:** the "candidate" / "likely" labels, as written. (The loading screen is built: the
+Delta II rocket, see `pixel-art/archive/` for the first version.)
+
+The questions as first asked:
+
 1. Spacecraft: answered, see FLEET_CLOSEUPS.md (flashing lights until named).
 2. Loading screen: always shown briefly, or only when loading takes more than half a second (recommended)?
 3. Exomoon and water-world labels: "candidate" / "likely" wording as above, OK?
