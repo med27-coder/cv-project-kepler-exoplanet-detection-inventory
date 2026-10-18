@@ -264,7 +264,12 @@ function lookup(query, updateHash = true) {
   if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
   if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
   if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
-  if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
+  if (CRAFT_QUERY.test(q)) {
+    showSpacecraft(updateHash, q);
+    unlockEgg(eggForQuery(q));
+    if (VOYAGERS_QUERY.test(q)) toast('egg', 'TWO VOYAGERS', 'Twin probes, launched in 1977 on different paths. Search VOYAGER 1 or VOYAGER 2 to find each one.');
+    return;
+  }
   if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
   const s = find(query);
   if (s) select(s, updateHash); else { showUnknown(query); nearMiss(q); }

@@ -119,11 +119,11 @@
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
   // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
   // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const RELEASE_NOTES = [
-    'Sky watch: every few minutes a comet or a tumbling asteroid crosses the Kepler map. Click one to catch it!',
-    'Six new achievements for catching them, in their own SKY WATCH constellation.',
-    'Keep watching the skies: something stranger passes by now and then.',
+    'Voyager 1 and Voyager 2 are now two easter eggs, each with its own story. Already found "Voyager"? That was Voyager 1.',
+    'The 8-bit fanfare is on from the start and plays reliably (switch it off in Settings if you prefer quiet).',
+    'Sky watch (v1.1): comets and asteroids cross the Kepler map every few minutes. Click one to catch it!',
   ];
 
   // ---------------------------------------------------------------- sky events: comets, asteroids, the odd UFO
@@ -1775,7 +1775,12 @@
     if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }
     if (ISS_QUERY.test(q)) { showISS(updateHash); unlockEgg('iss'); return; }
     if (KEPLER_QUERY.test(q)) { showKepler(updateHash); unlockEgg('kepler'); return; }
-    if (CRAFT_QUERY.test(q)) { showSpacecraft(updateHash, q); unlockEgg(eggForQuery(q)); return; }
+    if (CRAFT_QUERY.test(q)) {
+      showSpacecraft(updateHash, q);
+      unlockEgg(eggForQuery(q));
+      if (VOYAGERS_QUERY.test(q)) toast('egg', 'TWO VOYAGERS', 'Twin probes, launched in 1977 on different paths. Search VOYAGER 1 or VOYAGER 2 to find each one.');
+      return;
+    }
     if (/^(the )?tatooine$/i.test(q)) { const k16 = find('Kepler-16'); if (k16) { select(k16, updateHash); tatooineFound(); return; } }
     const s = find(query);
     if (s) select(s, updateHash); else { showUnknown(query); nearMiss(q); }
@@ -1786,13 +1791,14 @@
   // the planets and humanity's spacecraft beyond Earth orbit where NASA JPL Horizons puts them
   // (scripts/starmap/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
   // are left out on purpose; "ISS" / "space station" opens the International Space Station instead.
-  const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?)$/i;
+  const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?|voyagers?)$/i;
+  const VOYAGERS_QUERY = /^(the )?voyagers?$/i;   // which one? Voyager 1 and Voyager 2 are found separately
   // Search words for one spacecraft -> its name in data/spacecraft.js (or a rover's): the view then
   // highlights it and shows its pixel art.
   // ("the" in front is always allowed; lookup() has already turned hyphens, underscores and dots into spaces.)
   const CRAFT_ALIASES = [
     [/^(jwst|(james )?webb( space)?( telescope)?)$/i, 'James Webb Space Telescope'],
-    [/^voyager( ?(1|i|one))?$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
+    [/^voyager ?(1|i|one)$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
     [/^new horizons( probe| spacecraft)?$/i, 'New Horizons'],
     [/^parker( solar)?( probe)?$/i, 'Parker Solar Probe'], [/^juno( probe)?$/i, 'Juno'], [/^(europa )?clipper$/i, 'Europa Clipper'],
     [/^(soho|solar and heliospheric observatory)$/i, 'SOHO'], [/^euclid( telescope)?$/i, 'Euclid'],
@@ -1824,8 +1830,11 @@
 
   // Spacecraft you haven't found yet are nameless flashing lights; searching a name reveals one for good
   // (docs/plans/FLEET_CLOSEUPS.md). Everything shows once GRAND TOUR is earned.
-  const craftEgg = c => CRAFT_SPRITE[c.name];
+  const CRAFT_EGG = { 'Voyager 2': 'voyager2' };   // the twins share a sprite but are two easter eggs
+  const craftEggId = name => CRAFT_EGG[name] || CRAFT_SPRITE[name];
+  const craftEgg = c => craftEggId(c.name);
   const craftFound = c => Boolean(progress.ach['grand-tour'] || progress.eggs[craftEgg(c)]);
+  const craftFoundByName = name => craftFound({ name });
   // "Where" for a spacecraft still hidden, with any word of its name blanked ("asteroid Psyche" gives Psyche away).
   const COMMON_WORDS = new Set(['mars', 'space', 'telescope', 'solar', 'probe', 'orbiter', 'trace', 'gas']);   // not giveaways
   const hiddenWhere = c => c.name.split(/[\s-]+/).filter(w => w.length >= 4 && !COMMON_WORDS.has(w.toLowerCase()))
@@ -1939,8 +1948,10 @@
       });
       sc.frozen = true;
       const gallery = [...data.spacecraft, ...data.rovers]
-        .filter((c, i, all) => CRAFT_SPRITE[c.name] && craftFound(c) && all.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)
-        .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name], label: c.name === 'Voyager 1' ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
+        .filter(c => CRAFT_SPRITE[c.name] && craftFound(c))
+        .filter((c, i, found) => found.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)   // one per sprite
+        .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name],
+                     label: c.name.startsWith('Voyager') && craftFoundByName('Voyager 1') && craftFoundByName('Voyager 2') ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
       if (focus) {   // the second Voyager shares the first's sprite
         const own = gallery.find(g => g.name === focus) || { name: focus, key: CRAFT_SPRITE[focus] };
         Object.assign(own, { label: focus.toUpperCase() });
@@ -2941,9 +2952,12 @@
     { id: 'iss', name: 'International Space Station', kind: 'craft', art: 'iss', ref: 'iss', query: 'ISS', toast: 'CREW ABOARD',
       clue: 'Sixteen sunrises a day, and people have lived inside me since the year 2000.',
       story: 'Built in orbit from 1998 by the space agencies of the United States, Russia, Europe, Japan and Canada, piece by piece over dozens of launches. Crews have lived aboard without a break since November 2000, and it is big enough to see from the ground with your own eyes.' },
-    { id: 'voyager', name: 'Voyager', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager', toast: 'INTERSTELLAR SIGNAL',
-      clue: 'Twins launched in 1977, each carrying a golden record, now whispering from beyond the Sun\'s bubble.',
-      story: 'The Voyagers rode a rare line-up of the outer planets on a "Grand Tour": Voyager 2 is still the only spacecraft to visit Uranus and Neptune. Each carries a Golden Record of sounds and pictures of Earth. Voyager 1 entered interstellar space in 2012 and Voyager 2 in 2018; their signals take most of a day to reach us.' },
+    { id: 'voyager', name: 'Voyager 1', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 1', toast: 'INTERSTELLAR SIGNAL',
+      clue: 'The farthest human-made object. I took the Pale Blue Dot, and in 2012 I was first to leave the Sun\'s bubble.',
+      story: 'Launched on 5 September 1977, Voyager 1 flew past Jupiter (1979) and Saturn (1980), then headed up out of the planets\' plane. On 14 February 1990 it turned round and took the Pale Blue Dot, Earth from 6 billion km. In August 2012 it became the first spacecraft in interstellar space. It carries a Golden Record of sounds and pictures of Earth, and its signal takes most of a day to reach us.' },
+    { id: 'voyager2', name: 'Voyager 2', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 2', toast: 'ICE GIANTS VISITED',
+      clue: 'Launched first, but numbered second. I\'m still the only visitor Uranus and Neptune have ever had.',
+      story: 'Launched on 20 August 1977, two weeks before its twin, Voyager 2 rode a line-up of the outer planets that happens once every 175 years: Jupiter (1979), Saturn (1981), Uranus (1986) and Neptune (1989), the Grand Tour. It found Neptune\'s Great Dark Spot and Triton\'s geysers, and crossed into interstellar space in November 2018. It carries its own Golden Record.' },
     { id: 'newHorizons', name: 'New Horizons', kind: 'craft', art: 'newHorizons', ref: 'new-horizons', query: 'New Horizons', toast: 'KUIPER BELT REACHED',
       clue: 'I flew past a heart in 2015 and a snowman on New Year\'s Day 2019.',
       story: 'Launched in January 2006, the fastest launch of any spacecraft at the time, New Horizons reached Pluto in July 2015 after nine and a half years. On 1 January 2019 it flew past Arrokoth, a two-lobed "snowman" in the Kuiper Belt. It carries some of the ashes of Clyde Tombaugh, who discovered Pluto.' },
@@ -3048,7 +3062,7 @@
     { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
     { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
     { g: 'EASTER EGGS', id: 'dwarf-king', title: 'DWARF KING', how: 'Find all five dwarf planets.' },
-    { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find the two missions heading out of the Solar System.' },
+    { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find Voyager 1, Voyager 2 and New Horizons, heading out of the Solar System.' },
     { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
     { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
     { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
@@ -3105,7 +3119,7 @@
     'jupiter-crew': ['juno', 'clipper', 'juice', 'lucy'],
     'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
     l2: ['jwst', 'euclid'],
-    interstellar: ['voyager', 'newHorizons'],
+    interstellar: ['voyager', 'voyager2', 'newHorizons'],
     'dwarf-king': ['pluto', 'ceres', 'haumea', 'makemake', 'eris'],
   };
   const PYRAMID_LY = 4600;   // the Great Pyramid of Giza is about 4,600 years old
@@ -3119,7 +3133,7 @@
   const PROGRESS_KEY = 'starmap.progress.v1';
   const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                      calls: {}, notified: [],    // predictions (48b-predictions.js)
-                     showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
+                     showcase: [], levels: {}, sound: true, soundChoice: false,   // trophies (49b-trophies.js)
                      toured: false,   // first-visit tour (49c-ui.js)
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                      backdrop: 'animated',   // page background (55-backdrop.js)
@@ -3159,7 +3173,8 @@
     }
     if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
     if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
-    if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
+    // The fanfare is on unless the visitor switched it off themselves (an old saved "off" was only the old default).
+    if (saved.soundChoice === true && typeof saved.sound === 'boolean') { progress.sound = saved.sound; progress.soundChoice = true; }
     if (saved.toured === true) progress.toured = true;
     if (saved.daily && DATE.test(String(saved.daily.last)) && (!progress.daily.last || saved.daily.last > progress.daily.last)) {
       progress.daily = { last: saved.daily.last, streak: Number.isInteger(saved.daily.streak) ? Math.min(9999, Math.max(0, saved.daily.streak)) : 1 };
@@ -3253,7 +3268,7 @@
     if (ISS_QUERY.test(q)) return 'iss';
     if (KEPLER_QUERY.test(q)) return 'kepler';
     const craft = craftFocus(q);
-    return craft ? CRAFT_SPRITE[craft] : null;
+    return craft ? craftEggId(craft) : null;
   }
 
   function systemOpened(s) {   // from select(): counts systems for the achievements
@@ -3313,7 +3328,7 @@
 
   // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
   const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager'], ['Parker', 'parker'],
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Parker', 'parker'],
     ['Osiris Rex', 'apex'], ['Tatooine', null]];
   const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
   function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -3688,7 +3703,7 @@
 
   const soundSetting = document.getElementById('set-sound');
   soundSetting.checked = progress.sound;
-  soundSetting.addEventListener('change', () => { progress.sound = soundSetting.checked; saveProgress(); if (progress.sound) fanfare('rare'); });
+  soundSetting.addEventListener('change', () => { progress.sound = soundSetting.checked; progress.soundChoice = true; saveProgress(); if (progress.sound) fanfare('rare'); });
   const toastSetting = document.getElementById('set-toasts');
   toastSetting.checked = progress.toasts;
   toastSetting.addEventListener('change', () => { progress.toasts = toastSetting.checked; saveProgress(); });
@@ -4555,13 +4570,30 @@
     for (let x = -12; x <= 12; x += 3) ctx.fillRect(Math.round(cx + x), baseY, 1, 1);
   }
 
-  // ---- unlock fanfare (Web Audio, generated; only if turned on in Settings)
+  // ---- unlock fanfare (Web Audio, generated; on unless switched off in Settings)
+  // Browsers keep audio asleep until the visitor clicks or types, and an achievement can arrive without one (a timer,
+  // a passing comet). So the audio is woken on the first click or key, and a fanfare that arrives while it sleeps
+  // waits for it instead of being lost or played late in a jumble.
   let audio = null;
+  function audioContext() {
+    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch { audio = null; }
+    return audio;
+  }
+  function wakeAudio() {
+    const ctx = progress.sound && audioContext();
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  }
+  for (const evt of ['pointerdown', 'keydown', 'touchend']) addEventListener(evt, wakeAudio, { capture: true, passive: true });
   function fanfare(tier) {
     if (!progress.sound) return;
+    const ctx = audioContext();
+    if (!ctx) return;
+    if (ctx.state !== 'running') { ctx.resume().then(() => playFanfare(tier), () => {}); return; }
+    playFanfare(tier);
+  }
+  function playFanfare(tier) {
+    const audio = audioContext();
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      if (audio.state === 'suspended') audio.resume();
       const notes = { common: [523, 659], rare: [523, 659, 784], epic: [523, 659, 784, 1047], secret: [392, 523, 698, 932, 1175],
                       legend: [262, 392, 523, 784, 1047, 1568] }[tier] || [523, 659];
       notes.forEach((f, i) => {
