@@ -40,6 +40,7 @@ def segments(cmd):
     lex = shlex.shlex(HEREDOC.sub(' ', cmd), posix=True, punctuation_chars=';&|')
     lex.whitespace_split = True
     lex.commenters = ''
+    lex.escape = ''   # Windows paths use backslashes: keep them (.secrets\star_gazer.key)
     seg = []
     for tok in lex:
         if tok in SEPARATORS or set(tok) <= set(';&|'):
@@ -93,12 +94,16 @@ def check_git(args, env):
     k = 0
     while k < len(args) and args[k].startswith('-'):
         a = args[k]
-        if a in ('-c', '--config-env') and k + 1 < len(args) and hooks_path(args[k + 1]):
+        joined = ('=' in a and a.split('=', 1)[0] in GLOBAL_WITH_VALUE) or (a[:2] in ('-c', '-C') and len(a) > 2)
+        value = args[k + 1] if a in GLOBAL_WITH_VALUE and k + 1 < len(args) else ''
+        if hooks_path(a) or hooks_path(value):   # -c core.hooksPath=..., -ccore..., --config-env=core.hooksPath=...
             deny('changing core.hooksPath would bypass the git pre-commit hook that guards the key.')
-        k += 2 if a in GLOBAL_WITH_VALUE else 1
+        k += 2 if a in GLOBAL_WITH_VALUE and not joined else 1
     if k >= len(args):
         return
     sub, rest = args[k].lower(), args[k + 1:]
+    if sub not in ('commit', 'log', 'show', 'grep', 'diff', 'config', 'help') and any(hooks_path(a) for a in rest):
+        deny('changing core.hooksPath would bypass the git pre-commit hook that guards the key.')
     if sub in ('add', 'stage', 'update-index') and any(SECRET.search(a) for a in rest if not a.startswith('-')):
         deny('this git command stages a secret (.secrets/, *.key, *.pem or .env). The Star Gazer key must never be '
              'committed.')
@@ -111,27 +116,45 @@ def check_git(args, env):
     return False
 
 
-def main():
-    data = json.load(sys.stdin)
-    cmd = (data.get('tool_input') or {}).get('command', '')
-    if not re.search(r'git', cmd, re.IGNORECASE):
-        return
+def scan(cmd, depth=0):
+    """Check every git call in a command; returns True if one of them commits. Command strings handed to another
+    shell (bash -c "...", cmd /c "...", powershell -Command "...", iex "...") are read the same way, recursively."""
+    if depth > 3:
+        deny('this command nests shells too deeply to read safely.')
     try:
         segs = list(segments(cmd))
     except ValueError:   # unbalanced quotes: a shell would refuse it too; refuse if it could touch a secret
         if SECRET.search(cmd.replace('"', ' ').replace("'", ' ')) or hooks_path(cmd):
             deny('could not read this command safely, and it mentions a secret.')
-        return
+        return False
     commits = False
     for seg in segs:
         env = []
         while seg and re.match(r'^[A-Za-z_]\w*=', seg[0]):
             env.append(seg.pop(0))
+        if any(re.match(r'-e(nc(odedcommand)?)?$', t, re.IGNORECASE) for t in seg) and \
+                any(re.search(r'(^|[/\\])(powershell|pwsh)(\.exe)?$', t, re.IGNORECASE) for t in seg):
+            deny('an encoded PowerShell command cannot be checked for secrets.')
+        for tok in seg:   # strings run by another shell or by Invoke-Expression
+            if ' ' in tok and re.search(r'git', tok, re.IGNORECASE):
+                commits |= scan(tok, depth + 1)
         for i, tok in enumerate(seg):   # also after wrappers like `env`, `command`, `&`, `cmd /c`
             if is_git(tok):
                 commits |= bool(check_git(seg[i + 1:], env))
                 break
-    if commits:
+    return commits
+
+
+def main():
+    data = json.load(sys.stdin)
+    cmd = (data.get('tool_input') or {}).get('command', '')
+    if re.search(r'(powershell|pwsh)(\.exe)?\b.*\s-e(nc(odedcommand)?)?\s', cmd + ' ', re.IGNORECASE):
+        deny('an encoded PowerShell command cannot be checked for secrets.')
+    if not re.search(r'git', cmd, re.IGNORECASE):
+        return
+    if re.search(r'GIT_CONFIG', cmd, re.IGNORECASE):   # GIT_CONFIG_GLOBAL=..., $env:GIT_CONFIG_COUNT = ..., set ...
+        deny('setting GIT_CONFIG_* could redirect the git hook that guards the key.')
+    if scan(cmd):
         out = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True, check=False)
         bad = [f for f in out.stdout.splitlines() if SECRET.search(f)] if out.returncode == 0 else []
         if bad:
