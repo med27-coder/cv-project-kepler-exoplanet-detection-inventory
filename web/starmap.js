@@ -121,6 +121,9 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.5', date: '18 Oct 2026', notes: [
+      "New: one of the dwarf planets has a fresh look, closer to NASA's, with its two moons on their tilted orbits.",
+    ] },
     { v: '1.9.4', date: '18 Oct 2026', notes: [
       'New: a nearby star you can visit now, even though Kepler never looked at it. Something small glints there.',
       'Fixed: systems whose catalog numbers put a planet inside its star now explain why.',
@@ -2692,9 +2695,15 @@
     },
     haumea: {
       name: 'Haumea', km: 2322, stretch: 1.55,
-      art: (dx, dy, r) => (hash(`ha${dx},${dy}`) < 0.12 ? '#cfccc6' : '#ecebe7'),   // bright crystalline water ice
+      art: (dx, dy, r, spin) => {   // mottled grey-tan water ice (after NASA's Eyes on the Solar System), with its dark red spot
+        const u = dx + spin * 0.7, lon = ((u % (4 * r)) + 4 * r) % (4 * r) - 2 * r;   // half a turn is on the far side
+        if (Math.hypot(lon - r * 0.25, dy + r * 0.15) < r * 0.32) return hash(`hs${Math.floor(u)},${dy}`) < 0.3 ? '#8a6a5a' : '#7a5a4c';
+        const m = hash(`ha${Math.floor(u / 2)},${Math.floor(dy / 2)}`);
+        return m < 0.18 ? '#a39b8e' : m < 0.45 ? '#bdb5a8' : '#d2cbbf';
+      },
       ring: '#a9a59c',
-      moons: [['NAMAKA', 18.3, '#c8c4bc', 1], ['HIIAKA', 49.5, '#dedad2', 1]],
+      // Hiʻiaka is the larger, farther moon; Namaka's orbit is tipped well away from Hiʻiaka's (the fifth value: tilt)
+      moons: [['NAMAKA', 18.3, '#b8b2a8', 1, -0.55], ['HIIAKA', 49.5, '#dedad2', 2, 0.3]],
       url: `${NASA_SCIENCE}dwarf-planets/haumea/`,
       facts: [
         'It spins once every 3.9 hours, one of the fastest-spinning large objects known, which has stretched it into an egg about 2,300 km long and half as wide.',
@@ -2760,16 +2769,20 @@
     const reach = (d.ring ? r * d.stretch * 1.6 : r * d.stretch) + 7;   // moons circle outside the globe (and ring)
     const orbit = k => reach + 12 * k;
     const onGlobe = (x, y, pad = 1) => ((x - cx) / (r * d.stretch + pad)) ** 2 + ((y - cy) / (r + pad)) ** 2 < 1;
+    const onOrbit = (k, a) => {   // a point on moon k's orbit; an orbit can be tilted (its fifth value, radians)
+      const tilt = d.moons[k][4] || 0, ox = orbit(k) * Math.cos(a), oy = orbit(k) * FLAT * Math.sin(a);
+      return [cx + ox * Math.cos(tilt) - oy * Math.sin(tilt), cy + ox * Math.sin(tilt) + oy * Math.cos(tilt)];
+    };
     d.moons.forEach((m, k) => {   // dotted orbits, broken where the globe hides them
       sctx.fillStyle = '#26305e';
       for (let a = 0; a < 2 * Math.PI; a += 0.1) {
-        const x = cx + orbit(k) * Math.cos(a), y = cy + orbit(k) * FLAT * Math.sin(a);
+        const [x, y] = onOrbit(k, a);
         if (!(Math.sin(a) < 0 && onGlobe(x, y))) sctx.fillRect(Math.round(x), Math.round(y), 1, 1);
       }
     });
     const placed = d.moons.map(([name, period, colour, size], k) => {
-      const a = t * 2 / Math.sqrt(period) + hash(name) * 6.3;
-      return { name, colour, size, x: cx + orbit(k) * Math.cos(a), y: cy + orbit(k) * FLAT * Math.sin(a), behind: Math.sin(a) < 0 };
+      const a = t * 2 / Math.sqrt(period) + hash(name) * 6.3, [x, y] = onOrbit(k, a);
+      return { name, colour, size, x, y, behind: Math.sin(a) < 0 };
     });
     const moon = m => {
       if (m.behind && onGlobe(m.x, m.y)) return;   // hidden behind the world

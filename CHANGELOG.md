@@ -7,6 +7,13 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.5] - 2026-10-18
+
+### Changed
+- **Haumea redrawn** after NASA's Eyes on the Solar System (a player's reference): a mottled grey-tan surface with
+  its real dark red spot turning into view, and its moons Hiʻiaka (larger, farther) and Namaka on orbits tilted
+  differently, as they really are. Dwarf-planet moons can now have tilted orbits. The old drawing is archived.
+
 ## [1.9.4] - 2026-10-18
 
 ### Added
@@ -179,6 +186,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.5]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.5
 [1.9.4]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.4
 [1.9.3]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.3
 [1.9.2]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.2
