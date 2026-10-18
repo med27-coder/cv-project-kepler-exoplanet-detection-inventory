@@ -70,3 +70,11 @@ if ('IntersectionObserver' in window) {
 drawMap(0);
 drawSystem(0);
 wake();
+// Ready: the loading screen (index.html) fades out, if it ever showed, and goes.
+const loadingScreen = document.getElementById('loading');
+if (loadingScreen) {
+  loadingScreen.classList.add('done');
+  setTimeout(() => loadingScreen.remove(), 350);
+}
+// "TAKE ME SOMEWHERE" buttons (the empty screen, NO SIGNAL): the dice.
+info.addEventListener('click', e => { if (e.target.closest('[data-random]')) document.getElementById('random').click(); });
