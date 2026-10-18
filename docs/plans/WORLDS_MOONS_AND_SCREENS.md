@@ -5,8 +5,8 @@ Ground rule for everything here: **every claim carries its evidence level** (con
 and a source, so the game never overstates the science. Data checked on 17 October 2026.
 
 ## 0. Fixed already (17 October)
-Searching an easter egg you had already found opened it silently, which looked like nothing happened; it now
-says "ALREADY FOUND". The first-visit tour could also take the keyboard away from the search box; it no longer
+Searching an easter egg you had already found opened it silently, which looked like nothing happened. An
+"ALREADY FOUND" pop-up was tried, then removed at the user's request (the view opening is answer enough). The first-visit tour could also take the keyboard away from the search box; it no longer
 does. (If a name still doesn't work, note exactly what was typed.)
 
 ## 1. Water worlds, from published results (not guessed)
