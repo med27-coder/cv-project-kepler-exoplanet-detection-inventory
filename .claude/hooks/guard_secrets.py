@@ -36,11 +36,12 @@ def deny(reason):
     sys.exit(0)
 
 
-def segments(cmd):
+def segments(cmd, windows):
     lex = shlex.shlex(HEREDOC.sub(' ', cmd), posix=True, punctuation_chars=';&|')
     lex.whitespace_split = True
     lex.commenters = ''
-    lex.escape = ''   # Windows paths use backslashes: keep them (.secrets\star_gazer.key)
+    if windows:   # PowerShell and cmd keep backslashes (.secrets\star_gazer.key); bash treats them as escapes
+        lex.escape = ''
     seg = []
     for tok in lex:
         if tok in SEPARATORS or set(tok) <= set(';&|'):
@@ -121,12 +122,13 @@ def scan(cmd, depth=0):
     shell (bash -c "...", cmd /c "...", powershell -Command "...", iex "...") are read the same way, recursively."""
     if depth > 3:
         deny('this command nests shells too deeply to read safely.')
-    try:
-        segs = list(segments(cmd))
-    except ValueError:   # unbalanced quotes: a shell would refuse it too; refuse if it could touch a secret
-        if SECRET.search(cmd.replace('"', ' ').replace("'", ' ')) or hooks_path(cmd):
-            deny('could not read this command safely, and it mentions a secret.')
-        return False
+    segs = []
+    for windows in (False, True):   # read it both ways; either reading finding a problem is enough
+        try:
+            segs += list(segments(cmd, windows))
+        except ValueError:   # unbalanced quotes: refuse if it could touch a secret
+            if SECRET.search(cmd.replace('"', ' ').replace("'", ' ')) or hooks_path(cmd):
+                deny('could not read this command safely, and it mentions a secret.')
     commits = False
     for seg in segs:
         env = []
@@ -136,7 +138,7 @@ def scan(cmd, depth=0):
                 any(re.search(r'(^|[/\\])(powershell|pwsh)(\.exe)?$', t, re.IGNORECASE) for t in seg):
             deny('an encoded PowerShell command cannot be checked for secrets.')
         for tok in seg:   # strings run by another shell or by Invoke-Expression
-            if ' ' in tok and re.search(r'git', tok, re.IGNORECASE):
+            if re.search(r'\s', tok) and re.search(r'git', tok, re.IGNORECASE):
                 commits |= scan(tok, depth + 1)
         for i, tok in enumerate(seg):   # also after wrappers like `env`, `command`, `&`, `cmd /c`
             if is_git(tok):
@@ -148,10 +150,12 @@ def scan(cmd, depth=0):
 def main():
     data = json.load(sys.stdin)
     cmd = (data.get('tool_input') or {}).get('command', '')
-    if re.search(r'(powershell|pwsh)(\.exe)?\b.*\s-e(nc(odedcommand)?)?\s', cmd + ' ', re.IGNORECASE):
+    if re.search(r'(powershell|pwsh)(\.exe)?\b.*\s(-|/|--)e\w*\b', cmd, re.IGNORECASE):   # -e, -ec, -enc, /e...
         deny('an encoded PowerShell command cannot be checked for secrets.')
     if not re.search(r'git', cmd, re.IGNORECASE):
         return
+    if re.search(r'git(\.exe)?["\']?(\$\{?IFS|\$\(|`|\$[\w{])', cmd, re.IGNORECASE):   # git${IFS}add, git$(...)
+        deny('shell expansion right after git hides what it runs.')
     if re.search(r'GIT_CONFIG', cmd, re.IGNORECASE):   # GIT_CONFIG_GLOBAL=..., $env:GIT_CONFIG_COUNT = ..., set ...
         deny('setting GIT_CONFIG_* could redirect the git hook that guards the key.')
     if scan(cmd):
