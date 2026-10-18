@@ -2484,9 +2484,17 @@
     refreshGallery();
   }
 
+  const eggsSeenAgain = new Set();   // "already found" notes, once per egg per visit
   function unlockEgg(id) {
     const egg = EGG.get(id);
-    if (!egg || progress.eggs[id]) return;
+    if (!egg) return;
+    if (progress.eggs[id]) {   // found before: say so, instead of staying silent
+      if (!eggsSeenAgain.has(id)) {
+        eggsSeenAgain.add(id);
+        toast('egg', 'ALREADY FOUND', `${egg.name} is in your Galleria (found ${niceDate(progress.eggs[id])}).`, egg);
+      }
+      return;
+    }
     progress.eggs[id] = today();
     saveProgress();
     glow();
@@ -3785,7 +3793,7 @@
     tourBox.style.top = `${Math.round(r.bottom + scrollY + 10)}px`;
     tourBox.querySelector('[data-tour="next"]').addEventListener('click', () => showTourStep(i + 1));
     tourBox.querySelector('[data-tour="skip"]').addEventListener('click', endTour);
-    tourBox.querySelector('[data-tour="next"]').focus({ preventScroll: true });
+    if (document.activeElement === document.body) tourBox.querySelector('[data-tour="next"]').focus({ preventScroll: true });   // never steal the search box
   }
   function endTour() {
     document.querySelectorAll('.tour-target').forEach(el => el.classList.remove('tour-target'));
@@ -3819,7 +3827,11 @@
   queueMicrotask(() => {
     paintIcons();
     const forced = /[?&]tour\b/.test(location.search);
-    if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => showTourStep(0), forced ? 0 : 900);
+    let busy = false;   // a visitor who starts typing or clicking right away doesn't get interrupted by the tour
+    const mark = () => { busy = true; };
+    addEventListener('keydown', mark, { once: true, capture: true });
+    addEventListener('pointerdown', mark, { once: true, capture: true });
+    if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => { if (forced || !busy) showTourStep(0); }, forced ? 0 : 900);
   });
 
   // ---------------------------------------------------------------- connecting the pieces
