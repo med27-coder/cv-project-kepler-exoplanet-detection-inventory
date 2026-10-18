@@ -242,7 +242,8 @@ function showUnknown(query) {
   info.innerHTML = `
     <p class="big alert">✖ NO SIGNAL</p>
     <p>Nothing called “${esc(query)}” in the Kepler field.</p>
-    <p>Try <b>Kepler-90</b>, <b>KOI-351</b>, a KOI like <b>K00351.01</b> or a Kepler ID like <b>11442793</b>.</p>`;
+    <p>Try <b>Kepler-90</b>, <b>KOI-351</b>, a KOI like <b>K00351.01</b> or a Kepler ID like <b>11442793</b>.</p>
+    <p><button type="button" class="ghost take-me" data-random>TAKE ME SOMEWHERE</button></p>`;
   setScene(null);
   selected = null;
 }

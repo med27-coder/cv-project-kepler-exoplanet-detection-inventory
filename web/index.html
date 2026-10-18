@@ -21,6 +21,15 @@
 </head>
 <body>
   <canvas id="backdrop" aria-hidden="true"></canvas>
+  <div id="loading" class="loading" role="status" aria-label="Loading the star map">
+    <picture>
+      <source srcset="loading-still.png" media="(prefers-reduced-motion: reduce)">
+      <img src="loading.gif" width="288" height="128" alt="">
+    </picture>
+    <p class="loading-title">LOADING 3,600+ STARS...</p>
+    <p class="loading-fact">The first moon ever found around an asteroid, Dactyl, circles Ida: spotted in the Galileo
+       spacecraft's 1993 pictures.</p>
+  </div>
   <header>
     <div class="header-right">
       <span id="rank-showcase" aria-label="Your showcase trophies"></span>
@@ -114,6 +123,7 @@
       </label>
       <div id="info">
         <p>Type a system above, tap a chip, roll the 🎲, or click a pixel on the map.</p>
+        <p><button type="button" class="ghost take-me" data-random>TAKE ME SOMEWHERE</button></p>
       </div>
     </section>
   </main>

@@ -136,6 +136,24 @@ def test_phone_controls_fit_on_screen(browser, site):
     assert not errors, errors
 
 
+def test_loading_screen_and_lost_in_orbit(browser, site):
+    """The loading screen goes once the page is ready; the empty system view is LOST IN ORBIT, with a button that
+    jumps to a random system."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.wait_for_function("() => !document.getElementById('loading')")
+    page.wait_for_timeout(300)
+    lit = page.evaluate("""() => { const c = document.getElementById('system'), d = c.getContext('2d')
+        .getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] > 120 && d[i + 2] < 120) n++; return n; }""")
+    assert lit > 20                                                     # the orange visor and LOST IN ORBIT
+    page.click('#info [data-random]')
+    page.wait_for_function("document.getElementById('sys-title').textContent !== 'PICK A STAR'")
+    page.fill('#query', 'nothing-here-at-all')
+    page.press('#query', 'Enter')
+    assert page.locator('#info [data-random]').count() == 1            # NO SIGNAL offers the jump too
+    assert not errors, errors
+
+
 def test_page_checks(browser, site):
     """The full in-page check list (search, zoom, highlights, system view, easter egg, case files...)."""
     errors = []

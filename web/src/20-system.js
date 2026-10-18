@@ -371,12 +371,34 @@ function drawCurve(seconds, flux) {
   curve.forEach((f, i) => sctx.fillRect(4 + width - curve.length + i, top + Math.min(STRIP - 7, Math.round((1 - f) * 40)), 1, 1));
 }
 
-function drawSystem(seconds) {
-  if (!scene) {
-    sctx.fillStyle = '#070b1a';
-    sctx.fillRect(0, 0, SW, SH);
-    return;
+// Nothing picked yet, or a search found nothing: an astronaut tumbling slowly on a loose tether, LOST IN ORBIT
+// (docs/plans/WORLDS_MOONS_AND_SCREENS.md; the sprite is the UNIVERSE view's, 56-universe.js).
+function drawLostInOrbit(seconds) {
+  sctx.fillStyle = '#070b1a';
+  sctx.fillRect(0, 0, SW, SH);
+  for (let k = 0; k < 60; k++) {
+    sctx.fillStyle = k % 6 ? '#1e2550' : '#4a5590';
+    sctx.fillRect(Math.floor(hash('lo' + k) * SW), Math.floor(hash('lp' + k) * SH), 1, 1);
   }
+  const t = REDUCED_MOTION ? 0 : seconds;
+  const cx = SW / 2 + 10 * Math.sin(t * 0.4), cy = SH / 2 - 14 + 5 * Math.cos(t * 0.3);
+  sctx.fillStyle = '#4a5590';
+  for (let k = 0; k < 24; k++) {   // the loose tether, drifting off
+    sctx.fillRect(Math.round(cx + 9 + k * 2), Math.round(cy + 8 + Math.sin(k / 3 + t * 1.5) * 3 + k * 0.4), 1, 1);
+  }
+  sctx.save();
+  sctx.imageSmoothingEnabled = false;
+  sctx.translate(Math.round(cx), Math.round(cy));
+  sctx.rotate(t * 0.5);
+  sctx.drawImage(astronautSprite(), -7.5, -12);
+  sctx.restore();
+  const lost = 'LOST IN ORBIT', hint = title.textContent === 'NO SIGNAL' ? 'NO SIGNAL - TRY ANOTHER NAME' : 'PICK A STAR TO BEGIN';
+  pixelText(sctx, lost, Math.round((SW - textWidth(lost)) / 2), SH - 34, '#ff9a3c');
+  pixelText(sctx, hint, Math.round((SW - textWidth(hint)) / 2), SH - 24, '#9aa6d6');
+}
+
+function drawSystem(seconds) {
+  if (!scene) return drawLostInOrbit(seconds);
   if (scene.mystery) return drawMystery(seconds);
   if (scene.custom) return scene.custom(seconds);
   sctx.fillStyle = '#070b1a';   // a blank (discarded) layer must not leave trails behind

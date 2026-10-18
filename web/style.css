@@ -414,6 +414,18 @@ canvas#backdrop { position: fixed; inset: 0; width: 100vw; height: 100vh; z-inde
                   background: transparent; border: 0; image-rendering: pixelated; }
 canvas#backdrop[hidden] { display: none; }
 
+/* ---- loading screen: only shows if loading takes over half a second; starmap.js removes it when ready */
+.loading { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; padding: 16px; text-align: center; background: var(--bg); opacity: 0;
+  animation: loading-in 0.3s ease 0.5s forwards; }
+.loading img { width: 288px; max-width: 100%; height: auto; image-rendering: pixelated; }
+.loading-title { font: 12px var(--pixel); color: var(--accent); margin: 0; }
+.loading-fact { color: var(--ink-2); max-width: 30em; margin: 0; }
+.loading.done { animation: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+@keyframes loading-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .loading { animation-duration: 0s; } }
+.take-me { margin-top: 4px; }
+
 /* ---- the universe in sectors (56-universe.js) */
 #map[hidden], #universe-view[hidden], #hover[hidden], .uni-nav[hidden], .uni-facts[hidden] { display: none; }
 .uni-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
