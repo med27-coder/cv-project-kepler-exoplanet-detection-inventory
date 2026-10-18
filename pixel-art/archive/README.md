@@ -1,0 +1,38 @@
+# Archive: pixel art we replaced or scrapped
+
+Old versions and abandoned ideas, kept so nothing drawn for the project is lost. Nothing here is loaded by the
+site. The code that drew them lives on in the git history; this folder keeps the pictures easy to browse.
+
+**The rule from now on:** before a piece of pixel art is replaced, redrawn or dropped (a sprite, a concept draft, a
+loading screen, a link preview), its current version is copied here first, named
+`<name>_until-<date>_<commit>.<ext>` (the date it was last current, and the commit where it still exists), with a
+row in the table below. Drafts that are still in the running stay in `concepts/` until a version is picked; the
+ones not picked move here.
+
+| File | Was | Why it was replaced |
+|---|---|---|
+| [`concepts/draft_aliens_until-2026-10-18_824d920.gif`](concepts/draft_aliens_until-2026-10-18_824d920.gif) | `pixel-art/concepts/draft_aliens.gif` | The first aliens draft, redrawn after the user's UFO reference |
+| [`site/loading_until-2026-10-17_1fe36b5.gif`](site/loading_until-2026-10-17_1fe36b5.gif) | `web/loading.gif` | Loading screen v1, a rock with moons; replaced by the Delta II rocket |
+| [`site/loading-still_until-2026-10-17_1fe36b5.png`](site/loading-still_until-2026-10-17_1fe36b5.png) | `web/loading-still.png` | Loading screen v1, still frame (reduced motion) |
+| [`site/og_until-2026-10-17_181ccf7.png`](site/og_until-2026-10-17_181ccf7.png) | `web/og.png` | Link preview v3, before it was redone to match the README banner |
+| [`site/og_until-2026-10-14_cd8af77.png`](site/og_until-2026-10-14_cd8af77.png) | `web/og.png` | Link preview v2 |
+| [`site/og_until-2026-10-13_d61784b.png`](site/og_until-2026-10-13_d61784b.png) | `web/og.png` | Link preview v1, the original |
+| [`site/sky_until-2026-10-13_c14b195.png`](site/sky_until-2026-10-13_c14b195.png) | `web/sky.png` | Page backdrop v1, posterised blobs; replaced by the pixel-art night sky |
+| [`icons/draft_trophy_star_gazer_until-2026-10-14_87e312b.png`](icons/draft_trophy_star_gazer_until-2026-10-14_87e312b.png) | `pixel-art/icons/draft_trophy_star_gazer.png` | Star Gazer trophy, first pass |
+| [`icons/draft_trophy_secret_until-2026-10-14_ef2ba59.png`](icons/draft_trophy_secret_until-2026-10-14_ef2ba59.png) | `pixel-art/icons/draft_trophy_secret.png` | Secret trophy before the galaxy cup |
+| [`icons/draft_trophy_tiers_until-2026-10-14_ef2ba59.png`](icons/draft_trophy_tiers_until-2026-10-14_ef2ba59.png) | `pixel-art/icons/draft_trophy_tiers.png` | Trophy tiers before the galaxy cup and space lock |
+| [`emblems/draft_header_until-2026-10-14_85f5b1d.png`](emblems/draft_header_until-2026-10-14_85f5b1d.png) | `pixel-art/emblems/draft_header.png` | Header mock-up, first version |
+| [`emblems/draft_ladder_until-2026-10-14_85f5b1d.png`](emblems/draft_ladder_until-2026-10-14_85f5b1d.png) | `pixel-art/emblems/draft_ladder.png` | Rank ladder, first version |
+| [`solar-system/earth_until-2026-10-14_a2663a0.png`](solar-system/earth_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/earth.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/earth_scene_until-2026-10-14_a2663a0.png`](solar-system/earth_scene_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/earth_scene.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/jupiter_until-2026-10-14_a2663a0.png`](solar-system/jupiter_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/jupiter.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/mars_until-2026-10-14_a2663a0.png`](solar-system/mars_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/mars.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/mercury_until-2026-10-14_a2663a0.png`](solar-system/mercury_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/mercury.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/neptune_until-2026-10-14_a2663a0.png`](solar-system/neptune_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/neptune.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/pluto_until-2026-10-14_a2663a0.png`](solar-system/pluto_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/pluto.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/saturn_until-2026-10-14_a2663a0.png`](solar-system/saturn_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/saturn.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/sheet_until-2026-10-14_a2663a0.png`](solar-system/sheet_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/sheet.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/uranus_until-2026-10-14_a2663a0.png`](solar-system/uranus_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/uranus.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`solar-system/venus_until-2026-10-14_a2663a0.png`](solar-system/venus_until-2026-10-14_a2663a0.png) | `pixel-art/solar-system/venus.png` | Planet sprite before the real-Earth and reference-photo redraw |
+| [`spacecraft/iss_until-2026-10-14_a2663a0.png`](spacecraft/iss_until-2026-10-14_a2663a0.png) | `pixel-art/spacecraft/iss.png` | ISS sprite before the redraw from official references |
+| [`spacecraft/kepler_until-2026-10-14_a2663a0.png`](spacecraft/kepler_until-2026-10-14_a2663a0.png) | `pixel-art/spacecraft/kepler.png` | Kepler sprite before the redraw from official references |

@@ -93,6 +93,9 @@ so nobody loses what they've earned.
   (`gh release create v1.4.0 --notes-file ...`).
 - **On the page:** the version in the footer, linking to the changelog. A **"What's new in v1.4"** pop-up once
   per new version: 2 or 3 highlights in plain words, merged with today's data WHAT'S NEW.
+- **The antenna announces big updates** (user idea, 18 Oct 2026): when a release lands (one big push), the dish on
+  the page's edge lights up with a NEW signal and its note gains a "What's new in vX" section above the thank-you,
+  shown once per version; the WHAT'S NEW pop-up can then live there instead of interrupting.
 - **Fresh files after an update:** `build_web.py` stamps the version on the script and stylesheet links
   (`starmap.js?v=1.4.0`), so browsers don't keep an old cached copy after a release.
 - **One source of truth:** the version lives in one file (`web/src/00-version.js`, generated or checked by
