@@ -55,7 +55,7 @@ function showTourStep(i) {
   tourBox.style.top = `${Math.round(r.bottom + scrollY + 10)}px`;
   tourBox.querySelector('[data-tour="next"]').addEventListener('click', () => showTourStep(i + 1));
   tourBox.querySelector('[data-tour="skip"]').addEventListener('click', endTour);
-  tourBox.querySelector('[data-tour="next"]').focus({ preventScroll: true });
+  if (document.activeElement === document.body) tourBox.querySelector('[data-tour="next"]').focus({ preventScroll: true });   // never steal the search box
 }
 function endTour() {
   document.querySelectorAll('.tour-target').forEach(el => el.classList.remove('tour-target'));
@@ -89,5 +89,9 @@ function drawHoverLabel() {   // from drawSystem, after the planets
 queueMicrotask(() => {
   paintIcons();
   const forced = /[?&]tour\b/.test(location.search);
-  if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => showTourStep(0), forced ? 0 : 900);
+  let busy = false;   // a visitor who starts typing or clicking right away doesn't get interrupted by the tour
+  const mark = () => { busy = true; };
+  addEventListener('keydown', mark, { once: true, capture: true });
+  addEventListener('pointerdown', mark, { once: true, capture: true });
+  if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => { if (forced || !busy) showTourStep(0); }, forced ? 0 : 900);
 });
