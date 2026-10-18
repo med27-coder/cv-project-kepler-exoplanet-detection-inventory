@@ -342,7 +342,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 29
+    assert page.locator('.egg-card').count() == 30
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -696,4 +696,42 @@ def test_sky_events_can_be_caught(browser, site):
     saved = page.evaluate('() => JSON.parse(localStorage.getItem("starmap.progress.v1"))')
     assert (saved['comets'], saved['asteroids'], saved['ufos']) == (1, 1, 1)
     assert {'comet-catcher', 'rock-hound', 'ufo-spotter', 'what-was-that'} <= set(saved['ach'])
+    assert not errors, errors
+
+
+def test_voyagers_are_found_separately(browser, site):
+    """Plain "voyager" names neither twin (a pop-up asks which one); "voyager 1" and "voyager 2" are two eggs,
+    and both with New Horizons earn ROAD TO INTERSTELLAR."""
+    errors = []
+    page = open_page(browser, site, errors)
+    saved = lambda: page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1') || '{}')")
+    search = lambda q: (page.fill('#query', q), page.press('#query', 'Enter'))
+    search('voyager')
+    page.wait_for_selector('.toast:has-text("TWO VOYAGERS")')
+    assert not saved().get('eggs', {})
+    search('voyager 1')
+    page.wait_for_function("() => JSON.parse(localStorage.getItem('starmap.progress.v1')).eggs.voyager")
+    assert 'voyager2' not in saved()['eggs']
+    search('Voyager II')
+    search('new horizons')
+    page.wait_for_function("() => JSON.parse(localStorage.getItem('starmap.progress.v1')).ach.interstellar")
+    assert {'voyager', 'voyager2', 'newHorizons'} <= set(saved()['eggs'])
+    assert not errors, errors
+
+
+def test_fanfare_is_on_by_default_and_can_be_switched_off(browser, site):
+    """The unlock fanfare is on from the start (an old saved "off" that was only the default doesn't count);
+    switching it off in Settings is remembered."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, ach: {}, systems: [], toured: true, sound: false}))")
+    page.reload()
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    assert page.is_checked('#set-sound')
+    page.uncheck('#set-sound')
+    page.reload()
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    assert not page.is_checked('#set-sound')
     assert not errors, errors

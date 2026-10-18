@@ -182,13 +182,30 @@ function drawHologram(now) {
   for (let x = -12; x <= 12; x += 3) ctx.fillRect(Math.round(cx + x), baseY, 1, 1);
 }
 
-// ---- unlock fanfare (Web Audio, generated; only if turned on in Settings)
+// ---- unlock fanfare (Web Audio, generated; on unless switched off in Settings)
+// Browsers keep audio asleep until the visitor clicks or types, and an achievement can arrive without one (a timer,
+// a passing comet). So the audio is woken on the first click or key, and a fanfare that arrives while it sleeps
+// waits for it instead of being lost or played late in a jumble.
 let audio = null;
+function audioContext() {
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); } catch { audio = null; }
+  return audio;
+}
+function wakeAudio() {
+  const ctx = progress.sound && audioContext();
+  if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+}
+for (const evt of ['pointerdown', 'keydown', 'touchend']) addEventListener(evt, wakeAudio, { capture: true, passive: true });
 function fanfare(tier) {
   if (!progress.sound) return;
+  const ctx = audioContext();
+  if (!ctx) return;
+  if (ctx.state !== 'running') { ctx.resume().then(() => playFanfare(tier), () => {}); return; }
+  playFanfare(tier);
+}
+function playFanfare(tier) {
+  const audio = audioContext();
   try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    if (audio.state === 'suspended') audio.resume();
     const notes = { common: [523, 659], rare: [523, 659, 784], epic: [523, 659, 784, 1047], secret: [392, 523, 698, 932, 1175],
                     legend: [262, 392, 523, 784, 1047, 1568] }[tier] || [523, 659];
     notes.forEach((f, i) => {

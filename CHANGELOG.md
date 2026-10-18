@@ -7,6 +7,19 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.2.0] - 2026-10-18
+
+### Changed
+- **Voyager 1 and Voyager 2 are two easter eggs** (30 in all), each with its own clue and story. Searching plain
+  "voyager" shows both on the map but finds neither, and a pop-up asks which one. ROAD TO INTERSTELLAR now needs
+  both Voyagers and New Horizons. Progress keeps a found "Voyager" as Voyager 1.
+- **The unlock fanfare is on by default**; the switch in Settings turns it off, and that choice is remembered.
+
+### Fixed
+- The fanfare sometimes stayed silent: browsers keep audio asleep until a click or key press, so an achievement
+  earned without one (a timer, a passing comet) was lost. Audio now wakes on the first click or key, and a fanfare
+  that arrives while it sleeps waits for it.
+
 ## [1.1.0] - 2026-10-18
 
 ### Added
@@ -48,5 +61,6 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.2.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.0
 [1.1.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.1.0
 [1.0.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.0.0

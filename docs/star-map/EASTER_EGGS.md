@@ -7,7 +7,7 @@ full list for anyone maintaining the site. Search is case-insensitive.
 |---|---|---|---|
 | 🌍 **Our Solar System** | "★ YOU ARE HERE ★": the Sun, all eight planets and Pluto in hand-made pixel art (Earth spinning, Jupiter's Great Red Spot, Saturn's and Uranus' rings, Pluto's heart), 18 named moons circling their planets (Triton backwards, Uranus's on their side), the asteroid and Kuiper belts, the planet table, and a fact sheet about the Sun's names, the moons, Pluto, dwarf planets, the heliosphere and the Oort Cloud, linked to NASA, JPL and IAU pages | `sun`, `sol`, `solar system`, `earth`, `home`, `you are here`, `pluto` (also with "the": `the sun`) | `#Sun` |
 | 🛰️ **Our spacecraft** | "★ HUMANITY'S ROBOTS ★": the Solar System frozen on one real date with 19 spacecraft beyond Earth orbit at their real positions (NASA JPL Horizons), each with its pixel art, signal delay and mission page, plus the Mars rovers. The corner of the drawing shows each spacecraft's pixel art in turn | `spacecraft`, `space craft`, `probe(s)`, `space probe(s)`, `robots`, `missions`, `rover(s)`, `mars rover(s)` | `#Spacecraft` |
-| 🎯 **One spacecraft** | The same view with that spacecraft in yellow, its table row highlighted and its pixel art in the corner | `jwst`, `webb`, `james webb (space telescope)`, `voyager` / `voyager 1`, `voyager 2`, `new horizons`, `parker (solar probe)`, `juno`, `europa clipper`, `soho`, `euclid`, `solar orbiter`, `bepicolombo`, `juice`, `lucy`, `psyche`, `osiris-apex` / `osiris-rex`, `mro` / `mars reconnaissance orbiter`, `(mars) odyssey`, `mars express`, `tgo` / `exomars` / `trace gas orbiter`, `curiosity`, `perseverance` | `#jwst`, `#lucy`, ... |
+| 🎯 **One spacecraft** | The same view with that spacecraft in yellow, its table row highlighted and its pixel art in the corner | `jwst`, `webb`, `james webb (space telescope)`, `voyager 1` / `voyager i`, `voyager 2` / `voyager ii` (plain `voyager` shows both but finds neither: a pop-up asks which), `new horizons`, `parker (solar probe)`, `juno`, `europa clipper`, `soho`, `euclid`, `solar orbiter`, `bepicolombo`, `juice`, `lucy`, `psyche`, `osiris-apex` / `osiris-rex`, `mro` / `mars reconnaissance orbiter`, `(mars) odyssey`, `mars express`, `tgo` / `exomars` / `trace gas orbiter`, `curiosity`, `perseverance` | `#jwst`, `#lucy`, ... |
 | 🔭 **The Kepler telescope** | "★ THE PLANET HUNTER ★": the mission replayed on Kepler's Earth-trailing orbit (2009 → "Goodnight Kepler" in 2018), a big pixel Kepler, its story and NASA links. **Or click the little telescope in the map's top-left corner** (zoom 1, not in DEPTH) | `kepler`, `kepler space telescope`, `kepler telescope`, `kepler spacecraft`, `kepler mission`, `space telescope`, `telescope`, `goodnight kepler` (also with "the") | `#Kepler` |
 | ☀☀ **Tatooine** | Kepler-16, a real planet with two suns: a "YES, IT'S REAL" pop-up, both stars drawn orbiting each other (they eclipse in KEPLER'S VIEW), and the TATOOINE achievement | `tatooine` (also "the tatooine") | `#Tatooine` |
 | 🏠 **The International Space Station** | "★ PEOPLE LIVE UP HERE ★": the real continents (NASA's Blue Marble) on a turning, tilted pixel Earth with the ISS on a to-scale orbit and its pixel art in the corner (sped up ~460×), NASA's facts and a link to Spot the Station | `iss`, `space station`, `international space station` (also with "the") | `#ISS` |
@@ -27,7 +27,7 @@ bar finds it:
   (an official NASA photo, credited; ESA-credited pictures are linked instead) and a short history.
   The Solar System's card adds a strip of real photos of the Sun, every planet and the Moon.
 
-29 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Voyager, New Horizons, Webb, Euclid, SOHO, Parker Solar
+30 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
 Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OSIRIS-APEX, MRO, Mars
 Odyssey, Mars Express, ExoMars, Curiosity and Perseverance (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
@@ -76,12 +76,12 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | SPACE FARMER | Search "martian man" and watch the farm bring in a whole crop (a minute) |
 | | ECO MODE | Set the animation to battery saver |
 | | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
-| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 29 |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 30 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
 | | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |
 | | L2 NEIGHBOURS | Webb, Euclid |
-| | ROAD TO INTERSTELLAR | Voyager, New Horizons |
+| | ROAD TO INTERSTELLAR | Voyager 1, Voyager 2, New Horizons |
 | | PHOTO FINISH | Slide a Galleria photo all the way to pixel art |
 | | CURATOR | Open ten found Galleria cards in one visit |
 | Sky watch | COMET CATCHER / TAIL CHASER | Click a comet passing over the map / catch five (one crosses every 3 to 6 minutes of use, comets and asteroids alike) |
@@ -160,7 +160,7 @@ Not built yet; roughly from easiest to biggest.
 - **Unique trophies:** epic and secret achievements carry a symbol (Mars, Jupiter, the Golden Record, a rocket...).
   GALACTIC CENSUS has levels (★ 50, ★★ 500, ★★★ 1,000 systems). Secrets show a riddle after ten achievements.
 - **Daily mystery star:** a new riddle every day; **DOWNLOAD MY STAR CARD** saves your emblem and stats as a
-  picture; an optional 8-bit fanfare is in Settings.
+  picture; an 8-bit fanfare plays when you earn something (on by default; switch it off in Settings).
 
 ## Hidden in plain sight
 

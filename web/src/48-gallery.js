@@ -35,9 +35,12 @@ const EGGS = [
   { id: 'iss', name: 'International Space Station', kind: 'craft', art: 'iss', ref: 'iss', query: 'ISS', toast: 'CREW ABOARD',
     clue: 'Sixteen sunrises a day, and people have lived inside me since the year 2000.',
     story: 'Built in orbit from 1998 by the space agencies of the United States, Russia, Europe, Japan and Canada, piece by piece over dozens of launches. Crews have lived aboard without a break since November 2000, and it is big enough to see from the ground with your own eyes.' },
-  { id: 'voyager', name: 'Voyager', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager', toast: 'INTERSTELLAR SIGNAL',
-    clue: 'Twins launched in 1977, each carrying a golden record, now whispering from beyond the Sun\'s bubble.',
-    story: 'The Voyagers rode a rare line-up of the outer planets on a "Grand Tour": Voyager 2 is still the only spacecraft to visit Uranus and Neptune. Each carries a Golden Record of sounds and pictures of Earth. Voyager 1 entered interstellar space in 2012 and Voyager 2 in 2018; their signals take most of a day to reach us.' },
+  { id: 'voyager', name: 'Voyager 1', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 1', toast: 'INTERSTELLAR SIGNAL',
+    clue: 'The farthest human-made object. I took the Pale Blue Dot, and in 2012 I was first to leave the Sun\'s bubble.',
+    story: 'Launched on 5 September 1977, Voyager 1 flew past Jupiter (1979) and Saturn (1980), then headed up out of the planets\' plane. On 14 February 1990 it turned round and took the Pale Blue Dot, Earth from 6 billion km. In August 2012 it became the first spacecraft in interstellar space. It carries a Golden Record of sounds and pictures of Earth, and its signal takes most of a day to reach us.' },
+  { id: 'voyager2', name: 'Voyager 2', kind: 'craft', art: 'voyager', ref: 'voyager', query: 'Voyager 2', toast: 'ICE GIANTS VISITED',
+    clue: 'Launched first, but numbered second. I\'m still the only visitor Uranus and Neptune have ever had.',
+    story: 'Launched on 20 August 1977, two weeks before its twin, Voyager 2 rode a line-up of the outer planets that happens once every 175 years: Jupiter (1979), Saturn (1981), Uranus (1986) and Neptune (1989), the Grand Tour. It found Neptune\'s Great Dark Spot and Triton\'s geysers, and crossed into interstellar space in November 2018. It carries its own Golden Record.' },
   { id: 'newHorizons', name: 'New Horizons', kind: 'craft', art: 'newHorizons', ref: 'new-horizons', query: 'New Horizons', toast: 'KUIPER BELT REACHED',
     clue: 'I flew past a heart in 2015 and a snowman on New Year\'s Day 2019.',
     story: 'Launched in January 2006, the fastest launch of any spacecraft at the time, New Horizons reached Pluto in July 2015 after nine and a half years. On 1 January 2019 it flew past Arrokoth, a two-lobed "snowman" in the Kuiper Belt. It carries some of the ashes of Clyde Tombaugh, who discovered Pluto.' },
@@ -142,7 +145,7 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
   { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
   { g: 'EASTER EGGS', id: 'dwarf-king', title: 'DWARF KING', how: 'Find all five dwarf planets.' },
-  { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find the two missions heading out of the Solar System.' },
+  { g: 'EASTER EGGS', id: 'interstellar', title: 'ROAD TO INTERSTELLAR', how: 'Find Voyager 1, Voyager 2 and New Horizons, heading out of the Solar System.' },
   { g: 'EASTER EGGS', id: 'photo-finish', title: 'PHOTO FINISH', how: 'Slide a Galleria photo all the way into pixel art.' },
   { g: 'EASTER EGGS', id: 'curator', title: 'CURATOR', how: 'Open ten found cards in the Galleria in one visit.' },
   { g: 'EASTER EGGS', id: 'grand-tour', title: 'GRAND TOUR', how: "Find every easter egg, like the Voyagers' tour of the planets." },
@@ -199,7 +202,7 @@ const EGG_SETS = {
   'jupiter-crew': ['juno', 'clipper', 'juice', 'lucy'],
   'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
   l2: ['jwst', 'euclid'],
-  interstellar: ['voyager', 'newHorizons'],
+  interstellar: ['voyager', 'voyager2', 'newHorizons'],
   'dwarf-king': ['pluto', 'ceres', 'haumea', 'makemake', 'eris'],
 };
 const PYRAMID_LY = 4600;   // the Great Pyramid of Giza is about 4,600 years old
@@ -213,7 +216,7 @@ const ACH = new Map(ACHIEVEMENTS.map(a => [a.id, a]));
 const PROGRESS_KEY = 'starmap.progress.v1';
 const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewed: [], finalEmblem: 'black-hole', whiteHole: false,
                    calls: {}, notified: [],    // predictions (48b-predictions.js)
-                   showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
+                   showcase: [], levels: {}, sound: true, soundChoice: false,   // trophies (49b-trophies.js)
                    toured: false,   // first-visit tour (49c-ui.js)
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                    backdrop: 'animated',   // page background (55-backdrop.js)
@@ -253,7 +256,8 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   }
   if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
   if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
-  if (typeof saved.sound === 'boolean') progress.sound = saved.sound;
+  // The fanfare is on unless the visitor switched it off themselves (an old saved "off" was only the old default).
+  if (saved.soundChoice === true && typeof saved.sound === 'boolean') { progress.sound = saved.sound; progress.soundChoice = true; }
   if (saved.toured === true) progress.toured = true;
   if (saved.daily && DATE.test(String(saved.daily.last)) && (!progress.daily.last || saved.daily.last > progress.daily.last)) {
     progress.daily = { last: saved.daily.last, streak: Number.isInteger(saved.daily.streak) ? Math.min(9999, Math.max(0, saved.daily.streak)) : 1 };
@@ -347,7 +351,7 @@ function eggForQuery(q) {
   if (ISS_QUERY.test(q)) return 'iss';
   if (KEPLER_QUERY.test(q)) return 'kepler';
   const craft = craftFocus(q);
-  return craft ? CRAFT_SPRITE[craft] : null;
+  return craft ? craftEggId(craft) : null;
 }
 
 function systemOpened(s) {   // from select(): counts systems for the achievements
@@ -407,7 +411,7 @@ function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
 
 // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
 const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager'], ['Parker', 'parker'],
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Parker', 'parker'],
   ['Osiris Rex', 'apex'], ['Tatooine', null]];
 const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
 function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -782,7 +786,7 @@ galleryDialog.addEventListener('close', () => cancelAnimationFrame(detailFrame))
 
 const soundSetting = document.getElementById('set-sound');
 soundSetting.checked = progress.sound;
-soundSetting.addEventListener('change', () => { progress.sound = soundSetting.checked; saveProgress(); if (progress.sound) fanfare('rare'); });
+soundSetting.addEventListener('change', () => { progress.sound = soundSetting.checked; progress.soundChoice = true; saveProgress(); if (progress.sound) fanfare('rare'); });
 const toastSetting = document.getElementById('set-toasts');
 toastSetting.checked = progress.toasts;
 toastSetting.addEventListener('change', () => { progress.toasts = toastSetting.checked; saveProgress(); });

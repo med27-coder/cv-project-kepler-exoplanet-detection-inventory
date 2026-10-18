@@ -3,13 +3,14 @@
 // the planets and humanity's spacecraft beyond Earth orbit where NASA JPL Horizons puts them
 // (scripts/starmap/fetch_spacecraft.py -> data/spacecraft.js, loaded only here). Earth-orbit satellites
 // are left out on purpose; "ISS" / "space station" opens the International Space Station instead.
-const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?)$/i;
+const CRAFT_GENERAL = /^(spacecraft|space ?craft|probes?|space ?probes?|robots|missions|rovers?|mars rovers?|voyagers?)$/i;
+const VOYAGERS_QUERY = /^(the )?voyagers?$/i;   // which one? Voyager 1 and Voyager 2 are found separately
 // Search words for one spacecraft -> its name in data/spacecraft.js (or a rover's): the view then
 // highlights it and shows its pixel art.
 // ("the" in front is always allowed; lookup() has already turned hyphens, underscores and dots into spaces.)
 const CRAFT_ALIASES = [
   [/^(jwst|(james )?webb( space)?( telescope)?)$/i, 'James Webb Space Telescope'],
-  [/^voyager( ?(1|i|one))?$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
+  [/^voyager ?(1|i|one)$/i, 'Voyager 1'], [/^voyager ?(2|ii|two)$/i, 'Voyager 2'],
   [/^new horizons( probe| spacecraft)?$/i, 'New Horizons'],
   [/^parker( solar)?( probe)?$/i, 'Parker Solar Probe'], [/^juno( probe)?$/i, 'Juno'], [/^(europa )?clipper$/i, 'Europa Clipper'],
   [/^(soho|solar and heliospheric observatory)$/i, 'SOHO'], [/^euclid( telescope)?$/i, 'Euclid'],
@@ -41,8 +42,11 @@ function screenRadius(sc, au) {
 
 // Spacecraft you haven't found yet are nameless flashing lights; searching a name reveals one for good
 // (docs/plans/FLEET_CLOSEUPS.md). Everything shows once GRAND TOUR is earned.
-const craftEgg = c => CRAFT_SPRITE[c.name];
+const CRAFT_EGG = { 'Voyager 2': 'voyager2' };   // the twins share a sprite but are two easter eggs
+const craftEggId = name => CRAFT_EGG[name] || CRAFT_SPRITE[name];
+const craftEgg = c => craftEggId(c.name);
 const craftFound = c => Boolean(progress.ach['grand-tour'] || progress.eggs[craftEgg(c)]);
+const craftFoundByName = name => craftFound({ name });
 // "Where" for a spacecraft still hidden, with any word of its name blanked ("asteroid Psyche" gives Psyche away).
 const COMMON_WORDS = new Set(['mars', 'space', 'telescope', 'solar', 'probe', 'orbiter', 'trace', 'gas']);   // not giveaways
 const hiddenWhere = c => c.name.split(/[\s-]+/).filter(w => w.length >= 4 && !COMMON_WORDS.has(w.toLowerCase()))
@@ -156,8 +160,10 @@ function showSpacecraft(updateHash = true, query = '') {
     });
     sc.frozen = true;
     const gallery = [...data.spacecraft, ...data.rovers]
-      .filter((c, i, all) => CRAFT_SPRITE[c.name] && craftFound(c) && all.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)
-      .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name], label: c.name === 'Voyager 1' ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
+      .filter(c => CRAFT_SPRITE[c.name] && craftFound(c))
+      .filter((c, i, found) => found.findIndex(o => CRAFT_SPRITE[o.name] === CRAFT_SPRITE[c.name]) === i)   // one per sprite
+      .map(c => ({ name: c.name, key: CRAFT_SPRITE[c.name],
+                   label: c.name.startsWith('Voyager') && craftFoundByName('Voyager 1') && craftFoundByName('Voyager 2') ? 'VOYAGER 1 AND 2' : c.name.toUpperCase() }));
     if (focus) {   // the second Voyager shares the first's sprite
       const own = gallery.find(g => g.name === focus) || { name: focus, key: CRAFT_SPRITE[focus] };
       Object.assign(own, { label: focus.toUpperCase() });
