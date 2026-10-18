@@ -63,3 +63,5 @@ probabilities on the inner validation split), judged on folds not yet used.
 ## 8. Changes after registration
 
 (none)
+
+Results: [V3_1_RESULTS.md](V3_1_RESULTS.md) (both primary endpoints failed; not adopted).
