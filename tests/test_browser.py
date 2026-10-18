@@ -310,10 +310,13 @@ def test_final_mission(browser, site):
     page.clock.set_system_time('2026-10-15T00:30:00')   # after midnight: NIGHT SHIFT is earned at the same moment,
     page.reload()                                        # and the TRUE STAR GAZER pop-up must still show
     page.wait_for_selector('#highlights .chip.unseen')                                            # revealed: UNSEEN chip
+    page.click('#highlights .chip.unseen')
+    assert page.locator('#highlights .chip.unseen').inner_text() == 'unseen (1)'
     page.fill('#query', 'Kepler-90')
     page.press('#query', 'Enter')
     page.wait_for_selector('.toast.legend')
     assert 'true Star Gazers' in page.locator('.toast.legend').inner_text()
+    assert page.locator('#highlights .chip.unseen').inner_text() == 'unseen (0)'                 # updates as you go
     page.wait_for_function("document.getElementById('rank-name').textContent.startsWith('BLACK HOLE')")
     page.click('#open-gallery')
     page.click('#tab-set')
