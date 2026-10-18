@@ -119,10 +119,11 @@
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
   // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
   // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.7.0';
+  const VERSION = '1.8.0';
   const RELEASE_NOTES = [
+    'Dwarf planets you find now join the Solar System drawing, out where they really orbit.',
+    'A second loading screen: an astronomer at a telescope under twinkling stars (it takes turns with the rocket).',
     'A new easter egg: the very first rover on Mars, from 1997. Can you find it? (The Martian farm has a clue outside its Hab.)',
-    'New pixel art for every spacecraft and rover: bigger, shaded, and easier to tell apart.',
     'Every found easter egg in the Galleria now has FUN FACTS and the story of why it was hidden here.',
   ];
 
@@ -1530,23 +1531,37 @@
       ['Uranus', 4.01, 14.5, 30589, 19.19, 0.047, 1781, 4],
       ['Neptune', 3.88, 17.1, 59800, 30.07, 0.010, 1846, 4],
       ['Pluto', 0.186, 0.0022, 90560, 39.48, 0.249, 1930, 2],   // a dwarf planet since 2006
-    ].map(([name, radius, mass, period, sma, ecc, year, sprite]) => ({
-      name, koi: 'Sol ' + name, status: 'confirmed', radius, mass, mass_kind: 'measured', period, sma, ecc,
-      teq: Math.round(255 / Math.sqrt(sma)), insol: 1 / sma ** 2, year, sprite,
-      art: name.toLowerCase(),
-      url: `${NASA_SCIENCE}${name === 'Pluto' ? 'dwarf-planets/' : ''}${name.toLowerCase()}/`,
-      note: name === 'Earth' ? 'home ★' : name === 'Pluto' ? 'dwarf planet' : 'planet',
-    })),
+    ].map(solarBody),
     // drawn as drifting dots; edges are approximate
     belts: [
       { name: 'asteroid belt', a0: 2.2, a1: 3.2, n: 170, color: '#8c8475' },
       { name: 'Kuiper Belt', a0: 30, a1: 50, n: 240, color: '#56708f' },
     ],
   };
+  // The other four dwarf planets join the drawing and the table once each is found (47b-dwarfs.js): NASA/JPL elements.
+  const SOLAR_DWARFS = [
+    ['Ceres', 0.0738, 0.000157, 1682, 2.77, 0.079, 1801, 1],
+    ['Haumea', 0.12, 0.00066, 103774, 43.1, 0.195, 2004, 1],
+    ['Makemake', 0.112, 0.00052, 111845, 45.6, 0.16, 2005, 1],
+    ['Eris', 0.183, 0.0028, 203830, 67.9, 0.44, 2005, 2],
+  ].map(solarBody);
+  const solarNow = () => ({ ...SOLAR, planets: [...SOLAR.planets, ...SOLAR_DWARFS.filter(p => progress.eggs[p.art])].sort((a, b) => a.sma - b.sma) });
+  function solarBody([name, radius, mass, period, sma, ecc, year, sprite]) {
+    const dwarf = ['Pluto', 'Ceres', 'Haumea', 'Makemake', 'Eris'].includes(name);
+    return {
+      name, koi: 'Sol ' + name, status: 'confirmed', radius, mass, mass_kind: 'measured', period, sma, ecc,
+      teq: Math.round(255 / Math.sqrt(sma)), insol: 1 / sma ** 2, year, sprite,
+      art: name.toLowerCase(),
+      url: `${NASA_SCIENCE}${dwarf ? 'dwarf-planets/' : ''}${name.toLowerCase()}/`,
+      note: name === 'Earth' ? 'home ★' : dwarf ? 'dwarf planet' : 'planet',
+    };
+  }
 
   // Pixel colour of each Solar System planet at (dx, dy) on a disc of radius r; `spin` (pixels)
   // scrolls surface features sideways so the planet turns.
   const SOLAR_ART = {
+    ceres: (dx, dy, r, spin) => DWARFS.ceres.art(dx, dy, r, spin), haumea: (dx, dy, r, spin) => DWARFS.haumea.art(dx, dy, r, spin),
+    makemake: (dx, dy, r, spin) => DWARFS.makemake.art(dx, dy, r, spin), eris: (dx, dy, r, spin) => DWARFS.eris.art(dx, dy, r, spin),
     mercury: (dx, dy, r, spin) => (hash(`me${Math.floor(dx + spin)},${dy}`) < 0.25 ? '#6f6a66' : '#9c9792'),
     venus: (dx, dy, r, spin) => (hash(`ve${Math.floor((dx + spin) / 2)},${dy}`) < 0.3 ? '#d4c08a' : '#eadcaf'),
     earth: (dx, dy, r, spin) => earthSurface(dx, dy, r, spin),
@@ -1724,6 +1739,7 @@
   }
 
   function showHome(updateHash = true) {
+    const home = solarNow(), hidden = SOLAR_DWARFS.length - (home.planets.length - SOLAR.planets.length);
     selected = null;
     title.textContent = 'THE SOLAR SYSTEM';
     info.innerHTML = `
@@ -1733,13 +1749,15 @@
          stared at one patch of Cygnus and Lyra, and every star you can click is hundreds to thousands of
          light-years down that line of sight. Seen from Kepler-90, Earth would dim the Sun by just 0.008%
          for 13 hours once a year, so small that a Kepler looking back at us would most likely miss it.</p>
-      ${planetTable(SOLAR)}
+      ${planetTable(home)}
+      <p class="note">${hidden ? `${hidden} more dwarf planet${hidden > 1 ? 's' : ''} will join the drawing once you find ${hidden > 1 ? 'them' : 'it'} (search their names).`
+        : 'All five dwarf planets are on the drawing: Ceres in the asteroid belt, the rest out past Neptune.'}</p>
       ${homeFacts()}
       <p class="note">Found: known since antiquity, or the year it was discovered by telescope ·
         temperatures as the Kepler catalog would list them (no greenhouse effect: Venus is really
         ~464 °C) · planet sizes on the drawing are exaggerated; try TRUE SCALE to see how empty it
         really is · you found the easter egg!</p>`;
-    setScene(buildScene(SOLAR));
+    setScene(buildScene(home));
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
     if (updateHash) history.replaceState(null, '', '#Sun');
   }

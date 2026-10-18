@@ -65,7 +65,7 @@ def version():
 
 def stamp(html, v):
     """index.html with the version on its own script and stylesheet links."""
-    return re.sub(r'((?:src|href)="(?:starmap\.js|style\.css))(?:\?v=[\d.]+)?"', rf'\1?v={v}"', html)
+    return re.sub(r'((?:src|href)="(?:starmap\.js|style\.css|loading\.js))(?:\?v=[\d.]+)?"', rf'\1?v={v}"', html)
 
 
 def main():

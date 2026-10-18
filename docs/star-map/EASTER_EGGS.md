@@ -14,6 +14,9 @@ full list for anyone maintaining the site. Search is case-insensitive.
 
 Earth-orbit satellites are left out on purpose; the ISS is the only exception.
 
+Dwarf planets you have found (Ceres, Haumea, Makemake, Eris) also appear in the Solar System view, on their real
+orbits; Pluto is always there.
+
 ## The Galleria (⚙ button, top right)
 
 A collecting game built on the easter eggs. Every egg starts as a dark silhouette with a **?**, its name
