@@ -1,4 +1,4 @@
-"""Star Gazer V4 (giant specialist): the registered hand-off and the matched false-positive threshold."""
+"""Star Gazer V4, Colossus (giant specialist): the registered hand-off and the matched false-positive threshold."""
 
 import sys
 from pathlib import Path

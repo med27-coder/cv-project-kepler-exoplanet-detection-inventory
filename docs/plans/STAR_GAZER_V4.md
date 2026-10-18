@@ -1,7 +1,7 @@
 # Plan: Star Gazer V4
 
 **Status: plan** (17 October 2026). **Direction chosen by the user: two specialists.** V3 stays as it is and
-keeps the small planets it already finds 96-100% of the time; V4 is a new **giant-planet specialist** that takes
+keeps the small planets it already finds 96-100% of the time; V4 is a new **giant-planet specialist, Colossus**, that takes
 over for big objects. V3 stays frozen (`docs/AUDIT_V3.md`): V4 is a new version with its own
 design, decided **before** it is evaluated, judged by cross-validation on fresh star-grouped splits and by a
 **prospective test** (below), never by tuning on V3's test split.
@@ -20,7 +20,7 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
 ## 2. Two specialists: V3 for small planets, V4 for giants
 
 - **V3, unchanged** (frozen), scores everything as today.
-- **V4, the giant specialist**, is trained and judged only on big objects: the KOIs above 6 Earth radii
+- **V4, Colossus, the giant specialist**, is trained and judged only on big objects: the KOIs above 6 Earth radii
   (2,570 labelled, of which **184 confirmed planets**, 7%; above 15 Earth radii only **24 planets among 2,165**).
   That scarcity is the whole problem, so V4 leans on physics inputs (below) rather than pattern-matching, and adds
   confirmed giant planets from TESS (TFOPWG-confirmed hot Jupiters) to its training set.
@@ -76,5 +76,5 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
 1. TESS: the giant specialist needs TESS's confirmed giants as extra examples (recommended); the full TESS
    fine-tuning stays a later V4.1. OK?
 2. Difference images: worth the heavier downloads (a pilot first, recommended)?
-3. A name for the giant specialist (e.g. "Star Gazer Giants")?
+3. Name: **Colossus** (chosen by the user, 17 October 2026).
 4. Compute: a laptop CPU like V3 (days of building and training), or would you use a free cloud GPU?

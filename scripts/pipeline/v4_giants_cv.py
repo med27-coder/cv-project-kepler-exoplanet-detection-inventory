@@ -1,4 +1,4 @@
-"""Star Gazer V4 (giant-planet specialist): the registered cross-validation and analysis.
+"""Star Gazer V4, Colossus (giant-planet specialist): the registered cross-validation and analysis.
 
     .venv\\Scripts\\python scripts\\pipeline\\v4_giants_cv.py
 

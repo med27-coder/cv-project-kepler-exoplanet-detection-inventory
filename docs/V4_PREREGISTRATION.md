@@ -1,4 +1,4 @@
-# Star Gazer V4 (giant-planet specialist): pre-registration
+# Star Gazer V4, Colossus (giant-planet specialist): pre-registration
 
 Written and committed on 17 October 2026, **before any V4 model was trained**. Design, data, metrics and the
 decision rules below are fixed; any change after training starts is listed in section 8 with its reason and
@@ -69,4 +69,4 @@ before anything goes in the README.
 
 ## 8. Changes after registration
 
-(none yet)
+- 17 October 2026: the specialist is named **Colossus** (the user's choice). A name only; nothing in the design changed.
