@@ -15,6 +15,7 @@ also go to web/gallery/, with their credits in web/data/gallery.js.
 
 import io
 import json
+import re
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -60,7 +61,7 @@ PICKS = [
     ('solar-system', 'earth', 'epic-view-of-africa-and-europe-from-a-million-miles-away_19927967400_o',
      'Earth, Africa and Europe, from 1.5 million km (DSCOVR EPIC, 2015)'),
     ('solar-system', 'moon', 'GSFC_20171208_Archive_e000868', 'The full Moon'),
-    ('solar-system', 'mars', 'GSFC_20171208_Archive_e000332', 'Mars near its close approach (Hubble)'),
+    ('solar-system', 'mars', 'PIA04304', 'Mars, a global colour mosaic from the Viking orbiters'),
     ('solar-system', 'jupiter', 'PIA04866', 'Jupiter and the Great Red Spot (Cassini, 2000)'),
     ('solar-system', 'saturn', 'PIA14922', 'Saturn with its moon Titan in front (Cassini, 2012)'),
     ('solar-system', 'uranus', 'PIA18182', 'Uranus (Voyager 2, 1986)'),
@@ -79,6 +80,20 @@ PICKS = [
     ('concepts', 'comet-hale-bopp', 'PIA01289', 'Comet Hale-Bopp seen by Hubble (for the passing comets)'),
     ('concepts', 'asteroid-eros', 'PIA02900', 'Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids)'),
     ('stars', '9-black-hole-m87', 'PIA23122', 'Galaxy M87 (Spitzer) with the first image of a black hole (Event Horizon Telescope inset)'),
+    # Trophies (docs/plans/TROPHIES_AND_DATA.md): the universe cup, the nebula tier, and unique trophies.
+    ('trophies', 'universe-deep-field', 'GSFC_20171208_Archive_e001651', 'Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky'),
+    ('trophies', 'universe-cmb', 'PIA16874', 'The oldest light in the universe, the cosmic microwave background (Planck)'),
+    ('trophies', 'universe-baby-galaxies', 'PIA07142', 'Young galaxies across the universe (GALEX, Spitzer)'),
+    ('trophies', 'universe-milky-way', 'PIA10748', 'Our Milky Way from outside, with its central bar (artist concept)'),
+    ('trophies', 'universe-andromeda', 'PIA04921', 'The Andromeda galaxy in ultraviolet (GALEX)'),
+    ('trophies', 'nebula-eagle', 'PIA25433', 'The Eagle Nebula, home of the Pillars of Creation (WISE, infrared)'),
+    ('trophies', 'dwarf-ceres', 'PIA19167', 'Ceres from the Dawn spacecraft, 2015'),
+    ('trophies', 'dwarf-eris', 'PIA17307', 'Eris and its moon Dysnomia (artist concept)'),
+    ('trophies', 'moon-ida-dactyl', 'PIA00069', 'Asteroid Ida and its moon Dactyl, the first asteroid moon found (Galileo, 1993)'),
+    ('trophies', 'red-dwarf-flare', 'GSFC_20171208_Archive_e002073', 'A red dwarf unleashing a giant flare (artist concept)'),
+    ('trophies', 'red-dwarf-trappist', 'PIA22096', 'TRAPPIST-1, a red dwarf and its seven worlds, to scale with Jupiter\'s moons'),
+    ('trophies', 'brown-dwarf', 'PIA21752', 'A brown dwarf, too small to be a star, with banded weather (artist concept)'),
+    ('trophies', 'two-suns-kepler-16', 'PIA14724', 'Kepler-16 b, where the sun sets twice (artist concept)'),
 ]
 WEB_FOLDERS = {'spacecraft', 'solar-system'}   # the Galleria's photos; 'stars' are concept references only
 EXTRA = [   # not in the NASA library search: (folder, file, URL, credit, what it shows)
@@ -109,6 +124,10 @@ def main():
         pick = next((a for suffix in ('~medium.jpg', '~large.jpg', '~orig.jpg') for a in assets if a.endswith(suffix)),
                     None) or next(a for a in assets if a.lower().endswith(('.jpg', '.png')))
         credit = meta.get('secondary_creator') or meta.get('photographer') or f"NASA {meta.get('center', '')}".strip()
+        # Hubble images filed under GSFC name ESA only in the description's "Credit:" line (e.g. "NASA, ESA, ...").
+        credit_line = re.search(r'Credits?:\s*([^<\n]{0,240})', meta.get('description', ''))
+        if credit_line and re.search(r'\bESA\b', credit_line.group(1)) and 'ESA' not in credit:
+            credit = f'{credit} ({credit_line.group(1).strip().rstrip(";,. ")})'
         path = OUT / folder / f'{name}.jpg'
         if 'ESA' in credit:   # ESA's licence, not NASA's: link only
             path.unlink(missing_ok=True)

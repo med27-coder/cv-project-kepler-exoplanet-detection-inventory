@@ -10,6 +10,7 @@ still open. (Merged into `main` in October 2026.)
 | 2 | [HIGHLIGHTS.md](HIGHLIGHTS.md): accurate, explained highlights (Kopparapu habitable zone, facts vs predictions, radius errors), 9 new filters, combined filters with a results list | planned, numbers measured | the user answers its 4 decisions; data first, then an independent data audit |
 | 3 | [ACHIEVEMENTS_V2.md](ACHIEVEMENTS_V2.md): 13 chapters as real constellations, 35 new achievements, planets up close, Project Hail Mary (Tau Ceti, secret Erid), "What the alien doing", comets/asteroids/UFO sky events, rewards and titles | planned, concept art done | the user answers its 5 decisions, then build in its 5 steps |
 | 4 | [CONSTELLATIONS.md](CONSTELLATIONS.md): the constellation data (d3-celestial, BSD) and how figures draw | data checked; pairing superseded by #2 | built as part of #2 |
+| 5 | [TROPHIES_AND_DATA.md](TROPHIES_AND_DATA.md): **version updates** (semantic versions, changelog, GitHub Releases, "what's new in vX"), Gaia-based planet sizes, star types and life stages, brown dwarfs, the trophy ladder (new **nebula** tier, the **universe cup** for secrets), unique trophies, levelled achievements (DWARF KING, DWARF STAR) | planned, references fetched | 4 decisions; version updates can go first |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 

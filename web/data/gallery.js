@@ -158,9 +158,9 @@ window.STARMAP_GALLERY = {
  },
  "mars": {
   "img": "gallery/mars.jpg",
-  "credit": "NASA GSFC",
-  "link": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000332",
-  "what": "Mars near its close approach (Hubble)"
+  "credit": "NASA/USGS",
+  "link": "https://images.nasa.gov/details/PIA04304",
+  "what": "Mars, a global colour mosaic from the Viking orbiters"
  },
  "jupiter": {
   "img": "gallery/jupiter.jpg",
@@ -191,5 +191,17 @@ window.STARMAP_GALLERY = {
   "credit": "NASA/Johns Hopkins University Applied Physics Laboratory/Southwest Research Institute",
   "link": "https://images.nasa.gov/details/PIA19952",
   "what": "Pluto by New Horizons (enhanced colour), heart and all"
+ },
+ "universe-deep-field": {
+  "img": null,
+  "credit": "NASA GSFC (NASA; ESA; G. Illingworth, D. Magee, and P. Oesch, University of California, Santa Cruz; R. Bouwens, Leiden University; and the HUDF09 Team)",
+  "link": "https://images.nasa.gov/details/GSFC_20171208_Archive_e001651",
+  "what": "Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky"
+ },
+ "universe-cmb": {
+  "img": null,
+  "credit": "NASA/JPL-Caltech/ESA",
+  "link": "https://images.nasa.gov/details/PIA16874",
+  "what": "The oldest light in the universe, the cosmic microwave background (Planck)"
  }
 };
