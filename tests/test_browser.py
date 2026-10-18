@@ -755,3 +755,23 @@ def test_egg_cards_step_with_edge_arrows_and_keys(browser, site):
     page.click('.back')
     assert page.locator('.egg-card').count() == int(total)
     assert not errors, errors
+
+
+def test_rovers_at_work_on_mars(browser, site):
+    """"curiosity" and "percy" open the rovers at work on Mars (their own scenes, found as easter eggs); "mars rovers"
+    still shows where everything is; found rovers roll by behind the Martian farm without errors."""
+    errors = []
+    page = open_page(browser, site, errors)
+    search = lambda q: (page.fill('#query', q), page.press('#query', 'Enter'))
+    search('curiosity')
+    assert page.locator('#sys-title').inner_text() == 'CURIOSITY'
+    assert 'GALE CRATER' in page.locator('#info').inner_text()
+    search('percy')
+    assert page.locator('#sys-title').inner_text() == 'PERSEVERANCE'
+    saved = page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1'))")
+    assert {'curiosity', 'perseverance'} <= set(saved['eggs'])
+    search('martian man')
+    page.wait_for_timeout(500)
+    search('mars rovers')
+    page.wait_for_selector('#info table')                      # the spacecraft table (loaded on demand)
+    assert not errors, errors

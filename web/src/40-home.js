@@ -259,6 +259,8 @@ function lookup(query, updateHash = true) {
   const q = query.trim().replace(/[-_.]/g, ' ');
   if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
   if (MARTIAN_QUERY.test(q)) { showMartian(updateHash); unlockEgg('martian'); return; }   // 47d-martian.js
+  const rover = roverFor(q);   // Curiosity and Perseverance at work on Mars (47e-rovers.js)
+  if (rover) { showRover(rover, updateHash); unlockEgg(rover); return; }
   const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
   if (dwarf) { showDwarf(dwarf, updateHash); unlockEgg(dwarf); return; }
   if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }

@@ -7,6 +7,15 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.4.0] - 2026-10-18
+
+### Added
+- **The Mars rovers at work**, animated like the Martian farm: searching "curiosity" shows Curiosity climbing past
+  Mount Sharp in Gale Crater, stopping to drill and look around; "perseverance" (or "percy") shows Perseverance by the
+  old river delta in Jezero Crater, leaving sample tubes while Ingenuity takes off, flies and lands. Each scene has
+  the real rover's facts and NASA's mission page. "mars rovers" still shows where everything is.
+- Rovers you have found roll by far off behind the Martian farm.
+
 ## [1.3.1] - 2026-10-18
 
 ### Changed
@@ -82,6 +91,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.4.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.4.0
 [1.3.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.3.1
 [1.3.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.3.0
 [1.2.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.2.1

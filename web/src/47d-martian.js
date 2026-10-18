@@ -3,7 +3,8 @@
 // potatoes to survive. Searching "martian man" opens a Mars farm in pixel art: the Hab, a glass biodome where potato
 // rows grow through a whole crop while an astronaut tends them (in whatever outfit they wear, 47c-astronaut.js),
 // solar panels and a rover. Watching a crop all the way to harvest earns SPACE FARMER. The Galleria card shows
-// NASA's real work on farming Mars as references (no film stills: those are the studio's).
+// NASA's real work on farming Mars as references (no film stills: those are the studio's). Rovers found by name
+// (Curiosity, Perseverance) roll by far off.
 const MARTIAN_QUERY = /^(the )?martian man$/i;   // the only way in: the Galleria clue points to it
 const CROP_MS = 60_000;   // one crop, sprout to harvest, in a minute of watching
 let martianSince = 0, cropDone = false;
@@ -24,6 +25,7 @@ function drawMartianBase(ctx, w, h, t, growth) {
   }
   ctx.fillStyle = '#b5623a';
   ctx.fillRect(0, horizon, w, h - horizon);
+  drawFarRovers(ctx, w, horizon, t);   // the rovers you have found, rolling by far off (47e-rovers.js)
   for (let k = 0; k < 90; k++) {
     ctx.fillStyle = k % 3 ? '#9a4f2c' : '#7d3b20';
     ctx.fillRect(Math.floor(hash(`mr${k}`) * w), horizon + 2 + Math.floor(hash(`ms${k}`) * (h - horizon - 2)), k % 5 ? 1 : 2, 1);
