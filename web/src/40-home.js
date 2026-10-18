@@ -257,6 +257,7 @@ function lookup(query, updateHash = true) {
   // Easter eggs first; finding one unlocks it in the Galleria (48-gallery.js). Hyphens, underscores and dots
   // count as spaces ("new-horizons", "OSIRIS_REx"); extra or missing spaces don't, on purpose.
   const q = query.trim().replace(/[-_.]/g, ' ');
+  if (ASTRO_QUERY.test(q) && progress.ach['lost-in-orbit']) { showAstronaut(updateHash); return; }   // 47c-astronaut.js
   const dwarf = dwarfFor(q);   // Pluto, Ceres, Haumea, Makemake, Eris (47b-dwarfs.js)
   if (dwarf) { showDwarf(dwarf, updateHash); unlockEgg(dwarf); return; }
   if (HOME_QUERY.test(q)) { showHome(updateHash); unlockEgg(eggForQuery(q)); return; }

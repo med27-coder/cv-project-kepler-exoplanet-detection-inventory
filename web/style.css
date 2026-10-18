@@ -133,6 +133,10 @@ canvas {
 table { width: 100%; border-collapse: collapse; font-size: 20px; }
 th { text-align: left; color: var(--ink-2); font-weight: normal; border-bottom: 2px solid var(--edge); }
 td, th { padding: 2px 6px 2px 0; }
+/* Rows that wrap onto several lines stay easy to tell apart: a divider and a faint stripe on every other row */
+tbody td { border-bottom: 1px solid rgba(43, 58, 110, 0.7); padding-top: 5px; padding-bottom: 5px; vertical-align: top; }
+tbody tr:nth-child(even) td { background: rgba(255, 255, 255, 0.025); }
+td:first-child, th:first-child { padding-left: 4px; }
 td:first-child { white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .dot { display: inline-block; width: 10px; height: 10px; margin-right: 6px; background: var(--c, #c0c6e0); }

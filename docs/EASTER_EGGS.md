@@ -37,7 +37,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (61, in groups), trophies, badges and your star
+### Achievements (63, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -93,6 +93,8 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | NO SIGNAL | Search for five things that aren't there in one visit |
 | | SO CLOSE | Search a hidden name with a letter or two wrong |
 | | LOST IN ORBIT | Catch the flare drifting across the universe view: it's an astronaut |
+| | HOUSTON, WE HAVE A PROBLEM | Search "astronaut" after LOST IN ORBIT: a new outfit each time, the cowboy hat first |
+| | SPACE WARDROBE | See all six outfits (a seventh, a crown, comes with DWARF KING) |
 | | WARP SPEED | Find three new easter eggs within a minute |
 | | GOODNIGHT KEPLER | Visit on 15 November (Kepler was switched off on 15 November 2018) |
 | | LAUNCH DAY | Visit on 7 March (Kepler launched on 7 March 2009) |

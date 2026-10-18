@@ -156,6 +156,8 @@ const ACHIEVEMENTS = [
   { g: 'SECRET', id: 'hollow', title: 'NO SIGNAL', how: "Search for things that aren't there five times in one visit.", secret: true },
   { g: 'SECRET', id: 'so-close', title: 'SO CLOSE', how: 'Search a hidden name with a letter or two wrong.', secret: true },
   { g: 'SECRET', id: 'lost-in-orbit', title: 'LOST IN ORBIT', how: 'Catch the flare drifting across the universe.', secret: true },
+  { g: 'SECRET', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Look up the lost astronaut again, and see what they are wearing.', secret: true },
+  { g: 'SECRET', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'See every outfit in the lost astronaut\'s wardrobe.', secret: true },
   { g: 'SECRET', id: 'speedrun', title: 'WARP SPEED', how: 'Find three new easter eggs within one minute.', secret: true },
   { g: 'SECRET', id: 'goodnight', title: 'GOODNIGHT KEPLER', how: 'Visit on 15 November, the day Kepler was switched off in 2018.', secret: true },
   { g: 'SECRET', id: 'launch-day', title: 'LAUNCH DAY', how: 'Visit on 7 March, the day Kepler launched in 2009.', secret: true },
@@ -197,7 +199,8 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
                    toured: false,   // first-visit tour (49c-ui.js)
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
-                   backdrop: 'animated' };   // page background (55-backdrop.js)
+                   backdrop: 'animated',   // page background (55-backdrop.js)
+                   outfit: '', outfits: [] };   // the lost astronaut's outfits (56-universe.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -218,6 +221,8 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (Array.isArray(saved.viewed)) progress.viewed = [...new Set([...progress.viewed, ...saved.viewed.filter(v => ID.test(v))])].slice(0, 300);
   if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
   if (saved.whiteHole === true) progress.whiteHole = true;
+  if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
+  if (Array.isArray(saved.outfits)) progress.outfits = [...new Set([...progress.outfits, ...saved.outfits.filter(o => typeof o === 'string' && ID.test(o))])].slice(0, 40);
   const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
   for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
     if (!/^K\d{5}\.\d{2}$/.test(koi) || !Array.isArray(c) || !['planet', 'not'].includes(c[0]) || !DATE.test(String(c[1]))) continue;
