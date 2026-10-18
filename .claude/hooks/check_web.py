@@ -19,8 +19,8 @@ def main():
     if not re.search(r'[/\\]web[/\\]src[/\\][^/\\]+\.js$', path):
         return
     build = subprocess.run([str(PY if PY.exists() else 'python'), str(ROOT / 'scripts/starmap/build_web.py')],
-                           capture_output=True, text=True, cwd=ROOT)
-    check = subprocess.run(['node', '--check', str(ROOT / 'web/starmap.js')], capture_output=True, text=True, cwd=ROOT) \
+                           capture_output=True, text=True, cwd=ROOT, check=False)
+    check = subprocess.run(['node', '--check', str(ROOT / 'web/starmap.js')], capture_output=True, text=True, cwd=ROOT, check=False) \
         if build.returncode == 0 else build
     if check.returncode != 0:
         print(json.dumps({'decision': 'block',

@@ -27,7 +27,7 @@ def main():
             deny('Blocked by .claude/hooks/guard_secrets.py: this git add names a secret (.secrets/, *.key, *.pem '
                  'or .env). The Star Gazer key must never be committed.')
     if re.search(r'\bgit\b[^|;&]*\bcommit\b', cmd):
-        staged = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True).stdout
+        staged = subprocess.run(['git', 'diff', '--cached', '--name-only'], capture_output=True, text=True, check=False).stdout
         bad = [f for f in staged.splitlines() if SECRET.search(' ' + f)]
         if bad:
             deny(f'Blocked by .claude/hooks/guard_secrets.py: secret files are staged ({", ".join(bad)}). '
