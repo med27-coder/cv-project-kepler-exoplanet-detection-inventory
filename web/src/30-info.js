@@ -108,7 +108,19 @@ function planetTable(detail) {
         <th class="num">Year (days)</th><th class="num">Temp (K)</th><th class="num">Sunlight (vs Earth)</th>
         <th>Status</th><th class="num">Found</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table></div>`;
+    </table></div>${insideStarNote(detail)}`;
+}
+
+// A few catalog entries put a planet's orbit inside its own star (the star's listed size and its surface gravity
+// disagree, so one of them is wrong, or the signal isn't a planet). The drawing keeps the catalog's numbers and says so.
+function insideStarNote(detail) {
+  const starAU = (detail.srad || 0) * 0.00465047;   // solar radii to AU
+  const inside = detail.planets.filter(p => p.sma != null && starAU && p.sma < starAU);
+  if (!inside.length) return '';
+  return `<p class="callout">Look closely in TRUE SCALE: the catalog puts ${inside.length === 1 ? 'one orbit' : `${inside.length} orbits`}
+    (${inside.map(p => esc(p.name)).join(', ')}) inside the star itself, which is impossible. The listed star size
+    (${esc(fmt(detail.srad, 1))} times the Sun's) is probably wrong, or the signal is not a planet; these numbers are
+    shown as the catalog gives them.</p>`;
 }
 
 // Plain-language reasons a candidate might not be a planet (same rules as the export's leaderboard).

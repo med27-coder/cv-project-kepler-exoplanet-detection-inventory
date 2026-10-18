@@ -342,7 +342,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 34
+    assert page.locator('.egg-card').count() == 35
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -841,4 +841,35 @@ def test_hubble_is_found(browser, site):
         page.press('#query', 'Enter')
         assert page.locator('#sys-title').inner_text() == 'HUBBLE SPACE TELESCOPE', q
     assert 'hubble' in page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).eggs")
+    assert not errors, errors
+
+
+def test_tau_ceti_and_the_hail_mary(browser, site):
+    """"tau ceti" opens the real system (candidates) with the ship hidden as a glint; "hail mary" reveals it."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'tau ceti')
+    page.press('#query', 'Enter')
+    assert page.locator('#sys-title').inner_text() == 'TAU CETI'
+    assert 'glints' in page.locator('#info').inner_text()
+    saved = lambda: page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1') || '{}').eggs || {}")
+    assert 'hailmary' not in saved()
+    page.fill('#query', 'project hail mary')
+    page.press('#query', 'Enter')
+    assert 'HAIL MARY' in page.locator('#info').inner_text().upper()
+    assert 'hailmary' in saved()
+    assert not errors, errors
+
+
+def test_orbit_inside_the_star_is_explained(browser, site):
+    """KOI-2093's catalog puts two orbits inside its (probably mis-sized) star: the panel says so (user report)."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'KOI-2093')
+    page.press('#query', 'Enter')
+    page.wait_for_selector('#info .callout:has-text("inside the star")')
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.wait_for_function("() => document.getElementById('sys-title').textContent.includes('KEPLER-90')")
+    assert page.locator('#info .callout:has-text("inside the star")').count() == 0
     assert not errors, errors

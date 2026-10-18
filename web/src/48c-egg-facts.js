@@ -57,6 +57,12 @@ const EGG_FACTS = {
           'You can see it from your back yard: it looks like a bright, steady star gliding across the sky.'],
     why: 'The one place in space where people live, and the only Earth-orbit spacecraft in the game. You can go outside and find it for real.',
   },
+  hailmary: {
+    fun: ['Tau Ceti is one of the closest single Sun-like stars, so it has starred in science fiction for decades.',
+          'In 1960 Frank Drake pointed a radio telescope at Tau Ceti in the first modern search for alien signals, Project Ozma.',
+          'Its four planet candidates were found from the star\'s tiny back-and-forth wobble, not from transits like Kepler\'s.'],
+    why: 'A nod to the story by the author of The Martian: in it, stars dim because something eats their light, and catching stars dimming is exactly how Kepler found its planets. The ship hides as a glint near Tau Ceti until you name it.',
+  },
   hubble: {
     fun: ['Hubble is about the size of a school bus: 13.2 metres long.',
           'Its Deep Field picture of 1995 aimed at a dark speck of sky and found about 3,000 galaxies.',

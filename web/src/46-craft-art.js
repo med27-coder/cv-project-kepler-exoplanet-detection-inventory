@@ -13,7 +13,7 @@ const CRAFT_INK = {
   r: '#b0663a',                                                                       // Martian dust
   b: '#1e2f6e',                                                                       // solar cell grid lines
   v: '#6a5a86',                                                                       // Webb's sunshield, underside
-  x: '#2a2a30', e: '#9fd8ff', E: '#4a8fd6', o: '#ff9a3c',                             // black (shields, RTGs, wheels), thruster glow
+  x: '#2a2a30', e: '#9fd8ff', E: '#4a8fd6', o: '#ff9a3c', O: '#ff5a2a',                             // black (shields, RTGs, wheels), thruster glow
 };
 
 const CRAFT_ART = {
@@ -263,6 +263,13 @@ const CRAFT_ART = {
     '....mmmmmmmmmmm....',
     '...xx...xx...xx....',
     '...xm...xm...xm....',
+  ],
+  hailmary: [   // a nod to Project Hail Mary: the long ship, crew module at the front, Astrophage engines at the back
+    '.........m..........',
+    'oo.mmmmmmlsssssww...',
+    'Oollllllllsssssswwk.',
+    'oo.mmmmmmlsssssww...',
+    '.........m..........',
   ],
   hubble: [   // the silver tube with its open aperture door, two blue solar wings, the high-gain antennas
     'PpP..............PpP',
