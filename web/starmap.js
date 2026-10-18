@@ -4540,7 +4540,12 @@
 
   // ---- lost in orbit: a flare that is really an astronaut
   const ASTRONAUT = ['.www.', 'wooow', 'wooow', '.www.', 'wwwww', 'wwwww', '.w.w.', '.w.w.'];
-  const forceAstronaut = /[?&]astronaut\b/.test(location.search);
+  let astronautCanvas = null;
+  const astronautSprite = () => astronautCanvas || (astronautCanvas = layer(15, 24, put => ASTRONAUT.forEach((row, r) => [...row].forEach((ch, c) => {
+    if (ch === '.') return;
+    for (let k = 0; k < 9; k++) put(c * 3 + (k % 3), r * 3 + Math.floor(k / 3), ch === 'o' ? '#ff9a3c' : '#e6ecff');   // 3 x 3 per pixel
+  }))));
+  const forceAstronaut =/[?&]astronaut\b/.test(location.search);
   let flare = null, nextFlare = 0, caught = 0;
   function planFlare(now) { nextFlare = now + (forceAstronaut ? 300 : 20_000 + Math.random() * 50_000); }
   function updateFlare(now) {
@@ -4558,12 +4563,11 @@
   function drawFlare(now) {
     if (caught && now - caught < 4000) {   // caught: the astronaut, big, tumbling slowly
       const spin = REDUCED_MOTION ? 0 : (now - caught) / 900, cx = UCX, cy = UCY;
-      ASTRONAUT.forEach((row, r) => [...row].forEach((ch, c) => {
-        if (ch === '.') return;
-        const x = (c - 2) * 3, y = (r - 4) * 3, rx = x * Math.cos(spin) - y * Math.sin(spin), ry = x * Math.sin(spin) + y * Math.cos(spin);
-        uctx.fillStyle = ch === 'o' ? '#ff9a3c' : '#e6ecff';
-        uctx.fillRect(Math.round(cx + rx), Math.round(cy + ry), 3, 3);
-      }));
+      uctx.save();   // rotate the whole sprite as one image, so it stays solid at every angle
+      uctx.translate(cx, cy);
+      uctx.rotate(spin);
+      uctx.drawImage(astronautSprite(), -7.5, -12);
+      uctx.restore();
       for (let k = 0; k < 20; k++) { uctx.fillStyle = '#4a5590'; uctx.fillRect(Math.round(cx + 8 + k * 2), Math.round(cy + 6 + Math.sin(k / 3 + now / 300) * 3), 1, 1); }
       uniText(uctx, 'LOST IN ORBIT', UCX - 25, UCY + 22, '#ff9a3c');
       return;
