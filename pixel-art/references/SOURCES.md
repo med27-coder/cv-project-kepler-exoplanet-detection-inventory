@@ -29,6 +29,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `spacecraft/curiosity.jpg` | Curiosity selfie on Mars | [PIA19808](https://images.nasa.gov/details/PIA19808) | NASA/JPL-Caltech/MSSS | 2015-08-19 |
 | `spacecraft/perseverance.jpg` | Perseverance selfie with Ingenuity | [PIA24542](https://images.nasa.gov/details/PIA24542) | NASA/JPL-Caltech/MSSS | 2021-04-07 |
 | `spacecraft/iss.jpg` | The ISS photographed from a departing Soyuz (2018) | [iss056e201248](https://images.nasa.gov/details/iss056e201248) | NASA JSC | 2018-10-04 |
+| `solar-system/solar-system-montage.jpg` | The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008) | [PIA10969](https://images.nasa.gov/details/PIA10969) | NASA/JPL | 2008-07-21 |
 | `solar-system/pale-blue-dot.jpg` | The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020) | [PIA23645](https://images.nasa.gov/details/PIA23645) | NASA/JPL-Caltech | 2020-02-12 |
 | `solar-system/sun.jpg` | The Sun in visible light with a giant sunspot (SDO, 2014) | [GSFC_20171208_Archive_e000923](https://images.nasa.gov/details/GSFC_20171208_Archive_e000923) | NASA GSFC | 2017-12-08 |
 | `solar-system/mercury.jpg` | Mercury, most of a hemisphere, as Mariner 10 left it (1974) | [PIA02418](https://images.nasa.gov/details/PIA02418) | NASA/JPL/Northwestern University | 1999-10-07 |
@@ -52,6 +53,7 @@ ESA are under ESA's own terms, so they are linked here, not copied.
 | `stars/8-neutron-star.jpg` | A pulsar: a spinning neutron star sweeping beams (artist concept) | [PIA21085](https://images.nasa.gov/details/PIA21085) | NASA/JPL-Caltech | 2017-01-06 |
 | `stars/9-black-hole.jpg` | A black hole with its glowing disk and jet (artist concept) | [PIA16695](https://images.nasa.gov/details/PIA16695) | NASA/JPL-Caltech | 2013-02-27 |
 | `concepts/comet-neowise.jpg` | Comet NEOWISE in July 2020, with the space station streaking past (for the passing comets) | [NHQ202007180001](https://images.nasa.gov/details/NHQ202007180001) | NASA/Bill Ingalls | 2020-07-18 |
+| `concepts/comet-lovejoy-iss.jpg` | Comet Lovejoy from the space station, December 2011: a long, gently curved dust tail (for the passing comets) | [iss030e015491](https://images.nasa.gov/details/iss030e015491) | NASA JSC | 2012-12-22 |
 | `concepts/comet-hale-bopp.jpg` | Comet Hale-Bopp over Earth's limb, seen from the Space Shuttle in 1997 (for the passing comets) | [sts084-389-024](https://images.nasa.gov/details/sts084-389-024) | NASA JSC | 1997-07-09 |
 | `concepts/asteroid-eros.jpg` | Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids) | [PIA02900](https://images.nasa.gov/details/PIA02900) | NASA/JPL/JHUAPL | 2000-06-10 |
 | `martian/martian-gardens.jpg` | Martian Gardens: crops grown in simulated Martian soil (NASA Kennedy and Florida Tech, 2016) | [KSC-20160815-PH_DNG01_0003](https://images.nasa.gov/details/KSC-20160815-PH_DNG01_0003) | NASA/Dimitri Gerondidakis | 2016-08-15 |

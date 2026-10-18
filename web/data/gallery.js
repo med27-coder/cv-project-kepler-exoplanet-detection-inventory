@@ -120,6 +120,12 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/iss056e201248",
   "what": "The ISS photographed from a departing Soyuz (2018)"
  },
+ "solar-system-montage": {
+  "img": "gallery/solar-system-montage.jpg",
+  "credit": "NASA/JPL",
+  "link": "https://images.nasa.gov/details/PIA10969",
+  "what": "The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008)"
+ },
  "pale-blue-dot": {
   "img": "gallery/pale-blue-dot.jpg",
   "credit": "NASA/JPL-Caltech",

@@ -5,7 +5,7 @@
 // to the real thing (web/gallery/, credits in data/gallery.js) with its story. Achievements reward
 // exploring the rest of the page. Progress lives only in this browser (localStorage).
 const EGGS = [
-  { id: 'sun', name: 'Solar System', kind: 'sun', ref: 'pale-blue-dot', query: 'Solar System', toast: 'HOME SWEET HOME',
+  { id: 'sun', name: 'Solar System', kind: 'sun', ref: 'solar-system-montage', query: 'Solar System', toast: 'HOME SWEET HOME',
     clue: 'Eight worlds circle me, and on one of them, someone is reading this.',
     story: 'The Sun and its planets formed about 4.6 billion years ago from a collapsing cloud of gas and dust. It is the only system we know of with life, and the only one Kepler could never see: its view looked away from home.' },
   { id: 'pluto', name: 'Pluto', kind: 'dwarf', ref: 'pluto', query: 'Pluto', toast: 'DWARF PLANET DISCOVERED',
@@ -25,8 +25,9 @@ const EGGS = [
   { id: 'eris', name: 'Eris', kind: 'dwarf', ref: 'eris', query: 'Eris', toast: 'GODDESS OF DISCORD',
     clue: 'When I was found, astronomers had to decide what a planet is, and Pluto lost its title.',
     story: 'Found in 2005, Eris is about Pluto\'s size but more massive. A tenth "planet" forced the question, and in 2006 the IAU defined planets for the first time: Pluto, Eris and Ceres became dwarf planets. Its moon Dysnomia is named after the daughter of Eris, the Greek goddess of strife.' },
-  { id: 'martian', name: 'Martian Man', kind: 'martian', ref: 'martian-gardens', query: 'Martian Man', toast: 'BOTANIST OF MARS',
-    refs: [['mars-habitat', 'BASE'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'SPACE GARDEN']],
+  { id: 'martian', name: 'Martian Man', kind: 'martian', ref: 'mars-habitat', query: 'Martian Man', toast: 'BOTANIST OF MARS',
+    refs: [['martian-gardens', 'MARS SOIL CROPS'], ['acidalia', 'ACIDALIA'], ['pathfinder', 'PATHFINDER'], ['veggie', 'SPACE GARDEN']],
+    film: ['https://www.20thcenturystudios.com/movies/the-martian', "the film's Hab and greenhouse: The Martian (20th Century Studios)"],
     clue: 'Left behind on the red planet, I grew potatoes to stay alive. What do you call a man who lives on Mars?',
     story: 'A nod to Andy Weir\'s 2011 novel and the 2015 film. The real science: Martian soil holds toxic perchlorates that a farm would have to wash out, NASA has grown crops in simulated Martian soil, and astronauts first ate space-grown lettuce on the ISS in August 2015. The pictures are NASA\'s, used as references for the pixel farm.' },
   { id: 'kepler', name: 'Kepler', kind: 'kepler', ref: 'kepler', query: 'Kepler', toast: 'PLANET HUNTER AWAKENED',
@@ -563,6 +564,7 @@ function renderDetail(egg) {
     </div>
     ${got && egg.id === 'sun' ? planetStrip() : ''}
     ${got && egg.refs ? refStrip(egg) : ''}
+    ${got && egg.film ? `<p class="note">Film stills belong to the studio, so they aren't copied here: see ${link(egg.film[0], egg.film[1])}</p>` : ''}
     <h3 class="facts-title">${got ? esc(egg.name.toUpperCase()) : esc(blanks(egg.name))}</h3>
     ${got ? `<p class="egg-badge">★ ${esc(egg.toast)} · found ${esc(progress.eggs[egg.id])}</p><p>${esc(egg.story)}</p>
         <button type="button" class="show-me">SHOW ME</button>`

@@ -3,7 +3,7 @@
 // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
 // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
 // announces (2 or 3 plain-words highlights per version, no spoilers).
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 const RELEASE_NOTES = [
   'Galleria cards now have arrows on their edges (and the arrow keys work too): step from card to card without going back.',
   'Voyager 1 and Voyager 2 are now two easter eggs, each with its own story. Already found "Voyager"? That was Voyager 1.',

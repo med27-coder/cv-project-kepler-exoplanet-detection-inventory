@@ -192,7 +192,7 @@ def test_gallery_photos():
             assert (WEB / g['img']).is_file(), name
     egg_refs = re.findall(r"ref: '([\w-]+)'", (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8'))
     assert set(egg_refs) <= set(gallery), set(egg_refs) - set(gallery)
-    assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 800_000   # 480-wide copies, loaded one card at a time
+    assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 900_000   # 480-wide copies, loaded one card at a time
 
 
 # Every achievement and easter-egg id ever published. Visitors' saved progress refers to these, so they must

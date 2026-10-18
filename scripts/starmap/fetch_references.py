@@ -53,6 +53,7 @@ PICKS = [
     ('spacecraft', 'perseverance', 'PIA24542', 'Perseverance selfie with Ingenuity'),
     ('spacecraft', 'iss', 'iss056e201248', 'The ISS photographed from a departing Soyuz (2018)'),
     # Real photos in natural colour where one exists (not artist montages or false-colour ultraviolet).
+    ('solar-system', 'solar-system-montage', 'PIA10969', 'The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008)'),
     ('solar-system', 'pale-blue-dot', 'PIA23645', ('The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), '
                                                    'photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020)')),
     ('solar-system', 'sun', 'GSFC_20171208_Archive_e000923', 'The Sun in visible light with a giant sunspot (SDO, 2014)'),
