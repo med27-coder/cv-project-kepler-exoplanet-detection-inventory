@@ -89,7 +89,7 @@ PICKS = [
     ('martian', 'mars-greenhouse', 'PIA23343', 'Aerogel greenhouses: a proposal for warming patches of Mars to grow plants (concept)'),
     ('martian', 'acidalia', 'PIA02000', 'Acidalia and Chryse Plains, where the novel puts the Ares 3 base (Mars Global Surveyor)'),
     ('martian', 'pathfinder', 'PIA00621', 'Mars Pathfinder and Sojourner in 1997, the lander the story uses to phone home'),
-    ('martian', 'veggie', 'KSC-20180227-PH_DAC01_0044', "Seeds placed into pods for Veggie, the space station's garden (2018)"),
+    ('martian', 'veggie', 'KSC-20171017-PH_ISS01_0001', "Lettuce and mustard greens growing in Veggie, the space station's plant chamber: a real greenhouse in space (2017)"),
     # Trophies (docs/plans/TROPHIES_AND_DATA.md): the universe cup, the nebula tier, and unique trophies.
     ('trophies', 'universe-deep-field', 'GSFC_20171208_Archive_e001651', 'Hubble eXtreme Deep Field: thousands of galaxies in a speck of sky'),
     ('trophies', 'universe-cmb', 'PIA16874', 'The oldest light in the universe, the cosmic microwave background (Planck)'),
