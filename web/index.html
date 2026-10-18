@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/og.png">
   <meta property="og:url" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=1.9.0">
+  <link rel="stylesheet" href="style.css?v=1.10.0">
 </head>
 <body>
   <canvas id="backdrop" aria-hidden="true"></canvas>
@@ -30,7 +30,7 @@
     <p class="loading-fact">Kepler itself launched on a Delta II rocket from Cape Canaveral on 7 March 2009, and spent
        the next nine years hunting planets.</p>
   </div>
-  <script src="loading.js?v=1.9.0"></script>
+  <script src="loading.js?v=1.10.0"></script>
   <header>
     <div class="header-right">
       <span id="rank-showcase" aria-label="Your showcase trophies"></span>
@@ -209,10 +209,19 @@
       <h2 id="thanks-title">INCOMING TRANSMISSION</h2>
       <button type="button" id="thanks-close" class="ghost" aria-label="Close">✕</button>
     </div>
+    <div class="tabs" role="tablist" aria-label="Transmission">
+      <button type="button" role="tab" id="thanks-tab-msg" aria-controls="thanks-pane-msg" aria-selected="true">MESSAGE</button>
+      <button type="button" role="tab" id="thanks-tab-upd" aria-controls="thanks-pane-upd" aria-selected="false" tabindex="-1">UPDATES</button>
+    </div>
+    <section id="thanks-pane-upd" role="tabpanel" aria-labelledby="thanks-tab-upd" hidden>
+      <p class="note">Everything added and fixed, newest first.</p>
+      <ol id="thanks-updates" class="updates"></ol>
+    </section>
+    <section id="thanks-pane-msg" role="tabpanel" aria-labelledby="thanks-tab-msg">
     <section id="thanks-news" class="news" hidden aria-labelledby="thanks-news-title">
       <h3 id="thanks-news-title">WHAT'S NEW</h3>
       <ul id="thanks-news-list"></ul>
-      <p><a id="thanks-news-log" href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/blob/main/CHANGELOG.md">Everything that changed (the changelog)</a></p>
+      <p><button type="button" id="thanks-news-all" class="linkish">See every update</button></p>
     </section>
     <p>Thank you for trying my webpage!</p>
     <p>This started out as a project: Star Gazer, a model that learns to spot planets in the starlight NASA's Kepler
@@ -221,6 +230,7 @@
        mission to find worlds around other stars.</p>
     <p>I'm really thankful you're enjoying it. Have fun with it, and clear skies!</p>
     <p class="ps">P.S. Search up the solar system.</p>
+    </section>
   </dialog>
 
   <script src="data/systems.js"></script>
@@ -228,6 +238,6 @@
   <script src="data/earth.js"></script>
   <script src="data/gallery.js"></script>
   <script src="data/resolutions.js"></script>
-  <script src="starmap.js?v=1.9.0"></script>
+  <script src="starmap.js?v=1.10.0"></script>
 </body>
 </html>

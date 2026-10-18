@@ -7,7 +7,7 @@ The page loads one classic script so it also works opened straight from disk (fi
 ES modules are blocked. The parts are plain top-level JavaScript, joined in file-name order inside
 one function scope (shared variables, nothing leaks to the page), behind the clickjacking guard.
 Edit web/src/*.js, then run this script; tests fail if the two drift apart. It also stamps the version
-(VERSION in web/src/00-version.js) on index.html's script and stylesheet links (starmap.js?v=1.0.0), so browsers
+(the first HISTORY entry in web/src/00-version.js) on index.html's script and stylesheet links (starmap.js?v=1.0.0), so browsers
 fetch fresh files after a release instead of an old cached copy.
 """
 
@@ -57,9 +57,9 @@ def build():
 
 
 def version():
-    m = re.search(r"^const VERSION = '(\d+\.\d+\.\d+)';", (SRC / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)
+    m = re.search(r"^  \{ v: '(\d+\.\d+\.\d+)'", (SRC / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)
     if not m:
-        sys.exit('No VERSION in web/src/00-version.js')
+        sys.exit('No version in HISTORY in web/src/00-version.js')
     return m[1]
 
 

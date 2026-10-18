@@ -116,16 +116,60 @@
 
   // ---------------------------------------------------------------- the site's version
   // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
-  // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
-  // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
-  // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.9.0';
-  const RELEASE_NOTES = [
-    "Two more rovers to find: NASA's twins of 2004, each with its own scene on Mars.",
-    'Dwarf planets you find now join the Solar System drawing, out where they really orbit.',
-    'A new easter egg: the very first rover on Mars, from 1997. Can you find it? (The Martian farm has a clue outside its Hab.)',
-    'Every found easter egg in the Galleria now has FUN FACTS and the story of why it was hidden here.',
+  // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: stay on 1.x (MINOR for
+  // new features, PATCH for fixes). HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
+  // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
+  // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
+  const HISTORY = [
+    { v: '1.10.0', date: '18 Oct 2026', notes: [
+      'New: an UPDATES tab in this transmission, with everything added and fixed, version by version.',
+    ] },
+    { v: '1.9.0', date: '18 Oct 2026', notes: [
+      "New: two more rovers to find, NASA's twins of 2004, each with its own scene on Mars.",
+      'New: every rover you find now rolls by behind the farm on Mars.',
+      'Fixed: small bugs.',
+    ] },
+    { v: '1.8.0', date: '18 Oct 2026', notes: [
+      'New: dwarf planets you find join the Solar System drawing, out where they really orbit.',
+      'New: a second loading screen, an astronomer at a telescope under twinkling stars.',
+    ] },
+    { v: '1.7.0', date: '18 Oct 2026', notes: [
+      'New: the very first rover on Mars, from 1997, is hidden somewhere. The farm on Mars has a clue outside its Hab.',
+    ] },
+    { v: '1.6.0', date: '18 Oct 2026', notes: [
+      'New: fresh pixel art for every spacecraft and rover: bigger, shaded and easier to tell apart.',
+      'Fixed: bugs in how the pixel art is made.',
+    ] },
+    { v: '1.5.0', date: '18 Oct 2026', notes: [
+      'New: every easter egg you find has FUN FACTS in the Galleria, and the story of why it was hidden here.',
+    ] },
+    { v: '1.4.0', date: '18 Oct 2026', notes: [
+      'New: some spacecraft open their own animated scenes on Mars. Try searching for the rovers you know.',
+    ] },
+    { v: '1.3.1', date: '18 Oct 2026', notes: [
+      'New: better photos for some Galleria cards.',
+    ] },
+    { v: '1.3.0', date: '18 Oct 2026', notes: [
+      'New: arrows on the Galleria cards (and the arrow keys) to step from card to card.',
+    ] },
+    { v: '1.2.1', date: '18 Oct 2026', notes: [
+      "Fixed: the astronaut's wardrobe buttons and outfit count.",
+    ] },
+    { v: '1.2.0', date: '18 Oct 2026', notes: [
+      'New: the two Voyagers are now two easter eggs, each with its own story.',
+      'Fixed: the 8-bit fanfare sometimes stayed silent. It is now on from the start (switch it off in Settings).',
+    ] },
+    { v: '1.1.0', date: '18 Oct 2026', notes: [
+      'New: sky watch. Comets and asteroids cross the Kepler map every few minutes: click one to catch it.',
+      'New: six achievements for catching them, and something stranger passing by now and then.',
+      'Fixed: small bugs.',
+    ] },
+    { v: '1.0.0', date: '18 Oct 2026', notes: [
+      'The first full release: 3,600+ Kepler stars, their planets in pixel art, the Galleria collecting game, and the UNIVERSE view.',
+    ] },
   ];
+  const VERSION = HISTORY[0].v;
+  const RELEASE_NOTES = HISTORY[0].notes;
 
   // ---------------------------------------------------------------- sky events: comets, asteroids, the odd UFO
   // Every 3 to 6 minutes of use, something crosses the Kepler field map: a comet (a bright head, a curved dust
@@ -5582,11 +5626,11 @@
 
   queueMicrotask(whatsNew);
 
-  // ---------------------------------------------------------------- the antenna: a thank-you note, and what's new
+  // ---------------------------------------------------------------- the antenna: a thank-you note, and the updates
   // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note from the
-  // site's maker. When the site has a version this browser hasn't seen (VERSION, 00-version.js), the dish lights up
-  // and the note starts with WHAT'S NEW IN VX: the release notes. Opening it marks the version as seen.
-  // Clicking outside the note closes it too.
+  // site's maker, in two tabs: MESSAGE (the note, led by WHAT'S NEW IN VX when this browser hasn't seen the version)
+  // and UPDATES (every version, newest first: HISTORY in 00-version.js). A new version lights the dish up; opening it
+  // marks the version as seen. Clicking outside the note closes it too.
   const SEEN_VERSION_KEY = 'starmap.seenVersion';
   const thanksDialog = document.getElementById('thanks');
   const thanksButton = document.getElementById('thanks-open');
@@ -5595,19 +5639,57 @@
     try { return localStorage.getItem(SEEN_VERSION_KEY); } catch { return null; }
   }
   const versionIsNew = seenVersion() !== VERSION;
+  function noteList(notes) {
+    const ul = document.createElement('ul');
+    for (const note of notes) {
+      const li = document.createElement('li');
+      li.textContent = note;
+      ul.append(li);
+    }
+    return ul;
+  }
   if (versionIsNew) {
     thanksButton.classList.add('news');
     thanksButton.title = `New in v${VERSION}: open the transmission`;
     document.getElementById('thanks-news-title').textContent = `WHAT'S NEW IN V${VERSION}`;
-    const list = document.getElementById('thanks-news-list');
-    for (const note of RELEASE_NOTES) {
-      const li = document.createElement('li');
-      li.textContent = note;
-      list.append(li);
+    document.getElementById('thanks-news-list').replaceWith(Object.assign(noteList(RELEASE_NOTES), { id: 'thanks-news-list' }));
+  }
+  const updatesList = document.getElementById('thanks-updates');
+  for (const h of HISTORY) {
+    const li = document.createElement('li');
+    const title = document.createElement('h3');
+    title.textContent = `V${h.v}`;
+    const date = document.createElement('span');
+    date.textContent = h.date.toUpperCase();
+    title.append(date);
+    li.append(title, noteList(h.notes));
+    updatesList.append(li);
+  }
+
+  const thanksTabs = [['thanks-tab-msg', 'thanks-pane-msg'], ['thanks-tab-upd', 'thanks-pane-upd']]
+    .map(([tab, pane]) => [document.getElementById(tab), document.getElementById(pane)]);
+  function showThanksTab(which) {
+    for (const [tab, pane] of thanksTabs) {
+      const on = tab.id === which;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      pane.hidden = !on;
     }
   }
+  thanksTabs.forEach(([tab], k) => {
+    tab.addEventListener('click', () => showThanksTab(tab.id));
+    tab.addEventListener('keydown', e => {   // arrow keys move between the tabs, as in the Galleria
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const next = thanksTabs[(k + (e.key === 'ArrowRight' ? 1 : thanksTabs.length - 1)) % thanksTabs.length][0];
+      showThanksTab(next.id);
+      next.focus();
+    });
+  });
+  document.getElementById('thanks-news-all').addEventListener('click', () => showThanksTab('thanks-tab-upd'));
+
   thanksButton.addEventListener('click', () => {
     document.getElementById('thanks-news').hidden = !versionIsNew;
+    showThanksTab('thanks-tab-msg');
     thanksDialog.showModal();
     thanksButton.classList.remove('news');
     thanksButton.title = 'Incoming transmission: a note from the maker';

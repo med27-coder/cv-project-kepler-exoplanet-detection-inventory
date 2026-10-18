@@ -659,9 +659,15 @@ def test_antenna_opens_the_thank_you_note(browser, site):
     page.click('#thanks-open')
     page.wait_for_function('() => document.getElementById("thanks").open')
     assert page.locator('#thanks-news').is_visible()
-    assert page.locator('#thanks-news-list li').count() >= 2
+    assert page.locator('#thanks-news-list li').count() >= 1
     assert 'search up the solar system' in page.locator('#thanks .ps').inner_text().lower()
     assert 'news' not in page.get_attribute('#thanks-open', 'class')
+    page.click('#thanks-tab-upd')                         # every version, newest first
+    assert page.locator('#thanks-pane-upd').is_visible() and page.locator('#thanks-pane-msg').is_hidden()
+    assert page.locator('#thanks-updates > li').count() >= 10
+    text = page.locator('#thanks-updates').inner_text().lower()
+    assert 'security' not in text and 'v1.0.0' in text
+    page.click('#thanks-tab-msg')
     page.click('#thanks-close')
     assert not page.evaluate('() => document.getElementById("thanks").open')
     page.click('#thanks-open')
