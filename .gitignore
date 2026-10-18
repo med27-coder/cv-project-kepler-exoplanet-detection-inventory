@@ -28,6 +28,7 @@ flagged/
 results/v3/
 # V4 giant specialist: out-of-fold predictions and analysis (a public summary goes in docs once audited)
 results/v4/
+results/v3_1/
 .secrets/
 
 # Hugging Face Space bundle (scripts/tools/make_hf_space.py)
