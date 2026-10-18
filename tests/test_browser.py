@@ -375,6 +375,23 @@ def test_daily_mystery_calls_and_card(browser, site):
     assert not errors, errors
 
 
+def test_night_sky_backdrop(browser, site):
+    """The pixel night sky draws behind the page, never takes clicks, and can be switched to plain."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.wait_for_timeout(300)
+    info = page.evaluate("""() => { const c = document.getElementById('backdrop'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        const colours = new Set(); for (let i = 0; i < d.length; i += 4 * 7) colours.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]);
+        return { w: c.width, colours: colours.size, events: getComputedStyle(c).pointerEvents, z: getComputedStyle(c).zIndex }; }""")
+    assert info['w'] >= 200 and info['colours'] > 12 and info['events'] == 'none' and info['z'] == '-1'
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    page.select_option('#set-backdrop', 'plain')
+    assert page.locator('#backdrop').is_hidden()
+    assert '"backdrop":"plain"' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    assert not errors, errors
+
+
 def test_view_links_kepler_view_and_pinch(browser, site):
     """A shared link restores zoom, true scale and Kepler's view; pinching zooms; the URL follows."""
     errors = []

@@ -1,6 +1,6 @@
 # Plan: a pixel night-sky page background
 
-**Status: plan + concept art (local branch `plan/constellations`). Next up: build this first.**
+**Status: built (October 2026): `web/src/55-backdrop.js`, with a Background setting (animated / still / plain).**
 The user wants the page's plain dark-purple background (`--bg: #070b1a` on `body`) replaced by an animated
 pixel-art night sky, inspired by a screenshot they shared (someone else's art: inspiration only, never copied
 or committed). Concept: `pixel-art/concepts/draft_background.gif` (`scripts/starmap/draft_concepts.py`, `background()`).

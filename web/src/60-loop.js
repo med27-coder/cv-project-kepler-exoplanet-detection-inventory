@@ -21,10 +21,12 @@ function frame(now) {
   if (SYSTEM_MS === Infinity) {   // animation off: draw the current state once, then sleep until something changes
     drawMap(now);
     drawSystem(0);
+    drawBackdrop(now, true);
     running = false;
     return;
   }
   if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); drawHeaderEmblem(now); lastMap = now; }
+  drawBackdrop(now);   // the night sky behind the page (55-backdrop.js; ~8 fps, still with reduced motion)
   if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) {
     drawSystem(now / 1000);
     lastSys = now;
