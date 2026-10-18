@@ -1,45 +1,73 @@
-"""The loading screen's pixel art: a rock with little moons, after asteroid Ida and its moon Dactyl.
+"""The loading screen's pixel art: Kepler's own rocket, a Delta II, climbing.
 
     .venv\\Scripts\\python scripts\\starmap\\make_loading_art.py
 
-Writes web/loading.gif (animated, 16 frames) and web/loading-still.png (for reduced motion), 4 screen pixels per
-art pixel. The rock and moons come from the approved concept (draft_concepts.py, docs/plans/WORLDS_MOONS_AND_SCREENS.md);
-the words are HTML, so they stay sharp and readable.
+Kepler launched on a Delta II (the 7925-10L version: nine strap-on solid boosters) from Cape Canaveral on
+7 March 2009. The rocket stays centred while stars stream past and the flame flickers, so the loop is seamless.
+Writes web/loading.gif (16 frames) and web/loading-still.png (for reduced motion), 4 screen pixels per art
+pixel; the words are HTML. The first design, a rock with moons, is kept as concept art
+(pixel-art/concepts/draft_loading_rock.gif).
 """
 
 import math
 from pathlib import Path
 
-import draft_concepts as D
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / 'web'
-W, H, SCALE, FRAMES = 72, 32, 4, 16
+W, H, SCALE, FRAMES = 40, 44, 4, 16
+BG = (7, 11, 26)
+
+
+def hexc(c):
+    return tuple(int(c[i:i + 2], 16) for i in (1, 3, 5))
 
 
 def frame(t):
-    f = D.Frame(W, H, seed=13)
-    cx, cy = W // 2, H // 2
-    rot = t * 2 * math.pi
-    for y in range(-7, 8):   # a lumpy, slowly turning rock
-        for x in range(-11, 12):
-            if (x / 11) ** 2 + (y / 7) ** 2 > 1 + 0.18 * math.sin(3 * math.atan2(y, x) + rot):
-                continue
-            crater = round(x + rot * 3) % 6 == 0 and y % 4 == 1
-            f.put(cx + x, cy + y, '#5d5a55' if crater else '#b8b0a4' if x + y < -3 else '#8a8278')
-    for k, (r, ry, speed, col) in enumerate([(17, 6, 1, '#d6dae2'), (24, 8, -0.6, '#c9a86a'), (31, 11, 0.4, '#9fd8ff')]):
-        a = rot * speed + k * 2
-        x, y = cx + r * math.cos(a), cy + ry * math.sin(a)
-        if math.sin(a) < 0 and abs(x - cx) < 11 and abs(y - cy) < 7:
-            continue   # behind the rock
-        f.disc(x, y, 1.6 if k == 1 else 1.2, lambda dx, dy, q, c=col: c)
-    return f.img.resize((W * SCALE, H * SCALE), Image.NEAREST)
+    img = Image.new('RGB', (W, H), BG)
+    put = lambda x, y, c: img.putpixel((x, y), hexc(c)) if 0 <= x < W and 0 <= y < H else None
+    for k in range(34):   # stars streaming down past the climbing rocket (one full screen per loop)
+        x = (k * 37 + 5) % W
+        y = int(((k * 53) % H) + t * H * (1 + k % 3)) % H
+        put(x, y, '#4a5590' if k % 4 else '#c8d0ff')
+        if k % 3 == 2:
+            put(x, (y - 1) % H, '#1e2550')   # faster stars leave a short streak
+    cx, top = W // 2, 6
+    body = '#eef2f8'
+    for y in range(top, top + 4):   # the payload fairing (Kepler inside), tapering to the nose
+        half = (y - top) // 2
+        for x in range(cx - half, cx + half + 1):
+            put(x, y, body)
+    for y in range(top + 4, top + 22):   # the first stage: white body, a dark interstage band, a shadowed side
+        for x in range(cx - 2, cx + 3):
+            put(x, y, '#2b3566' if y in (top + 8, top + 9) else '#c9d2de' if x == cx + 2 else body)
+    for dx in (-4, -3, 3, 4):   # strap-on solid boosters, nine in all (drawn as the ones facing us)
+        for y in range(top + 14, top + 22):
+            put(cx + dx, y, '#9aa6b8' if abs(dx) == 4 else '#d6dae2')
+        if abs(dx) == 3:
+            put(cx + dx, top + 13, '#d6dae2')   # the inner boosters' rounded tops
+    flick = [0, 2, 1, 3, 1, 2, 0, 3][int(t * FRAMES) % 8]   # the flame flickers
+    for k in range(6 + flick):
+        y = top + 22 + k
+        w = max(0, 2 - k // 3)
+        for x in range(cx - w, cx + w + 1):
+            put(x, y, '#fff1b0' if k < 2 else '#ffd34d' if k < 4 else '#ff9a3c')
+    for dx in (-4, 4):   # the boosters' smaller flames
+        for k in range(2 + flick // 2):
+            put(cx + dx, top + 22 + k, '#ffd34d' if k == 0 else '#ff9a3c')
+    for k in range(10):   # smoke puffs falling away behind
+        s = (t + k / 10) % 1
+        x = cx + round(math.sin(k * 2.3) * (2 + s * 6))
+        y = top + 28 + round(s * 12)
+        put(x, y, '#5d6878' if s < 0.5 else '#3a4258')
+        put(x + 1, y, '#5d6878' if s < 0.3 else '#3a4258')
+    return img.resize((W * SCALE, H * SCALE), Image.NEAREST)
 
 
 def main():
     frames = [frame(k / FRAMES) for k in range(FRAMES)]
-    frames[0].save(WEB / 'loading.gif', save_all=True, append_images=frames[1:], duration=120, loop=0, optimize=True)
+    frames[0].save(WEB / 'loading.gif', save_all=True, append_images=frames[1:], duration=90, loop=0, optimize=True)
     frames[0].save(WEB / 'loading-still.png', optimize=True)
     for name in ('loading.gif', 'loading-still.png'):
         print(f'web/{name}  {(WEB / name).stat().st_size // 1024} KB')

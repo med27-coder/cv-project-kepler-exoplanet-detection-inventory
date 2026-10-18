@@ -35,6 +35,10 @@ planet). Achievement **DWARF KING**: find all five by name. NASA images where th
 from New Horizons); the others only as artist concepts or dots, labelled so.
 
 ## 4. Loading screen: the rock with moons
+
+**Built, then reworked (17 October 2026):** the user asked for a rocket; it is now Kepler's own Delta II climbing
+(`scripts/starmap/make_loading_art.py`). The rock stays as concept art (`draft_loading_rock.gif`).
+
 While the page's data loads (a few hundred KB), show a pixel **asteroid with little moons orbiting**, like Ida and
 its moon Dactyl, the first asteroid moon ever found (Galileo, 1993; NASA reference image to fetch), plus
 "LOADING 3,631 STARS…" and one rotating space fact.
