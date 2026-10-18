@@ -121,6 +121,9 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.7', date: '18 Oct 2026', notes: [
+      'Fixed: the next-planets list could be replaced by a star that was still loading.',
+    ] },
     { v: '1.9.6', date: '18 Oct 2026', notes: [
       'Fixed: the lost astronaut spins more smoothly, with crisp edges.',
     ] },
@@ -1546,6 +1549,7 @@
   function showLeaderboard() {
     achieve('oracle');
     selected = null;
+    ++selectToken;   // a system still loading must not replace the list when it arrives
     title.textContent = 'NEXT PLANETS';
     const pct = v => (v == null ? '-' : `${fmt(Math.round(v * 100))}%`);
     const table = (rows, caption) => !rows.length ? '' : `
