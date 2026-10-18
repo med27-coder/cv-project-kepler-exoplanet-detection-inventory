@@ -94,7 +94,7 @@ def test_page_security_policy():
 
 def test_page_assets_exist():
     html = (WEB / 'index.html').read_text(encoding='utf-8')
-    for ref in re.findall(r'(?:src|href)="([^":#]+)"', html):   # relative links only
+    for ref in re.findall(r'(?:src|href)="([^":#?]+)(?:\?v=[\d.]+)?"', html):   # relative links only
         assert (WEB / ref).exists(), ref
     assert (WEB / 'og.png').exists()
 
@@ -243,3 +243,13 @@ def test_resolutions():
     for koi, (ruling, date) in rec['resolved'].items():
         assert re.fullmatch(r'K\d{5}\.\d{2}', koi) and ruling in {'confirmed', 'false positive'}
         assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', date) and date >= rec['since']
+
+
+def test_version_agrees_everywhere():
+    """The version in web/src/00-version.js tops CHANGELOG.md and is stamped on index.html's own links."""
+
+    v = re.search(r"^const VERSION = '(\d+\.\d+\.\d+)';", (WEB / 'src' / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)[1]
+    log = (WEB.parent / 'CHANGELOG.md').read_text(encoding='utf-8')
+    assert re.search(r'^## \[(\d+\.\d+\.\d+)\]', log, re.MULTILINE)[1] == v, 'add the version to CHANGELOG.md'
+    html = (WEB / 'index.html').read_text(encoding='utf-8')
+    assert f'src="starmap.js?v={v}"' in html and f'href="style.css?v={v}"' in html, 'run scripts/starmap/build_web.py'

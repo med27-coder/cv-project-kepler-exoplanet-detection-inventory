@@ -655,12 +655,22 @@ def test_antenna_opens_the_thank_you_note(browser, site):
     """The dish on the page's edge opens the maker's note (with its P.S. hint); Close and Escape shut it."""
     errors = []
     page = open_page(browser, site, errors)
+    assert 'news' in page.get_attribute('#thanks-open', 'class')   # a version this browser hasn't seen: lit up
     page.click('#thanks-open')
     page.wait_for_function('() => document.getElementById("thanks").open')
+    assert page.locator('#thanks-news').is_visible()
+    assert page.locator('#thanks-news-list li').count() >= 2
     assert 'search up the solar system' in page.locator('#thanks .ps').inner_text().lower()
+    assert 'news' not in page.get_attribute('#thanks-open', 'class')
     page.click('#thanks-close')
     assert not page.evaluate('() => document.getElementById("thanks").open')
     page.click('#thanks-open')
     page.keyboard.press('Escape')
     assert not page.evaluate('() => document.getElementById("thanks").open')
+    page.reload()
+    page.wait_for_function('() => !document.getElementById("loading")')
+    assert 'news' not in page.get_attribute('#thanks-open', 'class')   # seen: stays quiet until the next version
+    page.click('#thanks-open')
+    assert page.locator('#thanks-news').is_hidden()
+    assert page.locator('#site-version').inner_text().startswith('v')
     assert not errors, errors

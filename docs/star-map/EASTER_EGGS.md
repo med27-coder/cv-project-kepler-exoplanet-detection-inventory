@@ -172,7 +172,8 @@ Not secret, but easy to miss:
 - **Red dwarfs flare:** watch a cool star (e.g. Kepler-186) for a while.
 - **Animation menu** (below the system): smooth, normal, battery saver or off.
 - **The antenna** (a little dish on the left edge of the page): opens INCOMING TRANSMISSION, a thank-you note from
-  the maker, with a P.S. hint to search the solar system.
+  the maker, with a P.S. hint to search the solar system. After a new release it glows, and the note opens with
+  WHAT'S NEW IN VX (once per version; the version and changelog link are in the footer).
 
 ## Adding a new easter egg
 
