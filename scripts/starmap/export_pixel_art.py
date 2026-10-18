@@ -77,7 +77,7 @@ def main():
         page = browser.new_page(bypass_csp=True)   # local tool: the page's CSP rightly forbids eval
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        page.route('**/starmap.js', lambda route: route.fulfill(body=exposed_script(), content_type='text/javascript'))
+        page.route('**/starmap.js*', lambda route: route.fulfill(body=exposed_script(), content_type='text/javascript'))
         page.goto(f'http://127.0.0.1:{server.server_address[1]}/index.html')
         page.wait_for_function('window.__art !== undefined')
 
