@@ -79,6 +79,7 @@ PICKS = [
     ('stars', '8-neutron-star', 'PIA21085', 'A pulsar: a spinning neutron star sweeping beams (artist concept)'),
     ('stars', '9-black-hole', 'PIA16695', 'A black hole with its glowing disk and jet (artist concept)'),
     ('concepts', 'comet-neowise', 'NHQ202007180001', 'Comet NEOWISE in July 2020, with the space station streaking past (for the passing comets)'),
+    ('concepts', 'comet-lovejoy-iss', 'iss030e015491', 'Comet Lovejoy from the space station, December 2011: a long, gently curved dust tail (for the passing comets)'),
     ('concepts', 'comet-hale-bopp', 'sts084-389-024', "Comet Hale-Bopp over Earth's limb, seen from the Space Shuttle in 1997 (for the passing comets)"),
     ('concepts', 'asteroid-eros', 'PIA02900', 'Asteroid Eros up close, NEAR Shoemaker (for the passing asteroids)'),
     # The Martian easter egg (a fan reference to Andy Weir's novel and the 2015 film): real NASA work on farming Mars.
