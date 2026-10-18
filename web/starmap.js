@@ -121,6 +121,9 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.2', date: '18 Oct 2026', notes: [
+      'Fixed: a star still loading could replace the page you had moved on to.',
+    ] },
     { v: '1.9.1', date: '18 Oct 2026', notes: [
       'New: an UPDATES tab in this transmission, with everything added and fixed, version by version.',
       'Fixed: the search box now ignores emojis.',
@@ -1544,6 +1547,7 @@
   }
 
   function showUnknown(query) {
+    ++selectToken;   // a system still loading must not replace this page when it arrives
     noSignal();
     title.textContent = 'NO SIGNAL';
     info.innerHTML = `
@@ -1786,6 +1790,7 @@
   function showHome(updateHash = true) {
     const home = solarNow(), hidden = SOLAR_DWARFS.length - (home.planets.length - SOLAR.planets.length);
     selected = null;
+    ++selectToken;   // a system still loading must not replace the Solar System when it arrives
     title.textContent = 'THE SOLAR SYSTEM';
     info.innerHTML = `
       <p class="big">★ YOU ARE HERE ★</p>

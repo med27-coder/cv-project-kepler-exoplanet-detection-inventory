@@ -215,13 +215,17 @@ planets Kepler found outside its usual candidate list, like Kepler-16 b, a real 
 
 The **UNIVERSE** button zooms out in six sectors (◀ ▶ or the arrow keys): Kepler's field, the Sun's neighbourhood (every star with confirmed planets within 13 light-years, from NASA's table), the Milky Way, the Local Group (real galaxy distances, McConnachie 2012), Laniakea and the observable universe, each with its sources.
 
-**It's also a game.** The gear button opens the **Galleria**: 29 hidden easter eggs to find by name (each shows its
-pixel art next to the real NASA photo, with a slider that turns one into the other), 69 achievements with
-trophies by difficulty, set badges and a constellation per group, and a hologram close-up of every trophy. Your
-achievements grow **your star** in the page header, from stardust to a black hole for the final mission (open
-every system on the map). Visitors can **make their own predictions** on candidates (planet or not?), scored
-when NASA rules, and there's a **daily mystery star**. Progress stays in your own browser (no accounts, no
-tracking) and can be backed up to a file. A first-visit tour shows the way around.
+**It's also a game.** The gear button opens the **Galleria**: 33 hidden easter eggs to find by name (each shows its
+pixel art next to the real NASA photo, with a slider that turns one into the other, plus fun facts and why it was
+hidden), 75 achievements with trophies by difficulty, set badges and a constellation per group, and a hologram
+close-up of every trophy. Some eggs open their own animated scenes (the Mars rovers at work, a farm on Mars, the
+dwarf planets), comets and asteroids cross the map to be caught, and a lost astronaut collects a wardrobe of rare
+outfits. Your achievements grow **your star** in the page header, from stardust to a black hole for the final
+mission (open every system on the map). Visitors can **make their own predictions** on candidates (planet or
+not?), scored when NASA rules, and there's a **daily mystery star**. Progress stays in your own browser (no
+accounts, no tracking) and can be backed up to a file. A first-visit tour shows the way around, and the antenna
+on the page's edge holds a note from the maker and every update, version by version
+([CHANGELOG.md](CHANGELOG.md)); each release is tagged on GitHub.
 
 Everything is drawn from numbers on small canvases (about 1.8 MB of data for all systems, loaded in pieces as
 you open them) and hosted free on GitHub Pages. The data comes from the NASA Exoplanet Archive (KOI,

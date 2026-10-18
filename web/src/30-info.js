@@ -237,6 +237,7 @@ function showLeaderboard() {
 }
 
 function showUnknown(query) {
+  ++selectToken;   // a system still loading must not replace this page when it arrives
   noSignal();
   title.textContent = 'NO SIGNAL';
   info.innerHTML = `

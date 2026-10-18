@@ -229,6 +229,7 @@ function homeFacts() {
 function showHome(updateHash = true) {
   const home = solarNow(), hidden = SOLAR_DWARFS.length - (home.planets.length - SOLAR.planets.length);
   selected = null;
+  ++selectToken;   // a system still loading must not replace the Solar System when it arrives
   title.textContent = 'THE SOLAR SYSTEM';
   info.innerHTML = `
     <p class="big">★ YOU ARE HERE ★</p>
