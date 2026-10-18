@@ -26,7 +26,7 @@ design, decided **before** it is evaluated, judged by cross-validation on fresh 
   confirmed giant planets from TESS (TFOPWG-confirmed hot Jupiters) to its training set.
 - **The hand-off:** a KOI's radius is itself uncertain (it depends on the star's radius), so there is no hard cut.
   Below 6 Earth radii V3 answers; above 10, V4; in between, a blend weighted by radius. The blend's rule is fixed
-  before evaluation (section 3).
+  before evaluation (section 4).
 - **The star map** shows which specialist answered ("small-planet model" / "giant-planet model").
 
 ## 3. What the giant specialist uses
