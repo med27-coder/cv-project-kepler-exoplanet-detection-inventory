@@ -214,6 +214,7 @@ function drawMap(t) {
       mctx.fillRect(x + dx, y + dy, 1, 1);
     }
   }
+  drawSkyEvent(t);   // a passing comet, asteroid or saucer (05-sky-events.js)
 }
 
 function canvasPoint(evt) {
@@ -267,6 +268,11 @@ map.addEventListener('pointermove', e => {
     }
     return;
   }
+  if (skyEventAt(...canvasPoint(e))) {
+    map.classList.add('on-kepler');   // the pointing-hand cursor
+    hoverLine.textContent = `▸ ${skyEvent.kind === 'ufo' ? 'What is that?!' : `A ${skyEvent.kind} is passing!`} Click to catch it`;
+    return;
+  }
   const onKepler = overKepler(e);
   map.classList.toggle('on-kepler', onKepler);
   hovered = onKepler ? null : starAt(e);
@@ -278,6 +284,7 @@ map.addEventListener('pointerup', e => {
   const wasDrag = drag && drag.moved;
   drag = null;
   if (wasDrag) return;
+  if (catchSkyEvent(...canvasPoint(e))) return;
   if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
   const s = starAt(e);
   if (s) { session.hops = 0; select(s); }

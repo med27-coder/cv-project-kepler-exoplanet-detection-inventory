@@ -119,12 +119,171 @@
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
   // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
   // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const RELEASE_NOTES = [
-    'The first full release: 3,600+ Kepler stars to explore, each with its planets orbiting in pixel art.',
-    'A collecting game in the Galleria: 29 easter eggs to find by name, 69 achievements, trophies and your own star.',
-    'A UNIVERSE view that zooms out from Kepler\'s field to the edge of the observable universe.',
+    'Sky watch: every few minutes a comet or a tumbling asteroid crosses the Kepler map. Click one to catch it!',
+    'Six new achievements for catching them, in their own SKY WATCH constellation.',
+    'Keep watching the skies: something stranger passes by now and then.',
   ];
+
+  // ---------------------------------------------------------------- sky events: comets, asteroids, the odd UFO
+  // Every 3 to 6 minutes of use, something crosses the Kepler field map: a comet (a bright head, a curved dust
+  // tail and a faint blue ion tail, both pointing away from the Sun, off to the left) or a dark tumbling asteroid.
+  // Rarely, after a while, a flying saucer zooms past, and 2 times in 5 an asteroid tumbles by behind it (WHAT WAS
+  // THAT?). Click one while it's on screen to catch it (SKY WATCH achievements). Designs and science:
+  // docs/plans/SKY_EVENTS_DRAFTS.md, concept art pixel-art/concepts/draft_{comet_v3,asteroid_v2,ufo_space_*}.gif.
+  // Drawn on the map's own frames (~8 fps, 10-map.js calls drawSkyEvent), so it stops when the page is idle or
+  // hidden; never with reduced motion or the animation off; half as often in battery-saver mode.
+  const SKY_MIN_S = 180, SKY_MAX_S = 360, UFO_AFTER_S = 600, UFO_CHANCE = 0.08, UFO_ROCK_CHANCE = 0.4;
+  const SKY_DURATION = { comet: 16, asteroid: 10, ufo: 5 };   // seconds on screen
+  let skyEvent = null, skyClock = 0, skyNext = SKY_MIN_S + Math.random() * (SKY_MAX_S - SKY_MIN_S), skyLastT = 0, skyBurst = null;
+
+  // Sprites are gathered first, then drawn with a one-pixel ring of dark sky around them, so they stand out from
+  // the crowded star field behind.
+  const skyPixels = new Map();
+  function skyPut(x, y, col, ring = true) { skyPixels.set(`${Math.round(x)},${Math.round(y)}`, [col, ring]); }   // ring: false for glows
+  function flushSky() {
+    mctx.fillStyle = '#070b1a';
+    for (const [key, [, ring]] of skyPixels) {
+      if (!ring) continue;
+      const [x, y] = key.split(',').map(Number);
+      mctx.fillRect(x - 1, y - 1, 3, 3);
+    }
+    for (const [key, [col]] of skyPixels) {
+      const [x, y] = key.split(',').map(Number);
+      mctx.fillStyle = col;
+      mctx.fillRect(x, y, 1, 1);
+    }
+    skyPixels.clear();
+  }
+
+  function startSkyEvent(kind, withRock = false) {
+    const W = 192, H = 192, r = Math.random;
+    if (kind === 'comet') {   // drifts slowly towards the Sun (left), tails streaming behind it to the right
+      const y0 = 30 + r() * 120;
+      skyEvent = { kind, x0: W + 40, y0, x1: -40, y1: y0 + (r() - 0.5) * 60 };
+    } else if (kind === 'asteroid') {
+      const fromLeft = r() < 0.5, y0 = 20 + r() * 150;
+      skyEvent = { kind, x0: fromLeft ? -8 : W + 8, y0, x1: fromLeft ? W + 8 : -8, y1: 20 + r() * 150 };
+    } else {
+      const y0 = 40 + r() * 100;
+      skyEvent = { kind, x0: -16, y0, x1: W + 16, y1: y0 + (r() - 0.5) * 30, withRock };
+    }
+    Object.assign(skyEvent, { age: 0, spin: r() * 6 });
+  }
+
+  function skyPosition(e) {
+    const f = e.age / SKY_DURATION[e.kind];
+    return [e.x0 + (e.x1 - e.x0) * f, e.y0 + (e.y1 - e.y0) * f];
+  }
+
+  // A comet after real photos (Comet Lovejoy from the ISS): tiny bright head, soft coma, dithered dust plume that
+  // widens, fades and curves gently; a faint thin ion tail just off it. The Sun is to the left, so both point right.
+  function drawComet(hx, hy) {
+    const L = 44;
+    for (let u = 1; u < L; u++) {
+      const half = 0.8 + u * 0.17, bend = (u / L) ** 2 * 6;
+      for (let v = -Math.ceil(half); v <= Math.ceil(half); v++) {
+        const x = Math.round(hx + u), y = Math.round(hy - u * 0.3 + v + bend);
+        const dust = (1 - u / L) ** 1.3 * Math.max(0, 1 - (v / half) ** 2);
+        if (dust > (BAYER[y & 3][x & 3] + 0.5) / 16) skyPut(x, y, dust > 0.6 ? '#ffffff' : dust > 0.35 ? '#f4ecd6' : dust > 0.18 ? '#c9bfa4' : '#7a735f', false);
+      }
+      if (u > 2 && u % 2 === 0 && u < L * 0.9) skyPut(hx + u, hy - u * 0.42 - 1.5, u < 14 ? '#9fc8f0' : '#4a78b8', false);   // ion tail
+    }
+    for (const [dx, dy] of [[-1, 0], [-1, 1], [2, 0], [2, 1], [0, -1], [1, -1], [0, 2], [1, 2]]) skyPut(hx + dx, hy + dy, '#bfe0ff');   // the coma
+    for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) skyPut(hx + dx, hy + dy, '#ffffff');   // the bright head
+  }
+
+  // An asteroid: a dark, lumpy rock lit from the left, tumbling; no glow, no tail.
+  const ROCK = ['..aab..', '.aabbbc', 'aabbkbc', 'abbbbcc', '.bkbcc.', '..bcc..', '.......'];
+  const ROCK_INK = { a: '#d8d0c0', b: '#9a9284', c: '#5e584f', k: '#6e675c' };   // sunlit, with two craters
+  function drawAsteroid(x, y, spin) {
+    const q = Math.floor(spin) % 4;   // four tumbling poses: the rock turned a quarter each time
+    ROCK.forEach((row, r) => [...row].forEach((ch, c) => {
+      if (ch === '.') return;
+      const [px, py] = [[c, r], [6 - r, c], [6 - c, 6 - r], [r, 6 - c]][q];
+      skyPut(x - 3 + px, y - 3 + py, ROCK_INK[ch]);
+    }));
+  }
+
+  // The saucer (after the user's reference): a silver disc, a glass dome with two little green aliens, rim lights
+  // chasing round, bobbing as it goes.
+  const SAUCER = ['....ddddd....', '...dgdddgd...', '..ssssssssss.', '.sSSSSSSSSSs.', 'sSlSSlSSlSSls', '.sssssssssss.', '...mm...mm...'];
+  const SAUCER_INK = { d: '#9fd8ff', g: '#4fd17a', s: '#d6dae2', S: '#9aa6b8', m: '#6f7d96' };
+  function drawUfo(x, y, t) {
+    const lights = ['#ffd34d', '#ff6ec7', '#7ff0e0'];
+    let k = 0;
+    SAUCER.forEach((row, r) => [...row].forEach((ch, c) => {
+      if (ch === '.') return;
+      skyPut(x - 6 + c, y - 3 + r, ch === 'l' ? lights[(k++ + Math.floor(t * 6)) % 3] : SAUCER_INK[ch]);
+    }));
+  }
+
+  function drawSkyEvent(t) {   // t: milliseconds (the map's frame time)
+    const dt = Math.min(0.5, Math.max(0, (t - skyLastT) / 1000));
+    skyLastT = t;
+    if (REDUCED_MOTION || !t) return;
+    if (skyBurst) {   // a little sparkle where something was caught
+      skyBurst.age += dt;
+      const k = Math.round(skyBurst.age * 10);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) skyPut(skyBurst.x + dx * (1 + k), skyBurst.y + dy * (1 + k), k % 2 ? '#ffd34d' : '#ffffff');
+      flushSky();
+      if (skyBurst.age > 0.6) skyBurst = null;
+    }
+    if (!skyEvent) {
+      skyClock += dt * (SYSTEM_MS > 1000 / 20 ? 0.5 : 1);   // battery saver: half as often
+      if (skyClock < skyNext) return;
+      skyNext = skyClock + SKY_MIN_S + Math.random() * (SKY_MAX_S - SKY_MIN_S);
+      if (skyClock > UFO_AFTER_S && Math.random() < UFO_CHANCE) startSkyEvent('ufo', Math.random() < UFO_ROCK_CHANCE);
+      else startSkyEvent(Math.random() < 0.5 ? 'comet' : 'asteroid');
+    }
+    const e = skyEvent;
+    e.age += dt;
+    if (e.age > SKY_DURATION[e.kind]) { skyEvent = null; return; }
+    const [x, y] = skyPosition(e), s = t / 1000;
+    if (e.kind === 'comet') drawComet(x, y);
+    else if (e.kind === 'asteroid') drawAsteroid(x, y, e.spin + s * 2.5);
+    else {
+      if (e.withRock) {   // behind the saucer, going the other way: WHAT WAS THAT?
+        const f = e.age / SKY_DURATION.ufo;
+        drawAsteroid(192 * (1 - f) + 10, e.y0 + 12 - f * 20, e.spin + s * 4);
+        if (f > 0.3 && f < 0.7) achieve('what-was-that');
+      }
+      drawUfo(x, y + Math.round(Math.sin(s * 5) * 1.5), s);
+    }
+    flushSky();
+  }
+
+  // The map's pointer handlers (10-map.js) ask here first. A generous target: these are small and moving.
+  function skyEventAt(px, py) {
+    if (!skyEvent) return false;
+    const [x, y] = skyPosition(skyEvent), reach = skyEvent.kind === 'ufo' ? 9 : 7;
+    return Math.hypot(px - x, py - y) <= reach;
+  }
+  function catchSkyEvent(px, py) {
+    if (!skyEventAt(px, py)) return false;
+    const kind = skyEvent.kind, [x, y] = skyPosition(skyEvent);
+    skyEvent = null;
+    skyBurst = { x, y, age: 0 };
+    const key = { comet: 'comets', asteroid: 'asteroids', ufo: 'ufos' }[kind];
+    progress[key] += 1;
+    saveProgress();
+    const n = progress[key];
+    if (kind === 'comet') { achieve('comet-catcher'); if (n >= 5) achieve('tail-chaser'); }
+    if (kind === 'asteroid') { achieve('rock-hound'); if (n >= 10) achieve('asteroid-catcher'); }
+    if (kind === 'ufo') achieve('ufo-spotter');
+    hoverLine.textContent = `▸ Caught ${kind === 'ufo' ? 'the saucer' : `a ${kind}`}! (${n} so far)`;
+    return true;
+  }
+  // Browser tests can summon an event at once (only under automation: no achievements for free).
+  if (navigator.webdriver) {
+    window.__skyEvent = (kind, rock) => {   // returns where it is, in map pixels
+      startSkyEvent(kind, rock);
+      skyEvent.age = SKY_DURATION[kind] / 2;
+      skyEvent.x0 = skyEvent.x1 = 96; skyEvent.y0 = skyEvent.y1 = 96;   // parked mid-map, so a test can click it
+      return skyPosition(skyEvent);
+    };
+  }
 
   // ---------------------------------------------------------------- map
   const map = document.getElementById('map');
@@ -342,6 +501,7 @@
         mctx.fillRect(x + dx, y + dy, 1, 1);
       }
     }
+    drawSkyEvent(t);   // a passing comet, asteroid or saucer (05-sky-events.js)
   }
 
   function canvasPoint(evt) {
@@ -395,6 +555,11 @@
       }
       return;
     }
+    if (skyEventAt(...canvasPoint(e))) {
+      map.classList.add('on-kepler');   // the pointing-hand cursor
+      hoverLine.textContent = `▸ ${skyEvent.kind === 'ufo' ? 'What is that?!' : `A ${skyEvent.kind} is passing!`} Click to catch it`;
+      return;
+    }
     const onKepler = overKepler(e);
     map.classList.toggle('on-kepler', onKepler);
     hovered = onKepler ? null : starAt(e);
@@ -406,6 +571,7 @@
     const wasDrag = drag && drag.moved;
     drag = null;
     if (wasDrag) return;
+    if (catchSkyEvent(...canvasPoint(e))) return;
     if (overKepler(e)) { input.value = 'Kepler'; lookup('Kepler'); return; }
     const s = starAt(e);
     if (s) { session.hops = 0; select(s); }
@@ -2893,6 +3059,12 @@
     { g: 'WARDROBE', id: 'walk-in-closet', title: 'WALK-IN CLOSET', how: 'Collect seven outfits.' },
     { g: 'WARDROBE', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'Collect all fifteen outfits.' },
     { g: 'WARDROBE', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Find the legendary Texas cowboy hat, the rarest outfit of all.', secret: true },
+    { g: 'SKY WATCH', id: 'comet-catcher', title: 'COMET CATCHER', how: 'Catch a comet passing over the map.' },
+    { g: 'SKY WATCH', id: 'rock-hound', title: 'ROCK HOUND', how: 'Catch an asteroid tumbling across the map.' },
+    { g: 'SKY WATCH', id: 'tail-chaser', title: 'TAIL CHASER', how: 'Catch five comets.' },
+    { g: 'SKY WATCH', id: 'asteroid-catcher', title: 'ASTEROID CATCHER', how: 'Catch ten asteroids.' },
+    { g: 'SKY WATCH', id: 'ufo-spotter', title: 'UFO SPOTTER', how: 'Catch the flying saucer. It rarely shows up.' },
+    { g: 'SKY WATCH', id: 'what-was-that', title: 'WHAT WAS THAT?', how: 'See the asteroid that sometimes follows the flying saucer.', secret: true },
     { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
     { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
     { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
@@ -2916,8 +3088,9 @@
   // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet'],
-    epic: ['census', 'cartographer', 'dwarf-king', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+           'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet',
+           'tail-chaser', 'ufo-spotter'],
+    epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
            'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
   };
   for (const a of ACHIEVEMENTS) {
@@ -2950,7 +3123,8 @@
                      toured: false,   // first-visit tour (49c-ui.js)
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                      backdrop: 'animated',   // page background (55-backdrop.js)
-                     outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [] };   // the lost astronaut's wardrobe (47c-astronaut.js)
+                     outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
+                     comets: 0, asteroids: 0, ufos: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -2972,7 +3146,7 @@
     if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
     if (saved.whiteHole === true) progress.whiteHole = true;
     if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
-    for (const k of ['astroVisits', 'astroLastRoll', 'astroDry']) {
+    for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos']) {
       if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
     }
     if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
@@ -3761,6 +3935,10 @@
     'space-wardrobe': ['rrr.kkk', 'rrr.kkk', '.......', 'TTT.yyy', 'TTT.yyy', '.......'],   // four hats on the rack
     runway: ['...y...', '..yyy..', 'yyyyyyy', '..yyy..', '.y...y.', '.......'],         // a star of the runway
     'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
+    'tail-chaser': ['......w', '....tww', '..ttt.b', '.ttt.b.', 'ttt.b..', '.......'],     // a comet's tails
+    'ufo-spotter': ['.......', '..bbb..', '.bgbgb.', 'sssssss', '.yssy..', '.......'],     // the saucer
+    'asteroid-catcher': ['.......', '..ttm..', '.tmmmk.', '.mmmkk.', '..mkk..', '.......'],   // a lumpy rock
+    'what-was-that': ['....bb.', '...sss.', '..sssss', 'mm.....', 'mkm....', '.m.....'],   // a saucer, a rock behind
     'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
     speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
     goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
@@ -3862,6 +4040,15 @@
       for (let x = 2; x <= 14; x++) put(x, 11, '#ffc93c');
       for (let y = 8; y < 14; y++) { put(7, y, '#e04a4a'); put(9, y, '#e04a4a'); }
       put(8, 9, '#ff6ec7'); put(8, 12, '#ff6ec7');
+    } },
+    'SKY WATCH': { name: 'THE SHOOTING STAR', art: put => {   // a comet streaking across a dark square of sky
+      for (let k = 0; k < 11; k++) {
+        const x = 13 - k, y = 3 + Math.round(k * 0.8);
+        put(x, y, k < 2 ? '#ffffff' : k < 5 ? '#f4ecd6' : k < 8 ? '#c9bfa4' : '#7a735f');
+        if (k > 1 && k < 9) put(x, y + 1, k < 5 ? '#c9bfa4' : '#7a735f');
+      }
+      put(14, 2, '#dfefff'); put(13, 2, '#ffffff'); put(14, 3, '#ffffff');
+      for (const [x, y] of [[3, 3], [10, 12], [6, 1], [13, 14]]) put(x, y, '#9fd8ff');
     } },
     'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
       discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));
@@ -4215,6 +4402,12 @@
     'space-wardrobe': 'A real spacesuit, NASA\'s EMU, weighs about 145 kg on Earth and is made to measure.',
     runway: 'Spacesuits are white to reflect sunlight: in direct Sun, a dark suit would overheat.',
     'walk-in-closet': 'Astronauts on the space station can\'t wash clothes; worn clothing is packed away as rubbish.',
+    'comet-catcher': 'A comet\'s tails always point away from the Sun, so leaving the Sun, a comet travels tail-first.',
+    'rock-hound': 'Asteroid Ida has its own little moon, Dactyl: Galileo spotted it in 1993.',
+    'tail-chaser': 'Comets have two tails: a curved, whitish one of dust and a straight, bluish one of charged gas.',
+    'asteroid-catcher': 'In 2022 NASA\'s DART spacecraft hit the asteroid moonlet Dimorphos and changed its orbit: a first test of planetary defence.',
+    'ufo-spotter': 'UFO means unidentified flying object. NASA set up a study team on such sightings in 2022; nothing alien so far.',
+    'what-was-that': 'Most asteroids orbit between Mars and Jupiter, so far apart that spacecraft fly through the belt without trouble.',
     'space-farmer': 'NASA\'s Veggie garden on the ISS gave astronauts their first space-grown salad in August 2015.',
     speedrun: 'Voyager 1 travels about 17 km every second.',
     goodnight: "Kepler's last command was sent on 15 November 2018.",
@@ -4230,6 +4423,7 @@
     'lost-in-orbit': 'Not every flare in the dark is a star. Watch the universe long enough.',
     houston: 'The one you found drifting might be glad of a visit.',
     'space-wardrobe': 'Visit the lost one often enough and the wardrobe opens.',
+    'what-was-that': 'Keep an eye on the saucer: sometimes it has company.',
     speedrun: 'Some discoveries arrive in a rush, one after another.',
     goodnight: 'A telescope said goodbye on a November night. Visit on that day.',
     'launch-day': 'Return on the day it all began, in March.',

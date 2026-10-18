@@ -187,7 +187,7 @@ def test_astronaut_wardrobe(browser, site):
     assert 'New in the wardrobe' in page.locator('#info').inner_text()   # 2nd visit: always an outfit
     visit()
     assert 'come back in a little while' in page.locator('#info').inner_text()   # too soon to roll again
-    page.clock.run_for(16 * 60 * 1000)
+    page.clock.set_system_time('2026-10-14T15:20:00')                 # past the 15-minute cooldown (set, not run: deterministic)
     page.evaluate("window.__rand = [0.1, 0.99, 0.0]")                   # drop, legendary tier, the cowboy hat
     visit()
     assert 'Texas cowboy hat' in page.locator('#info').inner_text()
@@ -396,7 +396,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/69'
+    assert page.locator('#rank-count').inner_text() == '12/75'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -673,4 +673,27 @@ def test_antenna_opens_the_thank_you_note(browser, site):
     page.click('#thanks-open')
     assert page.locator('#thanks-news').is_hidden()
     assert page.locator('#site-version').inner_text().startswith('v')
+    assert not errors, errors
+
+
+def test_sky_events_can_be_caught(browser, site):
+    """A comet, an asteroid and the saucer cross the map (summoned at once under automation); clicking one catches
+    it, counts it and earns its SKY WATCH achievement; the saucer with its asteroid earns WHAT WAS THAT?"""
+    errors = []
+    page = open_page(browser, site, errors)
+    box = page.locator('#map').bounding_box()
+
+    def catch(kind, rock=False):
+        x, y = page.evaluate(f'() => window.__skyEvent("{kind}", {str(rock).lower()})')
+        page.wait_for_timeout(400)   # a few map frames
+        page.mouse.click(box['x'] + x * box['width'] / 192, box['y'] + y * box['height'] / 192)
+
+    for kind in ('comet', 'asteroid'):
+        catch(kind)
+    catch('ufo', rock=True)
+    page.wait_for_function('() => { const p = JSON.parse(localStorage.getItem("starmap.progress.v1")); '
+                           'return p.ach["ufo-spotter"] && p.ach["what-was-that"]; }')
+    saved = page.evaluate('() => JSON.parse(localStorage.getItem("starmap.progress.v1"))')
+    assert (saved['comets'], saved['asteroids'], saved['ufos']) == (1, 1, 1)
+    assert {'comet-catcher', 'rock-hound', 'ufo-spotter', 'what-was-that'} <= set(saved['ach'])
     assert not errors, errors
