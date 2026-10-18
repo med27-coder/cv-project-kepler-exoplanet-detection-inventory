@@ -171,6 +171,8 @@ Not secret, but easy to miss:
 - **Shareable views:** the address bar remembers zoom, true scale and Kepler's view, e.g. `#Kepler-90?view=true&zoom=4&edge=1`.
 - **Red dwarfs flare:** watch a cool star (e.g. Kepler-186) for a while.
 - **Animation menu** (below the system): smooth, normal, battery saver or off.
+- **The antenna** (a little dish on the left edge of the page): opens INCOMING TRANSMISSION, a thank-you note from
+  the maker, with a P.S. hint to search the solar system.
 
 ## Adding a new easter egg
 

@@ -197,6 +197,25 @@
   </dialog>
   <div id="toasts" aria-live="polite"></div>
 
+  <button type="button" id="thanks-open" class="antenna" aria-haspopup="dialog" title="Incoming transmission: a note from the maker">
+    <canvas class="icon" width="16" height="16" data-icon="antenna" aria-hidden="true"></canvas>
+    <canvas class="icon signal" width="16" height="16" data-icon="signal" aria-hidden="true"></canvas>
+    <span class="visually-hidden">A note from the maker</span>
+  </button>
+  <dialog id="thanks" aria-labelledby="thanks-title">
+    <div class="gallery-head">
+      <h2 id="thanks-title">INCOMING TRANSMISSION</h2>
+      <button type="button" id="thanks-close" class="ghost" aria-label="Close">✕</button>
+    </div>
+    <p>Thank you for trying my webpage!</p>
+    <p>This started out as a project: Star Gazer, a model that learns to spot planets in the starlight NASA's Kepler
+       telescope recorded. As I worked on it, more ideas came to mind, and I kept building until it fully flourished
+       into this star map and its game, so others could enjoy it, have fun, and learn more about Kepler and NASA's
+       mission to find worlds around other stars.</p>
+    <p>I'm really thankful you're enjoying it. Have fun with it, and clear skies!</p>
+    <p class="ps">P.S. Search up the solar system.</p>
+  </dialog>
+
   <script src="data/systems.js"></script>
   <script src="data/ccd.js"></script>
   <script src="data/earth.js"></script>
