@@ -183,6 +183,12 @@ const EGG_FACTS = {
           'It carries chips with the names of 10.9 million people.'],
     why: 'The rover collecting pieces of Mars to bring home one day, with the first aircraft on another planet as its sidekick. Search it to watch them work.',
   },
+  sojourner: {
+    fun: ['Sojourner\'s top speed was about 1 cm a second: crossing a tennis court would have taken it about 40 minutes.',
+          'Pathfinder\'s pictures were among the most popular things on the early web: its website had hundreds of millions of hits in a month.',
+          'The rover\'s name came from a 12-year-old\'s essay about Sojourner Truth, chosen from about 3,500 entries.'],
+    why: 'Where every Mars rover began. In The Martian, the stranded astronaut drives out to dig up Pathfinder and uses it as his radio to Earth, so it now sits outside the Hab on the Martian farm too.',
+  },
 };
 
 function eggFactsHtml(egg) {

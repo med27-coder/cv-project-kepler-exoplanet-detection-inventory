@@ -7,6 +7,16 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.7.0] - 2026-10-18
+
+### Added
+- **Sojourner, the first rover on Mars** (31 easter eggs): searching "sojourner" or "pathfinder" opens Ares Vallis in
+  1997, with Twin Peaks on the horizon, the Pathfinder lander with its petals open and its airbags, and Sojourner
+  rolling down the ramp to the rock Yogi to measure it (83 sols, as it really worked). Its own sprite, Galleria card,
+  fun facts and NASA's Pathfinder photo.
+- **Pathfinder outside the Hab** on the Martian farm, with Sojourner beside it, as in The Martian, where the stranded
+  astronaut digs it up to talk to Earth.
+
 ## [1.6.0] - 2026-10-18
 
 ### Changed
@@ -108,6 +118,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.7.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.7.0
 [1.6.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.6.0
 [1.5.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.5.0
 [1.4.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.4.0
