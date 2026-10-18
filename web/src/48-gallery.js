@@ -177,7 +177,8 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    calls: {}, notified: [],    // predictions (48b-predictions.js)
                    showcase: [], levels: {}, sound: false,   // trophies (49b-trophies.js)
                    toured: false,   // first-visit tour (49c-ui.js)
-                   daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0 };   // 49d-connect.js
+                   daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
+                   backdrop: 'animated' };   // page background (55-backdrop.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -213,6 +214,7 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   }
   if (DATE.test(String(saved.lastExport))) progress.lastExport = saved.lastExport;
   if (Number.isInteger(saved.lastStars)) progress.lastStars = saved.lastStars;
+  if (['animated', 'still', 'plain'].includes(saved.backdrop)) progress.backdrop = saved.backdrop;
   if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
   return true;
 }

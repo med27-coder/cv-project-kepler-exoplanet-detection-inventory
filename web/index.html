@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <canvas id="backdrop" aria-hidden="true"></canvas>
   <header>
     <div class="header-right">
       <span id="rank-showcase" aria-label="Your showcase trophies"></span>
@@ -147,6 +148,12 @@
     <section id="pane-pred" role="tabpanel" aria-labelledby="tab-pred" hidden></section>
     <section id="pane-set" role="tabpanel" aria-labelledby="tab-set" hidden>
       <label class="setting"><input type="checkbox" id="set-toasts" checked> Show pop-ups when you find something</label>
+      <label class="setting">Background
+        <select id="set-backdrop">
+          <option value="animated">night sky (animated)</option>
+          <option value="still">night sky (still)</option>
+          <option value="plain">plain</option>
+        </select></label>
       <label class="setting"><input type="checkbox" id="set-sound"> Play a short 8-bit fanfare when you earn something</label>
       <p>Your progress is saved only in this browser (local storage): nothing is sent anywhere, and it
          doesn't follow you to other devices.</p>

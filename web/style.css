@@ -111,7 +111,7 @@ main {
 }
 @media (max-width: 760px) { main { grid-template-columns: minmax(0, 1fr); } }
 
-.panel { background: var(--panel); border: 2px solid var(--edge); padding: 12px; }
+.panel { background: rgba(14, 21, 48, 0.93); border: 2px solid var(--edge); padding: 12px; }   /* the sky shows at the edges */
 
 canvas {
   display: block;
@@ -268,7 +268,7 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
          animation: toast-in 0.35s ease-out; transition: opacity 0.5s; }
 .toast.leaving { opacity: 0; }
 .toast canvas { width: 80px; height: 52px; background: transparent; border: 0; flex: none; }
-.toast b { display: block; font: 10px var(--pixel); color: var(--accent); letter-spacing: 1px; }
+.toast b { display: block; font: 10px/1.6 var(--pixel); color: var(--accent); letter-spacing: 1px; margin-bottom: 2px; }
 .toast span { font-size: 17px; color: var(--ink); }
 .toast .trophy { font-size: 26px; }
 @keyframes toast-in { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -405,3 +405,9 @@ canvas.icon { display: inline-block; width: 20px; height: 20px; background: tran
 .daily-card b:first-child { display: block; font: 10px var(--pixel); color: var(--accent); letter-spacing: 1px; margin-bottom: 4px; }
 .daily-card ul { margin: 4px 0; padding-left: 18px; }
 .daily-card.on { border-style: solid; border-color: #4fd17a; }
+
+/* ---- the night sky behind the page (55-backdrop.js) */
+canvas#backdrop { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
+                  background: transparent; border: 0; image-rendering: pixelated; }
+canvas#backdrop[hidden] { display: none; }
+header h1, header .sub, footer, .legend, #hover { text-shadow: 1px 1px 0 #070b1a, 0 0 6px #070b1a; }
