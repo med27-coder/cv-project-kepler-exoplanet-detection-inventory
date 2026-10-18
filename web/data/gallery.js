@@ -114,6 +114,18 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA24542",
   "what": "Perseverance selfie with Ingenuity"
  },
+ "mer-rover": {
+  "img": "gallery/mer-rover.jpg",
+  "credit": "NASA/JPL/Cornell University",
+  "link": "https://images.nasa.gov/details/PIA04413",
+  "what": "A Mars Exploration Rover, Spirit's and Opportunity's design (artist concept)"
+ },
+ "opportunity-rover": {
+  "img": "gallery/opportunity-rover.jpg",
+  "credit": "NASA/JPL-Caltech/Cornell Univ./Arizona State Univ.",
+  "link": "https://images.nasa.gov/details/PIA18079",
+  "what": "Opportunity's self-portrait just after the wind cleaned its solar panels (2014)"
+ },
  "iss": {
   "img": "gallery/iss.jpg",
   "credit": "NASA JSC",

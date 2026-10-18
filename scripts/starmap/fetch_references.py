@@ -51,6 +51,8 @@ PICKS = [
     ('spacecraft', 'trace-gas-orbiter', 'PIA21139', 'ExoMars Trace Gas Orbiter, artist concept'),
     ('spacecraft', 'curiosity', 'PIA19808', 'Curiosity selfie on Mars'),
     ('spacecraft', 'perseverance', 'PIA24542', 'Perseverance selfie with Ingenuity'),
+    ('spacecraft', 'mer-rover', 'PIA04413', 'A Mars Exploration Rover, Spirit\'s and Opportunity\'s design (artist concept)'),
+    ('spacecraft', 'opportunity-rover', 'PIA18079', 'Opportunity\'s self-portrait just after the wind cleaned its solar panels (2014)'),
     ('spacecraft', 'iss', 'iss056e201248', 'The ISS photographed from a departing Soyuz (2018)'),
     # Real photos in natural colour where one exists (not artist montages or false-colour ultraviolet).
     ('solar-system', 'solar-system-montage', 'PIA10969', 'The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008)'),

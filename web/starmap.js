@@ -119,10 +119,10 @@
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
   // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
   // announces (2 or 3 plain-words highlights per version, no spoilers).
-  const VERSION = '1.8.0';
+  const VERSION = '1.9.0';
   const RELEASE_NOTES = [
+    "Two more rovers to find: NASA's twins of 2004, each with its own scene on Mars.",
     'Dwarf planets you find now join the Solar System drawing, out where they really orbit.',
-    'A second loading screen: an astronomer at a telescope under twinkling stars (it takes turns with the rocket).',
     'A new easter egg: the very first rover on Mars, from 1997. Can you find it? (The Martian farm has a clue outside its Hab.)',
     'Every found easter egg in the Galleria now has FUN FACTS and the story of why it was hidden here.',
   ];
@@ -2299,6 +2299,30 @@
       '.xmx..xmx....xmx....',
       '.xxx..xxx....xxx....',
     ],
+    spirit: [   // a Mars Exploration Rover: the wide flat solar deck, the camera mast, six wheels
+      '..........lwl......',
+      '...........m.......',
+      '..l........m.......',
+      '..m.sl.....m.......',
+      'PpPpPpPpPpPpPpPpPpP',
+      '.....wwwwwwwww.....',
+      '.....sssssssss.....',
+      '....mmmmmmmmmmm....',
+      '...xx...xx...xx....',
+      '...xm...xm...xm....',
+    ],
+    opportunity: [   // Spirit's twin, its solar deck dusty red-brown before a gust of wind cleans it
+      '..........lwl......',
+      '...........m.......',
+      '..l........m.......',
+      '..m.sl.....m.......',
+      'rrPprrPprrPprrPprrP',
+      '.....wwwwwwwww.....',
+      '.....sssssssss.....',
+      '....mmmmmmmmmmm....',
+      '...xx...xx...xx....',
+      '...xm...xm...xm....',
+    ],
     sojourner: [   // the first Mars rover: six small wheels, a flat solar panel on top, its antenna
       '.m.........',
       '.m.........',
@@ -2342,7 +2366,7 @@
     'Solar Orbiter': 'solarOrbiter', BepiColombo: 'bepi', Juno: 'juno', 'Europa Clipper': 'clipper',
     JUICE: 'juice', Lucy: 'lucy', Psyche: 'psyche', 'OSIRIS-APEX': 'apex',
     'Mars Reconnaissance Orbiter': 'mro', 'Mars Odyssey': 'odyssey', 'Mars Express': 'mex',
-    'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner',
+    'ExoMars Trace Gas Orbiter': 'tgo', Curiosity: 'curiosity', Perseverance: 'perseverance', Sojourner: 'sojourner', Spirit: 'spirit', Opportunity: 'opportunity',
   };
 
   const spriteSize = key => [CRAFT_ART[key][0].length, CRAFT_ART[key].length];
@@ -3021,9 +3045,9 @@
   // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
   // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
   // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder)( rover)?$/i;
+  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy)( rover)?$/i;
   const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
-                     'mars pathfinder': 'sojourner', pathfinder: 'sojourner' };
+                     'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity' };
   const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
   const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
@@ -3066,10 +3090,10 @@
   }
   // From 47d-martian.js: rovers already found drive along the far plain, one behind the other.
   function drawFarRovers(ctx, w, horizon, t) {
-    const found = ['curiosity', 'perseverance'].filter(id => progress.eggs[id]);
+    const found = ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance'].filter(id => progress.eggs[id]);
     found.forEach((id, k) => {
       const x = Math.round(((t * 3 + k * (w + 40) / 2) % (w + 40)) - 20);
-      drawRoverTiny(ctx, x, horizon + 3 + k);
+      drawRoverTiny(ctx, x, horizon + 3 + (k % 3));
     });
   }
 
@@ -3131,6 +3155,82 @@
     pixelText(ctx, 'TWIN PEAKS', Math.round(w * 0.69) - 20, 4, '#5a2a14');
     pixelText(ctx, 'YOGI', yogi, ground - 20, '#fff1d6');
     const sol = `SOL ${Math.min(83, 1 + Math.floor((REDUCED_MOTION ? 0 : t) / 3))}`;
+    pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
+  }
+
+  // A Mars Exploration Rover (Spirit or Opportunity), facing right, wheels on the ground at (x, y): the wide, flat
+  // solar deck, the mast with its panoramic camera, six wheels. dust 0..1 browns the solar cells; drag: a stuck front
+  // wheel (Spirit, from 2006).
+  function drawMER(ctx, x, y, s, t, { moving = false, dust = 0, drag = false } = {}) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    const bob = k => (moving && !REDUCED_MOTION && !(drag && k === 2) ? Math.round(Math.sin(t * 6 + k * 2) * 0.5) : 0);
+    for (const [k, wx] of [[0, -7], [1, -1], [2, 5]]) { put(wx, -3 + bob(k), 3, 3, '#2a2a30'); put(wx + 1, -2 + bob(k), 1, 1, '#8a8f9a'); }
+    put(-6, -5, 13, 1, '#8a8f9a');                  // rocker-bogie
+    put(-5, -8, 10, 3, '#ece8e0'); put(-5, -6, 10, 1, '#c4beb3');   // the body
+    const cell = dust > 0.5 ? '#9a7a5a' : dust > 0.2 ? '#5d6a8a' : '#2f4fae';
+    put(-11, -9, 22, 1, cell);                      // the wide solar deck ("wings")
+    put(-11, -9, 3, 1, dust > 0.5 ? '#b08a62' : '#5d7bd6');
+    put(4, -16, 1, 7, '#8a8f9a');                   // the mast and its camera head
+    put(2, -18, 5, 2, '#ece8e0'); put(5, -17, 1, 1, '#151a2c'); put(3, -17, 1, 1, '#151a2c');
+    put(-3, -12, 1, 3, '#8a8f9a');                  // the low-gain antenna
+    put(-7, -11, 3, 1, '#d6dae2'); put(-6, -10, 1, 1, '#8a8f9a');   // the high-gain dish
+  }
+
+  function drawSpiritScene(ctx, w, h, t) {
+    const horizon = Math.round(h * 0.55);
+    marsSky(ctx, w, horizon);
+    for (let x = 0; x < w; x++) {   // the Columbia Hills, Husband Hill highest, inside Gusev Crater
+      const hill = Math.max(0, 1 - Math.abs(x - w * 0.35) / (w * 0.22)) * 22 + Math.max(0, 1 - Math.abs(x - w * 0.62) / (w * 0.12)) * 10;
+      const top = horizon - 2 - Math.round(hill) - Math.round(1.5 * hash(`gh${x >> 3}`));
+      ctx.fillStyle = hill > 0 ? '#a8643e' : '#9a5634';
+      ctx.fillRect(x, top, 1, horizon - top);
+    }
+    marsGround(ctx, w, h, horizon, 'gusev');
+    if (!REDUCED_MOTION) {   // a dust devil wandering across the plain: a spinning, widening column of dust
+      const dx = ((t * 6) % (w + 60)) - 30, base = horizon + 8;
+      for (let k = 0; k < 26; k++) {
+        const y = base - k, half = 1 + k * 0.25, a = t * 9 + k * 0.7;
+        ctx.fillStyle = k % 3 ? 'rgba(230, 194, 154, 0.55)' : 'rgba(201, 154, 112, 0.6)';
+        ctx.fillRect(Math.round(dx + Math.sin(a) * half), y, 1, 1);
+        ctx.fillRect(Math.round(dx + Math.sin(a + Math.PI) * half), y, 1, 1);
+      }
+    }
+    const ground = h - 30, c = REDUCED_MOTION ? 10 : t % 26;
+    const x = Math.round(w + 30 - ((c / 26) * (w + 60)));   // driving backwards, to the left, dragging the stuck wheel
+    for (let tx = x + 10; tx < w; tx += 2) {
+      ctx.fillStyle = '#9a4f2c'; ctx.fillRect(tx, ground - 1, 1, 1);
+      ctx.fillStyle = hash(`si${tx}`) < 0.6 ? '#f4f0e6' : '#d8d0c0'; ctx.fillRect(tx + 1, ground, 1, 1);   // the bright silica it dug up
+    }
+    drawMER(ctx, x, ground, 2, t, { moving: true, dust: 0.3, drag: true });
+    pixelText(ctx, 'GUSEV CRATER', 4, h - 10, '#fff1d6');
+    pixelText(ctx, 'HUSBAND HILL', Math.round(w * 0.35) - 24, 4, '#5a2a14');
+    const sol = `SOL ${Math.min(2210, 1 + Math.floor((REDUCED_MOTION ? 0 : t) * 10))}`;
+    pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
+  }
+
+  function drawOpportunityScene(ctx, w, h, t) {
+    const horizon = Math.round(h * 0.55);
+    marsSky(ctx, w, horizon);
+    for (let x = 0; x < w; x++) {   // the far rim of Endeavour Crater, a low ridge across Meridiani Planum
+      const top = horizon - 3 - Math.round(4 * Math.max(0, Math.sin(x / 30 + 1)) + 1.5 * hash(`er${x >> 3}`));
+      ctx.fillStyle = '#9a5634'; ctx.fillRect(x, top, 1, horizon - top);
+    }
+    marsGround(ctx, w, h, horizon, 'meridiani');
+    for (let k = 0; k < 70; k++) {   // "blueberries": little grey-blue balls of hematite, formed in water
+      ctx.fillStyle = k % 4 ? '#5d6878' : '#7d8596';
+      ctx.fillRect(Math.floor(hash(`bb${k}`) * w), horizon + 8 + Math.floor(hash(`bc${k}`) * (h - horizon - 12)), 1, 1);
+    }
+    const ground = h - 30, c = REDUCED_MOTION ? 14 : t % 28;
+    const x = Math.round(-30 + (c / 28) * (w + 60));
+    const gust = c > 12 && c < 16;   // a gust of wind sweeps the dust off its solar panels
+    if (gust && !REDUCED_MOTION) {
+      ctx.fillStyle = 'rgba(230, 194, 154, 0.7)';
+      for (let k = 0; k < 18; k++) ctx.fillRect(Math.round(((t * 80 + k * 37) % w)), ground - 30 + (k * 7) % 26, 4, 1);
+    }
+    drawMER(ctx, x, ground, 2, t, { moving: true, dust: c < 14 ? 0.8 : 0 });
+    pixelText(ctx, 'MERIDIANI PLANUM', 4, h - 10, '#fff1d6');
+    pixelText(ctx, 'ENDEAVOUR CRATER', w - textWidth('ENDEAVOUR CRATER') - 4, 4, '#5a2a14');
+    const sol = `SOL ${Math.min(5111, 1 + Math.floor((REDUCED_MOTION ? 0 : t) * 20))}`;
     pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
   }
 
@@ -3254,6 +3354,30 @@
         'It is named after Sojourner Truth, the American abolitionist, picked in a schools essay contest.',
       ],
       link: 'https://science.nasa.gov/mission/mars-pathfinder/',
+    },
+    spirit: {
+      title: 'SPIRIT', big: '★ SPIRIT IN GUSEV CRATER ★', draw: drawSpiritScene, hash: 'spirit',
+      intro: 'One of NASA\'s twin Mars Exploration Rovers. Planned for 90 sols, Spirit worked for more than six years, climbing the Columbia Hills. Watch it drive backwards, dragging its stuck front wheel, while a dust devil wanders past.',
+      facts: [
+        'Landed on 4 January 2004 in Gusev Crater, bouncing in on airbags like Pathfinder.',
+        'It climbed Husband Hill, reaching the summit in August 2005 after more than a year of driving.',
+        'From 2006 its right front wheel stopped turning, so it drove backwards, dragging it; in 2007 the dragged wheel scraped up almost pure silica, a sign of ancient hot springs.',
+        'Gusts of wind sometimes swept the dust off its solar panels, giving it new power; it also filmed dust devils.',
+        'It got stuck in soft sand at a place called Troy in 2009, kept working as a fixed station, and last called home in March 2010.',
+      ],
+      link: 'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/',
+    },
+    opportunity: {
+      title: 'OPPORTUNITY', big: '★ OPPORTUNITY ON MERIDIANI PLANUM ★', draw: drawOpportunityScene, hash: 'opportunity',
+      intro: 'Spirit\'s twin, on the other side of Mars. Planned for 90 sols, "Oppy" drove for more than 14 years and over a marathon\'s distance. Watch a gust of wind sweep the dust off its solar panels.',
+      facts: [
+        'Landed on 25 January 2004, three weeks after Spirit, rolling into a small crater: an "interplanetary hole in one".',
+        'It found "blueberries", little balls of the mineral hematite that formed in water, proof that Meridiani was once wet.',
+        'In 2015 it became the first vehicle to drive a marathon\'s distance on another world; it covered 45.16 km in all.',
+        'A planet-wide dust storm in June 2018 blocked its sunlight; NASA tried more than a thousand times to wake it before ending the mission in February 2019.',
+        'It worked for 5,111 sols, more than 55 times the 90 it was built for.',
+      ],
+      link: 'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/',
     },
     perseverance: {
       title: 'PERSEVERANCE', big: '★ PERSEVERANCE IN JEZERO CRATER ★', draw: drawPerseveranceScene, hash: 'perseverance',
@@ -3393,6 +3517,12 @@
     { id: 'perseverance', name: 'Perseverance', kind: 'craft', art: 'perseverance', ref: 'perseverance', query: 'Perseverance', toast: 'LIFTOFF ON MARS',
       clue: 'I collect rock samples in tubes, and I brought a little helicopter along.',
       story: 'Perseverance landed in Jezero Crater, an ancient river delta, on 18 February 2021. It seals rock samples in tubes for a future trip to Earth, and it carried Ingenuity, the first aircraft to fly on another planet: 72 flights instead of the planned five.' },
+    { id: 'spirit', name: 'Spirit', kind: 'craft', art: 'spirit', ref: 'mer-rover', query: 'Spirit', toast: 'TWIN ON THE HILLS',
+      clue: 'One of twins sent in 2004. I climbed a hill named after an astronaut, and kept driving backwards on a broken wheel.',
+      story: 'Spirit landed in Gusev Crater on 4 January 2004, the first of NASA\'s twin Mars Exploration Rovers. Built to last 90 sols, it explored for six years, climbed Husband Hill, and even its broken wheel made a discovery: dragging through the soil, it uncovered silica left by ancient hot springs.' },
+    { id: 'opportunity', name: 'Opportunity', kind: 'craft', art: 'opportunity', ref: 'opportunity-rover', query: 'Opportunity', toast: 'MARATHON ON MARS',
+      clue: 'The other twin of 2004. Built for 90 days, I lasted over 14 years and drove more than a marathon. My friends called me Oppy.',
+      story: 'Opportunity landed on Meridiani Planum on 25 January 2004 and found blueberry-sized balls of hematite that formed in water. It drove 45.16 km, crossed crater after crater, and worked for 5,111 sols until a planet-wide dust storm darkened its solar panels in June 2018.' },
     { id: 'sojourner', name: 'Sojourner', kind: 'craft', art: 'sojourner', ref: 'pathfinder', query: 'Sojourner', toast: 'FIRST WHEELS ON MARS',
       clue: 'The first wheels on another planet: I rolled off my lander on 4 July 1997, no bigger than a microwave oven.',
       story: 'Mars Pathfinder landed in Ares Vallis on 4 July 1997, bouncing in on airbags, and its little rover Sojourner became the first to drive on another planet. Planned for a week, it worked for 83 sols, studying rocks named after cartoon characters. In The Martian, the stranded astronaut digs up Pathfinder and uses it to talk to Earth.' },
@@ -3707,7 +3837,7 @@
 
   // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
   const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Parker', 'parker'],
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Parker', 'parker'],
     ['Osiris Rex', 'apex'], ['Tatooine', null]];
   const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
   function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -4448,6 +4578,18 @@
             'Its helicopter Ingenuity carried a tiny piece of fabric from the Wright brothers\' first airplane.',
             'It carries chips with the names of 10.9 million people.'],
       why: 'The rover collecting pieces of Mars to bring home one day, with the first aircraft on another planet as its sidekick. Search it to watch them work.',
+    },
+    spirit: {
+      fun: ['Spirit and Opportunity were named by Sofi Collis, a 9-year-old from Arizona, in a NASA essay contest.',
+            'Its landing site was named Columbia Memorial Station, and the hills nearby after the seven astronauts of Space Shuttle Columbia.',
+            'It was built to drive about 600 metres; it drove more than 7.7 km.'],
+      why: 'The twin that never gave up: when a wheel broke it drove backwards, and the broken wheel itself found signs of hot springs. Sojourner, Spirit, Opportunity, Curiosity and Perseverance together tell the whole story of driving on Mars.',
+    },
+    opportunity: {
+      fun: ['Its last data in 2018 was summed up by a reporter as "My battery is low and it\'s getting dark". The rover never sent those words, but the line made people around the world cry.',
+            'It landed inside a crater only 22 metres wide, by pure luck: an "interplanetary hole in one".',
+            'Wind gusts cleaned its solar panels again and again, which is why it kept going for so long.'],
+      why: 'The record holder: built for 90 days, it lasted more than 14 years. A favourite of everyone who followed it, and Spirit\'s twin.',
     },
     sojourner: {
       fun: ['Sojourner\'s top speed was about 1 cm a second: crossing a tennis court would have taken it about 40 minutes.',

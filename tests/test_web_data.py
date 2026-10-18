@@ -200,7 +200,7 @@ def test_gallery_photos():
 SHIPPED_IDS = {
     'eggs': {'sun', 'pluto', 'kepler', 'iss', 'voyager', 'newHorizons', 'jwst', 'euclid', 'soho', 'parker',
              'solarOrbiter', 'bepi', 'juno', 'clipper', 'juice', 'lucy', 'psyche', 'apex', 'mro', 'odyssey', 'mex',
-             'tgo', 'curiosity', 'perseverance', 'ceres', 'haumea', 'makemake', 'eris', 'martian', 'voyager2', 'sojourner'},
+             'tgo', 'curiosity', 'perseverance', 'ceres', 'haumea', 'makemake', 'eris', 'martian', 'voyager2', 'sojourner', 'spirit', 'opportunity'},
     'ach': {'first-light', 'star-hopper', 'census', 'dice', 'ghost', 'oracle', 'link', 'first-rock', 'eight-worlds',
             'cousin', 'eden', 'puff', 'tiny', 'goldilocks', 'double', 'lava', 'ancient', 'flare', 'transit', 'scale',
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',

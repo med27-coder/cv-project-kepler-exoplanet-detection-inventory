@@ -5,9 +5,9 @@
 // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
 // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
 // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder)( rover)?$/i;
+const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy)( rover)?$/i;
 const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
-                   'mars pathfinder': 'sojourner', pathfinder: 'sojourner' };
+                   'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity' };
 const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
 const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
@@ -50,10 +50,10 @@ function drawRoverTiny(ctx, x, y) {
 }
 // From 47d-martian.js: rovers already found drive along the far plain, one behind the other.
 function drawFarRovers(ctx, w, horizon, t) {
-  const found = ['curiosity', 'perseverance'].filter(id => progress.eggs[id]);
+  const found = ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance'].filter(id => progress.eggs[id]);
   found.forEach((id, k) => {
     const x = Math.round(((t * 3 + k * (w + 40) / 2) % (w + 40)) - 20);
-    drawRoverTiny(ctx, x, horizon + 3 + k);
+    drawRoverTiny(ctx, x, horizon + 3 + (k % 3));
   });
 }
 
@@ -115,6 +115,82 @@ function drawSojournerScene(ctx, w, h, t) {
   pixelText(ctx, 'TWIN PEAKS', Math.round(w * 0.69) - 20, 4, '#5a2a14');
   pixelText(ctx, 'YOGI', yogi, ground - 20, '#fff1d6');
   const sol = `SOL ${Math.min(83, 1 + Math.floor((REDUCED_MOTION ? 0 : t) / 3))}`;
+  pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
+}
+
+// A Mars Exploration Rover (Spirit or Opportunity), facing right, wheels on the ground at (x, y): the wide, flat
+// solar deck, the mast with its panoramic camera, six wheels. dust 0..1 browns the solar cells; drag: a stuck front
+// wheel (Spirit, from 2006).
+function drawMER(ctx, x, y, s, t, { moving = false, dust = 0, drag = false } = {}) {
+  const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+  const bob = k => (moving && !REDUCED_MOTION && !(drag && k === 2) ? Math.round(Math.sin(t * 6 + k * 2) * 0.5) : 0);
+  for (const [k, wx] of [[0, -7], [1, -1], [2, 5]]) { put(wx, -3 + bob(k), 3, 3, '#2a2a30'); put(wx + 1, -2 + bob(k), 1, 1, '#8a8f9a'); }
+  put(-6, -5, 13, 1, '#8a8f9a');                  // rocker-bogie
+  put(-5, -8, 10, 3, '#ece8e0'); put(-5, -6, 10, 1, '#c4beb3');   // the body
+  const cell = dust > 0.5 ? '#9a7a5a' : dust > 0.2 ? '#5d6a8a' : '#2f4fae';
+  put(-11, -9, 22, 1, cell);                      // the wide solar deck ("wings")
+  put(-11, -9, 3, 1, dust > 0.5 ? '#b08a62' : '#5d7bd6');
+  put(4, -16, 1, 7, '#8a8f9a');                   // the mast and its camera head
+  put(2, -18, 5, 2, '#ece8e0'); put(5, -17, 1, 1, '#151a2c'); put(3, -17, 1, 1, '#151a2c');
+  put(-3, -12, 1, 3, '#8a8f9a');                  // the low-gain antenna
+  put(-7, -11, 3, 1, '#d6dae2'); put(-6, -10, 1, 1, '#8a8f9a');   // the high-gain dish
+}
+
+function drawSpiritScene(ctx, w, h, t) {
+  const horizon = Math.round(h * 0.55);
+  marsSky(ctx, w, horizon);
+  for (let x = 0; x < w; x++) {   // the Columbia Hills, Husband Hill highest, inside Gusev Crater
+    const hill = Math.max(0, 1 - Math.abs(x - w * 0.35) / (w * 0.22)) * 22 + Math.max(0, 1 - Math.abs(x - w * 0.62) / (w * 0.12)) * 10;
+    const top = horizon - 2 - Math.round(hill) - Math.round(1.5 * hash(`gh${x >> 3}`));
+    ctx.fillStyle = hill > 0 ? '#a8643e' : '#9a5634';
+    ctx.fillRect(x, top, 1, horizon - top);
+  }
+  marsGround(ctx, w, h, horizon, 'gusev');
+  if (!REDUCED_MOTION) {   // a dust devil wandering across the plain: a spinning, widening column of dust
+    const dx = ((t * 6) % (w + 60)) - 30, base = horizon + 8;
+    for (let k = 0; k < 26; k++) {
+      const y = base - k, half = 1 + k * 0.25, a = t * 9 + k * 0.7;
+      ctx.fillStyle = k % 3 ? 'rgba(230, 194, 154, 0.55)' : 'rgba(201, 154, 112, 0.6)';
+      ctx.fillRect(Math.round(dx + Math.sin(a) * half), y, 1, 1);
+      ctx.fillRect(Math.round(dx + Math.sin(a + Math.PI) * half), y, 1, 1);
+    }
+  }
+  const ground = h - 30, c = REDUCED_MOTION ? 10 : t % 26;
+  const x = Math.round(w + 30 - ((c / 26) * (w + 60)));   // driving backwards, to the left, dragging the stuck wheel
+  for (let tx = x + 10; tx < w; tx += 2) {
+    ctx.fillStyle = '#9a4f2c'; ctx.fillRect(tx, ground - 1, 1, 1);
+    ctx.fillStyle = hash(`si${tx}`) < 0.6 ? '#f4f0e6' : '#d8d0c0'; ctx.fillRect(tx + 1, ground, 1, 1);   // the bright silica it dug up
+  }
+  drawMER(ctx, x, ground, 2, t, { moving: true, dust: 0.3, drag: true });
+  pixelText(ctx, 'GUSEV CRATER', 4, h - 10, '#fff1d6');
+  pixelText(ctx, 'HUSBAND HILL', Math.round(w * 0.35) - 24, 4, '#5a2a14');
+  const sol = `SOL ${Math.min(2210, 1 + Math.floor((REDUCED_MOTION ? 0 : t) * 10))}`;
+  pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
+}
+
+function drawOpportunityScene(ctx, w, h, t) {
+  const horizon = Math.round(h * 0.55);
+  marsSky(ctx, w, horizon);
+  for (let x = 0; x < w; x++) {   // the far rim of Endeavour Crater, a low ridge across Meridiani Planum
+    const top = horizon - 3 - Math.round(4 * Math.max(0, Math.sin(x / 30 + 1)) + 1.5 * hash(`er${x >> 3}`));
+    ctx.fillStyle = '#9a5634'; ctx.fillRect(x, top, 1, horizon - top);
+  }
+  marsGround(ctx, w, h, horizon, 'meridiani');
+  for (let k = 0; k < 70; k++) {   // "blueberries": little grey-blue balls of hematite, formed in water
+    ctx.fillStyle = k % 4 ? '#5d6878' : '#7d8596';
+    ctx.fillRect(Math.floor(hash(`bb${k}`) * w), horizon + 8 + Math.floor(hash(`bc${k}`) * (h - horizon - 12)), 1, 1);
+  }
+  const ground = h - 30, c = REDUCED_MOTION ? 14 : t % 28;
+  const x = Math.round(-30 + (c / 28) * (w + 60));
+  const gust = c > 12 && c < 16;   // a gust of wind sweeps the dust off its solar panels
+  if (gust && !REDUCED_MOTION) {
+    ctx.fillStyle = 'rgba(230, 194, 154, 0.7)';
+    for (let k = 0; k < 18; k++) ctx.fillRect(Math.round(((t * 80 + k * 37) % w)), ground - 30 + (k * 7) % 26, 4, 1);
+  }
+  drawMER(ctx, x, ground, 2, t, { moving: true, dust: c < 14 ? 0.8 : 0 });
+  pixelText(ctx, 'MERIDIANI PLANUM', 4, h - 10, '#fff1d6');
+  pixelText(ctx, 'ENDEAVOUR CRATER', w - textWidth('ENDEAVOUR CRATER') - 4, 4, '#5a2a14');
+  const sol = `SOL ${Math.min(5111, 1 + Math.floor((REDUCED_MOTION ? 0 : t) * 20))}`;
   pixelText(ctx, sol, w - textWidth(sol) - 4, h - 10, '#fff1d6');
 }
 
@@ -238,6 +314,30 @@ const ROVERS = {
       'It is named after Sojourner Truth, the American abolitionist, picked in a schools essay contest.',
     ],
     link: 'https://science.nasa.gov/mission/mars-pathfinder/',
+  },
+  spirit: {
+    title: 'SPIRIT', big: '★ SPIRIT IN GUSEV CRATER ★', draw: drawSpiritScene, hash: 'spirit',
+    intro: 'One of NASA\'s twin Mars Exploration Rovers. Planned for 90 sols, Spirit worked for more than six years, climbing the Columbia Hills. Watch it drive backwards, dragging its stuck front wheel, while a dust devil wanders past.',
+    facts: [
+      'Landed on 4 January 2004 in Gusev Crater, bouncing in on airbags like Pathfinder.',
+      'It climbed Husband Hill, reaching the summit in August 2005 after more than a year of driving.',
+      'From 2006 its right front wheel stopped turning, so it drove backwards, dragging it; in 2007 the dragged wheel scraped up almost pure silica, a sign of ancient hot springs.',
+      'Gusts of wind sometimes swept the dust off its solar panels, giving it new power; it also filmed dust devils.',
+      'It got stuck in soft sand at a place called Troy in 2009, kept working as a fixed station, and last called home in March 2010.',
+    ],
+    link: 'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/',
+  },
+  opportunity: {
+    title: 'OPPORTUNITY', big: '★ OPPORTUNITY ON MERIDIANI PLANUM ★', draw: drawOpportunityScene, hash: 'opportunity',
+    intro: 'Spirit\'s twin, on the other side of Mars. Planned for 90 sols, "Oppy" drove for more than 14 years and over a marathon\'s distance. Watch a gust of wind sweep the dust off its solar panels.',
+    facts: [
+      'Landed on 25 January 2004, three weeks after Spirit, rolling into a small crater: an "interplanetary hole in one".',
+      'It found "blueberries", little balls of the mineral hematite that formed in water, proof that Meridiani was once wet.',
+      'In 2015 it became the first vehicle to drive a marathon\'s distance on another world; it covered 45.16 km in all.',
+      'A planet-wide dust storm in June 2018 blocked its sunlight; NASA tried more than a thousand times to wake it before ending the mission in February 2019.',
+      'It worked for 5,111 sols, more than 55 times the 90 it was built for.',
+    ],
+    link: 'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/',
   },
   perseverance: {
     title: 'PERSEVERANCE', big: '★ PERSEVERANCE IN JEZERO CRATER ★', draw: drawPerseveranceScene, hash: 'perseverance',
