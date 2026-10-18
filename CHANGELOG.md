@@ -7,6 +7,18 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.1.0] - 2026-10-18
+
+### Added
+- **Sky watch:** every 3 to 6 minutes of use, a comet (a bright head with a curved dust tail and a faint ion tail,
+  both pointing away from the Sun) or a tumbling asteroid crosses the Kepler map, and something rarer now and then.
+  Click one to catch it: six new achievements (75 in all) in a SKY WATCH constellation, with the SHOOTING STAR badge.
+  Off with reduced motion or the animation off; half as often in battery-saver mode.
+
+### Fixed
+- A browser test that could fail by chance (the astronaut's wardrobe cooldown); dependency minimums raised past
+  known security fixes.
+
 ## [1.0.0] - 2026-10-18
 
 The first full release, gathering everything built since the star map went online on 12 October 2026.
@@ -36,4 +48,5 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.1.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.1.0
 [1.0.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.0.0

@@ -89,6 +89,10 @@ const SYMBOLS = {
   'space-wardrobe': ['rrr.kkk', 'rrr.kkk', '.......', 'TTT.yyy', 'TTT.yyy', '.......'],   // four hats on the rack
   runway: ['...y...', '..yyy..', 'yyyyyyy', '..yyy..', '.y...y.', '.......'],         // a star of the runway
   'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
+  'tail-chaser': ['......w', '....tww', '..ttt.b', '.ttt.b.', 'ttt.b..', '.......'],     // a comet's tails
+  'ufo-spotter': ['.......', '..bbb..', '.bgbgb.', 'sssssss', '.yssy..', '.......'],     // the saucer
+  'asteroid-catcher': ['.......', '..ttm..', '.tmmmk.', '.mmmkk.', '..mkk..', '.......'],   // a lumpy rock
+  'what-was-that': ['....bb.', '...sss.', '..sssss', 'mm.....', 'mkm....', '.m.....'],   // a saucer, a rock behind
   'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
@@ -190,6 +194,15 @@ const BADGES = {
     for (let x = 2; x <= 14; x++) put(x, 11, '#ffc93c');
     for (let y = 8; y < 14; y++) { put(7, y, '#e04a4a'); put(9, y, '#e04a4a'); }
     put(8, 9, '#ff6ec7'); put(8, 12, '#ff6ec7');
+  } },
+  'SKY WATCH': { name: 'THE SHOOTING STAR', art: put => {   // a comet streaking across a dark square of sky
+    for (let k = 0; k < 11; k++) {
+      const x = 13 - k, y = 3 + Math.round(k * 0.8);
+      put(x, y, k < 2 ? '#ffffff' : k < 5 ? '#f4ecd6' : k < 8 ? '#c9bfa4' : '#7a735f');
+      if (k > 1 && k < 9) put(x, y + 1, k < 5 ? '#c9bfa4' : '#7a735f');
+    }
+    put(14, 2, '#dfefff'); put(13, 2, '#ffffff'); put(14, 3, '#ffffff');
+    for (const [x, y] of [[3, 3], [10, 12], [6, 1], [13, 14]]) put(x, y, '#9fd8ff');
   } },
   'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
     discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));

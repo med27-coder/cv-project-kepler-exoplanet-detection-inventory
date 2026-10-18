@@ -1,6 +1,7 @@
 # Draft: sky events (the UFO, asteroids, comets, meteors)
 
-**Status: drafts approved by the user** (18 October 2026); rarities still to decide before building. Concept art in `pixel-art/concepts/`, made by
+**Status: built on the map** (18 October 2026, `web/src/05-sky-events.js`, v1.1.0): comets, asteroids and the UFO,
+with SKY WATCH achievements. Still to build: meteors over the planets (METEOR CATCHER). Concept art in `pixel-art/concepts/`, made by
 `scripts/starmap/draft_concepts.py`. Extends ACHIEVEMENTS_V2.md section 1D (sky events).
 
 ## The science behind the drawings

@@ -37,7 +37,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (69, in groups), trophies, badges and your star
+### Achievements (75, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -84,6 +84,10 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | ROAD TO INTERSTELLAR | Voyager, New Horizons |
 | | PHOTO FINISH | Slide a Galleria photo all the way to pixel art |
 | | CURATOR | Open ten found Galleria cards in one visit |
+| Sky watch | COMET CATCHER / TAIL CHASER | Click a comet passing over the map / catch five (one crosses every 3 to 6 minutes of use, comets and asteroids alike) |
+| | ROCK HOUND / ASTEROID CATCHER | Click a tumbling asteroid / catch ten |
+| | UFO SPOTTER | Click the flying saucer (after 10 minutes of use, about once an hour) |
+| | WHAT WAS THAT? (secret) | See the asteroid that follows the saucer, 2 times in 5 |
 | Two suns | TATOOINE / DOUBLE SUNSET | Visit a planet with two suns / all 12 two-sun systems (the "two suns" highlight finds them) |
 | Predictions | FIRST CALL / PROPHET / ORACLE | Call a candidate (PLANET or NOT A PLANET in its case file) / be proven right by NASA once / five times |
 | | CASSANDRA / CONTRARIAN | Rightly call a false positive Star Gazer believed in / be right three times when Star Gazer was wrong |

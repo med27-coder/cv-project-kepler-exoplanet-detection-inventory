@@ -153,6 +153,12 @@ const ACHIEVEMENTS = [
   { g: 'WARDROBE', id: 'walk-in-closet', title: 'WALK-IN CLOSET', how: 'Collect seven outfits.' },
   { g: 'WARDROBE', id: 'space-wardrobe', title: 'SPACE WARDROBE', how: 'Collect all fifteen outfits.' },
   { g: 'WARDROBE', id: 'houston', title: 'HOUSTON, WE HAVE A PROBLEM', how: 'Find the legendary Texas cowboy hat, the rarest outfit of all.', secret: true },
+  { g: 'SKY WATCH', id: 'comet-catcher', title: 'COMET CATCHER', how: 'Catch a comet passing over the map.' },
+  { g: 'SKY WATCH', id: 'rock-hound', title: 'ROCK HOUND', how: 'Catch an asteroid tumbling across the map.' },
+  { g: 'SKY WATCH', id: 'tail-chaser', title: 'TAIL CHASER', how: 'Catch five comets.' },
+  { g: 'SKY WATCH', id: 'asteroid-catcher', title: 'ASTEROID CATCHER', how: 'Catch ten asteroids.' },
+  { g: 'SKY WATCH', id: 'ufo-spotter', title: 'UFO SPOTTER', how: 'Catch the flying saucer. It rarely shows up.' },
+  { g: 'SKY WATCH', id: 'what-was-that', title: 'WHAT WAS THAT?', how: 'See the asteroid that sometimes follows the flying saucer.', secret: true },
   { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
   { g: 'TWO SUNS', id: 'double-sunset', title: 'DOUBLE SUNSET', how: 'Visit every system on the map whose planets circle two stars.' },
   { g: 'PREDICTIONS', id: 'first-call', title: 'FIRST CALL', how: 'Make your own call on a candidate: planet or not?' },
@@ -176,8 +182,9 @@ const ACHIEVEMENTS = [
 // Difficulty, shown by the trophy (49-ranks.js): bronze, silver, gold; secret ones get the galaxy cup.
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
-         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet'],
-  epic: ['census', 'cartographer', 'dwarf-king', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+         'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet',
+         'tail-chaser', 'ufo-spotter'],
+  epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
          'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
 for (const a of ACHIEVEMENTS) {
@@ -210,7 +217,8 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    toured: false,   // first-visit tour (49c-ui.js)
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                    backdrop: 'animated',   // page background (55-backdrop.js)
-                   outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [] };   // the lost astronaut's wardrobe (47c-astronaut.js)
+                   outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
+                   comets: 0, asteroids: 0, ufos: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -232,7 +240,7 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
   if (saved.whiteHole === true) progress.whiteHole = true;
   if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
-  for (const k of ['astroVisits', 'astroLastRoll', 'astroDry']) {
+  for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos']) {
     if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
   }
   if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
