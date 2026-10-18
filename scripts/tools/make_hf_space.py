@@ -78,12 +78,12 @@ app.main()
 SPACE_REQUIREMENTS = """numpy>=1.26
 pandas>=2.3.3
 lightkurve>=2.6.0
-astropy>=5.3
+astropy>=5.3.3
 tensorflow-cpu>=2.16
-scikit-learn>=1.3
+scikit-learn>=1.5.0
 matplotlib>=3.7
 seaborn>=0.13.2
-tqdm>=4.66
+tqdm>=4.66.3
 cryptography>=50.0.2
 """
 

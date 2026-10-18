@@ -26,7 +26,6 @@ jobs:
           cache-dependency-path: requirements-dev.lock
       - name: Install dependencies (hash-checked)
         run: |
-          python -m pip install --upgrade pip
           pip install --require-hashes -r requirements-dev.lock
           pip install --no-deps -e .
       - name: Install the headless browser for the star map tests

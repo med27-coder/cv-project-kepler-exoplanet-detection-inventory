@@ -12,18 +12,18 @@ pandas>=2.3.3
 
 # Astronomy / light curve access
 lightkurve>=2.6.0
-astropy>=5.3
+astropy>=5.3.3
 
 # Machine learning (TF >= 2.16 bundles Keras 3, which reads .keras files saved on Colab)
 tensorflow>=2.16
-scikit-learn>=1.3
+scikit-learn>=1.5.0
 
 # Visualisation
 matplotlib>=3.7
 seaborn>=0.13.2
 
 # Progress bars (tqdm.auto renders as widgets in VS Code notebooks)
-tqdm>=4.66
+tqdm>=4.66.3
 ipywidgets>=8.0
 
 # Notebook kernel for VS Code
@@ -36,7 +36,7 @@ cryptography>=50.0.2
 gradio>=6.30.0
 
 # Tests (.venv\Scripts\python -m pytest)
-pytest>=8
+pytest>=9.0.3
 
 # This project's own package (src/kepler_cnn), installed in editable mode so the scripts,
 # app and notebooks can `import kepler_cnn` from anywhere; edits to src/ apply immediately.
