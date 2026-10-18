@@ -11,7 +11,7 @@ The software asks you to accept these Terms before it downloads data, trains, or
 
 ## 1. Purpose and permitted use
 
-This project was built as a student portfolio project for *Computer Vision, ITAI 1378* at San Antonio College. You may view, run, and modify the code for:
+This project was built as a student portfolio project for *Computer Vision, ITAI 1378*. You may view, run, and modify the code for:
 
 - personal learning and teaching,
 - academic coursework, with proper citation (see §8), and

@@ -6,7 +6,7 @@
 
 <p align="center">
   A deep-learning vetter for NASA Kepler planet candidates, and a pixel-art map of every Kepler planet system.<br>
-  Computer Vision, ITAI 1378 · San Antonio College
+  Computer Vision, ITAI 1378 · a student portfolio project
 </p>
 
 <p align="center">
