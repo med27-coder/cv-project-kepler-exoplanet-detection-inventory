@@ -7,6 +7,17 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.6.0] - 2026-10-18
+
+### Changed
+- **New spacecraft and rover pixel art:** all 21 sprites redrawn larger (up to 35 x 17) and shaded, each with its
+  signature: Webb's 18 gold hexagons and its secondary mirror, Juno's three solar arms seen from above, Lucy's two
+  round arrays, Psyche's blue thruster glow, Mars Express's radar antennas, the TAGSAM arm on OSIRIS-APEX, the
+  rovers' rocker-bogie wheels and finned power units, and more. The first set is kept in `pixel-art/archive/`.
+
+### Fixed
+- `export_pixel_art.py` stopped working after v1.0.0 (the page now loads `starmap.js?v=...`); it matches again.
+
 ## [1.5.0] - 2026-10-18
 
 ### Added
@@ -97,6 +108,7 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.6.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.6.0
 [1.5.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.5.0
 [1.4.0]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.4.0
 [1.3.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.3.1
