@@ -441,3 +441,23 @@ canvas#backdrop[hidden] { display: none; }
 #universe-view { cursor: crosshair; }
 .uni-facts { line-height: 1.35; }
 header h1, header .sub, footer, .legend, #hover { text-shadow: 1px 1px 0 #070b1a, 0 0 6px #070b1a; }
+
+/* ---- the thank-you antenna (49e-thanks.js): a dish on the left edge that opens a note from the maker */
+button.antenna { position: fixed; left: 0; bottom: 96px; z-index: 20; padding: 6px 7px 5px 5px; line-height: 0;
+                 background: var(--panel); border: 2px solid var(--edge); border-left: 0; box-shadow: none; }
+button.antenna:hover, button.antenna:focus-visible { border-color: var(--accent); }
+button.antenna:active { transform: none; box-shadow: none; }
+button.antenna canvas.icon { width: 32px; height: 32px; image-rendering: pixelated; }
+button.antenna canvas.signal { position: absolute; left: 5px; top: 6px; animation: antenna-signal 1.6s steps(1) infinite; }
+@keyframes antenna-signal { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { button.antenna canvas.signal { animation: none; } }
+dialog#thanks { width: min(540px, calc(100vw - 32px)); padding: 16px 18px; line-height: 1.45;
+                background: var(--panel); color: var(--ink); border: 2px solid var(--accent); }
+dialog#thanks::backdrop { background: rgba(7, 11, 26, 0.8); }
+dialog#thanks h2 { font-size: 13px; }
+dialog#thanks .ps { margin: 18px 0 2px; color: var(--accent); font: 11px/1.7 var(--pixel); }
+@media (max-width: 600px) {
+  button.antenna { bottom: 12px; padding: 4px 5px 3px 3px; }
+  button.antenna canvas.icon { width: 24px; height: 24px; }
+  button.antenna canvas.signal { left: 3px; top: 4px; }
+}

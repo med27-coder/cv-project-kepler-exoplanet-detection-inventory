@@ -4394,6 +4394,22 @@
     trophy: (put, t) => trophyArt('epic')((x, y, c) => put(x - 2, y - 2, c), t),
     sky: put => skyIcon(put, false),          // the background toggle (55-backdrop.js): a moon and a star
     skyPaused: put => skyIcon(put, true),     // ... dimmed, with pause bars
+    antenna: put => {   // the thank-you button (49e-thanks.js): a Deep Space Network dish, as NASA uses to hear its spacecraft
+      for (let y = 12; y < 15; y++) { put(5, y, '#9aa6b8'); put(6, y, '#6f7d96'); }   // the pedestal
+      for (let x = 2; x < 10; x++) put(x, 15, '#6f7d96');
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {   // the dish face: an ellipse tilted to the upper right
+        const dx = x + 0.5 - 6, dy = y + 0.5 - 8.5, u = (dx + dy) / Math.SQRT2, v = (dx - dy) / Math.SQRT2;
+        const e = (u / 6.2) ** 2 + (v / 3.4) ** 2;
+        if (e <= 1) put(x, y, e > 0.62 ? '#6f7d96' : v < -0.6 ? '#9aa6b8' : '#e6ecff');
+      }
+      put(7, 7, '#c9d2de'); put(8, 6, '#9aa6b8'); put(9, 5, '#9aa6b8'); put(10, 4, '#ffd34d');   // the feed on its strut
+    },
+    signal: put => {    // its blinking signal: two arcs from the feed
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+        const d = Math.hypot(x - 10.5, y - 4.5), a = Math.atan2(y - 4.5, x - 10.5) * 180 / Math.PI;
+        if (a > -85 && a < -5 && (Math.abs(d - 2.5) < 0.5 || Math.abs(d - 4.4) < 0.5)) put(x, y, '#9fd8ff');
+      }
+    },
   };
   function skyIcon(put, paused) {
     for (let y = 1; y < 11; y++) for (let x = 0; x < 9; x++) {   // a crescent: a disc minus a smaller one
@@ -4578,6 +4594,14 @@
   }
 
   queueMicrotask(whatsNew);
+
+  // ---------------------------------------------------------------- the thank-you note
+  // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note
+  // from the site's maker. Clicking outside the note closes it too.
+  const thanksDialog = document.getElementById('thanks');
+  document.getElementById('thanks-open').addEventListener('click', () => thanksDialog.showModal());
+  document.getElementById('thanks-close').addEventListener('click', () => thanksDialog.close());
+  thanksDialog.addEventListener('click', e => { if (e.target === thanksDialog) thanksDialog.close(); });
 
   // ---------------------------------------------------------------- wiring
   const input = document.getElementById('query');

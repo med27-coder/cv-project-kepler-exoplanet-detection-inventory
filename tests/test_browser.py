@@ -649,3 +649,18 @@ def test_spotlight_sky_photos_are_local(browser, site):
     assert page.get_attribute('#info .sky img', 'src') == 'sky/kepler-90_2mass.jpg'
     assert not outside, outside
     assert not errors, errors
+
+
+def test_antenna_opens_the_thank_you_note(browser, site):
+    """The dish on the page's edge opens the maker's note (with its P.S. hint); Close and Escape shut it."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.click('#thanks-open')
+    page.wait_for_function('() => document.getElementById("thanks").open')
+    assert 'search up the solar system' in page.locator('#thanks .ps').inner_text().lower()
+    page.click('#thanks-close')
+    assert not page.evaluate('() => document.getElementById("thanks").open')
+    page.click('#thanks-open')
+    page.keyboard.press('Escape')
+    assert not page.evaluate('() => document.getElementById("thanks").open')
+    assert not errors, errors
