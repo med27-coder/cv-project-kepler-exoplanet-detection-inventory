@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 from .config import TERMS_FILE, TERMS_RECORD
 
-TERMS_VERSION = '1.0'
+TERMS_VERSION = '1.1'
 ENV_VAR = 'KEPLER_ACCEPT_TERMS'
 
 _accepted = False

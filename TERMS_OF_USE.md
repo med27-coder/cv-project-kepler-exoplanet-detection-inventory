@@ -1,9 +1,9 @@
 # Terms of Use
 
-**Kepler Exoplanet Detection (AstroNet-style 1D CNN)**
-Version 1.0. Effective October 6, 2026.
+**Kepler Exoplanet Detection (Star Gazer) and the Kepler Star Map**
+Version 1.1. Effective October 17, 2026. (Version 1.0, October 6, 2026: the first version.)
 
-By running the notebooks, the `app.py` web demo, or any code in this repository, or by using a hosted copy of the demo, you agree to these Terms. If you do not agree, do not use the project.
+By running the notebooks, the `app.py` web demo, or any code in this repository, by using a hosted copy of the demo, or by copying anything from the Kepler Star Map website, you agree to these Terms. If you do not agree, do not use the project. Simply visiting and playing the star map is free and needs no acceptance.
 
 The software asks you to accept these Terms before it downloads data, trains, or makes predictions. Your acceptance is saved locally in `.terms_accepted`. If the version number above changes, you will be asked to accept again.
 
@@ -19,9 +19,13 @@ This project was built as a student portfolio project for *Computer Vision, ITAI
 
 Commercial use, redistribution as part of a paid product or service, or presenting the work as your own requires prior written permission from the author.
 
+The project's own code, pixel art and documentation are licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**; these Terms add to it. Data, images, fonts and libraries from other sources are not covered by that licence and keep their own terms ([NOTICE.md](NOTICE.md)).
+
+**The Kepler Star Map website.** You are welcome to visit it, play it, link to it, and share screenshots of it with credit. Do not re-host the site, its game or its pixel art as your own, and do not use them commercially, without written permission.
+
 ## 2. Not a scientific instrument
 
-The model is an educational prototype. Its reported test accuracy is about 70% and its test AUC is about 0.77 (V1.5), which is below the project's own targets.
+The model is an educational prototype. Its current results, and how they were measured, are in the README ("Results across versions"); like any model, it makes mistakes.
 
 - Its predictions are **not** official classifications. They do not replace NASA Exoplanet Archive dispositions or peer-reviewed vetting.
 - Do not present a prediction as a discovery, confirmation, or rejection of an exoplanet in any publication, report, or public statement.
@@ -33,6 +37,8 @@ The project downloads data at run time from:
 
 - **NASA Exoplanet Archive** (operated by Caltech/IPAC under contract with NASA), and
 - **MAST**, the Mikulski Archive for Space Telescopes (operated by STScI), accessed through the `lightkurve` library.
+
+The star map also uses Gaia (ESA), NASA JPL Horizons, the NASA Image and Video Library and sky surveys served by CDS; the full list and their terms are in [NOTICE.md](NOTICE.md).
 
 You agree to:
 
@@ -56,6 +62,8 @@ THE SOFTWARE, MODEL, AND OUTPUTS ARE PROVIDED **"AS IS"**, WITHOUT WARRANTY OF A
 - If you start it with `--share`, Gradio creates a temporary public URL routed through Gradio's servers. Anyone with the link can use the demo, and each use causes your machine to make requests to NASA/MAST. You are responsible for who you share the link with and for any traffic it generates.
 - The demo does not store your inputs. However, Gradio's relay and the data providers may log requests under their own privacy policies.
 - Anyone using the demo must also accept these Terms, using the checkbox in the app.
+
+**The star map's game.** Your progress (easter eggs, achievements, predictions) is stored only in your own browser. The site sets no cookies and runs no analytics; the only outside request is the sky photo of a system you open (from CDS).
 
 ## 7. Limitation of liability
 
