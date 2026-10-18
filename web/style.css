@@ -461,3 +461,10 @@ dialog#thanks .ps { margin: 18px 0 2px; color: var(--accent); font: 11px/1.7 var
   button.antenna canvas.icon { width: 24px; height: 24px; }
   button.antenna canvas.signal { left: 3px; top: 4px; }
 }
+/* a new version: the dish lights up and its signal blinks fast; the note opens with WHAT'S NEW */
+button.antenna.news { border-color: var(--accent); box-shadow: 0 0 10px 1px rgba(255, 211, 77, 0.55); }
+button.antenna.news canvas.signal { animation-duration: 0.6s; }
+dialog#thanks .news { border: 2px solid var(--edge); padding: 4px 12px; margin: 10px 0 16px; }
+dialog#thanks .news h3 { font: 11px/1.7 var(--pixel); color: var(--accent); margin: 8px 0 4px; }
+dialog#thanks .news ul { margin: 4px 0; padding-left: 18px; }
+dialog#thanks .news li { margin: 4px 0; }

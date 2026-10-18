@@ -114,6 +114,18 @@
 
   const MAP_COLORS = { spot: '#ffd34d', spotDim: '#8a6d1f', likely: '#6cb4ff', unlikely: '#ff8c42' };   // blue / orange: safe for colour blindness (tests/test_palette.py)
 
+  // ---------------------------------------------------------------- the site's version
+  // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
+  // stylesheet links, and tests check it matches the top of CHANGELOG.md. Semantic versions: MAJOR for a redesign or
+  // a change in how progress is saved, MINOR for new features, PATCH for fixes. RELEASE_NOTES are what the antenna
+  // announces (2 or 3 plain-words highlights per version, no spoilers).
+  const VERSION = '1.0.0';
+  const RELEASE_NOTES = [
+    'The first full release: 3,600+ Kepler stars to explore, each with its planets orbiting in pixel art.',
+    'A collecting game in the Galleria: 29 easter eggs to find by name, 69 achievements, trophies and your own star.',
+    'A UNIVERSE view that zooms out from Kepler\'s field to the edge of the observable universe.',
+  ];
+
   // ---------------------------------------------------------------- map
   const map = document.getElementById('map');
   const mctx = map.getContext('2d');
@@ -4595,11 +4607,37 @@
 
   queueMicrotask(whatsNew);
 
-  // ---------------------------------------------------------------- the thank-you note
-  // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note
-  // from the site's maker. Clicking outside the note closes it too.
+  // ---------------------------------------------------------------- the antenna: a thank-you note, and what's new
+  // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note from the
+  // site's maker. When the site has a version this browser hasn't seen (VERSION, 00-version.js), the dish lights up
+  // and the note starts with WHAT'S NEW IN VX: the release notes. Opening it marks the version as seen.
+  // Clicking outside the note closes it too.
+  const SEEN_VERSION_KEY = 'starmap.seenVersion';
   const thanksDialog = document.getElementById('thanks');
-  document.getElementById('thanks-open').addEventListener('click', () => thanksDialog.showModal());
+  const thanksButton = document.getElementById('thanks-open');
+  document.getElementById('site-version').textContent = `v${VERSION}`;
+  function seenVersion() {
+    try { return localStorage.getItem(SEEN_VERSION_KEY); } catch { return null; }
+  }
+  const versionIsNew = seenVersion() !== VERSION;
+  if (versionIsNew) {
+    thanksButton.classList.add('news');
+    thanksButton.title = `New in v${VERSION}: open the transmission`;
+    document.getElementById('thanks-news-title').textContent = `WHAT'S NEW IN V${VERSION}`;
+    const list = document.getElementById('thanks-news-list');
+    for (const note of RELEASE_NOTES) {
+      const li = document.createElement('li');
+      li.textContent = note;
+      list.append(li);
+    }
+  }
+  thanksButton.addEventListener('click', () => {
+    document.getElementById('thanks-news').hidden = !versionIsNew;
+    thanksDialog.showModal();
+    thanksButton.classList.remove('news');
+    thanksButton.title = 'Incoming transmission: a note from the maker';
+    try { localStorage.setItem(SEEN_VERSION_KEY, VERSION); } catch { /* private window: the dish lights up again next visit */ }
+  });
   document.getElementById('thanks-close').addEventListener('click', () => thanksDialog.close());
   thanksDialog.addEventListener('click', e => { if (e.target === thanksDialog) thanksDialog.close(); });
 

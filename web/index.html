@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/og.png">
   <meta property="og:url" content="https://med27-coder.github.io/cv-project-kepler-exoplanet-detection-inventory/">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=1.0.0">
 </head>
 <body>
   <canvas id="backdrop" aria-hidden="true"></canvas>
@@ -140,7 +140,8 @@
        confirmed planets. Spacecraft positions are a snapshot from one date; the pixel art, the Kepler and ISS
        animations and the Solar System's moon distances are illustrative. Data and images belong to their sources,
        credited above and in <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/blob/main/pixel-art/references/SOURCES.md">SOURCES.md</a>.</p>
-    <p>Made by <a href="https://github.com/med27-coder">med27-coder on GitHub</a> ·
+    <p><a id="site-version" href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/blob/main/CHANGELOG.md">version</a> ·
+       Made by <a href="https://github.com/med27-coder">med27-coder on GitHub</a> ·
        <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory">source code</a>
        (part of the Star Gazer exoplanet-detection project) ·
        <a href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/issues">report a problem</a> ·
@@ -207,6 +208,11 @@
       <h2 id="thanks-title">INCOMING TRANSMISSION</h2>
       <button type="button" id="thanks-close" class="ghost" aria-label="Close">✕</button>
     </div>
+    <section id="thanks-news" class="news" hidden aria-labelledby="thanks-news-title">
+      <h3 id="thanks-news-title">WHAT'S NEW</h3>
+      <ul id="thanks-news-list"></ul>
+      <p><a id="thanks-news-log" href="https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/blob/main/CHANGELOG.md">Everything that changed (the changelog)</a></p>
+    </section>
     <p>Thank you for trying my webpage!</p>
     <p>This started out as a project: Star Gazer, a model that learns to spot planets in the starlight NASA's Kepler
        telescope recorded. As I worked on it, more ideas came to mind, and I kept building until it fully flourished
@@ -221,6 +227,6 @@
   <script src="data/earth.js"></script>
   <script src="data/gallery.js"></script>
   <script src="data/resolutions.js"></script>
-  <script src="starmap.js"></script>
+  <script src="starmap.js?v=1.0.0"></script>
 </body>
 </html>
