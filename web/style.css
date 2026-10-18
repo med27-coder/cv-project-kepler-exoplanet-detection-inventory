@@ -411,4 +411,12 @@ canvas.icon { display: inline-block; width: 20px; height: 20px; background: tran
 canvas#backdrop { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;
                   background: transparent; border: 0; image-rendering: pixelated; }
 canvas#backdrop[hidden] { display: none; }
+
+/* ---- the universe in sectors (56-universe.js) */
+#map[hidden], #universe-view[hidden], #hover[hidden], .uni-nav[hidden], .uni-facts[hidden] { display: none; }
+.uni-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.uni-nav span { font: 10px var(--pixel); color: var(--accent); text-align: center; }
+.uni-nav button { padding: 4px 10px; }
+#universe-view { cursor: crosshair; }
+.uni-facts { line-height: 1.35; }
 header h1, header .sub, footer, .legend, #hover { text-shadow: 1px 1px 0 #070b1a, 0 0 6px #070b1a; }

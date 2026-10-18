@@ -12,20 +12,22 @@ fpsMenu.addEventListener('change', () => {
   SYSTEM_MS = fps ? 1000 / fps : Infinity;
   wake();
 });
-const onScreen = new Map([[map, true], [sys, true]]);
-let lastMap = 0, lastSys = 0, lastActive = performance.now(), running = false;
+const onScreen = new Map([[map, true], [sys, true], [uniCanvas, false]]);
+let lastMap = 0, lastSys = 0, lastUniverse = 0, lastActive = performance.now(), running = false;
 
 function frame(now) {
-  const visible = onScreen.get(map) || onScreen.get(sys);
+  const visible = onScreen.get(map) || onScreen.get(sys) || onScreen.get(uniCanvas);
   if (!visible || now - lastActive > IDLE_MS) { running = false; return; }
   if (SYSTEM_MS === Infinity) {   // animation off: draw the current state once, then sleep until something changes
     drawMap(now);
+    drawUniverse(now);
     drawSystem(0);
     drawBackdrop(now, true);
     running = false;
     return;
   }
   if (onScreen.get(map) && now - lastMap >= MAP_MS) { drawMap(now); drawHeaderEmblem(now); lastMap = now; }
+  if (onScreen.get(uniCanvas) && now - lastUniverse >= MAP_MS) { drawUniverse(now); lastUniverse = now; }   // 56-universe.js
   drawBackdrop(now);   // the night sky behind the page (55-backdrop.js; ~8 fps, still with reduced motion)
   if (onScreen.get(sys) && now - lastSys >= SYSTEM_MS) {
     drawSystem(now / 1000);
@@ -59,10 +61,11 @@ window.addEventListener('hashchange', wake);
 if ('IntersectionObserver' in window) {
   const watcher = new IntersectionObserver(entries => {
     for (const e of entries) onScreen.set(e.target, e.isIntersecting);
-    if (onScreen.get(map) || onScreen.get(sys)) wake();
+    if (onScreen.get(map) || onScreen.get(sys) || onScreen.get(uniCanvas)) wake();
   });
   watcher.observe(map);
   watcher.observe(sys);
+  watcher.observe(uniCanvas);
 }
 drawMap(0);
 drawSystem(0);

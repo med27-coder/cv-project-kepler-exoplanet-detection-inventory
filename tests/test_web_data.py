@@ -207,7 +207,8 @@ SHIPPED_IDS = {
             'curious', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'l2', 'interstellar',
             'photo-finish', 'curator', 'grand-tour', 'patient', 'night', 'hollow', 'speedrun', 'goodnight',
             'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
-            'contrarian', 'patience', 'daily', 'streak', 'so-close'},
+            'contrarian', 'patience', 'daily', 'streak', 'so-close', 'cosmic-zoom',
+            'lost-in-orbit'},
 }
 
 

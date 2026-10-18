@@ -62,7 +62,7 @@ patches, write a script file (scratchpad) and run it, or use the Edit tool.
   later part must be deferred with `queueMicrotask`.
 - Roles: `40-home.js` `lookup()` routes searches (easter eggs before the catalog). `48-gallery.js` owns progress,
   achievements and easter eggs. `48b-predictions`, `49-ranks` (emblems, badges, header), `49b-trophies`,
-  `49c-ui`, `49d-connect` add on to it. `60-loop.js` is the only animation loop (it stops when idle or hidden;
+  `49c-ui`, `49d-connect` add on to it. `56-universe.js` is the UNIVERSE view (sectors on their own canvas). `60-loop.js` is the only animation loop (it stops when idle or hidden;
   every drawing hooks into it).
 - **Strict CSP**: no inline scripts, styles or `style=` attributes in HTML strings (set `el.style` from JS);
   escape every interpolated value with `esc()`.

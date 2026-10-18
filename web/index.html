@@ -60,6 +60,8 @@
                   title="Outline Kepler's 21 camera chips (CCD modules)">CCDS</button>
           <button type="button" id="depth" class="ghost" aria-pressed="false"
                   title="Side view: Earth on the left, each star at its real distance">DEPTH</button>
+          <button type="button" id="universe" class="ghost" aria-pressed="false"
+                  title="Zoom out to the whole universe, one sector at a time">UNIVERSE</button>
           <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
           <span id="zoom-level" aria-live="polite">1×</span>
           <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
@@ -67,6 +69,13 @@
       </div>
       <canvas id="map" width="192" height="192" tabindex="0"
               aria-label="Pixel map of the Kepler field. Click a pixel, or focus the map and use the arrow keys to move between stars and plus or minus to zoom."></canvas>
+      <div class="uni-nav" id="uni-nav" hidden>
+        <button type="button" id="uni-in" aria-label="Zoom in: the previous sector">◀</button>
+        <span id="uni-title" aria-live="polite"></span>
+        <button type="button" id="uni-out" aria-label="Zoom out: the next sector">▶</button>
+      </div>
+      <canvas id="universe-view" width="192" height="192" tabindex="0" hidden></canvas>
+      <p id="uni-facts" class="status uni-facts" hidden></p>
       <p id="hover" class="status">Click a pixel · arrows move · scroll or +/− zooms · drag pans</p>
       <ul class="legend">
         <li><span class="dot lg-spot"></span>spotlight</li>
