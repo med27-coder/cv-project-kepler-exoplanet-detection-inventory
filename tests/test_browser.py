@@ -168,26 +168,33 @@ def test_dwarf_planets_and_dwarf_king(browser, site):
     assert not errors, errors
 
 
-def test_astronaut_outfits(browser, site):
-    """"astronaut" stays secret until LOST IN ORBIT; after it, each search shows the next outfit: the cowboy hat
-    earns HOUSTON, WE HAVE A PROBLEM, and every outfit SPACE WARDROBE."""
+def test_astronaut_wardrobe(browser, site):
+    """"astronaut" stays secret until LOST IN ORBIT. Then: the 1st visit brings no outfit, the 2nd always one
+    (DRESS-UP DAY); later visits roll at most every 15 minutes (Math.random is scripted here), and the legendary
+    cowboy hat earns HOUSTON, WE HAVE A PROBLEM. Owned outfits can be worn from the card."""
     errors = []
-    page = open_page(browser, site, errors)
+    page = open_page(browser, site, errors, init_script="Math.random = () => (window.__rand && window.__rand.length ? window.__rand.shift() : 0.99);")
     page.fill('#query', 'astronaut')
     page.press('#query', 'Enter')
     assert page.locator('#sys-title').inner_text() == 'NO SIGNAL'          # not found yet: no hint
     page.evaluate("localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {}, systems: [], toured: true,"
                   " toasts: false, ach: {'lost-in-orbit': '2026-10-14'}}))")
     page.reload()
-    for k in range(6):
-        page.fill('#query', 'astronaut')
-        page.press('#query', 'Enter')
-        assert page.locator('#sys-title').inner_text() == 'LOST IN ORBIT'
-        if k == 0:
-            assert 'cowboy hat' in page.locator('#info').inner_text()
+    visit = lambda: (page.fill('#query', 'astronaut'), page.press('#query', 'Enter'))
+    visit()
+    assert 'glad to see' in page.locator('#info').inner_text()           # 1st visit: nothing yet
+    visit()
+    assert 'New in the wardrobe' in page.locator('#info').inner_text()   # 2nd visit: always an outfit
+    visit()
+    assert 'come back in a little while' in page.locator('#info').inner_text()   # too soon to roll again
+    page.clock.run_for(16 * 60 * 1000)
+    page.evaluate("window.__rand = [0.1, 0.99, 0.0]")                   # drop, legendary tier, the cowboy hat
+    visit()
+    assert 'Texas cowboy hat' in page.locator('#info').inner_text()
     saved = page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1'))")
-    assert 'houston' in saved['ach'] and 'space-wardrobe' in saved['ach'] and len(saved['outfits']) == 6
-    page.wait_for_timeout(300)
+    assert {'first-outfit', 'houston'} <= set(saved['ach']) and len(saved['outfits']) == 2
+    page.click('.outfit-pick[data-outfit=""]')                         # wear the plain suit
+    assert page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1')).outfit") == ''
     assert not errors, errors
 
 
@@ -389,7 +396,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/64'
+    assert page.locator('#rank-count').inner_text() == '12/69'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1

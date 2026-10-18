@@ -430,6 +430,8 @@ canvas#backdrop[hidden] { display: none; }
 @keyframes loading-in { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .loading { animation-duration: 0s; } }
 .take-me { margin-top: 4px; }
+.outfit-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.outfit-pick[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
 /* ---- the universe in sectors (56-universe.js) */
 #map[hidden], #universe-view[hidden], #hover[hidden], .uni-nav[hidden], .uni-facts[hidden] { display: none; }

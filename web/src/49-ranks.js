@@ -85,8 +85,10 @@ const SYMBOLS = {
   'cosmic-zoom': ['.vvvv..', 'v....v.', 'v.yy..v', 'v.y...v', '.v...v.', '..vvv..'],         // a spiral, the universe
   'lost-in-orbit': ['..www..', '.woooww', '.woooww', '..www.m', '.wwwwm.', '.w.w...'],      // an astronaut, tether loose
   'dwarf-king': ['y.y.y..', 'yyyyy..', '.......', 'w.b.r.t', '.......', '.......'],      // a crown over five little worlds
-  houston: ['..bbb..', '..kkk..', 'bbbbbbb', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
-  'space-wardrobe': ['ppp.kkk', 'ppp.kkk', '.......', 'bbb.yyy', 'bbb.yyy', '.......'],   // four hats on the rack
+  houston: ['..TTT..', '..kkk..', 'TTTTTTT', '..www..', '.wooow.', '..www..'],         // the astronaut's cowboy hat
+  'space-wardrobe': ['rrr.kkk', 'rrr.kkk', '.......', 'TTT.yyy', 'TTT.yyy', '.......'],   // four hats on the rack
+  runway: ['...y...', '..yyy..', 'yyyyyyy', '..yyy..', '.y...y.', '.......'],         // a star of the runway
+  'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
   'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
   speedrun: ['bb.w...', '..bbb.w', 'w.bbbbb', '..bbb.w', 'bb.w...', '.......'],              // warp streaks
   goodnight: ['....www', '.....w.', 'ww..www', '.w.....', 'ww.....', '.......'],             // zZ
@@ -181,6 +183,13 @@ const BADGES = {
     discArt(put, 8, 8, 2.8, (dx, dy) => (dx + dy < -1 ? '#fff1b0' : '#ffc93c'));
     ringArt(put, 8, 3, 2.5, 1, '#eef2f8', a => Math.sin(a) > -0.5);
     put(8, 4, '#d6dae2');
+  } },
+  WARDROBE: { name: 'THE COAT HANGER', art: put => {   // a hanger with a little scarf
+    put(8, 2, '#d6dae2'); put(9, 2, '#d6dae2'); put(9, 3, '#d6dae2'); put(8, 4, '#d6dae2');
+    for (let k = 0; k < 6; k++) { put(8 - k, 5 + k, '#ffc93c'); put(8 + k, 5 + k, '#ffc93c'); }
+    for (let x = 2; x <= 14; x++) put(x, 11, '#ffc93c');
+    for (let y = 8; y < 14; y++) { put(7, y, '#e04a4a'); put(9, y, '#e04a4a'); }
+    put(8, 9, '#ff6ec7'); put(8, 12, '#ff6ec7');
   } },
   'TWO SUNS': { name: 'THE TWIN SUNSET', art: (put, t) => {
     discArt(put, 5, 7.5, 3.4, (dx, dy, f) => (f < 0.55 ? '#fff1b0' : '#ffc93c'));
