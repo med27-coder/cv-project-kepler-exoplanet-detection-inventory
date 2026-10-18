@@ -417,11 +417,19 @@ def test_night_sky_backdrop(browser, site):
         const colours = new Set(); for (let i = 0; i < d.length; i += 4 * 7) colours.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]);
         return { w: c.width, colours: colours.size, events: getComputedStyle(c).pointerEvents, z: getComputedStyle(c).zIndex }; }""")
     assert info['w'] >= 200 and info['colours'] > 12 and info['events'] == 'none' and info['z'] == '-1'
+    assert page.get_attribute('#sky-toggle', 'aria-pressed') == 'true'
+    page.click('#sky-toggle')                                         # the header button pauses the sky
+    assert page.get_attribute('#sky-toggle', 'aria-pressed') == 'false'
+    assert '"backdrop":"still"' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
     page.click('#open-gallery')
     page.click('#tab-set')
+    assert page.input_value('#set-backdrop') == 'still'               # and the setting follows
     page.select_option('#set-backdrop', 'plain')
     assert page.locator('#backdrop').is_hidden()
     assert '"backdrop":"plain"' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    page.click('#gallery-close')
+    page.click('#sky-toggle')                                         # from plain, it turns the animated sky back on
+    assert page.locator('#backdrop').is_visible() and page.get_attribute('#sky-toggle', 'aria-pressed') == 'true'
     assert not errors, errors
 
 

@@ -18,7 +18,17 @@ const ICONS = {
     }
   },
   trophy: (put, t) => trophyArt('epic')((x, y, c) => put(x - 2, y - 2, c), t),
+  sky: put => skyIcon(put, false),          // the background toggle (55-backdrop.js): a moon and a star
+  skyPaused: put => skyIcon(put, true),     // ... dimmed, with pause bars
 };
+function skyIcon(put, paused) {
+  for (let y = 1; y < 11; y++) for (let x = 0; x < 9; x++) {   // a crescent: a disc minus a smaller one
+    if (Math.hypot(x - 4, y - 6) <= 4.3 && Math.hypot(x - 6.2, y - 4.6) > 3.4) put(x, y, paused ? '#8a7f55' : '#ffd34d');
+  }
+  const star = paused ? '#6f7d96' : '#e6ecff';
+  put(9, 2, star); put(8, 2, star); put(10, 2, star); put(9, 1, star); put(9, 3, star);
+  if (paused) for (let y = 6; y < 12; y++) { put(7, y, '#e6ecff'); put(8, y, '#e6ecff'); put(10, y, '#e6ecff'); put(11, y, '#e6ecff'); }
+}
 function paintIcons(root = document) {
   root.querySelectorAll('canvas[data-icon]').forEach(c => {
     const ctx = c.getContext('2d');

@@ -3797,7 +3797,17 @@
       }
     },
     trophy: (put, t) => trophyArt('epic')((x, y, c) => put(x - 2, y - 2, c), t),
+    sky: put => skyIcon(put, false),          // the background toggle (55-backdrop.js): a moon and a star
+    skyPaused: put => skyIcon(put, true),     // ... dimmed, with pause bars
   };
+  function skyIcon(put, paused) {
+    for (let y = 1; y < 11; y++) for (let x = 0; x < 9; x++) {   // a crescent: a disc minus a smaller one
+      if (Math.hypot(x - 4, y - 6) <= 4.3 && Math.hypot(x - 6.2, y - 4.6) > 3.4) put(x, y, paused ? '#8a7f55' : '#ffd34d');
+    }
+    const star = paused ? '#6f7d96' : '#e6ecff';
+    put(9, 2, star); put(8, 2, star); put(10, 2, star); put(9, 1, star); put(9, 3, star);
+    if (paused) for (let y = 6; y < 12; y++) { put(7, y, '#e6ecff'); put(8, y, '#e6ecff'); put(10, y, '#e6ecff'); put(11, y, '#e6ecff'); }
+  }
   function paintIcons(root = document) {
     root.querySelectorAll('canvas[data-icon]').forEach(c => {
       const ctx = c.getContext('2d');
@@ -4126,7 +4136,7 @@
   // drifting clouds and a tree line. Drawn small (about 320 pixels wide) and scaled up, so it stays crisp and
   // cheap; the parts that never change are drawn once per window size. It moves with the main animation loop
   // (60-loop.js), so it follows the Animation menu, stops when the page is idle, and is still with reduced motion.
-  // Settings: animated, still, or plain (the old flat colour).
+  // Settings: animated, still, or plain (the old flat colour); the moon button in the header pauses and resumes it.
   const backdrop = document.getElementById('backdrop');
   const bctx = backdrop.getContext('2d');
   const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
@@ -4233,12 +4243,26 @@
   addEventListener('resize', () => { clearTimeout(backdropTimer); backdropTimer = setTimeout(buildBackdrop, 200); });
   const backdropSetting = document.getElementById('set-backdrop');
   backdropSetting.value = backdropMode();
-  backdropSetting.addEventListener('change', () => {
-    progress.backdrop = backdropSetting.value;
+  function setBackdropMode(mode) {
+    progress.backdrop = mode;
     saveProgress();
+    backdropSetting.value = mode;
     buildBackdrop();
-  });
+    syncSkyToggle();
+  }
+  backdropSetting.addEventListener('change', () => setBackdropMode(backdropSetting.value));
+  // The header's moon button: one click pauses the night sky (still) or brings it back (animated, also from plain).
+  const skyToggle = document.getElementById('sky-toggle');
+  function syncSkyToggle() {
+    const on = backdropMode() === 'animated';
+    skyToggle.setAttribute('aria-pressed', String(on));
+    skyToggle.title = on ? 'Background animation: on (click to pause the night sky)' : 'Background animation: off (click to animate the night sky)';
+    skyToggle.querySelector('canvas').dataset.icon = on ? 'sky' : 'skyPaused';
+    paintIcons(skyToggle);
+  }
+  skyToggle.addEventListener('click', () => setBackdropMode(backdropMode() === 'animated' ? 'still' : 'animated'));
   buildBackdrop();
+  syncSkyToggle();
 
   // ---------------------------------------------------------------- animation loop
   // Power savers: the system view runs at 30 fps (pixel art looks the same), the map at ~8 fps;
