@@ -176,7 +176,8 @@ function renderAstronautCard(visit) {
   info.innerHTML = `
     <p class="big">★ MISSION CONTROL, HOUSTON ★</p>
     <p>${news}</p>
-    <p>Wardrobe: <b>${owned.filter(o => o.tier !== 'special').length} of ${DROPPABLE.length}</b> found.
+    <p>Wardrobe: <b>${owned.filter(o => o.tier !== 'special').length} of ${DROPPABLE.length}</b> found by visiting${
+       owned.some(o => o.tier === 'special') ? `, plus ${owned.filter(o => o.tier === 'special').map(o => `the <b>${esc(o.name)}</b>`).join(' and ')} (special)` : ''}.
        ${owned.length ? 'Choose what they wear:' : ''}</p>
     ${owned.length ? `<p class="outfit-picks">${buttons}<button type="button" class="ghost outfit-pick" data-outfit=""
       aria-pressed="${!progress.outfit}">plain suit</button></p>` : ''}
