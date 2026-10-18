@@ -78,13 +78,19 @@ WAVER = ['.ggg.', 'gkgkg', 'ggggg', '.ggg.', '..g..']
 PEACE = [['g.g', 'g.g', '.g.', '.g.'], ['g..g', 'g..g', '.gg.', '.g..']]   # V sign, wiggling
 
 
-def aliens(t, sky=True):
+def aliens(t, sky=True, space=False, rare=False):
     """Two green aliens in a silver flying saucer under a glass dome, one at the controls, one flashing a peace
     sign (after the user's reference, redrawn as pixel art; the reference itself is not committed)."""
     W, H = 96, 64
     f = Frame(W, H, seed=3)
     if not sky:   # draft 2: no sky, a key colour that becomes transparent (to fly over the site's night sky)
         f.img.paste(KEY, (0, 0, W, H))
+    if space:   # travelling through space: a steady starfield drifting past (no twinkling, nothing flashing)
+        sky = False
+        f.img.paste(BG, (0, 0, W, H))
+        starfield(f, t, W, H)
+        if rare:   # the rare version: an asteroid tumbles past behind the saucer (WHAT WAS THAT?)
+            rock(f, W + 14 - t * (W + 28), 20 + 10 * t, 8, t * 2 * math.pi * 0.75)
     for y in range(H if sky else 0):   # a daytime sky, lighter towards the bottom
         c = '#3f86d6' if y < 20 else '#5a9be0' if y < 42 else '#79b2ea'
         for x in range(W):
@@ -170,6 +176,216 @@ def aliens(t, sky=True):
         f.put(round(cx + 42 * math.cos(a)), round(cy + 2 + 9 * math.sin(a)), '#e8f4ff')
     return f
 
+
+
+# ---- drafts 2: space travel, asteroids, comets and meteors drawn the way they really look
+def starfield(f, t, W, H):
+    """Stars drifting left at three speeds (parallax), so the scene reads as travelling; they never blink."""
+    for k in range(90):
+        speed = (1, 2, 3)[k % 3]
+        x = round(((k * 37) % W) - t * W * speed / 3) % W
+        y = (k * 53 + k // 7) % H
+        f.put(x, y, ('#2a3360', '#5a6a9a', '#c8d0ff')[k % 3])
+
+
+def rock(f, cx, cy, r, rot, light=(-0.8, -0.6)):
+    """A lumpy, cratered rock lit from one side, turning by `rot`: an asteroid as it really looks (no glow, no
+    tail: in empty space nothing burns)."""
+    for y in range(math.floor(cy - r * 1.4), math.ceil(cy + r * 1.4) + 1):
+        for x in range(math.floor(cx - r * 1.4), math.ceil(cx + r * 1.4) + 1):
+            dx, dy = x + 0.5 - cx, y + 0.5 - cy
+            a, d = math.atan2(dy, dx), math.hypot(dx, dy)
+            edge = r * (1 + 0.22 * math.sin(2 * a + rot) + 0.12 * math.sin(5 * a - rot * 1.3))
+            if d > edge:
+                continue
+            lit = (dx * light[0] + dy * light[1]) / max(edge, 1)
+            c = '#b0a698' if lit > 0.35 else '#8a8176' if lit > -0.15 else '#5d564e' if lit > -0.55 else '#3a352f'
+            u = (a + rot) % (2 * math.pi)
+            if math.hypot(u - 2.0, d / edge - 0.45) < 0.22 or math.hypot(u - 4.4, d / edge - 0.3) < 0.18:
+                c = '#4a443e'   # craters, turning with the rock
+            f.put(x, y, c)
+
+
+def asteroid_v2(t):
+    """An asteroid as it really is: a dark, cratered, lumpy rock tumbling slowly, lit on one side, with a little
+    moon like Ida's Dactyl."""
+    f = Frame(64, 40, seed=9)
+    rot = t * 2 * math.pi
+    a = rot * 1.5
+    mx, my = 32 + 20 * math.cos(a), 20 + 6 * math.sin(a)
+    moon = lambda: f.disc(mx, my, 1.6, lambda dx, dy, q: '#8a8176' if dx < 0 else '#5d564e')
+    if math.sin(a) < 0:
+        moon()
+    rock(f, 32, 20, 9, rot)
+    if math.sin(a) >= 0:
+        moon()
+    return f
+
+
+def comet_v2(t):
+    """A comet as it really is: a small dark nucleus in a glowing coma, a straight bluish ion tail and a broad,
+    curved, whiter dust tail, both pointing away from the Sun (off to the left), not behind the comet's motion."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=11)
+    for x in range(10):   # the Sun's glow fading in from the left edge
+        c = ['#fff1b0', '#ffe28a', '#ffd34d', '#c9a23a', '#8a6d1f', '#5a4a2a', '#3a3020', '#241e16', '#16131a', '#0d0d1c'][x]
+        for y in range(H):
+            if x < 4 or (x + y) % (x - 2) == 0:
+                f.put(x, y, c)
+    hx, hy = 66 - t * 26, 12 + t * 18   # heading down and left, towards the Sun
+    for k in range(2, 44):   # the dust tail: a fan that widens and curves, fading with distance
+        half = 0.6 + k * 0.16
+        for w10 in range(int(-half * 10), int(half * 10) + 1, 5):
+            w = w10 / 10
+            x, y = hx + k, hy + w + (k / 16) ** 2 * 3
+            fade = k / 44 + abs(w) / (half * 3)
+            if fade > 0.95 or (fade > 0.6 and (round(x) + round(y)) % 2):
+                continue
+            f.put(x, y, '#f4ecd6' if fade < 0.3 else '#d8c8a0' if fade < 0.55 else '#8a7a5a')
+    for k in range(2, 46):   # the ion tail: thin, straight, blue, pointing exactly away from the Sun
+        if k < 30 or k % 2 == 0:
+            f.put(hx + k, hy - 1, '#9fd8ff' if k < 18 else '#4a7fd6')
+    f.disc(hx, hy, 3.4, lambda dx, dy, q: '#ffffff' if q < 0.35 else '#cfeaff' if q < 0.7 else '#6aa8d6')   # the coma
+    f.put(hx, hy, '#4a443e')   # the nucleus: dark ice and dust, a few kilometres across
+    return f
+
+BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]   # ordered dither, as the night sky uses
+
+
+def comet_v3(t):
+    """A comet after real photos (Comet Lovejoy from the space station, 2011; NEOWISE, 2020): a tiny, very bright
+    head with a soft glow; a long dust tail, bright near the head, widening and fading into a gently curved plume;
+    and a faint, thin, bluish ion tail beside it, barely there. Both point away from the Sun (to the left)."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=11)
+    hx, hy = 30 - t * 6, 32 - t * 4          # drifting slowly; the Sun is off to the left
+    ax, ay = 0.92, -0.39                      # the tail's direction (away from the Sun), unit length
+    L = 64                                    # tail length in pixels
+    for y in range(H):
+        for x in range(W):
+            dx, dy = x + 0.5 - hx, y + 0.5 - hy
+            u = dx * ax + dy * ay              # distance along the tail
+            if u <= 0 or u > L:
+                continue
+            v = -dx * ay + dx * 0 + dy * ax    # distance across it (positive: below the axis)
+            v -= (u / L) ** 2 * 6              # the dust tail curves gently
+            half = 1.0 + u * 0.19   # the plume widens like Lovejoy's
+            threshold = (BAYER[y % 4][x % 4] + 0.5) / 16
+            dust = (1 - u / L) ** 1.3 * max(0.0, 1 - (v / half) ** 2)
+            if dust > threshold:
+                f.put(x, y, '#ffffff' if dust > 0.75 else '#f4ecd6' if dust > 0.45 else '#c9bfa4' if dust > 0.22 else '#7a735f')
+                continue
+            vi = -dx * ay + dy * ax + 1.6 + u * 0.04   # the ion tail: straight, just off the dust tail
+            ion = 0.42 * (1 - u / L) * max(0.0, 1 - (vi / 0.9) ** 2)
+            if ion > threshold:
+                f.put(x, y, '#9fc8f0' if u < 24 else '#4a78b8')
+    f.disc(hx, hy, 2.8, lambda dx, dy, q: '#dfefff' if BAYER[round(dy) % 4][round(dx) % 4] < 16 * (1 - q) else None)   # coma
+    f.disc(hx, hy, 1.3, lambda dx, dy, q: '#ffffff')   # the bright head
+    return f
+
+def meteor_v2(t):
+    """A meteor: a small rock burning up in a planet's air (80 to 120 km up), seen from orbit over the planet's
+    edge. Fire only happens in an atmosphere (after the user's meteor photos, redrawn)."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=13)
+    for x in range(W):   # the planet's curved edge and its thin glowing air
+        limb = 32 + round(((x - 48) / 56) ** 2 * 18)   # the horizon arcs down at the sides
+        for y in range(limb, H):
+            f.put(x, y, '#2a4a7a' if y < limb + 3 else '#1a2a4a')
+        f.put(x, limb - 1, '#9fd8ff')
+        f.put(x, limb - 2, '#4a7fd6')
+    hx, hy = 78 - t * 52, 22 + t * 14
+    for k in range(1, 26):   # the burning trail fades behind the head
+        x, y = hx + k * 1.2, hy - k * 0.32
+        c = '#fff1b0' if k < 4 else '#ffd34d' if k < 9 else '#ff9a3c' if k < 16 else '#a8552e'
+        f.put(x, y, c)
+        if k < 10 and k % 2:
+            f.put(x, y + 1, '#ff9a3c')
+    f.disc(hx, hy, 1.6, lambda dx, dy, q: '#ffffff')
+    for k in range(4):   # sparks breaking off
+        f.put(hx + 4 + k * 3 + (t * 37 % 3), hy + 1 + (k % 2), '#ffd34d')
+    return f
+
+
+def hash01(x, y):
+    """A steady pseudo-random number in 0..1 for a pixel (scattered, but the same every frame)."""
+    v = math.sin(x * 12.9898 + y * 78.233) * 43758.5453
+    return v - math.floor(v)
+
+
+# Meteor colours come from what burns: green-blue (magnesium, nickel), yellow-orange (sodium), red (the air itself).
+METEOR_INK = ['#ffffff', '#d8ffe8', '#9ff0b8', '#ffe28a', '#ff9a3c', '#c44a3a']
+
+
+def meteor_streak(f, x0, y0, x1, y1, phase):
+    """One meteor's life over phase 0..1: it appears, streaks along a thin straight line (head white-green, the
+    trail cooling to yellow, orange, red), flares near the end, then leaves a faint glowing trail that fades."""
+    length = math.hypot(x1 - x0, y1 - y0)
+    if phase <= 0 or phase >= 1:
+        return
+    travel = min(1.0, phase / 0.6)                     # 60% of its life moving, then the fade
+    hx, hy = x0 + (x1 - x0) * travel, y0 + (y1 - y0) * travel
+    trail = length * 0.6
+    if phase < 0.6:
+        for k in range(int(trail)):   # a thin trail behind the head, cooling and thinning
+            q = k / trail
+            if q > 0.55 and k % 2:
+                continue
+            x, y = hx - (x1 - x0) / length * k, hy - (y1 - y0) / length * k
+            if math.hypot(x - x0, y - y0) > length * travel:
+                break
+            f.put(x, y, METEOR_INK[min(5, 1 + int(q * 5))])
+            if q < 0.25:
+                f.put(x, y + 1, METEOR_INK[2])   # thicker, brighter near the head
+        flare = 2.0 if travel > 0.8 else 1.3           # it flares as it breaks up
+        f.disc(hx, hy, flare, lambda dx, dy, q: '#ffffff' if q < 0.6 else '#d8ffe8')
+    else:   # the persistent train: a faint green line that fades away
+        fade = (phase - 0.6) / 0.4
+        for k in range(int(length)):
+            if (k + int(fade * 7)) % 3 or (k / length) < fade * 0.8:
+                continue
+            f.put(x0 + (x1 - x0) / length * k, y0 + (y1 - y0) / length * k, '#3f8a5a' if fade < 0.5 else '#244a3a')
+
+
+def meteor_v3a(t):
+    """From orbit, over the night side: city lights below, the thin green airglow layer (about 90 to 100 km up)
+    along the horizon, and a meteor burning through it, at the same height, 70 to 120 km."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=13)
+    for x in range(W):
+        limb = 30 + round(((x - 48) / 56) ** 2 * 18)   # the horizon arcs down at the sides
+        for y in range(limb, H):
+            f.put(x, y, '#0d1428')
+            if hash01(x, y) < 0.025 and y > limb + 3:
+                f.put(x, y, '#ffd34d' if hash01(y, x) < 0.6 else '#ff9a3c')   # city lights, scattered
+        f.put(x, limb - 1, '#1f6a4a')   # the airglow band
+        f.put(x, limb - 2, '#3fae6a')
+        if x % 3:
+            f.put(x, limb - 3, '#1f4a3a')
+    meteor_streak(f, 82, 22, 30, 27, (t - 0.15) / 0.8)   # through the airglow, at its height
+    return f
+
+
+def meteor_v3b(t):
+    """From the ground, as in photos of the Perseids: a dark sky with the faint Milky Way, a tree line, and a thin
+    straight streak that flashes across and fades."""
+    W, H = 96, 48
+    f = Frame(W, H, seed=21)
+    for y in range(H):   # a faint glow low on the horizon (towns far away), as in the Perseid photos
+        for x in range(W):
+            if y > 26 and hash01(x, y) < (y - 26) / 30:
+                f.put(x, y, '#1a2238' if y < 34 else '#2a2a30')
+    for y in range(H):   # the Milky Way: a soft diagonal band of faint glow and extra stars
+        for x in range(W):
+            d = abs(y - (6 + x * 0.3))
+            if d < 6 and hash01(x, y) < 0.18 * (1 - d / 6):
+                f.put(x, y, '#2a3360' if hash01(y, x) < 0.8 else '#5a6a9a')
+    for x in range(W):   # the tree line
+        top = 40 - round(5 * abs(math.sin(x * 0.7)) + 3 * abs(math.sin(x * 0.23)))
+        for y in range(top, H):
+            f.put(x, y, '#03050b')
+    meteor_streak(f, 84, 4, 34, 22, (t - 0.2) / 0.7)
+    return f
 
 # ---- comet and asteroid
 def comet(t):
@@ -337,6 +553,14 @@ def main():
     save_gif([aliens(k / 16) for k in range(16)], 'draft_aliens.gif', scale=5)
     save_gif([aliens(k / 16, sky=False) for k in range(16)], 'draft_aliens_2.gif', scale=5, transparent=True)
     save_gif([comet(k / 20) for k in range(20)], 'draft_comet.gif', ms=80)
+    save_gif([aliens(k / 24, space=True) for k in range(24)], 'draft_ufo_space_a.gif', scale=5)
+    save_gif([aliens(k / 24, space=True, rare=True) for k in range(24)], 'draft_ufo_space_b.gif', scale=5)
+    save_gif([asteroid_v2(k / 24) for k in range(24)], 'draft_asteroid_v2.gif', ms=110)
+    save_gif([comet_v2(k / 24) for k in range(24)], 'draft_comet_v2.gif', scale=5, ms=100)
+    save_gif([comet_v3(k / 24) for k in range(24)], 'draft_comet_v3.gif', scale=5, ms=100)
+    save_gif([meteor_v2(k / 20) for k in range(20)], 'draft_meteor_v2.gif', scale=5, ms=70)
+    save_gif([meteor_v3a(k / 24) for k in range(24)], 'draft_meteor_v3a.gif', scale=5, ms=80)
+    save_gif([meteor_v3b(k / 24) for k in range(24)], 'draft_meteor_v3b.gif', scale=5, ms=80)
     save_gif([asteroid(k / 20) for k in range(20)], 'draft_asteroid.gif', ms=90)
     save_gif([hail_mary(k / 16) for k in range(16)], 'draft_hail_mary.gif', scale=5)
 
