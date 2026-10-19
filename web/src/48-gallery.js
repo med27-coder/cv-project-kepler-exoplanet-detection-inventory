@@ -154,6 +154,8 @@ const ACHIEVEMENTS = [
   { g: 'SCIENCE', id: 'scale', title: 'MIND THE GAP', how: 'Switch a system to TRUE SCALE.' },
   { g: "STAR GAZER'S GUESSES", id: 'believer', title: 'BELIEVER', how: 'Open a candidate Star Gazer rates 90% likely or more.' },
   { g: "STAR GAZER'S GUESSES", id: 'skeptic', title: 'SKEPTIC', how: 'Open a candidate Star Gazer rates 10% or less.' },
+  { g: "STAR GAZER'S GUESSES", id: 'meet-star-gazer', title: 'MEET STAR GAZER', how: 'Search for the AI that scored every candidate on the map.' },
+  { g: "STAR GAZER'S GUESSES", id: 'meet-colossus', title: 'THE EXPERIMENT', how: "Search for Star Gazer's experimental rival, the giant-planet specialist." },
   { g: "STAR GAZER'S GUESSES", id: 'coin', title: 'COIN FLIP', how: "Open a candidate Star Gazer can't decide on (40 to 60%)." },
   { g: 'MAP AND TOOLS', id: 'depth', title: 'DEPTH PERCEPTION', how: 'Turn the map sideways with DEPTH.' },
   { g: 'MAP AND TOOLS', id: 'chips', title: 'CHIP CHECK', how: "Switch Kepler's camera chips (CCDS) off or on." },
@@ -216,7 +218,7 @@ const ACHIEVEMENTS = [
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
          'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet',
-         'tail-chaser', 'ufo-spotter', 'lunar-drivers'],
+         'tail-chaser', 'ufo-spotter', 'lunar-drivers', 'meet-colossus'],
   epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'meteor-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'rover-roster', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
          'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
@@ -253,7 +255,7 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                    backdrop: 'animated',   // page background (55-backdrop.js)
                    outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
-                   comets: 0, asteroids: 0, ufos: 0, meteors: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
+                   comets: 0, asteroids: 0, ufos: 0, meteors: 0, model: 'stargazer' };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -269,6 +271,7 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
     progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60).map(renamed)])].slice(-200);
   }
   if (typeof saved.toasts === 'boolean') progress.toasts = saved.toasts;
+  if (saved.model === 'colossus' || saved.model === 'stargazer') progress.model = saved.model;   // the case files' score switch
   if (typeof saved.seen === 'string' && /^[0-9a-z,]{0,80000}$/.test(saved.seen)) {   // TRUE STAR GAZER: Kepler IDs, base 36
     progress.seen = [...new Set([...progress.seen.split(','), ...saved.seen.split(',')].filter(Boolean))].join(',');
   }

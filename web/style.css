@@ -206,6 +206,11 @@ a { color: var(--accent); }
 .cases li { margin-bottom: 10px; }
 .pro { color: #6fe39a; }
 .con { color: #ff7a59; }
+/* The Star Gazer / Colossus score switch (48d-models.js) */
+.model-switch { margin: 0 0 10px; font-size: 13px; }
+.model-switch button.ghost { font-size: 9px; padding: 4px 8px; margin: 0 2px; }
+.model-switch button.ghost[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.tag-exp { font-size: 10px; color: #ff9a3c; border: 1px solid #ff9a3c; padding: 0 3px; letter-spacing: 1px; }
 button.linkish { background: none; border: none; box-shadow: none; padding: 0; color: var(--accent);
                  font: inherit; text-decoration: underline; cursor: pointer; letter-spacing: 0; }
 
@@ -409,7 +414,7 @@ canvas.icon { display: inline-block; width: 20px; height: 20px; background: tran
   dialog#gallery { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 10px; border-width: 0; }
   .tabs { flex-wrap: nowrap; overflow-x: auto; }
   .tabs [role="tab"] { flex: none; min-height: 40px; }
-  .chip, #highlights button, .call button { min-height: 36px; }
+  .chip, #highlights button, .call button, .model-switch button { min-height: 36px; }
   .egg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .holo { flex-direction: column; overflow-y: auto; }
 }

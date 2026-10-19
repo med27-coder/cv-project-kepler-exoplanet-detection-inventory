@@ -10,6 +10,7 @@ const ARTIFACT_LOG = {
   cartographer: 'People mapped the stars long before telescopes: star catalogues are more than 2,000 years old.',
   'mission-control': "Nineteen of humanity's spacecraft beyond Earth orbit are on this map.",
   'red-fleet': 'Mars has more working spacecraft around it and on it than any planet except Earth.',
+  'meet-colossus': 'Most giant candidates that turn out false are two stars eclipsing each other, not a planet.',
   'lunar-drivers': 'Lunokhod 1 drove on the Moon in 1970, a year after the first people walked there.',
   'rover-roster': 'Rovers have driven on two worlds besides Earth, the Moon and Mars, sent by three countries.',
   'jupiter-crew': "Jupiter has 95+ known moons; Europa may hold more water than all of Earth's oceans.",

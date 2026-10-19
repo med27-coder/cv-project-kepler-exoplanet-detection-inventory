@@ -5,6 +5,10 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.10', date: '18 Oct 2026', notes: [
+    'New: a second opinion on giant candidates. Their case files can switch to Colossus, an experimental AI made for giant planets, to compare with Star Gazer.',
+    'New: two more achievements for finding out about the AIs behind the map.',
+  ] },
   { v: '1.9.9', date: '18 Oct 2026', notes: [
     'New: two rovers hidden on the Moon, the first ever to drive on another world and the first on its far side, each with its own scene.',
     'New: meteors. A real-looking one now streaks across the night sky behind the page, and somewhere in orbit you can catch them.',

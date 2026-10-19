@@ -217,7 +217,7 @@ The **UNIVERSE** button zooms out in six sectors (◀ ▶ or the arrow keys): Ke
 
 **It's also a game.** The gear button opens the **Galleria**: 38 hidden easter eggs to find by name (each shows its
 pixel art next to the real NASA photo, with a slider that turns one into the other, plus fun facts and why it was
-hidden), 79 achievements with trophies by difficulty, set badges and a constellation per group, and a hologram
+hidden), 81 achievements with trophies by difficulty, set badges and a constellation per group, and a hologram
 close-up of every trophy. Some eggs open their own animated scenes (the rovers at work on Mars and the Moon, a farm on Mars, the
 dwarf planets), comets and asteroids cross the map to be caught, and a lost astronaut collects a wardrobe of rare
 outfits. Your achievements grow **your star** in the page header, from stardust to a black hole for the final

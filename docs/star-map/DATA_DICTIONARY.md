@@ -14,6 +14,7 @@ The files the Kepler Star Map loads from `web/data/`. All are generated; never e
 | `tags` | Bit values used in the `tags` column: `hz` 1, `earth` 2, `multi` 4, `giant` 8, `tess` 16, `unscored` 32, `twosuns` 64 (planets circling both stars of a binary) |
 | `chunks` | Number of details files (32) |
 | `spotlight` | Featured systems (quick-pick buttons, twinkling gold pixels) |
+| `aliases` | NASA's catalogue names (KIC, 2MASS, KOI numbers) of systems shown by their Kepler names: lower-case name -> shown name |
 | `leaderboard` | `top` and `hz`: the "next planets" lists (candidate, system, combined score, NASA and Star Gazer scores, radius) |
 | `stars` | One row per star with a CONFIRMED or CANDIDATE KOI |
 
@@ -60,6 +61,7 @@ Kepler found outside the KOI list; its star and planets come only from NASA's co
 | `ecc`, `w` | Orbital eccentricity; argument of periastron (degrees) |
 | `toi` | TESS Object of Interest that re-detected it (period within 1%) |
 | `sg`, `sg_planet` | Star Gazer probability; whether it is above the threshold |
+| `cg` | Giant candidates only: Colossus 2's probability (EXPERIMENTAL, not adopted; threshold 0.5), blended with Star Gazer between 6 and 10 Earth radii |
 | `nasa`, `snr`, `flags` | Candidates only: NASA's vetting score (`koi_score`), signal-to-noise, NASA false-positive flags |
 
 ## Other files

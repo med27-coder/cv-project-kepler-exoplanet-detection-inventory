@@ -1,0 +1,8 @@
+{
+  "scored": "2026-10-18",
+  "model": "Colossus 2 (V4b), not adopted: EXPERIMENTAL",
+  "registration": "docs/star-gazer/V4B_PREREGISTRATION.md",
+  "results": "docs/star-gazer/V4B_RESULTS.md",
+  "threshold": 0.5,
+  "n": 289
+}

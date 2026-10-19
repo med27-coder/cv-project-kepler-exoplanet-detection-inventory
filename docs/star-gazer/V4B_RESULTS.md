@@ -36,3 +36,14 @@ was also a second test on the same folds.
 To count, it must be registered first and judged on evidence these folds can't have shaped: cross-validation with a
 different fold seed, and above all the **prospective test** against NASA's future rulings
 (`web/data/resolutions.js`).
+
+## On the star map, as an experiment (18 October 2026)
+
+The user chose to show Colossus 2 on the star map **beside** Star Gazer, labelled EXPERIMENTAL, so visitors can
+compare. This changes nothing above and adopts nothing. `scripts/pipeline/colossus_score_candidates.py` repeats the
+registered recipe once on every labelled KOI (V3's inner train/validation split, Stage A, then Stage B on the giants;
+no setting changed, nothing measured) and scores the 1,976 unlabelled candidates, blending with V3 between 6 and 10
+Earth radii as registered. Of the 289 giant candidates it calls 33.2% planets at 0.5, where V3 at its threshold calls
+16.3%: the same high-running probabilities found above, and the site says so. Published scores (giants only):
+`results/v3_public/colossus_scores.csv`. The map's colours, the next-planets list and the predictions game keep using
+V3, the model of record.

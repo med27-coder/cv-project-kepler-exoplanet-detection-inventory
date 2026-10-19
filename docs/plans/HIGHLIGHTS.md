@@ -80,7 +80,8 @@ any disagreement before anything ships.
 1. The conservative (strict) habitable zone.
 2. Predictions get a **switch between Star Gazer and Colossus**, so visitors can compare the two models. Colossus is
    shown labelled as experimental (its registered tests: `docs/star-gazer/V4_RESULTS.md`, `V4B_RESULTS.md`), and new
-   achievements reward finding each model (searching "star gazer" and "colossus"). Still to confirm: predictions off
+   achievements reward finding each model (searching "star gazer" and "colossus"). **Built in v1.9.10** as a
+   switch in giant candidates' case files (MEET STAR GAZER, THE EXPERIMENT). Still to confirm: predictions off
    until switched on.
 3. The first set: rocky + habitable, hot Jupiters, ultra-short orbits, the radius valley.
 4. The grouped panel with a results list.

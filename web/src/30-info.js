@@ -78,6 +78,9 @@ function nasaLink(host) {
 function statusText(p) {
   if (p.note) return esc(p.note);
   if (p.status === 'other') return esc(p.method);
+  if (p.status === 'candidate' && p.cg != null && modelPick() === 'colossus') {   // the experimental switch (48d-models.js)
+    return `candidate · Colossus ${fmt(Math.round(p.cg * 100))}% ${p.cg >= COLOSSUS_THRESHOLD ? 'planet' : '(likely false positive)'} (experimental)`;
+  }
   if (p.status === 'candidate' && p.sg != null) {
     return `candidate · Star Gazer ${fmt(Math.round(p.sg * 100))}% ${p.sg_planet ? 'planet' : '(likely false positive)'}`;
   }
@@ -143,13 +146,13 @@ function caseFiles(detail, system = '') {
     if (p.toi) good.push(`seen again by TESS (${esc(p.toi)})`);
     if (p.snr != null && p.snr >= 20) good.push('strong, clear signal');
     return `
-      <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · Star Gazer ${pct(p.sg)}${
+      <li><b>${esc(p.name)}</b>: NASA vetting ${pct(p.nasa)} · ${modelScores(p, pct)}${
         p.snr != null ? ` · signal strength ${fmt(p.snr)}` : ''}
         <br>${good.length ? `<span class="pro">✔ ${good.join(' · ')}</span> ` : ''}${
         flags.length ? `<span class="con">✖ ${flags.map(esc).join(' · ')}</span>` : '<span class="pro">no red flags</span>'}${
         callMarkup(p, system)}</li>`;
   }).join('');
-  return `<h3 class="facts-title">CASE FILES</h3><ul class="facts cases">${items}</ul>`;
+  return `<h3 class="facts-title">CASE FILES</h3>${modelSwitchMarkup(detail)}<ul class="facts cases">${items}</ul>`;
 }
 
 function showSystem(s, detail) {
@@ -185,6 +188,12 @@ function showSystem(s, detail) {
       planet looks are a guess from size and temperature · Kepler ID ${esc(detail.kepid)}</p>`;
   wireSkyThumbs();
   wireCalls(info);
+  wireModelSwitch(info, () => {   // redraw the page with the other model's scores, keeping the view where it was
+    const { zoom, panX, panY } = sview;
+    showSystem(s, detail);
+    Object.assign(sview, { zoom, panX, panY });
+    layout();
+  });
   setScene(buildScene(detail));
 }
 
