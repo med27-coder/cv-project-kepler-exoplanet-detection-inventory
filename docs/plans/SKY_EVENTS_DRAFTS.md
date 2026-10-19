@@ -22,7 +22,7 @@ are not committed. The fiery-asteroid look is really a meteor's, so fire is draw
 | Draft | What it shows |
 |---|---|
 | `archive/.../draft_aliens_until-...gif` | The UFO after the user's reference, on a daytime sky (archived) |
-| `draft_aliens_2.gif` | The same with no background (transparent) |
+| `archive/.../draft_aliens_2_until-...gif` | The same with no background (transparent) (archived) |
 | `draft_ufo_space_a.gif` | The UFO travelling through space: a steady starfield drifting past, nothing flashing |
 | `draft_ufo_space_b.gif` | The rare version: an asteroid tumbles past behind the saucer (achievement **WHAT WAS THAT?**) |
 | `draft_asteroid_v2.gif` | An asteroid as it really looks, with a small moon |

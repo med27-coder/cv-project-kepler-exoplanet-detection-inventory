@@ -5,7 +5,7 @@ its pairing table: the achievement list is reorganised first, then every chapter
 exactly as many stars as it has achievements. Concept art: `pixel-art/concepts/` (`scripts/starmap/draft_concepts.py`);
 references: `pixel-art/references/concepts/`.
 
-![concepts](../../pixel-art/concepts/draft_aliens_2.gif)
+![concepts](../../pixel-art/archive/concepts/draft_aliens_2_until-2026-10-18_3c514a8.gif)
 
 ## 1. New easter eggs
 
@@ -26,7 +26,7 @@ using the star positions from the constellation data.
 
 ### C. "What the alien doing" (secret)
 Two green aliens in a flying saucer: one driving, one throwing a ✌, the saucer bobbing, rim lights chasing,
-a tractor beam flickering (concept: `draft_aliens_2.gif`). Found by searching **aliens, ufo, flying saucer,
+a tractor beam flickering (concept, archived: `pixel-art/archive/concepts/draft_aliens_2_until-2026-10-18_3c514a8.gif`). Found by searching **aliens, ufo, flying saucer,
 little green men, what the alien doing**, or by clicking the saucer when it (rarely) zooms across the map.
 
 ### D. Sky events: comets, asteroids, the odd UFO

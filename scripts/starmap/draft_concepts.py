@@ -626,7 +626,6 @@ def main():
     # Drafts not used any more live in pixel-art/archive/ (the code that drew them stays above, for history).
     save_gif([lost_in_orbit(k / 20) for k in range(20)], 'draft_lost_in_orbit.gif', scale=5)
     save_gif([background(k / 12) for k in range(12)], 'draft_background.gif', scale=3, ms=140)
-    save_gif([aliens(k / 16, sky=False) for k in range(16)], 'draft_aliens_2.gif', scale=5, transparent=True)
     save_gif([aliens(k / 24, space=True) for k in range(24)], 'draft_ufo_space_a.gif', scale=5)
     save_gif([aliens(k / 24, space=True, rare=True) for k in range(24)], 'draft_ufo_space_b.gif', scale=5)
     save_gif([asteroid_v2(k / 24) for k in range(24)], 'draft_asteroid_v2.gif', ms=110)
