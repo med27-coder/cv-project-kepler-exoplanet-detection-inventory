@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------- the site's version
 // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
 // stylesheet links, and tests check it matches the top of CHANGELOG.md. Versions count up in the last number, one step per release
-// (1.9.1, 1.9.2, 1.9.3...), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
+// (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
-  { v: '1.9.10', date: '18 Oct 2026', notes: [
+  { v: '1.9.9.1', date: '18 Oct 2026', notes: [
     'New: a second opinion on giant candidates. Their case files can switch to Colossus, an experimental AI made for giant planets, to compare with Star Gazer.',
     'New: two more achievements for finding out about the AIs behind the map.',
   ] },

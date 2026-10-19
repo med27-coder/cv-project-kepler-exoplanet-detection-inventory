@@ -86,7 +86,8 @@ patches, write a script file (scratchpad) and run it, or use the Edit tool.
   sets the version; 1 to 3 player-facing notes starting "New:" or "Fixed:", no spoilers, no security details; the
   antenna announces it and lists every version in its UPDATES tab), add the CHANGELOG entry, run `build_web.py`
   (stamps `?v=` on index.html's links), push, then `git tag vX.Y.Z` + `gh release create vX.Y.Z`. **Versions count up
-  one step in the last number per release (1.9.1, 1.9.2, 1.9.3...) so players read them in order; never 2.0.**
+  one step in the last number per release (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...) so
+  players read them in order; never 1.9.10 or 2.0.**
 - Docs are grouped: `docs/star-gazer/` (the model: audit, analysis, V4 pre-registrations and results),
   `docs/star-map/` (the site: data dictionary, easter eggs, game design, roadmap).
 - Plans for upcoming features live in `docs/plans/` (`docs/plans/README.md` is the planner); some are kept on
