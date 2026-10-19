@@ -76,12 +76,12 @@
 
   function find(query) {
     const q = query.trim().toLowerCase().replace(/\s+/g, ' ');
-    let m;
-    if ((m = q.match(/^kepler[\s-]*(\d+)(?:\s*[a-z])?$/))) return byName.get('kepler-' + Number(m[1]));
-    if ((m = q.match(/^koi[\s-]*(\d+)(?:\.\d+)?$/))) return byKoi.get(Number(m[1]));
+    let m, s;
+    if ((m = q.match(/^kepler[\s-]*(\d+)(?:\s*[a-z])?$/)) && (s = byName.get('kepler-' + Number(m[1])) || byName.get(`kepler-${Number(m[1])} ab`))) return s;
+    if ((m = q.match(/^koi[\s-]*(\d+)(?:\.\d+)?$/)) && (s = byKoi.get(Number(m[1])))) return s;
     if ((m = q.match(/^k0*(\d+)\.\d{2}$/))) return byKoi.get(Number(m[1]));
     if ((m = q.match(/^(?:kic|kepid)?[\s-]*(\d{5,9})$/))) return byKepid.get(Number(m[1]));
-    return byName.get(q);
+    return byName.get(q) || byName.get((DATA.aliases || {})[q]?.toLowerCase());   // NASA's other names (export_starmap.py)
   }
 
   // ---------------------------------------------------------------- colours
@@ -121,6 +121,11 @@
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.9', date: '18 Oct 2026', notes: [
+      'New: two rovers hidden on the Moon, the first ever to drive on another world and the first on its far side, each with its own scene.',
+      'New: meteors. A real-looking one now streaks across the night sky behind the page, and somewhere in orbit you can catch them.',
+      'Fixed: a few systems Kepler found outside its usual list now show their Kepler names (one appeared as "2MASS J19383260+4603591"), all their planets, and what makes them unusual.',
+    ] },
     { v: '1.9.8', date: '18 Oct 2026', notes: [
       'New: another rover to find on Mars, the first one from outside the United States, with its own scene.',
     ] },
@@ -1298,6 +1303,7 @@
     rememberView();
   };
   sys.addEventListener('pointerup', endSysDrag);
+  sys.addEventListener('click', e => { if (scene?.onTap?.(...sysPoint(e))) wake(); });   // things to catch in a scene (the ISS's meteors)
   sys.addEventListener('pointerleave', () => { if (scene) scene.hover = null; });
   sys.addEventListener('pointercancel', endSysDrag);
   sys.addEventListener('dblclick', fitAll);
@@ -1495,13 +1501,19 @@
         candidates (KOIs), in the light of stars that eclipse each other. The second star in the drawing is
         illustrative.</p>`
       : detail.extra ? `<p class="callout">Found by Kepler outside its usual list of candidates (KOIs), by ${esc(methods || 'other means')}.</p>` : '';
+    const timing = methods.includes('eclipse timing') ? `<p class="callout">⏱ <b>Found by eclipse timing.</b> No planet was
+        seen crossing a star here: as the planets tug the two stars back and forth, their eclipses come a few seconds early
+        or late, and the pattern gives the planets away. Planets found this way are drawn as diamonds (◆).</p>` : '';
+    const subdwarf = (detail.teff ?? 0) >= 20000 && (detail.srad ?? 1) < 0.5 ? `<p class="callout">✦ <b>A hot subdwarf.</b>
+        This star is the bare, glowing core of an old star that lost its outer layers: about ${esc(fmt(Math.round(detail.teff / 100) * 100))} K,
+        ${esc(String(Math.round(detail.teff / 5772)))} times hotter than the Sun, yet only ${esc(String(detail.srad))} times its size.</p>` : '';
     const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
     info.innerHTML = `
       <div class="head">${skyThumb(detail.ra, detail.dec, s[COL.name])}<div>
         <p>Star: ${starLine(detail)}</p>
         <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
       </div></div>
-      ${origin}
+      ${origin}${subdwarf}${timing}
       ${planetTable(detail)}
       ${caseFiles(detail, s[COL.name])}
       <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
@@ -2114,11 +2126,108 @@
     orbit(true);
     if (behind && !hidden) station(ix, iy);
     solarPlanet(sctx, cx, cy, { art: 'earth', size: EARTH_R_PX, seed: 'iss', noMoon: true }, -0.9, -0.3, t * 0.4);
+    drawIssMeteor(cx, cy, t);
     orbit(false);
     if (!behind) station(ix, iy);
     if (!hidden) pixelText(sctx, 'ISS', Math.round(ix) + 7, Math.round(iy) - 8, '#ffd34d');
     drawCraftInset([{ name: 'ISS', key: 'iss', label: 'THE STATION' }], 'ISS', seconds);
     pixelText(sctx, 'ORBIT 92 MIN', 4, SH - 9, '#5a6a8a');
+  }
+
+  // Meteors seen from orbit (docs/plans/SKY_EVENTS_DRAFTS.md, version A): over the night side, the thin green airglow
+  // (oxygen glowing 90-100 km up) hugs the edge of the Earth, and now and then a meteor burns through it, 80-120 km up:
+  // a green-white head (magnesium, nickel), a trail cooling to yellow (sodium) and red (the air itself), a last flare,
+  // and a green train that lingers. Click one while it burns to catch it: METEOR CATCHER at ten.
+  const METEOR_S = 1.6, METEOR_GAP = [20, 45];   // seconds burning; seconds between meteors
+  let issMeteor = null, issMeteorNext = 8, issMeteorBurst = null, issClock = 0;
+  function issMeteorHead(m) {   // where the head is now, along its short path skimming the limb
+    const f = Math.min(1, m.age / METEOR_S), a = m.phi + m.dir * 0.3 * f, r = EARTH_R_PX + 3 - 1.5 * f;
+    return [m.cx + r * Math.cos(a), m.cy + r * Math.sin(a) * 0.98, a, r];
+  }
+  function drawIssMeteor(cx, cy, t) {
+    const dt = Math.min(0.25, Math.max(0, t - issClock));
+    issClock = t;
+    // the night side: the Sun lights the Earth from the upper left, so the far right is in darkness
+    const L = [-0.9, -0.3, 0.45], ln = Math.hypot(...L);
+    for (let dy = -EARTH_R_PX; dy <= EARTH_R_PX; dy++) {
+      for (let dx = -EARTH_R_PX; dx <= EARTH_R_PX; dx++) {
+        const q = (dx * dx + dy * dy) / (EARTH_R_PX * EARTH_R_PX);
+        if (q > 1) continue;
+        const d = (dx * L[0] + dy * L[1] + Math.sqrt(1 - q) * EARTH_R_PX * L[2]) / (EARTH_R_PX * ln);
+        if (d > 0.12) continue;
+        sctx.fillStyle = d < -0.05 ? 'rgba(4, 7, 22, 0.62)' : 'rgba(4, 7, 22, 0.3)';   // a soft terminator
+        sctx.fillRect(cx + dx, cy + dy, 1, 1);
+      }
+    }
+    // the airglow: a faint green rim over the night side
+    for (let a = -1.25; a <= 1.25; a += 0.03) {
+      if (hash(`ag${Math.round(a * 33)}`) < 0.25) continue;
+      sctx.fillStyle = Math.abs(a) < 0.8 ? '#2f8a5a' : '#1f5a40';
+      sctx.fillRect(Math.round(cx + (EARTH_R_PX + 1) * Math.cos(a + 0.3)), Math.round(cy + (EARTH_R_PX + 1) * Math.sin(a + 0.3)), 1, 1);
+    }
+    if (REDUCED_MOTION) return;
+    if (!issMeteor && t >= issMeteorNext) {
+      issMeteor = { cx, cy, age: 0, phi: 0.3 + (Math.random() - 0.5) * 1.6, dir: Math.random() < 0.5 ? -1 : 1 };
+      issMeteorNext = t + METEOR_S + METEOR_GAP[0] + Math.random() * (METEOR_GAP[1] - METEOR_GAP[0]);
+    }
+    if (issMeteor) {
+      const m = issMeteor;
+      m.age += dt;
+      const fade = Math.max(0, (m.age - METEOR_S) / 1.4);   // the train lingers after the meteor is gone
+      if (fade >= 1) issMeteor = null;
+      else {
+        const [hx, hy, a] = issMeteorHead(m), trail = Math.min(10, 3 + m.age * 7);
+        const back = [-Math.sin(a) * m.dir, Math.cos(a) * m.dir * 0.98];   // the way it came, along the limb
+        for (let k = 1; k <= 9; k++) {   // the train: faint green where it has been
+          if (fade > k / 9) continue;
+          sctx.fillStyle = k % 2 ? '#2f8a5a' : '#3fbf7a';
+          sctx.fillRect(Math.round(hx + back[0] * (trail + k)), Math.round(hy + back[1] * (trail + k)), 1, 1);
+        }
+        if (m.age < METEOR_S) {
+          const ink = ['#eafff2', '#9dffc4', '#ffe27a', '#ffd34d', '#ff9a3c', '#e0602f', '#a83a22'];
+          for (let k = 0; k < trail; k++) {
+            sctx.fillStyle = ink[Math.min(ink.length - 1, Math.floor(k * ink.length / trail))];
+            sctx.fillRect(Math.round(hx + back[0] * k), Math.round(hy + back[1] * k), 1, 1);
+          }
+          sctx.fillStyle = '#eafff2'; sctx.fillRect(Math.round(hx), Math.round(hy), 2, 2);   // the bright head
+          if (m.age > METEOR_S * 0.7) {   // the flare as it breaks up
+            sctx.fillStyle = '#ffffff';
+            sctx.fillRect(Math.round(hx) - 1, Math.round(hy), 3, 1); sctx.fillRect(Math.round(hx), Math.round(hy) - 1, 1, 3);
+          }
+        }
+      }
+    }
+    if (issMeteorBurst) {   // the catch: a sparkle and the running count
+      const b = issMeteorBurst;
+      b.age += dt;
+      if (b.age > 2) issMeteorBurst = null;
+      else {
+        sctx.fillStyle = b.age % 0.3 < 0.15 ? '#ffffff' : '#9dffc4';
+        for (const [dx, dy] of [[0, -3], [0, 3], [-3, 0], [3, 0], [-2, -2], [2, 2], [2, -2], [-2, 2]]) sctx.fillRect(Math.round(b.x + dx * (1 + b.age)), Math.round(b.y + dy * (1 + b.age)), 1, 1);
+        const label = `METEOR ${b.n}`;
+        pixelText(sctx, label, Math.min(SW - textWidth(label) - 2, Math.round(b.x) + 6), Math.round(b.y) - 10, '#9dffc4');
+      }
+    }
+  }
+  function catchIssMeteor(px, py) {   // a generous target: it is small and quick
+    if (!issMeteor || issMeteor.age >= METEOR_S) return false;
+    const [hx, hy] = issMeteorHead(issMeteor);
+    if (Math.hypot(px - hx, py - hy) > 9) return false;
+    issMeteor = null;
+    progress.meteors += 1;
+    saveProgress();
+    issMeteorBurst = { x: hx, y: hy, age: 0, n: progress.meteors };
+    achieve('shooting-star');
+    if (progress.meteors >= 10) achieve('meteor-catcher');
+    return true;
+  }
+  // Browser tests can light a meteor at once (only under automation: no achievements for free).
+  if (navigator.webdriver) {
+    window.__issMeteor = () => {   // returns where its head is, in scene pixels
+      issMeteor = { cx: CX, cy: Math.round(SH / 2), age: 0.5, phi: 0.3, dir: 1 };
+      issMeteorNext = Infinity;
+      return issMeteorHead(issMeteor).slice(0, 2);
+    };
   }
 
   function showISS(updateHash = true) {
@@ -2135,13 +2244,17 @@
         <li>Circles Earth about every <b>90 minutes</b>, <b>16 times a day</b>, at about five miles (8 km) per second.</li>
         <li><b>109 m</b> end to end (about a football field) and about <b>420 tonnes</b>.</li>
         <li>You can see it with your own eyes: it's the brightest moving "star" after sunset or before dawn.</li>
+        <li>Astronauts see meteors from above: watch the night side, where a thin green airglow hugs the Earth, and
+          click a meteor while it burns to catch it.</li>
       </ul>
       <p>${['https://www.nasa.gov/international-space-station/|NASA: the space station',
             'https://spotthestation.nasa.gov/|NASA Spot the Station: when it passes over you']
         .map(s => s.split('|')).map(([u, t]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join(' · ')}</p>
       <p class="note">Sources: NASA space station facts and figures · the orbit shown is illustrative, not the
         live position · you found an easter egg!</p>`;
-    setScene({ custom: drawISS });
+    issMeteor = null;
+    issMeteorNext = performance.now() / 1000 + 5 + Math.random() * 10;   // the first one soon after you arrive
+    setScene({ custom: drawISS, onTap: catchIssMeteor });
     document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
     if (updateHash) history.replaceState(null, '', '#ISS');
   }
@@ -2399,6 +2512,31 @@
       '.....mmmmmmmmmmm.....',
       '....xx...xx...xx.....',
       '....xm...xm...xm.....',
+    ],
+    lunokhod: [   // Lunokhod 1: the tub on eight wire wheels, its lid swung open showing the solar cells, the spike antenna
+      'Pp................w.',
+      '.pP.......lw......l.',
+      '..pP......l.......l.',
+      '...pPsssssssssssssss',
+      '....lllllllllllllkl.',
+      '.....mmmmmmmmmmmk...',
+      '...ddddddddddddddd..',
+      '...xx..xx..xx..xx...',
+      '...xl..xl..xl..xl...',
+    ],
+    yutu2: [   // Yutu-2: a gold box on six wheels, one solar wing out to the side, one tilted up, the camera mast
+      '............lwl....',
+      '.............m.....',
+      '.............m.....',
+      '..........P..m.....',
+      '........Pp...m.....',
+      '......Pp.....m.....',
+      'PpPpPpyyyyyyyyyy...',
+      '......gggggggggg...',
+      '......GGGGGGGGGG...',
+      '.....mmmmmmmmmmmm..',
+      '.....xx...xx...xx..',
+      '.....xm...xm...xm..',
     ],
     spirit: [   // a Mars Exploration Rover: the wide flat solar deck, the camera mast, six wheels
       '..........lwl......',
@@ -3194,11 +3332,14 @@
   // Perseverance by the old river delta in Jezero Crater, leaving sample tubes on the ground while the Ingenuity
   // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
   // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
+  // The Moon's rovers (Lunokhod 1, Yutu-2) live in 47h-moon.js and use the same page.
   // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy|zhurong|tianwen 1|tianwen)( rover)?$/i;
+  const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy|zhurong|tianwen 1|tianwen|lunokhod 1|lunokhod|luna 17|yutu 2|yutu2|jade rabbit 2)( rover)?$/i;
   const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
                      'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity',
-                     zhurong: 'zhurong', 'tianwen 1': 'zhurong', tianwen: 'zhurong' };
+                     zhurong: 'zhurong', 'tianwen 1': 'zhurong', tianwen: 'zhurong',
+                     'lunokhod 1': 'lunokhod', lunokhod: 'lunokhod', 'luna 17': 'lunokhod',   // the Moon (47h-moon.js)
+                     'yutu 2': 'yutu2', yutu2: 'yutu2', 'jade rabbit 2': 'yutu2' };
   const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
   const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
@@ -3609,9 +3750,9 @@
       <p>${esc(r.intro)}</p>
       <h3 class="facts-title">THE REAL ROVER</h3>
       <ul class="facts">${r.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
-      <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.linkLabel || `NASA: the ${r.title.toLowerCase()} mission`)} ↗</a> ·
-         <a href="#mars-rovers">where the rovers are on Mars and in the Solar System</a></p>
-      <p class="note">The drawing is pixel art, sped up; the scenery follows NASA's photos · you found an easter egg!</p>`;
+      <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.linkLabel || `NASA: the ${r.title.toLowerCase()} mission`)} ↗</a>${r.moon ? '' : ` ·
+         <a href="#mars-rovers">where the rovers are on Mars and in the Solar System</a>`}</p>
+      <p class="note">The drawing is pixel art, sped up; the scenery follows ${r.moon ? 'photos from the mission' : "NASA's photos"} · you found an easter egg!</p>`;
     setScene({ custom: seconds => {
       sctx.imageSmoothingEnabled = false;
       r.draw(sctx, SW, SH, REDUCED_MOTION ? 0 : seconds);
@@ -3784,6 +3925,198 @@
     if (updateHash) history.replaceState(null, '', '#tau-ceti');
   }
 
+  // ---------------------------------------------------------------- easter eggs: the rovers on the Moon
+  // Searching "lunokhod" opens Lunokhod 1 (USSR, 1970), the first rover on another world, rolling down the ramps of its
+  // Luna 17 lander on Mare Imbrium under a half-lit Earth, and closing its solar lid for the two-week lunar night.
+  // "yutu 2" opens Yutu-2 (China, 2019), the first rover on the Moon's far side, beside the Chang'e 4 lander in Von
+  // Karman crater, where Earth never rises and the Queqiao relay satellite carries every word home. They share the
+  // rover machinery of 47e-rovers.js (ROVER_QUERY sends them here, showRover shows them).
+
+  // No air on the Moon: a black sky, a sharp horizon, grey dust with small craters lit from one side.
+  function moonGround(ctx, w, h, horizon, seed) {
+    ctx.fillStyle = '#8a8a8a';
+    ctx.fillRect(0, horizon, w, h - horizon);
+    ctx.fillStyle = '#7d7d7d';
+    for (let y = horizon + 3; y < h; y += 7) ctx.fillRect(0, y, w, 1);   // faint bands of dust, closer together far away
+    for (let k = 0; k < 14; k++) {   // craters: a shadowed far rim, a bright near rim
+      const cx = Math.floor(hash(`${seed}c${k}`) * w), cy = horizon + 5 + Math.floor(hash(`${seed}d${k}`) * (h - horizon - 30));
+      const r = 2 + Math.floor(hash(`${seed}e${k}`) * 4) * (cy > horizon + 20 ? 2 : 1);
+      ctx.fillStyle = '#6c6c6c'; ctx.fillRect(cx - r, cy, 2 * r, 1); ctx.fillRect(cx - r + 1, cy + 1, 2 * r - 2, 1);
+      ctx.fillStyle = '#b4b4b4'; ctx.fillRect(cx - r + 1, cy + 2, 2 * r - 2, 1);
+    }
+    for (let k = 0; k < 70; k++) {   // pebbles
+      ctx.fillStyle = k % 3 ? '#a2a2a2' : '#5e5e5e';
+      ctx.fillRect(Math.floor(hash(`${seed}p${k}`) * w), horizon + 2 + Math.floor(hash(`${seed}q${k}`) * (h - horizon - 2)), k % 4 ? 1 : 2, 1);
+    }
+  }
+  function moonStars(ctx, w, horizon, seed, bright) {
+    for (let k = 0; k < (bright ? 60 : 18); k++) {
+      ctx.fillStyle = k % 5 ? '#8a90a8' : '#e8ecff';
+      ctx.fillRect(Math.floor(hash(`${seed}s${k}`) * w), Math.floor(hash(`${seed}t${k}`) * (horizon - 4)), 1, 1);
+    }
+  }
+  // Night falls for about 14 Earth days at a time: dim the ground, then the sky and Earth are drawn on top.
+  const moonNight = (ctx, w, h, a) => { if (a > 0) { ctx.fillStyle = `rgba(4, 6, 16, ${0.72 * a})`; ctx.fillRect(0, 0, w, h); } };
+  // Where a scene is in its lunar day: 0..1 for night (0 day, 1 deepest night) through dusk and dawn.
+  function lunarDark(c, dusk, night, dawn) {
+    if (c < dusk) return 0;
+    if (c < night) return (c - dusk) / (night - dusk);
+    if (c < dawn) return 1;
+    return Math.max(0, 1 - (c - dawn) / 2);
+  }
+
+  // Lunokhod 1, facing right, wheels on the ground at (x, y): a pressurised "bathtub" on eight wire-mesh wheels, a lid
+  // with solar cells on its inside (open: 0 closed .. 1 swung up and back), a spike antenna and two TV eyes in front.
+  function drawLunokhod(ctx, x, y, s, t, moving, open) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    const bob = k => (moving && !REDUCED_MOTION ? Math.round(Math.sin(t * 6 + k * 1.7) * 0.5) : 0);
+    for (const [k, wx] of [[0, -10], [1, -5], [2, 0], [3, 5]]) {   // four wheels this side, four behind
+      put(wx, -3 + bob(k), 4, 3, '#3a3a40');
+      put(wx + 1, -3 + bob(k), 2, 1, '#9aa0aa'); put(wx + 1, -1 + bob(k), 2, 1, '#9aa0aa'); put(wx + 1, -2 + bob(k), 1, 1, '#c8ccd4');
+    }
+    put(-11, -4, 21, 1, '#8a8f9a');                                       // the frame
+    put(-10, -9, 19, 2, '#d8d2bc'); put(-9, -7, 17, 2, '#b0aa92'); put(-8, -5, 15, 1, '#8f8b78');   // the tub, wider at the top
+    put(-10, -9, 19, 1, '#ece6d0');
+    put(8, -8, 1, 1, '#151a2c'); put(8, -6, 1, 1, '#151a2c');              // the TV cameras
+    put(6, -14, 1, 5, '#b8bfcc'); put(6, -15, 1, 1, '#eef2f8');           // the spike antenna
+    put(-3, -11, 3, 2, '#c4c8d0'); put(-2, -12, 1, 1, '#eef2f8');          // the cone of the dish antenna
+    const th = open * 1.95;                                                 // the lid, hinged at the back of the tub
+    for (let k = 0; k < 17; k++) {   // a round panel seen edge-on: three pixels thick, cells on the sunny inside
+      const dx = -10 + k * Math.cos(th), dy = -10 - k * Math.sin(th);
+      const nx = -Math.sin(th), ny = -Math.cos(th);                         // across the lid, toward its outside
+      put(dx, dy, 1, 1, open > 0.15 ? (k % 3 ? '#2f4fae' : '#5d7bd6') : '#c4beb3');
+      if (k > 0 && k < 16) { put(dx + nx, dy + ny, 1, 1, open > 0.15 ? '#1e2f6e' : '#a8a490'); put(dx + 2 * nx, dy + 2 * ny, 1, 1, '#c4beb3'); }
+    }
+  }
+
+  // Luna 17, the lander that carried it: round fuel tanks on four legs, with a ramp down each side.
+  function drawLuna17(ctx, x, y, s = 2) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    put(-9, -8, 18, 3, '#8a8f9a'); put(-9, -8, 18, 1, '#b8bfcc');          // the deck the rover sat on
+    for (const tx of [-8, -3, 2]) { put(tx, -5, 5, 4, '#c8ccd4'); put(tx, -5, 2, 1, '#eef2f8'); put(tx + 1, -2, 4, 1, '#8a8f9a'); }   // tanks
+    for (const lx of [-10, 9]) put(lx, -5, 1, 5, '#7d8596');               // legs
+    put(-12, 0, 3, 1, '#7d8596'); put(9, 0, 3, 1, '#7d8596');
+    for (let k = 0; k < 8; k++) put(9 + k, -8 + k, 1, 1, '#b8bfcc');       // the ramp it rolled down
+  }
+
+  function drawLunokhodScene(ctx, w, h, t) {
+    const horizon = Math.round(h * 0.5);
+    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h);
+    const c = REDUCED_MOTION ? 8 : t % 32, dark = REDUCED_MOTION ? 0 : lunarDark(c, 20, 23, 29);
+    for (let x = 0; x < w; x++) {   // the low far rim of Mare Imbrium
+      const top = horizon - 1 - Math.round(2.5 * hash(`imb${x >> 4}`) + Math.sin(x / 13));
+      ctx.fillStyle = '#6e6e6e'; ctx.fillRect(x, top, 1, horizon - top);
+    }
+    moonGround(ctx, w, h, horizon, 'imbrium');
+    const ground = h - 26, lx = Math.round(w * 0.2);
+    drawLuna17(ctx, lx, ground);
+    // down the ramp, a drive across the mare, a stop to look around, then the lid shuts for the night and opens at dawn
+    const x0 = lx + 36, x1 = Math.round(w * 0.72);
+    const x = c < 14 ? x0 + (x1 - x0) * (c / 14) : x1;
+    for (let tx = x0 - 6; tx < x - 22; tx += 3) { ctx.fillStyle = '#6a6a6a'; ctx.fillRect(tx, ground - 1, 2, 1); }   // wheel tracks
+    const open = c < 20 ? 1 : c < 22 ? 1 - (c - 20) / 2 : c < 28 ? 0 : Math.min(1, (c - 28) / 2);
+    drawLunokhod(ctx, x, ground, 2, t, c < 14, REDUCED_MOTION ? 1 : open);
+    moonNight(ctx, w, h, dark);
+    moonStars(ctx, w, horizon, 'imb', dark > 0.5);
+    // the Earth, half lit, high over the near side (it hangs in the same place in the Moon's sky)
+    const ex = Math.round(w * 0.8), ey = Math.round(h * 0.14), er = 9;
+    for (let dy = -er; dy <= er; dy++) {
+      for (let dx = -er; dx <= er; dx++) {
+        if (dx * dx + dy * dy > er * er) continue;
+        const lit = dx < 2;
+        ctx.fillStyle = !lit ? '#0d1d40' : hash(`ea${dx >> 1}${dy >> 1}`) < 0.32 ? '#f2f4f8' : hash(`eb${dx >> 2}${dy >> 2}`) < 0.3 ? '#5f8f4a' : '#2f6fd6';
+        ctx.fillRect(ex + dx, ey + dy, 1, 1);
+      }
+    }
+    pixelText(ctx, 'MARE IMBRIUM', 4, h - 10, '#e8ecff');
+    const day = `LUNAR DAY ${1 + (Math.floor((REDUCED_MOTION ? 0 : t) / 32) % 11)}`;
+    pixelText(ctx, dark > 0.5 ? 'LUNAR NIGHT' : day, w - textWidth(dark > 0.5 ? 'LUNAR NIGHT' : day) - 4, h - 10, '#e8ecff');
+    pixelText(ctx, 'LUNA 17', lx - 13, ground - 30, '#e8ecff');
+  }
+
+  // Yutu-2, facing right: a small gold box on six wheels, one solar wing out to the side, one hinged on top, and a mast
+  // with its cameras. asleep 0..1 folds the top wing over the body and lowers the mast, as it does every lunar night.
+  function drawYutu2(ctx, x, y, s, t, moving, asleep) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    const bob = k => (moving && !REDUCED_MOTION ? Math.round(Math.sin(t * 7 + k * 2) * 0.5) : 0);
+    for (const [k, wx] of [[0, -7], [1, -2], [2, 3]]) { put(wx, -3 + bob(k), 3, 3, '#2a2a30'); put(wx + 1, -2 + bob(k), 1, 1, '#8a8f9a'); }
+    put(-7, -4, 14, 1, '#8a8f9a');                                          // the rocker legs
+    put(-6, -8, 12, 4, '#d9a441'); put(-6, -5, 12, 1, '#9c6b22'); put(-6, -8, 12, 1, '#f3d27a');   // the gold-foil body
+    put(-13, -8, 7, 1, '#2f4fae'); put(-13, -9, 2, 1, '#5d7bd6');           // the wing out to the side
+    const th = 1.1 * (1 - asleep);                                          // the top wing tilts up to the Sun by day
+    for (let k = 0; k < 10; k++) put(-5 + k * Math.cos(th), -9 - k * Math.sin(th), 1, 1, k % 3 ? '#2f4fae' : '#5d7bd6');
+    const mast = Math.round(7 * (1 - asleep));                              // the mast folds down at night
+    put(4, -9 - mast, 1, mast, '#b8bfcc');
+    put(2, -11 - mast, 5, 2, '#eef2f8'); put(5, -10 - mast, 1, 1, '#151a2c');
+  }
+
+  // The Chang'e 4 lander: a gold box on four legs with its two solar wings, and the ramp Yutu-2 drove down.
+  function drawChange4(ctx, x, y, s = 2) {
+    const put = (dx, dy, w, h, col) => { ctx.fillStyle = col; ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), w * s, h * s); };
+    put(-7, -11, 14, 6, '#d9a441'); put(-7, -6, 14, 1, '#9c6b22'); put(-7, -11, 14, 1, '#f3d27a');
+    put(-15, -10, 8, 2, '#2f4fae'); put(7, -10, 8, 2, '#2f4fae'); put(-15, -10, 8, 1, '#5d7bd6'); put(7, -10, 8, 1, '#5d7bd6');
+    for (const lx of [-8, 7]) { put(lx, -5, 1, 5, '#b8bfcc'); put(lx - 1, 0, 3, 1, '#8a8f9a'); }
+    put(-1, -14, 1, 3, '#b8bfcc'); put(-3, -15, 5, 1, '#eef2f8');           // its antenna
+    for (let k = 0; k < 8; k++) put(8 + k, -5 + Math.round(k * 0.6), 2, 1, '#8a8f9a');   // the ramp
+  }
+
+  function drawYutu2Scene(ctx, w, h, t) {
+    const horizon = Math.round(h * 0.48);
+    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h);
+    const c = REDUCED_MOTION ? 8 : t % 30, dark = REDUCED_MOTION ? 0 : lunarDark(c, 18, 21, 27);
+    for (let x = 0; x < w; x++) {   // the far wall of Von Karman crater
+      const top = horizon - 3 - Math.round(4 * Math.max(0, Math.sin(x / 38 + 0.6)) + 1.5 * hash(`vk${x >> 3}`));
+      ctx.fillStyle = '#6a6a6a'; ctx.fillRect(x, top, 1, horizon - top);
+    }
+    moonGround(ctx, w, h, horizon, 'karman');
+    const ground = h - 26, lx = Math.round(w * 0.2);
+    drawChange4(ctx, lx, ground);
+    const x0 = lx + 40, x1 = Math.round(w * 0.74);
+    const x = c < 12 ? x0 + (x1 - x0) * (c / 12) : x1;
+    for (let tx = x0 - 4; tx < x - 14; tx += 2) { ctx.fillStyle = '#6a6a6a'; ctx.fillRect(tx, ground - 1, 1, 1); }
+    const asleep = REDUCED_MOTION ? 0 : c < 17 ? 0 : c < 19 ? (c - 17) / 2 : c < 26 ? 1 : Math.max(0, 1 - (c - 26) / 2);
+    drawYutu2(ctx, x, ground, 2, t, c < 12, asleep);
+    moonNight(ctx, w, h, dark);
+    moonStars(ctx, w, horizon, 'vk', true);   // no Earth in this sky, ever: the far side always faces away
+    // Queqiao, the relay satellite circling beyond the Moon, drifts across and blinks when it passes words along
+    const qx = Math.round(((REDUCED_MOTION ? 0.6 : (t % 40) / 40) * (w + 20)) - 10), qy = Math.round(h * 0.16);
+    ctx.fillStyle = '#d6dae2'; ctx.fillRect(qx, qy, 2, 1);
+    ctx.fillStyle = '#5d7bd6'; ctx.fillRect(qx - 2, qy, 2, 1); ctx.fillRect(qx + 2, qy, 2, 1);
+    if (!REDUCED_MOTION && Math.floor(t * 2) % 3 === 0) { ctx.fillStyle = '#9fd8ff'; ctx.fillRect(qx, qy - 1, 1, 1); }
+    pixelText(ctx, 'QUEQIAO', Math.min(w - textWidth('QUEQIAO') - 2, Math.max(2, qx - 12)), qy + 4, '#8a90a8');
+    pixelText(ctx, 'VON KARMAN CRATER', 4, h - 10, '#e8ecff');
+    pixelText(ctx, 'FAR SIDE', 4, 4, '#8a90a8');
+    const label = dark > 0.5 ? 'ASLEEP: LUNAR NIGHT' : `LUNAR DAY ${1 + (Math.floor((REDUCED_MOTION ? 0 : t) / 30) % 99)}`;
+    pixelText(ctx, label, w - textWidth(label) - 4, h - 10, '#e8ecff');
+  }
+
+  Object.assign(ROVERS, {
+    lunokhod: {
+      title: 'LUNOKHOD 1', big: '★ LUNOKHOD 1 ON MARE IMBRIUM ★', draw: drawLunokhodScene, hash: 'lunokhod', moon: true,
+      intro: 'The first rover on another world, 27 years before Sojourner. The Soviet Luna 17 landed it on the Sea of Rains in November 1970; drivers on Earth steered it by television. Watch it roll off its lander, drive across the mare, and close its lid for the long lunar night.',
+      facts: [
+        'Luna 17 landed on 17 November 1970 on Mare Imbrium, the Sea of Rains, and Lunokhod 1 drove down one of its two ramps.',
+        'A crew of five in the Soviet Union drove it from Earth, watching its TV pictures, which took several seconds to arrive.',
+        'At night its lid closed over the body and a heater warmed by radioactive polonium kept it from freezing at about -150 °C; by day the lid opened, and solar cells on its inside charged the batteries.',
+        'Planned for three lunar days, it worked for eleven, until September 1971, and drove about 10.5 km.',
+        'In 2010 NASA\'s Lunar Reconnaissance Orbiter found it and its lander (the lander is in the Galleria photo), and scientists then bounced a laser off the reflector on its front.',
+      ],
+      link: 'https://images.nasa.gov/details/PIA12967', linkLabel: "NASA's photo of Luna 17 from lunar orbit",
+    },
+    yutu2: {
+      title: 'YUTU-2', big: '★ YUTU-2 ON THE FAR SIDE ★', draw: drawYutu2Scene, hash: 'yutu-2', moon: true,
+      intro: 'The first rover on the far side of the Moon, from China\'s Chang\'e 4 mission. Earth never rises over this side, so a relay satellite, Queqiao, passes its messages home. Watch it drive off from its lander, then fold up and sleep through the lunar night.',
+      facts: [
+        'Chang\'e 4 landed on 3 January 2019 in Von Karman crater, inside the South Pole-Aitken basin, the biggest and oldest known crater on the Moon.',
+        'Its name means Jade Rabbit 2: in Chinese legend, a jade rabbit lives on the Moon with the goddess Chang\'e.',
+        'Queqiao, "magpie bridge", circles a point beyond the Moon from where it sees both Yutu-2 and the Earth.',
+        'Every lunar night, about 14 Earth days, it folds its mast and a solar wing and sleeps, waking when the Sun returns.',
+        'It soon became the longest-working rover on the Moon, passing Lunokhod 1\'s record of eleven lunar days in 2019.',
+      ],
+      link: 'https://images.nasa.gov/details/01_m1303619844lr_closC5A1C', linkLabel: "NASA's photo of Chang'e 4 and Yutu-2 from lunar orbit",
+    },
+  });
+
   // ---------------------------------------------------------------- Galleria: the easter-egg game
   // The ⚙ button opens the Galleria. Every easter egg starts as a black silhouette with a question mark,
   // its name blanked out and a clue underneath; typing the right name in the search bar finds it: the
@@ -3897,6 +4230,12 @@
     { id: 'zhurong', name: 'Zhurong', kind: 'craft', art: 'zhurong', ref: 'zhurong', query: 'Zhurong', toast: 'FIRE STAR ROVER',
       clue: 'Named after a god of fire, I drove across a northern plain on Mars and took a selfie with a camera I left on the ground.',
       story: 'China\'s Tianwen-1 mission put its lander and the rover Zhurong on Utopia Planitia on 14 May 2021. Zhurong drove about 1.9 km, scanned the ground beneath it with radar, and photographed itself with its lander using a small camera it had dropped. It went to sleep for the Martian winter in May 2022 and has not woken up.' },
+    { id: 'lunokhod', name: 'Lunokhod 1', kind: 'craft', art: 'lunokhod', ref: 'lunokhod', query: 'Lunokhod', toast: 'FIRST WHEELS ON THE MOON',
+      clue: 'Steered by television from a quarter of a million miles away, I was the first rover on another world, in 1970. I shut my lid every night.',
+      story: "The Soviet Luna 17 landed on Mare Imbrium on 17 November 1970, and Lunokhod 1 rolled down its ramp: the first rover to drive on another world. Drivers on Earth steered it by its TV pictures for eleven lunar days, about 10.5 km, closing its solar lid each lunar night. In 2010 NASA's Lunar Reconnaissance Orbiter photographed it where it stopped." },
+    { id: 'yutu2', name: 'Yutu-2', kind: 'craft', art: 'yutu2', ref: 'change-4', query: 'Yutu 2', toast: 'RABBIT ON THE FAR SIDE',
+      clue: 'A jade rabbit on the side of the Moon that never faces Earth. A magpie bridge carries my messages home.',
+      story: "China's Chang'e 4 made the first landing on the Moon's far side on 3 January 2019, in Von Karman crater, and its rover Yutu-2 (\"Jade Rabbit 2\") drove off to explore. Since Earth is never in the sky there, the relay satellite Queqiao passes its signals along. It sleeps through every lunar night and became the longest-working rover on the Moon." },
     { id: 'spirit', name: 'Spirit', kind: 'craft', art: 'spirit', ref: 'mer-rover', query: 'Spirit', toast: 'TWIN ON THE HILLS',
       clue: 'One of twins sent in 2004. I climbed a hill named after an astronaut, and kept driving backwards on a broken wheel.',
       story: 'Spirit landed in Gusev Crater on 4 January 2004, the first of NASA\'s twin Mars Exploration Rovers. Built to last 90 sols, it explored for six years, climbed Husband Hill, and even its broken wheel made a discovery: dragging through the soil, it uncovered silica left by ancient hot springs.' },
@@ -3947,6 +4286,8 @@
     { g: 'EASTER EGGS', id: 'curious', title: 'CURIOUS MIND', how: 'Find your first easter egg.' },
     { g: 'EASTER EGGS', id: 'mission-control', title: 'MISSION CONTROL', how: 'Find five spacecraft.' },
     { g: 'EASTER EGGS', id: 'red-fleet', title: 'RED PLANET FLEET', how: 'Find every mission at Mars: four orbiters and two rovers.' },
+    { g: 'EASTER EGGS', id: 'lunar-drivers', title: 'LUNAR DRIVERS', how: 'Find both rovers that drove on the Moon.' },
+    { g: 'EASTER EGGS', id: 'rover-roster', title: 'ROVER ROSTER', how: 'Find every rover, on Mars and on the Moon.' },
     { g: 'EASTER EGGS', id: 'jupiter-crew', title: "JUPITER'S ENTOURAGE", how: 'Find Juno, Europa Clipper, JUICE and Lucy.' },
     { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
     { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
@@ -3966,6 +4307,8 @@
     { g: 'SKY WATCH', id: 'rock-hound', title: 'ROCK HOUND', how: 'Catch an asteroid tumbling across the map.' },
     { g: 'SKY WATCH', id: 'tail-chaser', title: 'TAIL CHASER', how: 'Catch five comets.' },
     { g: 'SKY WATCH', id: 'asteroid-catcher', title: 'ASTEROID CATCHER', how: 'Catch ten asteroids.' },
+    { g: 'SKY WATCH', id: 'shooting-star', title: 'SHOOTING STAR', how: 'Catch a meteor burning up over the Earth, seen from the space station.' },
+    { g: 'SKY WATCH', id: 'meteor-catcher', title: 'METEOR CATCHER', how: 'Catch ten meteors from the space station.' },
     { g: 'SKY WATCH', id: 'ufo-spotter', title: 'UFO SPOTTER', how: 'Catch the flying saucer. It rarely shows up.' },
     { g: 'SKY WATCH', id: 'what-was-that', title: 'WHAT WAS THAT?', how: 'See the asteroid that sometimes follows the flying saucer.', secret: true },
     { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
@@ -3992,8 +4335,8 @@
   const TIER_OF = {
     rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
            'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet',
-           'tail-chaser', 'ufo-spotter'],
-    epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+           'tail-chaser', 'ufo-spotter', 'lunar-drivers'],
+    epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'meteor-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'rover-roster', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
            'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
   };
   for (const a of ACHIEVEMENTS) {
@@ -4005,6 +4348,8 @@
   // Finding every easter egg in a set earns a collection.
   const EGG_SETS = {
     'red-fleet': ['mro', 'odyssey', 'mex', 'tgo', 'curiosity', 'perseverance'],
+    'lunar-drivers': ['lunokhod', 'yutu2'],
+    'rover-roster': ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance', 'zhurong', 'lunokhod', 'yutu2'],
     'jupiter-crew': ['juno', 'clipper', 'juice', 'lucy'],
     'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
     l2: ['jwst', 'euclid'],
@@ -4027,7 +4372,7 @@
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                      backdrop: 'animated',   // page background (55-backdrop.js)
                      outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
-                     comets: 0, asteroids: 0, ufos: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
+                     comets: 0, asteroids: 0, ufos: 0, meteors: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
@@ -4039,7 +4384,8 @@
       }
     }
     if (Array.isArray(saved.systems)) {
-      progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60)])].slice(-200);
+      const renamed = n => (DATA.aliases || {})[n.toLowerCase()] || n;   // a system NASA lists under another name, now shown by its Kepler name
+      progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60).map(renamed)])].slice(-200);
     }
     if (typeof saved.toasts === 'boolean') progress.toasts = saved.toasts;
     if (typeof saved.seen === 'string' && /^[0-9a-z,]{0,80000}$/.test(saved.seen)) {   // TRUE STAR GAZER: Kepler IDs, base 36
@@ -4049,7 +4395,7 @@
     if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
     if (saved.whiteHole === true) progress.whiteHole = true;
     if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
-    for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos']) {
+    for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos', 'meteors']) {
       if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
     }
     if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
@@ -4217,7 +4563,7 @@
 
   // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
   const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Zhurong', 'zhurong'], ['Parker', 'parker'],
+    ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Zhurong', 'zhurong'], ['Lunokhod', 'lunokhod'], ['Yutu', 'yutu2'], ['Parker', 'parker'],
     ['Osiris Rex', 'apex'], ['Tatooine', null]];
   const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
   function editDistance(a, b) {   // Levenshtein, one row at a time
@@ -4977,6 +5323,18 @@
             'Its lander and rover were set down by a parachute, rockets and a hover phase, like NASA\'s, with a few minutes of "terror" all on autopilot.'],
       why: 'The first rover in the game from outside NASA: the story of driving on Mars belongs to more than one country, and Zhurong is the newest chapter.',
     },
+    lunokhod: {
+      fun: ['Lunokhod means "Moon walker" in Russian.',
+            'It weighed about 756 kg, more than five times as much as Yutu-2.',
+            'A ninth, thin wheel trailed behind it to measure how far it had really driven, since the others could slip in the dust.'],
+      why: 'The very first rover on another world, 27 years before Sojourner: the story of rovers starts on the Moon.',
+    },
+    yutu2: {
+      fun: ["Chang'e 4 carried a little sealed garden: cotton seeds sprouted inside it in January 2019, the first plants to sprout on the Moon.",
+            'In 2019 Yutu-2 spotted something shiny in a small crater; it turned out to be glass melted by an impact.',
+            'It weighs about 135 kg, about as much as a big motorbike.'],
+      why: "No one had landed on the side of the Moon that always faces away from Earth until Chang'e 4; Yutu-2 is the rover that drove there.",
+    },
     spirit: {
       fun: ['Spirit and Opportunity were named by Sofi Collis, a 9-year-old from Arizona, in a NASA essay contest.',
             'Its landing site was named Columbia Memorial Station, and the hills nearby after the seven astronauts of Space Shuttle Columbia.',
@@ -5078,6 +5436,7 @@
     cartographer: ['...r...', '..rrr..', '.kkwkk.', '..sss..', '...s...', '.......'],          // a compass needle
     'mission-control': ['.......', 'BB.s.BB', 'BBsssBB', 'BB.s.BB', '...m...', '..m.m..'],     // a satellite
     'red-fleet': ['..rrr..', '.rrRrr.', '.rRrrr.', '.rrrRr.', '..rrr..', '.......'],           // Mars
+    'rover-roster': ['.......', '..sss..', '.sssss.', 'mmmmmmm', 'kk.k.kk', 'kk.k.kk'],             // a rover
     'jupiter-crew': ['..ttt..', '.TTTTT.', '.ttttt.', '.TrTTT.', '..ttt..', '.......'],        // Jupiter and its spot
     'sun-chasers': ['y..y..y', '.yoooy.', 'yoyyyoy', '.yoooy.', 'y..y..y', '.......'],         // the Sun
     curator: ['TTTTTTT', 'TbbbbbT', 'TbbgbbT', 'TbgggbT', 'TTTTTTT', '.......'],               // a framed picture
@@ -5099,6 +5458,7 @@
     'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
     'tail-chaser': ['......w', '....tww', '..ttt.b', '.ttt.b.', 'ttt.b..', '.......'],     // a comet's tails
     'ufo-spotter': ['.......', '..bbb..', '.bgbgb.', 'sssssss', '.yssy..', '.......'],     // the saucer
+    'meteor-catcher': ['......w', '.....g.', '....y..', '...o...', '..r....', '.......'],   // a streak, cooling
     'asteroid-catcher': ['.......', '..ttm..', '.tmmmk.', '.mmmkk.', '..mkk..', '.......'],   // a lumpy rock
     'what-was-that': ['....bb.', '...sss.', '..sssss', 'mm.....', 'mkm....', '.m.....'],   // a saucer, a rock behind
     'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch
@@ -5545,6 +5905,8 @@
     cartographer: 'People mapped the stars long before telescopes: star catalogues are more than 2,000 years old.',
     'mission-control': "Nineteen of humanity's spacecraft beyond Earth orbit are on this map.",
     'red-fleet': 'Mars has more working spacecraft around it and on it than any planet except Earth.',
+    'lunar-drivers': 'Lunokhod 1 drove on the Moon in 1970, a year after the first people walked there.',
+    'rover-roster': 'Rovers have driven on two worlds besides Earth, the Moon and Mars, sent by three countries.',
     'jupiter-crew': "Jupiter has 95+ known moons; Europa may hold more water than all of Earth's oceans.",
     'sun-chasers': 'Parker Solar Probe is the fastest object ever built: about 690,000 km/h.',
     curator: 'Every photo in the Galleria is a real NASA image, credited to its mission.',
@@ -5567,6 +5929,7 @@
     'comet-catcher': 'A comet\'s tails always point away from the Sun, so leaving the Sun, a comet travels tail-first.',
     'rock-hound': 'Asteroid Ida has its own little moon, Dactyl: Galileo spotted it in 1993.',
     'tail-chaser': 'Comets have two tails: a curved, whitish one of dust and a straight, bluish one of charged gas.',
+    'meteor-catcher': 'Most meteors are grains of dust no bigger than sand, burning up about 100 km above the ground.',
     'asteroid-catcher': 'In 2022 NASA\'s DART spacecraft hit the asteroid moonlet Dimorphos and changed its orbit: a first test of planetary defence.',
     'ufo-spotter': 'UFO means unidentified flying object. NASA set up a study team on such sightings in 2022; nothing alien so far.',
     'what-was-that': 'Most asteroids orbit between Mars and Jupiter, so far apart that spacecraft fly through the belt without trouble.',
@@ -6299,20 +6662,44 @@
     bctx.fillRect(bx - 1, by, 3, 1); bctx.fillRect(bx, by - 1, 1, 3);
     bctx.fillStyle = '#9fd8ff';
     for (const k of [3 + pulse, -3 - pulse]) { bctx.fillRect(bx + k, by, 1, 1); bctx.fillRect(bx, by + k, 1, 1); }
-    const shoot = (t % 9) / 0.9;   // a shooting star for under a second, every nine seconds
-    if (!still && shoot < 1) {
-      const sx = BW * (0.45 + 0.35 * shoot), sy = BH * (0.08 + 0.2 * shoot);
-      for (let k = 0; k < 14; k++) {
-        bctx.fillStyle = k < 3 ? '#ffffff' : k < 8 ? '#9fd8ff' : '#2b5a8a';
-        bctx.fillRect(Math.round(sx - k), Math.round(sy - k * 0.42), 1, 1);
-      }
-    }
+    if (!still) drawBackdropMeteor(t);
     for (const L of cloudLayers) {   // clouds drift right, nearer layers faster
       const off = Math.round((t * L.speed) % L.w);
       bctx.drawImage(L.c, off - L.w, 0);
       bctx.drawImage(L.c, off, 0);
     }
     bctx.drawImage(treeLayer, 0, 0);
+  }
+
+  // A meteor seen from the ground (docs/plans/SKY_EVENTS_DRAFTS.md, version B, after photos of the 2021 Perseids), now
+  // and then rather than on a beat: a green-white head, a trail cooling from yellow to orange and red, a last flare, and
+  // a faint green train that lingers a moment after it is gone. Each one picks its own place, angle and length.
+  const METEOR_EVERY = 31, METEOR_BURN = 0.9, METEOR_TRAIN = 1.8;   // seconds
+  function drawBackdropMeteor(t) {
+    const n = Math.floor(t / METEOR_EVERY), c = t - n * METEOR_EVERY - bnoise(n, 5) * 12;   // when in its slot it falls
+    if (c < 0 || c > METEOR_BURN + METEOR_TRAIN) return;
+    const len = 18 + Math.round(bnoise(n, 1) * 16), slope = 0.3 + bnoise(n, 2) * 0.5, dir = bnoise(n, 3) < 0.5 ? 1 : -1;
+    const x0 = BW * (0.15 + 0.7 * bnoise(n, 4)), y0 = BH * (0.05 + 0.18 * bnoise(n, 6));
+    const f = Math.min(1, c / METEOR_BURN), at = s => [Math.round(x0 + dir * s), Math.round(y0 + s * slope)];
+    const head = len * f, fade = Math.max(0, (c - METEOR_BURN) / METEOR_TRAIN);
+    for (let s = 0; s < head - 4; s += 1) {   // the train along its whole path, fading from the start
+      if (bnoise(s, n) < 0.35 + fade * 0.65) continue;
+      const [x, y] = at(s);
+      bctx.fillStyle = fade < 0.5 ? '#2f8a5a' : '#1f5a40';
+      bctx.fillRect(x, y, 1, 1);
+    }
+    if (c > METEOR_BURN) return;
+    const ink = ['#ffffff', '#d8ffe8', '#9dffc4', '#ffe27a', '#ffd34d', '#ff9a3c', '#e0602f', '#a83a22'];
+    for (let k = 0; k < Math.min(ink.length, head); k++) {   // the hot head and its cooling trail
+      const [x, y] = at(head - k);
+      bctx.fillStyle = ink[k];
+      bctx.fillRect(x, y, 1, 1);
+    }
+    if (f > 0.75) {   // the flare as it breaks up
+      const [x, y] = at(head);
+      bctx.fillStyle = '#ffffff';
+      bctx.fillRect(x - 1, y, 3, 1); bctx.fillRect(x, y - 1, 1, 3);
+    }
   }
 
   let backdropTimer = 0;

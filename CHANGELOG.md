@@ -7,6 +7,27 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.9] - 2026-10-18
+
+### Added
+- **The Moon's rovers** (38 easter eggs): "lunokhod" / "luna 17" opens Lunokhod 1 (USSR, 1970) rolling off Luna 17 on
+  Mare Imbrium under a half-lit Earth and shutting its solar lid for the lunar night; "yutu 2" / "jade rabbit 2" opens
+  Yutu-2 (China, 2019) beside Chang'e 4 in Von Karman crater on the far side, napping through the night while the
+  Queqiao relay passes overhead (`web/src/47h-moon.js`). Sprites, Galleria cards with NASA's Lunar Reconnaissance
+  Orbiter photos (PIA12967; the LRO view of Chang'e 4 and Yutu-2), fun facts. New achievements **LUNAR DRIVERS** (both)
+  and **ROVER ROSTER** (all eight rovers).
+- **Meteors, both ways** (docs/plans/SKY_EVENTS_DRAFTS.md): in the ISS view, a meteor burns through the green airglow
+  over the Earth's night side every 20 to 45 seconds; click it to catch it (**SHOOTING STAR**, **METEOR CATCHER** at
+  ten). The ISS view now shows the night side. The page background's blue shooting star every nine seconds becomes a
+  real-looking meteor about every half minute (green-white head, cooling trail, fading green train); the old one is
+  archived.
+
+### Fixed
+- Systems Kepler found outside the KOI list that NASA files under KIC or 2MASS numbers now use their Kepler names
+  (2MASS J19383260+4603591 is Kepler-451; also Kepler-1707, -1648, -1970, -429, -1706, -70 and Kepler-1660 AB), keep
+  all their planets (Kepler-451 c and d, found in 2022), and explain hot subdwarf stars and planets found by eclipse
+  timing. The old names still work in searches, links and saved progress (`aliases` in `data/systems.js`).
+
 ## [1.9.8] - 2026-10-18
 
 ### Added

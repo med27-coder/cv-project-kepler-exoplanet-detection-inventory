@@ -192,7 +192,7 @@ def test_gallery_photos():
             assert (WEB / g['img']).is_file(), name
     egg_refs = re.findall(r"ref: '([\w-]+)'", (WEB / 'src' / '48-gallery.js').read_text(encoding='utf-8'))
     assert set(egg_refs) <= set(gallery), set(egg_refs) - set(gallery)
-    assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 900_000   # 480-wide copies, loaded one card at a time
+    assert sum(f.stat().st_size for f in (WEB / 'gallery').iterdir()) < 1_000_000   # 480-wide copies, loaded one card at a time (about 25 KB each)
 
 
 # Every achievement and easter-egg id ever published. Visitors' saved progress refers to these, so they must
@@ -200,7 +200,7 @@ def test_gallery_photos():
 SHIPPED_IDS = {
     'eggs': {'sun', 'pluto', 'kepler', 'iss', 'voyager', 'newHorizons', 'jwst', 'euclid', 'soho', 'parker',
              'solarOrbiter', 'bepi', 'juno', 'clipper', 'juice', 'lucy', 'psyche', 'apex', 'mro', 'odyssey', 'mex',
-             'tgo', 'curiosity', 'perseverance', 'ceres', 'haumea', 'makemake', 'eris', 'martian', 'voyager2', 'sojourner', 'spirit', 'opportunity', 'hubble', 'hailmary', 'zhurong'},
+             'tgo', 'curiosity', 'perseverance', 'ceres', 'haumea', 'makemake', 'eris', 'martian', 'voyager2', 'sojourner', 'spirit', 'opportunity', 'hubble', 'hailmary', 'zhurong', 'lunokhod', 'yutu2'},
     'ach': {'first-light', 'star-hopper', 'census', 'dice', 'ghost', 'oracle', 'link', 'first-rock', 'eight-worlds',
             'cousin', 'eden', 'puff', 'tiny', 'goldilocks', 'double', 'lava', 'ancient', 'flare', 'transit', 'scale',
             'believer', 'skeptic', 'coin', 'depth', 'chips', 'eagle', 'cartographer', 'highlighter', 'sky', 'eco',
@@ -209,7 +209,7 @@ SHIPPED_IDS = {
             'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
             'contrarian', 'patience', 'daily', 'streak', 'so-close', 'cosmic-zoom',
             'lost-in-orbit', 'dwarf-king', 'houston', 'space-wardrobe', 'space-farmer', 'first-outfit',
-            'visiting-hours', 'rare-threads', 'runway', 'walk-in-closet',
+            'visiting-hours', 'rare-threads', 'runway', 'walk-in-closet', 'lunar-drivers', 'rover-roster', 'shooting-star', 'meteor-catcher',
             'comet-catcher', 'rock-hound', 'tail-chaser', 'asteroid-catcher', 'ufo-spotter', 'what-was-that'},
 }
 
@@ -222,6 +222,19 @@ def test_progress_ids_are_stable():
     ach = js[js.index('const ACHIEVEMENTS = ['):js.index('const ACH = new Map')]
     assert SHIPPED_IDS['eggs'] <= set(re.findall(r"\bid: '([\w-]+)'", eggs))
     assert SHIPPED_IDS['ach'] <= set(re.findall(r"\bid: '([\w-]+)'", ach))
+
+
+def test_outside_systems_use_their_kepler_names(data):
+    """NASA files some Kepler discoveries under KIC or 2MASS numbers; the map shows their Kepler names, keeps the
+    catalogue names as aliases (old links, searches and saved progress) and keeps all of the system's planets."""
+    names = {s[0] for s in data['stars']}
+    assert 'Kepler-451' in names and '2MASS J19383260+4603591' not in names
+    assert not any(n.startswith(('KIC ', '2MASS ')) for n in names)
+    assert data['aliases']['2mass j19383260+4603591'] == 'Kepler-451'
+    assert all(target in names for target in data['aliases'].values())
+    col = {c: i for i, c in enumerate(data['columns'])}
+    k451 = next(s for s in data['stars'] if s[0] == 'Kepler-451')
+    assert k451[col['np']] == 3   # b (Kepler, 2015), c and d (2022)
 
 
 def test_kepler_worlds_outside_the_koi_list(data):

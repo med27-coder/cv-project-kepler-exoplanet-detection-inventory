@@ -56,12 +56,12 @@ for (const s of STARS) {
 
 function find(query) {
   const q = query.trim().toLowerCase().replace(/\s+/g, ' ');
-  let m;
-  if ((m = q.match(/^kepler[\s-]*(\d+)(?:\s*[a-z])?$/))) return byName.get('kepler-' + Number(m[1]));
-  if ((m = q.match(/^koi[\s-]*(\d+)(?:\.\d+)?$/))) return byKoi.get(Number(m[1]));
+  let m, s;
+  if ((m = q.match(/^kepler[\s-]*(\d+)(?:\s*[a-z])?$/)) && (s = byName.get('kepler-' + Number(m[1])) || byName.get(`kepler-${Number(m[1])} ab`))) return s;
+  if ((m = q.match(/^koi[\s-]*(\d+)(?:\.\d+)?$/)) && (s = byKoi.get(Number(m[1])))) return s;
   if ((m = q.match(/^k0*(\d+)\.\d{2}$/))) return byKoi.get(Number(m[1]));
   if ((m = q.match(/^(?:kic|kepid)?[\s-]*(\d{5,9})$/))) return byKepid.get(Number(m[1]));
-  return byName.get(q);
+  return byName.get(q) || byName.get((DATA.aliases || {})[q]?.toLowerCase());   // NASA's other names (export_starmap.py)
 }
 
 // ---------------------------------------------------------------- colours

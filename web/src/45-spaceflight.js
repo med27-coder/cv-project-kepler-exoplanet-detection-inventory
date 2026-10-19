@@ -217,11 +217,108 @@ function drawISS(seconds) {
   orbit(true);
   if (behind && !hidden) station(ix, iy);
   solarPlanet(sctx, cx, cy, { art: 'earth', size: EARTH_R_PX, seed: 'iss', noMoon: true }, -0.9, -0.3, t * 0.4);
+  drawIssMeteor(cx, cy, t);
   orbit(false);
   if (!behind) station(ix, iy);
   if (!hidden) pixelText(sctx, 'ISS', Math.round(ix) + 7, Math.round(iy) - 8, '#ffd34d');
   drawCraftInset([{ name: 'ISS', key: 'iss', label: 'THE STATION' }], 'ISS', seconds);
   pixelText(sctx, 'ORBIT 92 MIN', 4, SH - 9, '#5a6a8a');
+}
+
+// Meteors seen from orbit (docs/plans/SKY_EVENTS_DRAFTS.md, version A): over the night side, the thin green airglow
+// (oxygen glowing 90-100 km up) hugs the edge of the Earth, and now and then a meteor burns through it, 80-120 km up:
+// a green-white head (magnesium, nickel), a trail cooling to yellow (sodium) and red (the air itself), a last flare,
+// and a green train that lingers. Click one while it burns to catch it: METEOR CATCHER at ten.
+const METEOR_S = 1.6, METEOR_GAP = [20, 45];   // seconds burning; seconds between meteors
+let issMeteor = null, issMeteorNext = 8, issMeteorBurst = null, issClock = 0;
+function issMeteorHead(m) {   // where the head is now, along its short path skimming the limb
+  const f = Math.min(1, m.age / METEOR_S), a = m.phi + m.dir * 0.3 * f, r = EARTH_R_PX + 3 - 1.5 * f;
+  return [m.cx + r * Math.cos(a), m.cy + r * Math.sin(a) * 0.98, a, r];
+}
+function drawIssMeteor(cx, cy, t) {
+  const dt = Math.min(0.25, Math.max(0, t - issClock));
+  issClock = t;
+  // the night side: the Sun lights the Earth from the upper left, so the far right is in darkness
+  const L = [-0.9, -0.3, 0.45], ln = Math.hypot(...L);
+  for (let dy = -EARTH_R_PX; dy <= EARTH_R_PX; dy++) {
+    for (let dx = -EARTH_R_PX; dx <= EARTH_R_PX; dx++) {
+      const q = (dx * dx + dy * dy) / (EARTH_R_PX * EARTH_R_PX);
+      if (q > 1) continue;
+      const d = (dx * L[0] + dy * L[1] + Math.sqrt(1 - q) * EARTH_R_PX * L[2]) / (EARTH_R_PX * ln);
+      if (d > 0.12) continue;
+      sctx.fillStyle = d < -0.05 ? 'rgba(4, 7, 22, 0.62)' : 'rgba(4, 7, 22, 0.3)';   // a soft terminator
+      sctx.fillRect(cx + dx, cy + dy, 1, 1);
+    }
+  }
+  // the airglow: a faint green rim over the night side
+  for (let a = -1.25; a <= 1.25; a += 0.03) {
+    if (hash(`ag${Math.round(a * 33)}`) < 0.25) continue;
+    sctx.fillStyle = Math.abs(a) < 0.8 ? '#2f8a5a' : '#1f5a40';
+    sctx.fillRect(Math.round(cx + (EARTH_R_PX + 1) * Math.cos(a + 0.3)), Math.round(cy + (EARTH_R_PX + 1) * Math.sin(a + 0.3)), 1, 1);
+  }
+  if (REDUCED_MOTION) return;
+  if (!issMeteor && t >= issMeteorNext) {
+    issMeteor = { cx, cy, age: 0, phi: 0.3 + (Math.random() - 0.5) * 1.6, dir: Math.random() < 0.5 ? -1 : 1 };
+    issMeteorNext = t + METEOR_S + METEOR_GAP[0] + Math.random() * (METEOR_GAP[1] - METEOR_GAP[0]);
+  }
+  if (issMeteor) {
+    const m = issMeteor;
+    m.age += dt;
+    const fade = Math.max(0, (m.age - METEOR_S) / 1.4);   // the train lingers after the meteor is gone
+    if (fade >= 1) issMeteor = null;
+    else {
+      const [hx, hy, a] = issMeteorHead(m), trail = Math.min(10, 3 + m.age * 7);
+      const back = [-Math.sin(a) * m.dir, Math.cos(a) * m.dir * 0.98];   // the way it came, along the limb
+      for (let k = 1; k <= 9; k++) {   // the train: faint green where it has been
+        if (fade > k / 9) continue;
+        sctx.fillStyle = k % 2 ? '#2f8a5a' : '#3fbf7a';
+        sctx.fillRect(Math.round(hx + back[0] * (trail + k)), Math.round(hy + back[1] * (trail + k)), 1, 1);
+      }
+      if (m.age < METEOR_S) {
+        const ink = ['#eafff2', '#9dffc4', '#ffe27a', '#ffd34d', '#ff9a3c', '#e0602f', '#a83a22'];
+        for (let k = 0; k < trail; k++) {
+          sctx.fillStyle = ink[Math.min(ink.length - 1, Math.floor(k * ink.length / trail))];
+          sctx.fillRect(Math.round(hx + back[0] * k), Math.round(hy + back[1] * k), 1, 1);
+        }
+        sctx.fillStyle = '#eafff2'; sctx.fillRect(Math.round(hx), Math.round(hy), 2, 2);   // the bright head
+        if (m.age > METEOR_S * 0.7) {   // the flare as it breaks up
+          sctx.fillStyle = '#ffffff';
+          sctx.fillRect(Math.round(hx) - 1, Math.round(hy), 3, 1); sctx.fillRect(Math.round(hx), Math.round(hy) - 1, 1, 3);
+        }
+      }
+    }
+  }
+  if (issMeteorBurst) {   // the catch: a sparkle and the running count
+    const b = issMeteorBurst;
+    b.age += dt;
+    if (b.age > 2) issMeteorBurst = null;
+    else {
+      sctx.fillStyle = b.age % 0.3 < 0.15 ? '#ffffff' : '#9dffc4';
+      for (const [dx, dy] of [[0, -3], [0, 3], [-3, 0], [3, 0], [-2, -2], [2, 2], [2, -2], [-2, 2]]) sctx.fillRect(Math.round(b.x + dx * (1 + b.age)), Math.round(b.y + dy * (1 + b.age)), 1, 1);
+      const label = `METEOR ${b.n}`;
+      pixelText(sctx, label, Math.min(SW - textWidth(label) - 2, Math.round(b.x) + 6), Math.round(b.y) - 10, '#9dffc4');
+    }
+  }
+}
+function catchIssMeteor(px, py) {   // a generous target: it is small and quick
+  if (!issMeteor || issMeteor.age >= METEOR_S) return false;
+  const [hx, hy] = issMeteorHead(issMeteor);
+  if (Math.hypot(px - hx, py - hy) > 9) return false;
+  issMeteor = null;
+  progress.meteors += 1;
+  saveProgress();
+  issMeteorBurst = { x: hx, y: hy, age: 0, n: progress.meteors };
+  achieve('shooting-star');
+  if (progress.meteors >= 10) achieve('meteor-catcher');
+  return true;
+}
+// Browser tests can light a meteor at once (only under automation: no achievements for free).
+if (navigator.webdriver) {
+  window.__issMeteor = () => {   // returns where its head is, in scene pixels
+    issMeteor = { cx: CX, cy: Math.round(SH / 2), age: 0.5, phi: 0.3, dir: 1 };
+    issMeteorNext = Infinity;
+    return issMeteorHead(issMeteor).slice(0, 2);
+  };
 }
 
 function showISS(updateHash = true) {
@@ -238,13 +335,17 @@ function showISS(updateHash = true) {
       <li>Circles Earth about every <b>90 minutes</b>, <b>16 times a day</b>, at about five miles (8 km) per second.</li>
       <li><b>109 m</b> end to end (about a football field) and about <b>420 tonnes</b>.</li>
       <li>You can see it with your own eyes: it's the brightest moving "star" after sunset or before dawn.</li>
+      <li>Astronauts see meteors from above: watch the night side, where a thin green airglow hugs the Earth, and
+        click a meteor while it burns to catch it.</li>
     </ul>
     <p>${['https://www.nasa.gov/international-space-station/|NASA: the space station',
           'https://spotthestation.nasa.gov/|NASA Spot the Station: when it passes over you']
       .map(s => s.split('|')).map(([u, t]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`).join(' · ')}</p>
     <p class="note">Sources: NASA space station facts and figures · the orbit shown is illustrative, not the
       live position · you found an easter egg!</p>`;
-  setScene({ custom: drawISS });
+  issMeteor = null;
+  issMeteorNext = performance.now() / 1000 + 5 + Math.random() * 10;   // the first one soon after you arrive
+  setScene({ custom: drawISS, onTap: catchIssMeteor });
   document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-current', 'false'));
   if (updateHash) history.replaceState(null, '', '#ISS');
 }

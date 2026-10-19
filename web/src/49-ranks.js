@@ -70,6 +70,7 @@ const SYMBOLS = {
   cartographer: ['...r...', '..rrr..', '.kkwkk.', '..sss..', '...s...', '.......'],          // a compass needle
   'mission-control': ['.......', 'BB.s.BB', 'BBsssBB', 'BB.s.BB', '...m...', '..m.m..'],     // a satellite
   'red-fleet': ['..rrr..', '.rrRrr.', '.rRrrr.', '.rrrRr.', '..rrr..', '.......'],           // Mars
+  'rover-roster': ['.......', '..sss..', '.sssss.', 'mmmmmmm', 'kk.k.kk', 'kk.k.kk'],             // a rover
   'jupiter-crew': ['..ttt..', '.TTTTT.', '.ttttt.', '.TrTTT.', '..ttt..', '.......'],        // Jupiter and its spot
   'sun-chasers': ['y..y..y', '.yoooy.', 'yoyyyoy', '.yoooy.', 'y..y..y', '.......'],         // the Sun
   curator: ['TTTTTTT', 'TbbbbbT', 'TbbgbbT', 'TbgggbT', 'TTTTTTT', '.......'],               // a framed picture
@@ -91,6 +92,7 @@ const SYMBOLS = {
   'walk-in-closet': ['TTTTTTT', 'T.T.T.T', 'T.T.T.T', 'T.T.T.T', 'TTTTTTT', '.......'],  // a wardrobe
   'tail-chaser': ['......w', '....tww', '..ttt.b', '.ttt.b.', 'ttt.b..', '.......'],     // a comet's tails
   'ufo-spotter': ['.......', '..bbb..', '.bgbgb.', 'sssssss', '.yssy..', '.......'],     // the saucer
+  'meteor-catcher': ['......w', '.....g.', '....y..', '...o...', '..r....', '.......'],   // a streak, cooling
   'asteroid-catcher': ['.......', '..ttm..', '.tmmmk.', '.mmmkk.', '..mkk..', '.......'],   // a lumpy rock
   'what-was-that': ['....bb.', '...sss.', '..sssss', 'mm.....', 'mkm....', '.m.....'],   // a saucer, a rock behind
   'space-farmer': ['..www..', '.w...w.', 'w.g.g.w', 'wgggggw', 'TTTTTTT', '.......'],     // a dome over a potato patch

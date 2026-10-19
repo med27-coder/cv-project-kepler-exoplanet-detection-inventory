@@ -91,20 +91,44 @@ function drawBackdrop(now, force = false) {   // from the animation loop (~8 fps
   bctx.fillRect(bx - 1, by, 3, 1); bctx.fillRect(bx, by - 1, 1, 3);
   bctx.fillStyle = '#9fd8ff';
   for (const k of [3 + pulse, -3 - pulse]) { bctx.fillRect(bx + k, by, 1, 1); bctx.fillRect(bx, by + k, 1, 1); }
-  const shoot = (t % 9) / 0.9;   // a shooting star for under a second, every nine seconds
-  if (!still && shoot < 1) {
-    const sx = BW * (0.45 + 0.35 * shoot), sy = BH * (0.08 + 0.2 * shoot);
-    for (let k = 0; k < 14; k++) {
-      bctx.fillStyle = k < 3 ? '#ffffff' : k < 8 ? '#9fd8ff' : '#2b5a8a';
-      bctx.fillRect(Math.round(sx - k), Math.round(sy - k * 0.42), 1, 1);
-    }
-  }
+  if (!still) drawBackdropMeteor(t);
   for (const L of cloudLayers) {   // clouds drift right, nearer layers faster
     const off = Math.round((t * L.speed) % L.w);
     bctx.drawImage(L.c, off - L.w, 0);
     bctx.drawImage(L.c, off, 0);
   }
   bctx.drawImage(treeLayer, 0, 0);
+}
+
+// A meteor seen from the ground (docs/plans/SKY_EVENTS_DRAFTS.md, version B, after photos of the 2021 Perseids), now
+// and then rather than on a beat: a green-white head, a trail cooling from yellow to orange and red, a last flare, and
+// a faint green train that lingers a moment after it is gone. Each one picks its own place, angle and length.
+const METEOR_EVERY = 31, METEOR_BURN = 0.9, METEOR_TRAIN = 1.8;   // seconds
+function drawBackdropMeteor(t) {
+  const n = Math.floor(t / METEOR_EVERY), c = t - n * METEOR_EVERY - bnoise(n, 5) * 12;   // when in its slot it falls
+  if (c < 0 || c > METEOR_BURN + METEOR_TRAIN) return;
+  const len = 18 + Math.round(bnoise(n, 1) * 16), slope = 0.3 + bnoise(n, 2) * 0.5, dir = bnoise(n, 3) < 0.5 ? 1 : -1;
+  const x0 = BW * (0.15 + 0.7 * bnoise(n, 4)), y0 = BH * (0.05 + 0.18 * bnoise(n, 6));
+  const f = Math.min(1, c / METEOR_BURN), at = s => [Math.round(x0 + dir * s), Math.round(y0 + s * slope)];
+  const head = len * f, fade = Math.max(0, (c - METEOR_BURN) / METEOR_TRAIN);
+  for (let s = 0; s < head - 4; s += 1) {   // the train along its whole path, fading from the start
+    if (bnoise(s, n) < 0.35 + fade * 0.65) continue;
+    const [x, y] = at(s);
+    bctx.fillStyle = fade < 0.5 ? '#2f8a5a' : '#1f5a40';
+    bctx.fillRect(x, y, 1, 1);
+  }
+  if (c > METEOR_BURN) return;
+  const ink = ['#ffffff', '#d8ffe8', '#9dffc4', '#ffe27a', '#ffd34d', '#ff9a3c', '#e0602f', '#a83a22'];
+  for (let k = 0; k < Math.min(ink.length, head); k++) {   // the hot head and its cooling trail
+    const [x, y] = at(head - k);
+    bctx.fillStyle = ink[k];
+    bctx.fillRect(x, y, 1, 1);
+  }
+  if (f > 0.75) {   // the flare as it breaks up
+    const [x, y] = at(head);
+    bctx.fillStyle = '#ffffff';
+    bctx.fillRect(x - 1, y, 3, 1); bctx.fillRect(x, y - 1, 1, 3);
+  }
 }
 
 let backdropTimer = 0;

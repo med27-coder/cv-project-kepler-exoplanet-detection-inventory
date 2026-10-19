@@ -4,11 +4,14 @@
 // Perseverance by the old river delta in Jezero Crater, leaving sample tubes on the ground while the Ingenuity
 // helicopter takes off, flies and lands; "sojourner" or "pathfinder" the very first rover, rolling off its lander in
 // Ares Vallis in 1997. Rovers you have found also roll by behind the Martian farm, where Pathfinder sits outside the Hab.
+// The Moon's rovers (Lunokhod 1, Yutu-2) live in 47h-moon.js and use the same page.
 // "rovers" / "mars rovers" still shows where everything is in the Solar System (45-spaceflight.js).
-const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy|zhurong|tianwen 1|tianwen)( rover)?$/i;
+const ROVER_QUERY = /^(the )?(curiosity|perseverance|percy|sojourner|mars pathfinder|pathfinder|spirit|opportunity|oppy|zhurong|tianwen 1|tianwen|lunokhod 1|lunokhod|luna 17|yutu 2|yutu2|jade rabbit 2)( rover)?$/i;
 const ROVER_OF = { curiosity: 'curiosity', perseverance: 'perseverance', percy: 'perseverance', sojourner: 'sojourner',
                    'mars pathfinder': 'sojourner', pathfinder: 'sojourner', spirit: 'spirit', opportunity: 'opportunity', oppy: 'opportunity',
-                   zhurong: 'zhurong', 'tianwen 1': 'zhurong', tianwen: 'zhurong' };
+                   zhurong: 'zhurong', 'tianwen 1': 'zhurong', tianwen: 'zhurong',
+                   'lunokhod 1': 'lunokhod', lunokhod: 'lunokhod', 'luna 17': 'lunokhod',   // the Moon (47h-moon.js)
+                   'yutu 2': 'yutu2', yutu2: 'yutu2', 'jade rabbit 2': 'yutu2' };
 const roverFor = q => { const m = ROVER_QUERY.exec(q); return m ? ROVER_OF[m[2].toLowerCase()] : null; };
 const ROVER_INK = { body: '#ece8e0', shade: '#c4beb3', dark: '#2a2a30', hub: '#6f6a62', metal: '#8a8f9a', rtg: '#6f7d96', eye: '#151a2c', gold: '#d9b45a' };
 
@@ -419,9 +422,9 @@ function showRover(id, updateHash = true) {
     <p>${esc(r.intro)}</p>
     <h3 class="facts-title">THE REAL ROVER</h3>
     <ul class="facts">${r.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>
-    <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.linkLabel || `NASA: the ${r.title.toLowerCase()} mission`)} ↗</a> ·
-       <a href="#mars-rovers">where the rovers are on Mars and in the Solar System</a></p>
-    <p class="note">The drawing is pixel art, sped up; the scenery follows NASA's photos · you found an easter egg!</p>`;
+    <p><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.linkLabel || `NASA: the ${r.title.toLowerCase()} mission`)} ↗</a>${r.moon ? '' : ` ·
+       <a href="#mars-rovers">where the rovers are on Mars and in the Solar System</a>`}</p>
+    <p class="note">The drawing is pixel art, sped up; the scenery follows ${r.moon ? 'photos from the mission' : "NASA's photos"} · you found an easter egg!</p>`;
   setScene({ custom: seconds => {
     sctx.imageSmoothingEnabled = false;
     r.draw(sctx, SW, SH, REDUCED_MOTION ? 0 : seconds);

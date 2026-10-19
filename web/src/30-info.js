@@ -165,13 +165,19 @@ function showSystem(s, detail) {
       candidates (KOIs), in the light of stars that eclipse each other. The second star in the drawing is
       illustrative.</p>`
     : detail.extra ? `<p class="callout">Found by Kepler outside its usual list of candidates (KOIs), by ${esc(methods || 'other means')}.</p>` : '';
+  const timing = methods.includes('eclipse timing') ? `<p class="callout">⏱ <b>Found by eclipse timing.</b> No planet was
+      seen crossing a star here: as the planets tug the two stars back and forth, their eclipses come a few seconds early
+      or late, and the pattern gives the planets away. Planets found this way are drawn as diamonds (◆).</p>` : '';
+  const subdwarf = (detail.teff ?? 0) >= 20000 && (detail.srad ?? 1) < 0.5 ? `<p class="callout">✦ <b>A hot subdwarf.</b>
+      This star is the bare, glowing core of an old star that lost its outer layers: about ${esc(fmt(Math.round(detail.teff / 100) * 100))} K,
+      ${esc(String(Math.round(detail.teff / 5772)))} times hotter than the Sun, yet only ${esc(String(detail.srad))} times its size.</p>` : '';
   const links = [skyLink(detail.ra, detail.dec), ...(detail.host ? [nasaLink(detail.host)] : [])];
   info.innerHTML = `
     <div class="head">${skyThumb(detail.ra, detail.dec, s[COL.name])}<div>
       <p>Star: ${starLine(detail)}</p>
       <p>${parts.join(' + ')} · ${links.join(' · ')}</p>
     </div></div>
-    ${origin}
+    ${origin}${subdwarf}${timing}
     ${planetTable(detail)}
     ${caseFiles(detail, s[COL.name])}
     <p class="note">~ mass estimated from size · green band = habitable zone (approx.) · bottom strip = the
