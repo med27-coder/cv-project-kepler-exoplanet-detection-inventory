@@ -120,6 +120,18 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/PIA24914",
   "what": "Zhurong and its lander on Utopia Planitia, photographed by NASA's Mars Reconnaissance Orbiter (2021)"
  },
+ "lunokhod": {
+  "img": "gallery/lunokhod.jpg",
+  "credit": "NASA/GSFC/Arizona State University",
+  "link": "https://images.nasa.gov/details/PIA12967",
+  "what": "Luna 17 on Mare Imbrium (the arrow), the lander Lunokhod 1 drove off, seen by NASA's Lunar Reconnaissance Orbiter (2010)"
+ },
+ "change-4": {
+  "img": "gallery/change-4.jpg",
+  "credit": "NASA GSFC",
+  "link": "https://images.nasa.gov/details/01_m1303619844lr_closC5A1C",
+  "what": "Chang'e 4 (big arrow) and Yutu-2 (small arrow) in Von Karman crater, seen by NASA's Lunar Reconnaissance Orbiter (2019)"
+ },
  "mer-rover": {
   "img": "gallery/mer-rover.jpg",
   "credit": "NASA/JPL/Cornell University",

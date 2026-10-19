@@ -59,10 +59,10 @@ Mars rovers already built. Set achievements for each destination, one per agency
 | Mars | Curiosity | NASA, 2012 | | **built v1.4.0** |
 | Mars | Perseverance (with Ingenuity) | NASA, 2021 | | **built v1.4.0** |
 | Mars | Zhurong (Tianwen-1) | China (CNSA), 2021 | landed May 2021 in Utopia Planitia; dormant since May 2022 | **built v1.9.8** |
-| Moon | Lunokhod 1 (Luna 17) | USSR, 1970 | the first rover on another world | to build |
+| Moon | Lunokhod 1 (Luna 17) | USSR, 1970 | the first rover on another world | **built v1.9.9** |
 | Moon | Lunokhod 2 (Luna 21) | USSR, 1973 | | to build |
 | Moon | Yutu (Chang'e 3) | China, 2013 | | to build |
-| Moon | Yutu-2 (Chang'e 4) | China, 2019 | the first rover on the far side | to build |
+| Moon | Yutu-2 (Chang'e 4) | China, 2019 | the first rover on the far side | **built v1.9.9** |
 | Moon | Pragyan | India (ISRO), 2023 | flew on Chandrayaan-2 in 2019 but never left its lander, which crashed; it drove on Chandrayaan-3 in August 2023 | to build |
 | Moon | Rashid | UAE, 2023 | lost when its lander, ispace's Hakuto-R, crashed in April 2023: an "attempt" card | to build |
 | Moon | SORA-Q (LEV-2) and LEV-1 | Japan (JAXA), 2024 | rode on SLIM; SORA-Q photographed SLIM lying on its side | to build |
@@ -73,7 +73,8 @@ Mars rovers already built. Set achievements for each destination, one per agency
 
 **Moon drafts (18 October 2026):** `pixel-art/concepts/draft_lunokhod.gif` (Lunokhod 1, its open solar lid,
 Earth in the sky) and `pixel-art/concepts/draft_yutu2.gif` (Yutu-2 and the Chang'e 4 lander on the far side, where
-Earth never rises). Question for the user: build the Moon rovers as easter eggs with scenes like these?
+Earth never rises). **Approved by the user and built in v1.9.9** (`web/src/47h-moon.js`), with LUNAR DRIVERS and
+ROVER ROSTER.
 
 Pictures: NASA's are copied as references; other agencies' images only where their licences allow, otherwise linked
 (as for ESA). Waves: Mars first (Zhurong next), then the Moon, then the small bodies.

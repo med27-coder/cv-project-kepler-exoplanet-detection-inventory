@@ -122,6 +122,7 @@ const endSysDrag = e => {
   rememberView();
 };
 sys.addEventListener('pointerup', endSysDrag);
+sys.addEventListener('click', e => { if (scene?.onTap?.(...sysPoint(e))) wake(); });   // things to catch in a scene (the ISS's meteors)
 sys.addEventListener('pointerleave', () => { if (scene) scene.hover = null; });
 sys.addEventListener('pointercancel', endSysDrag);
 sys.addEventListener('dblclick', fitAll);

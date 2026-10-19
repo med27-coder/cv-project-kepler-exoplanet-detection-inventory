@@ -52,6 +52,8 @@ PICKS = [
     ('spacecraft', 'curiosity', 'PIA19808', 'Curiosity selfie on Mars'),
     ('spacecraft', 'perseverance', 'PIA24542', 'Perseverance selfie with Ingenuity'),
     ('spacecraft', 'zhurong', 'PIA24914', 'Zhurong and its lander on Utopia Planitia, photographed by NASA\'s Mars Reconnaissance Orbiter (2021)'),
+    ('spacecraft', 'lunokhod', 'PIA12967', "Luna 17 on Mare Imbrium (the arrow), the lander Lunokhod 1 drove off, seen by NASA's Lunar Reconnaissance Orbiter (2010)"),
+    ('spacecraft', 'change-4', '01_m1303619844lr_closC5A1C', "Chang'e 4 (big arrow) and Yutu-2 (small arrow) in Von Karman crater, seen by NASA's Lunar Reconnaissance Orbiter (2019)"),
     ('spacecraft', 'mer-rover', 'PIA04413', 'A Mars Exploration Rover, Spirit\'s and Opportunity\'s design (artist concept)'),
     ('spacecraft', 'opportunity-rover', 'PIA18079', 'Opportunity\'s self-portrait just after the wind cleaned its solar panels (2014)'),
     ('spacecraft', 'hubble', 'S109E5882', 'The Hubble Space Telescope over Earth, seen from Space Shuttle Columbia (2002)'),

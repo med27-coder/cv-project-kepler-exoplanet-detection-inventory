@@ -342,7 +342,7 @@ def test_galleria_game(browser, site):
     page.evaluate("localStorage.clear()")
     page.reload()
     page.click('#open-gallery')
-    assert page.locator('.egg-card').count() == 36
+    assert page.locator('.egg-card').count() == 38
     assert page.locator('.egg-card.found').count() == 0
     page.click('#gallery-close')
     page.fill('#query', 'lucy')
@@ -396,7 +396,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/75'
+    assert page.locator('#rank-count').inner_text() == '12/79'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -705,6 +705,23 @@ def test_sky_events_can_be_caught(browser, site):
     assert not errors, errors
 
 
+def test_meteors_can_be_caught_from_the_station(browser, site):
+    """In the ISS view a meteor burns through the airglow now and then; clicking it while it burns counts it and
+    earns SHOOTING STAR (METEOR CATCHER at ten). The page background's meteor is decoration only."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.fill('#query', 'iss')
+    page.press('#query', 'Enter')
+    page.wait_for_timeout(300)
+    box = page.locator('#system').bounding_box()
+    x, y = page.evaluate('() => window.__issMeteor()')
+    page.mouse.click(box['x'] + x * box['width'] / 256, box['y'] + y * box['height'] / 160)
+    page.wait_for_function('() => JSON.parse(localStorage.getItem("starmap.progress.v1")).meteors === 1')
+    saved = page.evaluate('() => JSON.parse(localStorage.getItem("starmap.progress.v1"))')
+    assert 'shooting-star' in saved['ach'] and 'meteor-catcher' not in saved['ach']
+    assert not errors, errors
+
+
 def test_voyagers_are_found_separately(browser, site):
     """Plain "voyager" names neither twin (a pop-up asks which one); "voyager 1" and "voyager 2" are two eggs,
     and both with New Horizons earn ROAD TO INTERSTELLAR."""
@@ -782,6 +799,10 @@ def test_rovers_at_work_on_mars(browser, site):
     assert page.locator('#sys-title').inner_text() == 'OPPORTUNITY'
     search('zhurong')
     assert page.locator('#sys-title').inner_text() == 'ZHURONG'
+    search('lunokhod')
+    assert page.locator('#sys-title').inner_text() == 'LUNOKHOD 1'
+    search('yutu-2')
+    assert page.locator('#sys-title').inner_text() == 'YUTU-2'
     saved = page.evaluate("JSON.parse(localStorage.getItem('starmap.progress.v1'))")
     assert {'curiosity', 'perseverance', 'sojourner', 'spirit', 'opportunity'} <= set(saved['eggs'])
     search('martian man')

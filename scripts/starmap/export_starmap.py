@@ -463,7 +463,7 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
             if kepid in koi_ids:   # the same star under another name or position (fast-moving stars)
                 hosts[kepid] = rows if kepid not in hosts else pd.concat([hosts[kepid], rows])
             elif (rows['disc_facility'] == 'Kepler').any():
-                extras[kepid] = (host, rows[rows['disc_facility'] == 'Kepler'])
+                extras[kepid] = (host, rows)   # all its planets, also those found later from the ground
     tess = match_hosts(positions, tois, key='tid')
     stars, systems = [], {}
     wanted = set(spotlight)
@@ -482,11 +482,20 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       len(detail['planets']), sum(p['status'] == 'confirmed' for p in detail['planets']),
                       tags(detail, drawn), chunk_of(name),
                       round(detail['dist_pc']) if detail.get('dist_pc') else None])
+    kepler_host = {k: h for h, k in names.items()}   # kepid -> 'Kepler-451'
+    aliases = {}   # NASA's catalogue name -> the Kepler name shown (old links and searches still work)
     for kepid, (host, rows) in sorted(extras.items()):
         detail = extra_system(host, rows, kepid)
-        if not detail['planets'] or host in systems:
+        name = kepler_host.get(int(kepid), host)   # NASA lists some under KIC or 2MASS numbers
+        if not detail['planets'] or name in systems:
             continue
-        systems[host] = detail
+        if name != host:
+            aliases[host.lower()] = name
+            for p in detail['planets']:
+                if p['name'].startswith(host + ' '):
+                    p['name'] = p['koi'] = name + p['name'][len(host):]
+        systems[name] = detail
+        host = name
         stars.append([host, int(kepid), None, round(detail['ra'], 4), round(detail['dec'], 4),
                       None if detail.get('kepmag') is None else round(detail['kepmag'], 1), int(host in wanted), 1,
                       0, None, len(detail['planets']), 0,
@@ -498,7 +507,7 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       'Berger et al. 2020 (Gaia-Kepler stellar properties)',
             'exported': datetime.now(timezone.utc).date().isoformat(),
             'scored': bool(scores), 'sg_threshold': threshold,
-            'columns': COLUMNS, 'tags': TAGS, 'chunks': CHUNKS,
+            'columns': COLUMNS, 'tags': TAGS, 'chunks': CHUNKS, 'aliases': aliases,
             'spotlight': [n for n in spotlight if n in names],
             'leaderboard': leaderboard(systems), 'stars': stars, 'systems': systems}, missing
 

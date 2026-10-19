@@ -5,6 +5,11 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.9', date: '18 Oct 2026', notes: [
+    'New: two rovers hidden on the Moon, the first ever to drive on another world and the first on its far side, each with its own scene.',
+    'New: meteors. A real-looking one now streaks across the night sky behind the page, and somewhere in orbit you can catch them.',
+    'Fixed: a few systems Kepler found outside its usual list now show their Kepler names (one appeared as "2MASS J19383260+4603591"), all their planets, and what makes them unusual.',
+  ] },
   { v: '1.9.8', date: '18 Oct 2026', notes: [
     'New: another rover to find on Mars, the first one from outside the United States, with its own scene.',
   ] },

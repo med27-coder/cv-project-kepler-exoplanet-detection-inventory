@@ -201,6 +201,18 @@ const EGG_FACTS = {
           'Its lander and rover were set down by a parachute, rockets and a hover phase, like NASA\'s, with a few minutes of "terror" all on autopilot.'],
     why: 'The first rover in the game from outside NASA: the story of driving on Mars belongs to more than one country, and Zhurong is the newest chapter.',
   },
+  lunokhod: {
+    fun: ['Lunokhod means "Moon walker" in Russian.',
+          'It weighed about 756 kg, more than five times as much as Yutu-2.',
+          'A ninth, thin wheel trailed behind it to measure how far it had really driven, since the others could slip in the dust.'],
+    why: 'The very first rover on another world, 27 years before Sojourner: the story of rovers starts on the Moon.',
+  },
+  yutu2: {
+    fun: ["Chang'e 4 carried a little sealed garden: cotton seeds sprouted inside it in January 2019, the first plants to sprout on the Moon.",
+          'In 2019 Yutu-2 spotted something shiny in a small crater; it turned out to be glass melted by an impact.',
+          'It weighs about 135 kg, about as much as a big motorbike.'],
+    why: "No one had landed on the side of the Moon that always faces away from Earth until Chang'e 4; Yutu-2 is the rover that drove there.",
+  },
   spirit: {
     fun: ['Spirit and Opportunity were named by Sofi Collis, a 9-year-old from Arizona, in a NASA essay contest.',
           'Its landing site was named Columbia Memorial Station, and the hills nearby after the seven astronauts of Space Shuttle Columbia.',

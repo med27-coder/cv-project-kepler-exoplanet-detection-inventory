@@ -1,7 +1,9 @@
 # Draft: sky events (the UFO, asteroids, comets, meteors)
 
 **Status: built on the map** (18 October 2026, `web/src/05-sky-events.js`, v1.1.0): comets, asteroids and the UFO,
-with SKY WATCH achievements. Still to build: meteors over the planets (METEOR CATCHER). Concept art in `pixel-art/concepts/`, made by
+with SKY WATCH achievements. **Meteors built in v1.9.9** (both versions, the user's choice): catchable from the ISS
+view (`web/src/45-spaceflight.js`, SHOOTING STAR and METEOR CATCHER) and as the page background's meteor
+(`web/src/55-backdrop.js`). Concept art in `pixel-art/concepts/`, made by
 `scripts/starmap/draft_concepts.py`. Extends ACHIEVEMENTS_V2.md section 1D (sky events).
 
 ## The science behind the drawings
@@ -60,4 +62,7 @@ The questions as first asked:
   meteor (green-white head, cooling trail, fading green train), now and then rather than every nine seconds.
   Decoration only, not catchable.
 
-**Question for the user:** both (A and B), only one, or neither? Nothing is built until then.
+**Answered 18 October 2026: both, each in its own way.** Built in v1.9.9. A lives in the ISS view, where the Earth
+is big enough to show a night side and its airglow (the Solar System view's Earth is a few pixels, so it has none).
+The old blue shooting star of the background is retired (it was drawn in code, no image; noted in
+`pixel-art/archive/README.md`).

@@ -30,9 +30,9 @@ bar finds it:
   (an official NASA photo, credited; ESA-credited pictures are linked instead) and a short history.
   The Solar System's card adds a strip of real photos of the Sun, every planet and the Moon.
 
-36 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Hubble, the Hail Mary (a nod to Project Hail Mary: `tau ceti` shows the real system with the ship as a glint by candidate e; `hail mary` finds it), Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
+38 eggs: the Solar System, Martian Man (a farm on Mars, a nod to The Martian), the five dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris), Kepler, the ISS, Hubble, the Hail Mary (a nod to Project Hail Mary: `tau ceti` shows the real system with the ship as a glint by candidate e; `hail mary` finds it), Voyager 1, Voyager 2, New Horizons, Webb, Euclid, SOHO, Parker Solar
 Probe, Solar Orbiter, BepiColombo, Juno, Europa Clipper, JUICE, Lucy, Psyche, OSIRIS-APEX, MRO, Mars
-Odyssey, Mars Express, ExoMars, Curiosity, Perseverance, Sojourner, Spirit, Opportunity and Zhurong (clues and stories: `EGGS` in
+Odyssey, Mars Express, ExoMars, Curiosity, Perseverance, Sojourner, Spirit, Opportunity, Zhurong, and on the Moon Lunokhod 1 and Yutu-2 (clues and stories: `EGGS` in
 `web/src/48-gallery.js`).
 
 Names ignore capitals, a leading "the", and hyphens, underscores or dots in place of spaces
@@ -40,7 +40,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (75, in groups), trophies, badges and your star
+### Achievements (79, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -79,8 +79,10 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | SPACE FARMER | Search "martian man" and watch the farm bring in a whole crop (a minute) |
 | | ECO MODE | Set the animation to battery saver |
 | | COSMIC ZOOM | Step through every sector of the UNIVERSE view |
-| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 36 |
+| Easter eggs | CURIOUS MIND / MISSION CONTROL / DWARF KING / GRAND TOUR | Find 1 easter egg / 5 spacecraft / all five dwarf planets / all 38 |
 | | RED PLANET FLEET | MRO, Odyssey, Mars Express, ExoMars, Curiosity, Perseverance |
+| | LUNAR DRIVERS | Lunokhod 1 and Yutu-2 (`lunokhod` / `luna 17`, `yutu 2` / `jade rabbit 2`) |
+| | ROVER ROSTER | Every rover: Sojourner, Spirit, Opportunity, Curiosity, Perseverance, Zhurong, Lunokhod 1, Yutu-2 |
 | | JUPITER'S ENTOURAGE | Juno, Europa Clipper, JUICE, Lucy |
 | | SUN CHASERS | Parker Solar Probe, SOHO, Solar Orbiter |
 | | L2 NEIGHBOURS | Webb, Euclid |
@@ -89,6 +91,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | CURATOR | Open ten found Galleria cards in one visit |
 | Sky watch | COMET CATCHER / TAIL CHASER | Click a comet passing over the map / catch five (one crosses every 3 to 6 minutes of use, comets and asteroids alike) |
 | | ROCK HOUND / ASTEROID CATCHER | Click a tumbling asteroid / catch ten |
+| | SHOOTING STAR / METEOR CATCHER | In the ISS view (`iss`), click a meteor burning through the green airglow over the night side / catch ten (one every 20 to 45 seconds; the page background's meteor is decoration only) |
 | | UFO SPOTTER | Click the flying saucer (after 10 minutes of use, about once an hour) |
 | | WHAT WAS THAT? (secret) | See the asteroid that follows the saucer, 2 times in 5 |
 | Two suns | TATOOINE / DOUBLE SUNSET | Visit a planet with two suns / all 12 two-sun systems (the "two suns" highlight finds them) |

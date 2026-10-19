@@ -12,8 +12,9 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 
 ## Queue (top first)
 
-**Queue finished 18 October 2026.** What is left needs the user: the meteor choice, the Moon rover drafts, and
-the Star Gazer / Colossus switch (see docs/HANDOFF.md).
+**Queue finished 18 October 2026.** The user then chose: meteors both ways and the Moon rovers (built in v1.9.9),
+and Colossus shown as EXPERIMENTAL beside Star Gazer (in progress: candidate scores, then the switch). Also fixed in
+v1.9.9 from a user report: Kepler-451 appeared under its 2MASS number with one planet of three.
 
 0. **Hubble Space Telescope** (user report: searching "hubble space telescope" or "hubble telescope" finds nothing).
    Add it as an easter egg like the ISS (an Earth-orbit exception): a pixel Earth with Hubble on its orbit, its

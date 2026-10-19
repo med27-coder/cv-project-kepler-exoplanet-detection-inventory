@@ -215,10 +215,10 @@ planets Kepler found outside its usual candidate list, like Kepler-16 b, a real 
 
 The **UNIVERSE** button zooms out in six sectors (◀ ▶ or the arrow keys): Kepler's field, the Sun's neighbourhood (every star with confirmed planets within 13 light-years, from NASA's table), the Milky Way, the Local Group (real galaxy distances, McConnachie 2012), Laniakea and the observable universe, each with its sources.
 
-**It's also a game.** The gear button opens the **Galleria**: 33 hidden easter eggs to find by name (each shows its
+**It's also a game.** The gear button opens the **Galleria**: 38 hidden easter eggs to find by name (each shows its
 pixel art next to the real NASA photo, with a slider that turns one into the other, plus fun facts and why it was
-hidden), 75 achievements with trophies by difficulty, set badges and a constellation per group, and a hologram
-close-up of every trophy. Some eggs open their own animated scenes (the Mars rovers at work, a farm on Mars, the
+hidden), 79 achievements with trophies by difficulty, set badges and a constellation per group, and a hologram
+close-up of every trophy. Some eggs open their own animated scenes (the rovers at work on Mars and the Moon, a farm on Mars, the
 dwarf planets), comets and asteroids cross the map to be caught, and a lost astronaut collects a wardrobe of rare
 outfits. Your achievements grow **your star** in the page header, from stardust to a black hole for the final
 mission (open every system on the map). Visitors can **make their own predictions** on candidates (planet or

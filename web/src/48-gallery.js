@@ -111,6 +111,12 @@ const EGGS = [
   { id: 'zhurong', name: 'Zhurong', kind: 'craft', art: 'zhurong', ref: 'zhurong', query: 'Zhurong', toast: 'FIRE STAR ROVER',
     clue: 'Named after a god of fire, I drove across a northern plain on Mars and took a selfie with a camera I left on the ground.',
     story: 'China\'s Tianwen-1 mission put its lander and the rover Zhurong on Utopia Planitia on 14 May 2021. Zhurong drove about 1.9 km, scanned the ground beneath it with radar, and photographed itself with its lander using a small camera it had dropped. It went to sleep for the Martian winter in May 2022 and has not woken up.' },
+  { id: 'lunokhod', name: 'Lunokhod 1', kind: 'craft', art: 'lunokhod', ref: 'lunokhod', query: 'Lunokhod', toast: 'FIRST WHEELS ON THE MOON',
+    clue: 'Steered by television from a quarter of a million miles away, I was the first rover on another world, in 1970. I shut my lid every night.',
+    story: "The Soviet Luna 17 landed on Mare Imbrium on 17 November 1970, and Lunokhod 1 rolled down its ramp: the first rover to drive on another world. Drivers on Earth steered it by its TV pictures for eleven lunar days, about 10.5 km, closing its solar lid each lunar night. In 2010 NASA's Lunar Reconnaissance Orbiter photographed it where it stopped." },
+  { id: 'yutu2', name: 'Yutu-2', kind: 'craft', art: 'yutu2', ref: 'change-4', query: 'Yutu 2', toast: 'RABBIT ON THE FAR SIDE',
+    clue: 'A jade rabbit on the side of the Moon that never faces Earth. A magpie bridge carries my messages home.',
+    story: "China's Chang'e 4 made the first landing on the Moon's far side on 3 January 2019, in Von Karman crater, and its rover Yutu-2 (\"Jade Rabbit 2\") drove off to explore. Since Earth is never in the sky there, the relay satellite Queqiao passes its signals along. It sleeps through every lunar night and became the longest-working rover on the Moon." },
   { id: 'spirit', name: 'Spirit', kind: 'craft', art: 'spirit', ref: 'mer-rover', query: 'Spirit', toast: 'TWIN ON THE HILLS',
     clue: 'One of twins sent in 2004. I climbed a hill named after an astronaut, and kept driving backwards on a broken wheel.',
     story: 'Spirit landed in Gusev Crater on 4 January 2004, the first of NASA\'s twin Mars Exploration Rovers. Built to last 90 sols, it explored for six years, climbed Husband Hill, and even its broken wheel made a discovery: dragging through the soil, it uncovered silica left by ancient hot springs.' },
@@ -161,6 +167,8 @@ const ACHIEVEMENTS = [
   { g: 'EASTER EGGS', id: 'curious', title: 'CURIOUS MIND', how: 'Find your first easter egg.' },
   { g: 'EASTER EGGS', id: 'mission-control', title: 'MISSION CONTROL', how: 'Find five spacecraft.' },
   { g: 'EASTER EGGS', id: 'red-fleet', title: 'RED PLANET FLEET', how: 'Find every mission at Mars: four orbiters and two rovers.' },
+  { g: 'EASTER EGGS', id: 'lunar-drivers', title: 'LUNAR DRIVERS', how: 'Find both rovers that drove on the Moon.' },
+  { g: 'EASTER EGGS', id: 'rover-roster', title: 'ROVER ROSTER', how: 'Find every rover, on Mars and on the Moon.' },
   { g: 'EASTER EGGS', id: 'jupiter-crew', title: "JUPITER'S ENTOURAGE", how: 'Find Juno, Europa Clipper, JUICE and Lucy.' },
   { g: 'EASTER EGGS', id: 'sun-chasers', title: 'SUN CHASERS', how: 'Find the three spacecraft that study the Sun.' },
   { g: 'EASTER EGGS', id: 'l2', title: 'L2 NEIGHBOURS', how: 'Find both telescopes parked at Sun-Earth L2.' },
@@ -180,6 +188,8 @@ const ACHIEVEMENTS = [
   { g: 'SKY WATCH', id: 'rock-hound', title: 'ROCK HOUND', how: 'Catch an asteroid tumbling across the map.' },
   { g: 'SKY WATCH', id: 'tail-chaser', title: 'TAIL CHASER', how: 'Catch five comets.' },
   { g: 'SKY WATCH', id: 'asteroid-catcher', title: 'ASTEROID CATCHER', how: 'Catch ten asteroids.' },
+  { g: 'SKY WATCH', id: 'shooting-star', title: 'SHOOTING STAR', how: 'Catch a meteor burning up over the Earth, seen from the space station.' },
+  { g: 'SKY WATCH', id: 'meteor-catcher', title: 'METEOR CATCHER', how: 'Catch ten meteors from the space station.' },
   { g: 'SKY WATCH', id: 'ufo-spotter', title: 'UFO SPOTTER', how: 'Catch the flying saucer. It rarely shows up.' },
   { g: 'SKY WATCH', id: 'what-was-that', title: 'WHAT WAS THAT?', how: 'See the asteroid that sometimes follows the flying saucer.', secret: true },
   { g: 'TWO SUNS', id: 'tatooine', title: 'TATOOINE', how: 'Visit a planet with two suns.' },
@@ -206,8 +216,8 @@ const ACHIEVEMENTS = [
 const TIER_OF = {
   rare: ['star-hopper', 'first-rock', 'eight-worlds', 'cousin', 'eden', 'puff', 'tiny', 'double', 'lava', 'ancient', 'flare',
          'believer', 'skeptic', 'coin', 'highlighter', 'l2', 'interstellar', 'photo-finish', 'tatooine', 'prophet', 'patience', 'daily', 'cosmic-zoom', 'rare-threads', 'walk-in-closet',
-         'tail-chaser', 'ufo-spotter'],
-  epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
+         'tail-chaser', 'ufo-spotter', 'lunar-drivers'],
+  epic: ['census', 'cartographer', 'dwarf-king', 'asteroid-catcher', 'meteor-catcher', 'runway', 'space-wardrobe', 'mission-control', 'red-fleet', 'rover-roster', 'jupiter-crew', 'sun-chasers', 'curator', 'grand-tour',
          'double-sunset', 'seer', 'cassandra', 'contrarian', 'streak'],
 };
 for (const a of ACHIEVEMENTS) {
@@ -219,6 +229,8 @@ const FAMOUS = { 'Kepler-10': 'first-rock', 'Kepler-90': 'eight-worlds', 'Kepler
 // Finding every easter egg in a set earns a collection.
 const EGG_SETS = {
   'red-fleet': ['mro', 'odyssey', 'mex', 'tgo', 'curiosity', 'perseverance'],
+  'lunar-drivers': ['lunokhod', 'yutu2'],
+  'rover-roster': ['sojourner', 'spirit', 'opportunity', 'curiosity', 'perseverance', 'zhurong', 'lunokhod', 'yutu2'],
   'jupiter-crew': ['juno', 'clipper', 'juice', 'lucy'],
   'sun-chasers': ['parker', 'soho', 'solarOrbiter'],
   l2: ['jwst', 'euclid'],
@@ -241,7 +253,7 @@ const progress = { eggs: {}, ach: {}, systems: [], toasts: true, seen: '', viewe
                    daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                    backdrop: 'animated',   // page background (55-backdrop.js)
                    outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
-                   comets: 0, asteroids: 0, ufos: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
+                   comets: 0, asteroids: 0, ufos: 0, meteors: 0 };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
 const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
   if (!saved || typeof saved !== 'object') return false;
@@ -253,7 +265,8 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
     }
   }
   if (Array.isArray(saved.systems)) {
-    progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60)])].slice(-200);
+    const renamed = n => (DATA.aliases || {})[n.toLowerCase()] || n;   // a system NASA lists under another name, now shown by its Kepler name
+    progress.systems = [...new Set([...progress.systems, ...saved.systems.filter(n => typeof n === 'string' && n.length < 60).map(renamed)])].slice(-200);
   }
   if (typeof saved.toasts === 'boolean') progress.toasts = saved.toasts;
   if (typeof saved.seen === 'string' && /^[0-9a-z,]{0,80000}$/.test(saved.seen)) {   // TRUE STAR GAZER: Kepler IDs, base 36
@@ -263,7 +276,7 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (saved.finalEmblem === 'white-dwarf' || saved.finalEmblem === 'black-hole') progress.finalEmblem = saved.finalEmblem;
   if (saved.whiteHole === true) progress.whiteHole = true;
   if (typeof saved.outfit === 'string' && ID.test(saved.outfit)) progress.outfit = saved.outfit;
-  for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos']) {
+  for (const k of ['astroVisits', 'astroLastRoll', 'astroDry', 'comets', 'asteroids', 'ufos', 'meteors']) {
     if (Number.isFinite(saved[k]) && saved[k] >= 0) progress[k] = Math.max(progress[k], Math.floor(saved[k]));
   }
   if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
@@ -431,7 +444,7 @@ function noSignal() { if (++session.unknown >= 5) achieve('hollow'); }
 
 // ---- "so close": a failed search that is a letter or two off an easter egg's name (or Tatooine)
 const NEAR_NAMES = [...EGGS.flatMap(e => [[e.name, e.id], [e.query, e.id]]),
-  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Zhurong', 'zhurong'], ['Parker', 'parker'],
+  ['James Webb', 'jwst'], ['Webb', 'jwst'], ['Voyager 1', 'voyager'], ['Voyager 2', 'voyager2'], ['Hubble', 'hubble'], ['Hail Mary', 'hailmary'], ['Opportunity', 'opportunity'], ['Spirit', 'spirit'], ['Zhurong', 'zhurong'], ['Lunokhod', 'lunokhod'], ['Yutu', 'yutu2'], ['Parker', 'parker'],
   ['Osiris Rex', 'apex'], ['Tatooine', null]];
 const nearForm = s => String(s).toLowerCase().replace(/[-_.]/g, ' ').replace(/^the /, '').trim();
 function editDistance(a, b) {   // Levenshtein, one row at a time
