@@ -7,6 +7,17 @@ for fixes. The NASA data refresh keeps its own date, shown in the footer. The ve
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.10] - 2026-10-18
+
+### Added
+- **Colossus beside Star Gazer, labelled EXPERIMENTAL** (docs/plans/HIGHLIGHTS.md, decision 2): giant candidates' case
+  files get a SCORES FROM switch (remembered), and the planet table follows it. Colossus 2 was tested as registered
+  and not adopted; its scores come from `scripts/pipeline/colossus_score_candidates.py` (the registered recipe trained
+  once on every labelled KOI, nothing measured or tuned; see docs/star-gazer/V4B_RESULTS.md) and reach the page as
+  `cg` on 289 giant candidates. The map's colours, the next-planets list and the predictions game keep Star Gazer.
+- "star gazer" and "colossus" open each model's page, with its registered numbers; new achievements **MEET STAR
+  GAZER** and **THE EXPERIMENT** (81 in all).
+
 ## [1.9.9] - 2026-10-18
 
 ### Added

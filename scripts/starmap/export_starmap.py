@@ -36,6 +36,8 @@ THRESHOLD = C.MODELS_DIR / 'v3' / 'threshold.json'   # Star Gazer's decision thr
 # absent, e.g. in the monthly refresh workflow, which has no access to the encrypted model.
 PUBLIC_SCORES = C.PROJECT_ROOT / 'results' / 'v3_public' / 'candidate_scores.csv'
 PLANETS = C.RAW_DIR / 'ps_kepler_planets.csv'
+# Colossus 2 (not adopted, shown as EXPERIMENTAL): giant candidates only, scripts/pipeline/colossus_score_candidates.py
+COLOSSUS = C.PROJECT_ROOT / 'results' / 'v3_public' / 'colossus_scores.csv'
 # NASA's confirmed-planet table (one row per planet, best values) for the Kepler field:
 # masses, distances, discovery year, and planets found by other methods (RV, TTV).
 # Hosts are matched to KOI stars by position (names differ: Kepler-90 is "KOI-351" there).
@@ -120,6 +122,14 @@ def load_scores(path):
     table = pd.read_csv(path)
     return {k: (float(p), bool(a)) for k, p, a in
             zip(table['kepoi_name'], table['star_gazer_prob'], table['above_threshold'])}
+
+
+def load_colossus(path=COLOSSUS):
+    """{kepoi_name: Colossus's blended probability} for the giant candidates, or {} if not scored."""
+    if not Path(path).exists():
+        return {}
+    table = pd.read_csv(path)
+    return {k: float(p) for k, p in zip(table['kepoi_name'], table['colossus_prob'])}
 
 
 def _cached_table(path, url, what, download=True, columns=()):
@@ -441,7 +451,7 @@ def extra_system(host, rows, kepid):
 
 
 def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5, tois=None, gaia=None,
-          names=None, lookup_kic=True):
+          names=None, lookup_kic=True, colossus=None):
     """Map pixels for every star with a non-false-positive KOI, full detail for drawn systems.
     Optional extras: `planets` is NASA's confirmed-planet table (masses, distances, non-KOI planets),
     `tois` NASA's TESS Objects of Interest table, `gaia` {kepid: Berger et al. 2020 star row},
@@ -501,6 +511,10 @@ def build(catalog, spotlight=SPOTLIGHT, scores=None, planets=None, threshold=0.5
                       0, None, len(detail['planets']), 0,
                       tags(detail, True), chunk_of(host),
                       round(detail['dist_pc']) if detail.get('dist_pc') else None])
+    for detail in systems.values():   # the experimental second opinion on giant candidates (the page's model switch)
+        for p in detail['planets']:
+            if p['status'] == 'candidate' and p['koi'] in (colossus or {}):
+                p['cg'] = round(colossus[p['koi']], 3)
     names = {s[0] for s in stars}
     missing = sorted(wanted - names)
     return {'source': 'NASA Exoplanet Archive (KOI, confirmed-planet and TOI tables); '
@@ -616,7 +630,7 @@ def main():
     threshold = json.loads(threshold_file.read_text())['threshold'] if scores and threshold_file.exists() else 0.5
     names = load_keplernames(download=not args.offline)
     data, missing = build(catalog, scores=scores, planets=planets, threshold=threshold, tois=tois, gaia=gaia,
-                          names=names, lookup_kic=not args.offline)
+                          names=names, lookup_kic=not args.offline, colossus=load_colossus())
     extra = [s[0] for s in data['stars'] if s[COLUMNS.index('kois')] == 0]
     if extra:
         print(f'Added {len(extra)} systems Kepler found outside the KOI list: {", ".join(extra)}')

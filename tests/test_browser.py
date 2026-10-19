@@ -396,7 +396,7 @@ def test_rank_header_badges_and_podium(browser, site):
     page.reload()
     page.wait_for_function("() => document.getElementById('rank-name').textContent === 'RED GIANT'")   # 12 achievements
     assert page.locator('#rank-badges canvas').count() == 1                                     # famous worlds done
-    assert page.locator('#rank-count').inner_text() == '12/79'
+    assert page.locator('#rank-count').inner_text() == '12/81'
     page.click('#rank')                                                                           # opens the tab
     assert page.locator('#pane-ach .rank-panel').is_visible()
     assert page.locator('.badge-shelf li.on').count() == 1
@@ -719,6 +719,28 @@ def test_meteors_can_be_caught_from_the_station(browser, site):
     page.wait_for_function('() => JSON.parse(localStorage.getItem("starmap.progress.v1")).meteors === 1')
     saved = page.evaluate('() => JSON.parse(localStorage.getItem("starmap.progress.v1"))')
     assert 'shooting-star' in saved['ach'] and 'meteor-catcher' not in saved['ach']
+    assert not errors, errors
+
+
+def test_star_gazer_and_colossus(browser, site):
+    """Searching each model opens its page and earns its achievement; a giant candidate's case file switches between
+    Star Gazer's score and Colossus's (labelled EXPERIMENTAL), and the choice is remembered."""
+    errors = []
+    page = open_page(browser, site, errors)
+    search = lambda q: (page.fill('#query', q), page.press('#query', 'Enter'))
+    search('star gazer')
+    assert page.locator('#sys-title').inner_text() == 'STAR GAZER'
+    search('colossus')
+    assert page.locator('#sys-title').inner_text() == 'COLOSSUS'
+    assert 'EXPERIMENTAL' in page.locator('#info').inner_text()
+    search('KOI-3411')
+    page.wait_for_selector('.model-switch')
+    assert 'Star Gazer' in page.locator('#info table').inner_text()
+    page.click('.model-switch button[data-model="colossus"]')
+    page.wait_for_function('() => document.querySelector("#info table").innerText.includes("Colossus")')
+    saved = page.evaluate('() => JSON.parse(localStorage.getItem("starmap.progress.v1"))')
+    assert saved['model'] == 'colossus'
+    assert {'meet-star-gazer', 'meet-colossus'} <= set(saved['ach'])
     assert not errors, errors
 
 

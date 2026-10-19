@@ -209,7 +209,7 @@ SHIPPED_IDS = {
             'launch-day', 'star-gazer', 'tatooine', 'double-sunset', 'first-call', 'prophet', 'seer', 'cassandra',
             'contrarian', 'patience', 'daily', 'streak', 'so-close', 'cosmic-zoom',
             'lost-in-orbit', 'dwarf-king', 'houston', 'space-wardrobe', 'space-farmer', 'first-outfit',
-            'visiting-hours', 'rare-threads', 'runway', 'walk-in-closet', 'lunar-drivers', 'rover-roster', 'shooting-star', 'meteor-catcher',
+            'visiting-hours', 'rare-threads', 'runway', 'walk-in-closet', 'lunar-drivers', 'rover-roster', 'shooting-star', 'meteor-catcher', 'meet-star-gazer', 'meet-colossus',
             'comet-catcher', 'rock-hound', 'tail-chaser', 'asteroid-catcher', 'ufo-spotter', 'what-was-that'},
 }
 

@@ -40,7 +40,7 @@ Names ignore capitals, a leading "the", and hyphens, underscores or dots in plac
 "ExoMars TGO"). Extra or missing spaces don't count, on purpose. A search a letter or two off a hidden name says
 **SO CLOSE!** without giving it away; once that egg is found, it asks "did you mean…" and names it.
 
-### Achievements (79, in groups), trophies, badges and your star
+### Achievements (81, in groups), trophies, badges and your star
 
 Each achievement's trophy shows how hard it is: **bronze** (common), **silver with a gem** (rare), **gold with a
 star** (epic), a **galaxy cup** (secret); locked ones show a **space lock**. Completing a group earns its **badge**
@@ -72,6 +72,7 @@ instead, and resetting starts you over as a **white hole**. Design: [STAR_GAZER_
 | | FLARE WATCHER | Catch a red dwarf flaring (Kepler-186 is a good place to wait) |
 | | TRANSIT WITNESS / MIND THE GAP | Turn on KEPLER'S VIEW / TRUE SCALE |
 | Star Gazer's guesses | BELIEVER / SKEPTIC / COIN FLIP | Open a candidate Star Gazer rates ≥ 90% / ≤ 10% / 40–60% |
+| | MEET STAR GAZER / THE EXPERIMENT | Search `star gazer` / `colossus`: each model's page (Colossus is EXPERIMENTAL; giant candidates' case files switch between the two scores) |
 | Map and tools | DEPTH PERCEPTION / CHIP CHECK / EAGLE EYE | DEPTH on / toggle CCDS / zoom the map to 8× |
 | | CARTOGRAPHER | Hop 25 stars in a row with the arrow keys (a click resets the count) |
 | | HIGHLIGHTER | Try all five highlight filters in one visit |
