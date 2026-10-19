@@ -4,7 +4,7 @@ argument-hint: "[what changed, in a few words]"
 ---
 
 Release a new version of the star map, following the release convention in CLAUDE.md. Arguments: $ARGUMENTS
-(they describe what changed). Versions count up one step in the last number per release (1.9.1, 1.9.2, 1.9.3...), so
+(they describe what changed). Versions count up one step in the last number per release (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...; never 1.9.10), so
 they always read in order for players; never jump to 2.0.
 
 1. Read `web/src/00-version.js` and the top of `CHANGELOG.md`; the new version is the last one with its final number + 1.

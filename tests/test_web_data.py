@@ -262,9 +262,9 @@ def test_resolutions():
 def test_version_agrees_everywhere():
     """The version in web/src/00-version.js tops CHANGELOG.md and is stamped on index.html's own links."""
 
-    v = re.search(r"^  \{ v: '(\d+\.\d+\.\d+)'", (WEB / 'src' / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)[1]
+    v = re.search(r"^  \{ v: '(\d+\.\d+\.\d+(?:\.\d+)?)'", (WEB / 'src' / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)[1]
     log = (WEB.parent / 'CHANGELOG.md').read_text(encoding='utf-8')
-    assert re.search(r'^## \[(\d+\.\d+\.\d+)\]', log, re.MULTILINE)[1] == v, 'add the version to CHANGELOG.md'
+    assert re.search(r'^## \[(\d+\.\d+\.\d+(?:\.\d+)?)\]', log, re.MULTILINE)[1] == v, 'add the version to CHANGELOG.md'
     html = (WEB / 'index.html').read_text(encoding='utf-8')
     assert f'src="starmap.js?v={v}"' in html and f'href="style.css?v={v}"' in html, 'run scripts/starmap/build_web.py'
 

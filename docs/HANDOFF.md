@@ -5,7 +5,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 
 ## State
 
-- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.10**. Every version is in
+- **Kepler Star Map** (`web/`, live on GitHub Pages): version **1.9.9.1**. Every version is in
   [CHANGELOG.md](../CHANGELOG.md), tagged and published as a GitHub Release; players see the same history, in plain
   words, in the antenna's UPDATES tab (`HISTORY` in `web/src/00-version.js`).
 - **The game:** 38 easter eggs (Hubble in 1.9.3, the Hail Mary at Tau Ceti in 1.9.4, Zhurong in 1.9.8, the Moon rovers in
@@ -20,7 +20,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 
 ## Conventions that matter
 
-- **Versions count up in the last number** (1.9.1, 1.9.2, 1.9.3...), never 2.0. `/release <what changed>` does the
+- **Versions count up in the last number** (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...), never 2.0. `/release <what changed>` does the
   whole routine (history, changelog, checks, push, CI, tag, GitHub Release).
 - **Player-facing notes** say only "New:" and "Fixed:"; no spoilers for hidden eggs, no technical or security details.
 - **Never hand-edit** `web/starmap.js` (built from `web/src/`) or `web/data/` (generated). Shipped achievement and
@@ -39,7 +39,7 @@ Where the project stands and how to pick it up, for anyone (or any session) cont
 ## Open decisions and next steps
 
 - Decided 18 October 2026 and built: meteors both ways and the Moon rovers (1.9.9); Colossus beside Star Gazer,
-  labelled EXPERIMENTAL (1.9.10): `star gazer` / `colossus` pages and a score switch in giant candidates' case files
+  labelled EXPERIMENTAL (1.9.9.1): `star gazer` / `colossus` pages and a score switch in giant candidates' case files
   (scores from `scripts/pipeline/colossus_score_candidates.py`, explained in star-gazer/V4B_RESULTS.md).
 - Commit identity (only the med27-coder account): see [plans/COMMIT_IDENTITY.md](plans/COMMIT_IDENTITY.md).
 - The loop's work list: [plans/LOOP_BACKLOG.md](plans/LOOP_BACKLOG.md).
