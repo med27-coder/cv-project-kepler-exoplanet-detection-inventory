@@ -16,6 +16,7 @@ Windows, Python venv at `.venv` (use `.venv/Scripts/python`, not `python`). The 
 .venv\Scripts\python -m mypy src/kepler_cnn scripts app.py           # "KeyError ..." from mypy = corrupt cache: delete .mypy_cache
 .venv\Scripts\python scripts\starmap\build_web.py                    # after ANY edit in web/src/ (then --check)
 .venv\Scripts\python -m http.server 8000 --directory web             # view the site locally
+.venv\Scripts\streamlit run app.py                                  # the Star Gazer demo (Streamlit; tests use its AppTest)
 .venv\Scripts\python scripts\pipeline\run_pipeline.py --list         # V3 ML pipeline steps (--from <step> resumes)
 ```
 

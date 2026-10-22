@@ -50,7 +50,7 @@ NASA and STScI do not endorse this project. Their names are used only to identif
 
 ## 4. Third-party software
 
-The project depends on open-source packages, including TensorFlow/Keras, lightkurve, astropy, scikit-learn, pandas, NumPy, matplotlib, seaborn, and Gradio. Each package is governed by its own license, and you are responsible for complying with those licenses.
+The project depends on open-source packages, including TensorFlow/Keras, lightkurve, astropy, scikit-learn, pandas, NumPy, matplotlib, seaborn, and Streamlit. Each package is governed by its own license, and you are responsible for complying with those licenses.
 
 ## 5. No warranty
 
@@ -58,9 +58,9 @@ THE SOFTWARE, MODEL, AND OUTPUTS ARE PROVIDED **"AS IS"**, WITHOUT WARRANTY OF A
 
 ## 6. The web demo and public links
 
-- By default, `app.py` runs only on your own computer (`127.0.0.1`).
-- If you start it with `--share`, Gradio creates a temporary public URL routed through Gradio's servers. Anyone with the link can use the demo, and each use causes your machine to make requests to NASA/MAST. You are responsible for who you share the link with and for any traffic it generates.
-- The demo does not store your inputs. However, Gradio's relay and the data providers may log requests under their own privacy policies.
+- By default, `app.py` runs only on your own computer (`localhost`).
+- If you run it on a public server (for example a Hugging Face Space), anyone with its address can use the demo, and each use makes the server send requests to NASA/MAST. You are responsible for who can reach it and for any traffic it generates.
+- The demo does not store your inputs. However, the hosting provider and the data providers may log requests under their own privacy policies.
 - Anyone using the demo must also accept these Terms, using the checkbox in the app.
 
 **The star map's game.** Your progress (easter eggs, achievements, predictions) is stored only in your own browser. The site sets no cookies and runs no analytics; the only outside request is the sky photo of a system you open (from CDS).

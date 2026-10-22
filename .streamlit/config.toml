@@ -1,0 +1,20 @@
+# Star Gazer's Streamlit server (app.py). Command-line flags override these, e.g. a Hugging Face Space runs
+# `streamlit run app.py --server.address 0.0.0.0 --server.port 7860`.
+
+[server]
+address = "localhost"          # this computer only, unless asked otherwise
+headless = true                # don't open a browser on its own
+maxUploadSize = 1              # MB; the app takes no uploads
+enableCORS = true
+enableXsrfProtection = true
+
+[client]
+showErrorDetails = "none"      # visitors never see tracebacks (they go to the server's log)
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false       # send nothing to Streamlit
+
+[theme]
+base = "dark"
+primaryColor = "#ffd34d"       # the star map's gold

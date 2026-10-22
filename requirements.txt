@@ -33,7 +33,8 @@ ipykernel>=6.25
 cryptography>=50.0.2
 
 # Optional web demo (app.py)
-gradio>=6.30.0
+streamlit>=1.66.1                # app.py, the Star Gazer demo (replaced Gradio, which capped Pillow below 13)
+pillow>=13.0.0                   # security fixes (Pillow 12 had 24 known issues)
 
 # Tests (.venv\Scripts\python -m pytest)
 pytest>=9.0.3

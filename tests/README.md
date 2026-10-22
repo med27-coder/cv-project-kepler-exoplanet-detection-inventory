@@ -13,7 +13,7 @@ They use small synthetic data and need no NASA downloads. The browser tests need
 | `test_views.py` | Light-curve views built from synthetic Kepler-like data: shapes, eclipsing-binary signatures, odd cases (e.g. a "transit" longer than its orbit) |
 | `test_star_gazer.py` | Model plumbing: splits by star, feature scaling, training, checkpoint resume, saliency, the Hugging Face bundle check |
 | `test_project.py` | Terms of Use gate and dataset de-duplication |
-| `test_app_security.py` | The Gradio demo refuses bad KOI names and out-of-range inputs |
+| `test_app_security.py` | The Streamlit demo refuses bad KOI names and out-of-range inputs; its page, run headless with Streamlit's test harness, explains a missing model and insists on the Terms |
 | `test_secure_artifacts.py` | The encrypted model bundle: round trip, tampering, swapped/dropped parts, wrong key, passphrase, rotation |
 | `test_pipeline_tools.py` | Catalog sanity report, prediction scoreboard, pipeline runner |
 | `test_analysis.py` | Error-analysis helpers (slice statistics, intervals) |

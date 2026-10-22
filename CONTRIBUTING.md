@@ -21,7 +21,7 @@ flowchart LR
     HORIZONS[(JPL Horizons)] --> CRAFT[fetch_spacecraft.py]
     EXPORT --> WEB[web/<br/>Kepler Star Map]
     CRAFT --> WEB
-    MODEL --> APP[app.py<br/>Gradio demo]
+    MODEL --> APP[app.py<br/>Streamlit demo]
 ```
 
 | Stage | Script | Output |

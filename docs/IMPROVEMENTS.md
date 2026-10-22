@@ -104,7 +104,7 @@ The current measures are listed in [SECURITY.md](../SECURITY.md): strict CSP, es
 | **P2** | **OpenSSF Scorecard workflow** (free): a weekly score of branch protection, pinned dependencies, token permissions and so on, with a badge. | Continuous, independent check of the repo's security posture. | 🟢 |
 | **P2** | **Signed commits** (SSH signing key on GitHub). | Proves commits on `main` really came from you. | 🟢 |
 | **P3** | **Real security headers** via a free proxy (e.g. Cloudflare in front of Pages) for `frame-ancestors`, HSTS and `Permissions-Policy`. | Pages can't send headers; the meta CSP and frame guard cover most of it. Trade-off: adds a third party that sees traffic. | 🟡 |
-| **P3** | **Hugging Face Space hardening** when deployed: keep `STAR_GAZER_KEY` only as a Space secret, private Space until reviewed, Gradio's built-in queue limits (already set). | The only server-side part of the project. | 🟢 |
+| **P3** | **Hugging Face Space hardening** when deployed: keep `STAR_GAZER_KEY` only as a Space secret, private Space until reviewed, one prediction at a time and at most 20 visitors waiting, set in `app.py` (already set). | The only server-side part of the project. | 🟢 |
 
 ## 6. Encryption and secrets
 

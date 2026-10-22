@@ -2,10 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Gradio app (local)",
+      "name": "Star Gazer app (local)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/app.py",
+      "module": "streamlit",
+      "args": [
+        "run",
+        "app.py"
+      ],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}"
     },
@@ -14,7 +18,9 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/scripts/data/import_colab_checkpoints.py",
-      "args": ["${input:colabFolder}"],
+      "args": [
+        "${input:colabFolder}"
+      ],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}"
     }

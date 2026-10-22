@@ -371,10 +371,10 @@ No data files are committed to this repository.
 6. **Explore** `notebooks/Exoplanet_Detection_V3_StarGazer.ipynb` (`.venv` kernel): views, features, evaluation, ablation and predictions.
 7. **Web demo:**
    ```powershell
-   .venv\Scripts\python app.py              # Star Gazer at http://127.0.0.1:7860
-   .venv\Scripts\python app.py --model v2   # the V2 CNN
+   .venv\Scripts\streamlit run app.py                 # Star Gazer at http://localhost:8501
+   .venv\Scripts\streamlit run app.py -- --model v2   # the V2 CNN
    ```
-   Or use **Run and Debug ▸ "Gradio app (local)"**. Add `--share` for a temporary public link (see Terms §6). Tick **"Explain this prediction"** for a saliency map. The app refuses a model trained on an older view recipe than the current code builds; retrain it, or start the app with `--allow-stale`.
+   Or use **Run and Debug ▸ "Star Gazer app (local)"**. The demo is a Streamlit app (it replaced Gradio in October 2026, when Gradio would not allow the Pillow release with security fixes); it stays on your computer unless you host it (see Terms §6). Tick **"Explain this prediction"** for a saliency map. The app refuses a model trained on an older view recipe than the current code builds; retrain it, or start the app with `-- --allow-stale`.
 8. **(Optional) Host the demo for free on Hugging Face Spaces** (CPU basic tier, no subscription): `scripts\tools\make_hf_space.py` builds `build/hf_space/`. Its docstring lists the upload commands and the `STAR_GAZER_KEY` secret to set. The model is uploaded only in encrypted form.
 
 **Using the committed V3 model instead of retraining:** the trained model and detailed results are stored encrypted (AES-256-GCM) in `secure/`: parts of up to 90 MB (GitHub's file limit is 100 MB), each authenticated together with its position in the bundle, plus a `MANIFEST.json` with every part's SHA-256. With the key (`.secrets/star_gazer.key` or the `STAR_GAZER_KEY` environment variable):
@@ -414,7 +414,7 @@ cv-project-kepler-exoplanet-detection-inventory/
 ├── LICENSE, NOTICE.md           ← PolyForm Noncommercial 1.0.0; third-party material and its terms
 ├── requirements.txt              ← Local (VS Code) dependencies
 ├── pyproject.toml                ← `pip install -e .` + pytest config
-├── app.py                        ← Gradio web demo: Star Gazer, V2 or V1.5 (local by default)
+├── app.py                        ← Streamlit web demo: Star Gazer, V2 or V1.5 (local by default)
 ├── .vscode/                      ← Interpreter, notebook root, launch configs, recommended extensions
 ├── .github/                      ← CI: tests, star map deploy, CodeQL, dependency audit, Dependabot
 ├── cspell.json                   ← Project words for the VS Code spell checker
@@ -532,7 +532,7 @@ The project evolved across four versions. V2 began as a Colab notebook titled "V
 | **Example KOIs** | Hard-coded IDs/period/epoch | Looked up by KOI name in the catalog | The V1.5 values did not match the catalog: "Kepler-90g" used P=14.45 d (the catalog lists 210.6 d), and the "KOI-189" and "KOI-203" false-positive examples are confirmed planets (Kepler-13 b, Kepler-428 b). This explains the "inconsistent" KOI-203 results |
 | **Evaluation plots** | Plotted `y_test` against predictions from the NaN-filtered `y_test_eval` | One consistent test set | Prevents misaligned confusion matrix / ROC |
 | **Catalog API** | Legacy NStED API | NASA TAP API (NStED kept as fallback) | NStED is the deprecated interface |
-| **Gradio app** | Notebook cell, `share=True` by default | `app.py`, local-only by default, `--share` opt-in | Safer default; doesn't block the notebook |
+| **Web app** | Gradio notebook cell, `share=True` by default | `app.py`, local-only by default; Streamlit since October 2026 (no public relay) | Safer default; doesn't block the notebook |
 | **Terms of Use** | — | [TERMS_OF_USE.md](TERMS_OF_USE.md), enforced in the notebook and app | Clarifies educational scope, data-provider etiquette, no-warranty |
 
 #### V3 — Star Gazer

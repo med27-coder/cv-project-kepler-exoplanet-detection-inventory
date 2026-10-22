@@ -20,8 +20,9 @@ results/colab_import/
 # Local Terms of Use acceptance record
 .terms_accepted
 
-# Gradio
+# Gradio (the demo before October 2026) and Streamlit secrets
 .gradio/
+.streamlit/secrets.toml
 flagged/
 
 # V3 Star Gazer: model + detailed results are committed only encrypted (secure/*.enc)

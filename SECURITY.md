@@ -15,7 +15,7 @@ bounty, but credit is given in the fix's commit message if you'd like.
 | Part | Where | Notes |
 |---|---|---|
 | Kepler Star Map | `web/`, published on GitHub Pages | Static site: no server code, no accounts, no cookies |
-| Star Gazer web demo | `app.py`, `scripts/tools/make_hf_space.py` | Gradio app; runs locally or on a Hugging Face Space |
+| Star Gazer web demo | `app.py`, `scripts/tools/make_hf_space.py` | Streamlit app (one prediction at a time, no error details shown to visitors); runs locally or on a Hugging Face Space (Docker) |
 | Encrypted model bundle | `secure/`, `scripts/tools/secure_artifacts.py` | AES-256-GCM; the key is never committed |
 | CI workflows | `.github/workflows/` | |
 
