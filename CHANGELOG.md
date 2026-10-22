@@ -18,6 +18,10 @@ history in `docs/star-gazer/`.
   three photos join the Lunokhod card as references. The old scene frame is archived; the before/after drafts are in
   `pixel-art/concepts/draft_lunokhod_earth*.png`.
 
+### Fixed
+- Development tools: uv 0.11.15 -> 0.13.5 (Dependabot alert 4: its bundled certificate store trusted a compromised
+  root). Only uv's entry in `requirements-dev.lock` changed; no other pin moved.
+
 ## [1.9.9.1] - 2026-10-18
 
 ### Added
