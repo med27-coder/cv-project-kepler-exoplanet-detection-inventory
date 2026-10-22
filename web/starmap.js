@@ -117,10 +117,14 @@
   // ---------------------------------------------------------------- the site's version
   // One source of truth (docs/plans/TROPHIES_AND_DATA.md section 5): build_web.py stamps it on the page's script and
   // stylesheet links, and tests check it matches the top of CHANGELOG.md. Versions count up in the last number, one step per release
-  // (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
+  // (1.9.1, 1.9.2, 1.9.3...; after 1.9.9 a fourth number: 1.9.9.1, 1.9.9.2...; a small follow-up before the next
+  // planned release adds one more: 1.9.9.1.1), so they always read in order; no 2.0. HISTORY is what players read in the antenna's UPDATES tab, newest first: plain
   // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
   // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
   const HISTORY = [
+    { v: '1.9.9.1.1', date: '21 Oct 2026', notes: [
+      "New: the Earth above the Moon now looks like NASA's photos taken from there, half lit by day and nearly full through the lunar night.",
+    ] },
     { v: '1.9.9.1', date: '18 Oct 2026', notes: [
       'New: a second opinion on giant candidates. Their case files can switch to Colossus, an experimental AI made for giant planets, to compare with Star Gazer.',
       'New: two more achievements for finding out about the AIs behind the map.',
@@ -3980,6 +3984,36 @@
     return Math.max(0, 1 - (c - dawn) / 2);
   }
 
+  // The Earth as seen from the Moon, after NASA's photos (LRO's Earthrise of 2015, Apollo 16 and 17): NASA's Blue
+  // Marble map (earthSurface, 40-home.js), its colours graded to the photos' deep navy oceans, bluish-white clouds and
+  // muted tan land; a black night side with a crisp terminator (no air on the Moon to soften it); a faint blue edge
+  // on the sunlit side. `phase`: the angle between the Sun and the viewer seen from the Earth (0 full, PI/2 half).
+  const EARTH_FROM_MOON = {
+    '#2a5fbf': '#1f2a6a', '#3f86d8': '#2c3f86', '#3d7a35': '#3a5034', '#6f9a48': '#5d6b3f', '#d1b07a': '#b39a6e',
+    '#9a7a50': '#7d6a4c', '#8d877d': '#77736c', '#eef6ff': '#e6ecfa', '#f4f8ff': '#dfe4f7',
+  };
+  function drawEarthFromMoon(ctx, cx, cy, r, spin, phase) {
+    const L = [-Math.sin(phase) * 0.96, -Math.sin(phase) * 0.28, Math.cos(phase)];   // the Sun: off to the left
+    const R = r + 0.5;
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        const q = (dx * dx + dy * dy) / (R * R);
+        if (q > 1) continue;
+        const nz = Math.sqrt(1 - q), lit = (dx / R) * L[0] + (dy / R) * L[1] + nz * L[2];
+        let col;
+        if (lit < -0.04) col = '#030409';                                     // night: black, no lights at this size
+        else {
+          const base = EARTH_FROM_MOON[earthSurface(dx, dy, r, spin).toLowerCase()] || '#1f2a6a';
+          const f = lit < 0.08 ? 0.45 : 0.8 + 0.3 * Math.min(1, lit * 1.5);  // a crisp terminator, brighter towards the Sun
+          col = shade(base, f);
+          if (q > 0.8 && lit > 0.25) col = shade('#5f6fbf', 0.9 + 0.2 * lit);   // the thin sunlit edge of the air
+        }
+        ctx.fillStyle = col;
+        ctx.fillRect(cx + dx, cy + dy, 1, 1);
+      }
+    }
+  }
+
   // Lunokhod 1, facing right, wheels on the ground at (x, y): a pressurised "bathtub" on eight wire-mesh wheels, a lid
   // with solar cells on its inside (open: 0 closed .. 1 swung up and back), a spike antenna and two TV eyes in front.
   function drawLunokhod(ctx, x, y, s, t, moving, open) {
@@ -4033,16 +4067,12 @@
     drawLunokhod(ctx, x, ground, 2, t, c < 14, REDUCED_MOTION ? 1 : open);
     moonNight(ctx, w, h, dark);
     moonStars(ctx, w, horizon, 'imb', dark > 0.5);
-    // the Earth, half lit, high over the near side (it hangs in the same place in the Moon's sky)
-    const ex = Math.round(w * 0.8), ey = Math.round(h * 0.14), er = 9;
-    for (let dy = -er; dy <= er; dy++) {
-      for (let dx = -er; dx <= er; dx++) {
-        if (dx * dx + dy * dy > er * er) continue;
-        const lit = dx < 2;
-        ctx.fillStyle = !lit ? '#0d1d40' : hash(`ea${dx >> 1}${dy >> 1}`) < 0.32 ? '#f2f4f8' : hash(`eb${dx >> 2}${dy >> 2}`) < 0.3 ? '#5f8f4a' : '#2f6fd6';
-        ctx.fillRect(ex + dx, ey + dy, 1, 1);
-      }
-    }
+    // the Earth, high over the near side (it hangs in the same place in the Moon's sky), its phase the opposite of the
+    // Moon's day: mostly dark while the Sun is up, nearly full through the lunar night, when its earthshine tints the
+    // ground blue
+    const phase = REDUCED_MOTION ? 1.3 : 1.35 - 1.1 * dark;   // radians between the Sun and us, seen from the Earth: half lit by day
+    if (dark > 0.3) { ctx.fillStyle = `rgba(70, 95, 170, ${0.07 * dark})`; ctx.fillRect(0, horizon, w, h - horizon); }
+    drawEarthFromMoon(ctx, Math.round(w * 0.8), Math.round(h * 0.16), 10, t * 0.3, phase);
     pixelText(ctx, 'MARE IMBRIUM', 4, h - 10, '#e8ecff');
     const day = `LUNAR DAY ${1 + (Math.floor((REDUCED_MOTION ? 0 : t) / 32) % 11)}`;
     pixelText(ctx, dark > 0.5 ? 'LUNAR NIGHT' : day, w - textWidth(dark > 0.5 ? 'LUNAR NIGHT' : day) - 4, h - 10, '#e8ecff');
@@ -4246,6 +4276,7 @@
       clue: 'Named after a god of fire, I drove across a northern plain on Mars and took a selfie with a camera I left on the ground.',
       story: 'China\'s Tianwen-1 mission put its lander and the rover Zhurong on Utopia Planitia on 14 May 2021. Zhurong drove about 1.9 km, scanned the ground beneath it with radar, and photographed itself with its lander using a small camera it had dropped. It went to sleep for the Martian winter in May 2022 and has not woken up.' },
     { id: 'lunokhod', name: 'Lunokhod 1', kind: 'craft', art: 'lunokhod', ref: 'lunokhod', query: 'Lunokhod', toast: 'FIRST WHEELS ON THE MOON',
+      refs: [['earthrise-lro', 'EARTH FROM LRO'], ['earthrise-apollo17', 'APOLLO 17'], ['earthrise-apollo16', 'APOLLO 16']],
       clue: 'Steered by television from a quarter of a million miles away, I was the first rover on another world, in 1970. I shut my lid every night.',
       story: "The Soviet Luna 17 landed on Mare Imbrium on 17 November 1970, and Lunokhod 1 rolled down its ramp: the first rover to drive on another world. Drivers on Earth steered it by its TV pictures for eleven lunar days, about 10.5 km, closing its solar lid each lunar night. In 2010 NASA's Lunar Reconnaissance Orbiter photographed it where it stopped." },
     { id: 'yutu2', name: 'Yutu-2', kind: 'craft', art: 'yutu2', ref: 'change-4', query: 'Yutu 2', toast: 'RABBIT ON THE FAR SIDE',

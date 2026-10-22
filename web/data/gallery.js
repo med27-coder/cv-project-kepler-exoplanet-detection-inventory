@@ -156,6 +156,24 @@ window.STARMAP_GALLERY = {
   "link": "https://images.nasa.gov/details/iss056e201248",
   "what": "The ISS photographed from a departing Soyuz (2018)"
  },
+ "earthrise-lro": {
+  "img": "gallery/earthrise-lro.jpg",
+  "credit": "NASA GSFC",
+  "link": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000496",
+  "what": "The Earth over the Moon's horizon, from NASA's Lunar Reconnaissance Orbiter (2015)"
+ },
+ "earthrise-apollo17": {
+  "img": "gallery/earthrise-apollo17.jpg",
+  "credit": "NASA JSC",
+  "link": "https://images.nasa.gov/details/as17-152-23272",
+  "what": "A crescent Earth rising over the Moon, from Apollo 17 in lunar orbit (1972)"
+ },
+ "earthrise-apollo16": {
+  "img": "gallery/earthrise-apollo16.jpg",
+  "credit": "NASA JSC",
+  "link": "https://images.nasa.gov/details/as16-113-18289",
+  "what": "The Earth over the lunar horizon, from Apollo 16's lunar module Orion (1972)"
+ },
  "solar-system-montage": {
   "img": "gallery/solar-system-montage.jpg",
   "credit": "NASA/JPL",

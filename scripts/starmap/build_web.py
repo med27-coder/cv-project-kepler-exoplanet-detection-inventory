@@ -57,7 +57,7 @@ def build():
 
 
 def version():
-    m = re.search(r"^  \{ v: '(\d+\.\d+\.\d+(?:\.\d+)?)'", (SRC / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)
+    m = re.search(r"^  \{ v: '(\d+\.\d+\.\d+(?:\.\d+)*)'", (SRC / '00-version.js').read_text(encoding='utf-8'), re.MULTILINE)
     if not m:
         sys.exit('No version in HISTORY in web/src/00-version.js')
     return m[1]
