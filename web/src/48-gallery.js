@@ -112,6 +112,7 @@ const EGGS = [
     clue: 'Named after a god of fire, I drove across a northern plain on Mars and took a selfie with a camera I left on the ground.',
     story: 'China\'s Tianwen-1 mission put its lander and the rover Zhurong on Utopia Planitia on 14 May 2021. Zhurong drove about 1.9 km, scanned the ground beneath it with radar, and photographed itself with its lander using a small camera it had dropped. It went to sleep for the Martian winter in May 2022 and has not woken up.' },
   { id: 'lunokhod', name: 'Lunokhod 1', kind: 'craft', art: 'lunokhod', ref: 'lunokhod', query: 'Lunokhod', toast: 'FIRST WHEELS ON THE MOON',
+    refs: [['earthrise-lro', 'EARTH FROM LRO'], ['earthrise-apollo17', 'APOLLO 17'], ['earthrise-apollo16', 'APOLLO 16']],
     clue: 'Steered by television from a quarter of a million miles away, I was the first rover on another world, in 1970. I shut my lid every night.',
     story: "The Soviet Luna 17 landed on Mare Imbrium on 17 November 1970, and Lunokhod 1 rolled down its ramp: the first rover to drive on another world. Drivers on Earth steered it by its TV pictures for eleven lunar days, about 10.5 km, closing its solar lid each lunar night. In 2010 NASA's Lunar Reconnaissance Orbiter photographed it where it stopped." },
   { id: 'yutu2', name: 'Yutu-2', kind: 'craft', art: 'yutu2', ref: 'change-4', query: 'Yutu 2', toast: 'RABBIT ON THE FAR SIDE',

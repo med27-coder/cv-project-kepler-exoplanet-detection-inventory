@@ -3,9 +3,20 @@
 Notable changes to the Kepler Star Map (`web/`), newest first, in the
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format, with [semantic versions](https://semver.org/):
 MAJOR for a redesign or a change in how progress is saved (progress is never lost), MINOR for new features, PATCH
-for fixes. After 1.9.9 the versions take a fourth number (1.9.9.1, 1.9.9.2...), so they always read in order. The NASA data refresh keeps its own date, shown in the footer. The version lives in
+for fixes. After 1.9.9 the versions take a fourth number (1.9.9.1, 1.9.9.2...), and a small follow-up before the next
+planned release adds one more (1.9.9.1.1), so they always read in order. The NASA data refresh keeps its own date, shown in the footer. The version lives in
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
+
+## [1.9.9.1.1] - 2026-10-21
+
+### Changed
+- **The Earth in Lunokhod 1's sky** is drawn from NASA's Blue Marble map (as in the ISS view), graded to NASA's
+  photos of the Earth from the Moon (LRO's Earthrise of 2015, Apollo 16 and 17): deep navy oceans, bluish-white
+  clouds, muted tan land, a black night side with a crisp terminator and a thin blue sunlit edge. Its phase follows
+  the lunar day (half lit by day, nearly full through the lunar night, when its earthshine tints the ground). The
+  three photos join the Lunokhod card as references. The old scene frame is archived; the before/after drafts are in
+  `pixel-art/concepts/draft_lunokhod_earth*.png`.
 
 ## [1.9.9.1] - 2026-10-18
 

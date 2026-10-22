@@ -74,7 +74,8 @@ Mars rovers already built. Set achievements for each destination, one per agency
 **Moon drafts (18 October 2026):** `pixel-art/concepts/draft_lunokhod.gif` (Lunokhod 1, its open solar lid,
 Earth in the sky) and `pixel-art/concepts/draft_yutu2.gif` (Yutu-2 and the Chang'e 4 lander on the far side, where
 Earth never rises). **Approved by the user and built in v1.9.9** (`web/src/47h-moon.js`), with LUNAR DRIVERS and
-ROVER ROSTER.
+ROVER ROSTER. **v1.9.9.1.1:** the Earth in Lunokhod's sky redrawn after NASA's Earth-from-the-Moon photos
+(drafts `pixel-art/concepts/draft_lunokhod_earth.png`, `draft_lunokhod_earth_closeup.png`).
 
 Pictures: NASA's are copied as references; other agencies' images only where their licences allow, otherwise linked
 (as for ESA). Waves: Mars first (Zhurong next), then the Moon, then the small bodies.

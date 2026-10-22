@@ -59,6 +59,10 @@ PICKS = [
     ('spacecraft', 'hubble', 'S109E5882', 'The Hubble Space Telescope over Earth, seen from Space Shuttle Columbia (2002)'),
     ('spacecraft', 'iss', 'iss056e201248', 'The ISS photographed from a departing Soyuz (2018)'),
     # Real photos in natural colour where one exists (not artist montages or false-colour ultraviolet).
+    # The Earth from the Moon: the references for the Earth in Lunokhod 1's sky (47h-moon.js)
+    ('solar-system', 'earthrise-lro', 'GSFC_20171208_Archive_e000496', "The Earth over the Moon's horizon, from NASA's Lunar Reconnaissance Orbiter (2015)"),
+    ('solar-system', 'earthrise-apollo17', 'as17-152-23272', 'A crescent Earth rising over the Moon, from Apollo 17 in lunar orbit (1972)'),
+    ('solar-system', 'earthrise-apollo16', 'as16-113-18289', "The Earth over the lunar horizon, from Apollo 16's lunar module Orion (1972)"),
     ('solar-system', 'solar-system-montage', 'PIA10969', 'The Sun and its eight planets in one picture (NASA/JPL montage of real images, 2008)'),
     ('solar-system', 'pale-blue-dot', 'PIA23645', ('The "Pale Blue Dot": Earth as a speck in a sunbeam (right of centre), '
                                                    'photographed by Voyager 1 from 6 billion km in 1990 (reprocessed 2020)')),

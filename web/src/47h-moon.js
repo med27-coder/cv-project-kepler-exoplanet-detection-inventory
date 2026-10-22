@@ -38,6 +38,36 @@ function lunarDark(c, dusk, night, dawn) {
   return Math.max(0, 1 - (c - dawn) / 2);
 }
 
+// The Earth as seen from the Moon, after NASA's photos (LRO's Earthrise of 2015, Apollo 16 and 17): NASA's Blue
+// Marble map (earthSurface, 40-home.js), its colours graded to the photos' deep navy oceans, bluish-white clouds and
+// muted tan land; a black night side with a crisp terminator (no air on the Moon to soften it); a faint blue edge
+// on the sunlit side. `phase`: the angle between the Sun and the viewer seen from the Earth (0 full, PI/2 half).
+const EARTH_FROM_MOON = {
+  '#2a5fbf': '#1f2a6a', '#3f86d8': '#2c3f86', '#3d7a35': '#3a5034', '#6f9a48': '#5d6b3f', '#d1b07a': '#b39a6e',
+  '#9a7a50': '#7d6a4c', '#8d877d': '#77736c', '#eef6ff': '#e6ecfa', '#f4f8ff': '#dfe4f7',
+};
+function drawEarthFromMoon(ctx, cx, cy, r, spin, phase) {
+  const L = [-Math.sin(phase) * 0.96, -Math.sin(phase) * 0.28, Math.cos(phase)];   // the Sun: off to the left
+  const R = r + 0.5;
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      const q = (dx * dx + dy * dy) / (R * R);
+      if (q > 1) continue;
+      const nz = Math.sqrt(1 - q), lit = (dx / R) * L[0] + (dy / R) * L[1] + nz * L[2];
+      let col;
+      if (lit < -0.04) col = '#030409';                                     // night: black, no lights at this size
+      else {
+        const base = EARTH_FROM_MOON[earthSurface(dx, dy, r, spin).toLowerCase()] || '#1f2a6a';
+        const f = lit < 0.08 ? 0.45 : 0.8 + 0.3 * Math.min(1, lit * 1.5);  // a crisp terminator, brighter towards the Sun
+        col = shade(base, f);
+        if (q > 0.8 && lit > 0.25) col = shade('#5f6fbf', 0.9 + 0.2 * lit);   // the thin sunlit edge of the air
+      }
+      ctx.fillStyle = col;
+      ctx.fillRect(cx + dx, cy + dy, 1, 1);
+    }
+  }
+}
+
 // Lunokhod 1, facing right, wheels on the ground at (x, y): a pressurised "bathtub" on eight wire-mesh wheels, a lid
 // with solar cells on its inside (open: 0 closed .. 1 swung up and back), a spike antenna and two TV eyes in front.
 function drawLunokhod(ctx, x, y, s, t, moving, open) {
@@ -91,16 +121,12 @@ function drawLunokhodScene(ctx, w, h, t) {
   drawLunokhod(ctx, x, ground, 2, t, c < 14, REDUCED_MOTION ? 1 : open);
   moonNight(ctx, w, h, dark);
   moonStars(ctx, w, horizon, 'imb', dark > 0.5);
-  // the Earth, half lit, high over the near side (it hangs in the same place in the Moon's sky)
-  const ex = Math.round(w * 0.8), ey = Math.round(h * 0.14), er = 9;
-  for (let dy = -er; dy <= er; dy++) {
-    for (let dx = -er; dx <= er; dx++) {
-      if (dx * dx + dy * dy > er * er) continue;
-      const lit = dx < 2;
-      ctx.fillStyle = !lit ? '#0d1d40' : hash(`ea${dx >> 1}${dy >> 1}`) < 0.32 ? '#f2f4f8' : hash(`eb${dx >> 2}${dy >> 2}`) < 0.3 ? '#5f8f4a' : '#2f6fd6';
-      ctx.fillRect(ex + dx, ey + dy, 1, 1);
-    }
-  }
+  // the Earth, high over the near side (it hangs in the same place in the Moon's sky), its phase the opposite of the
+  // Moon's day: mostly dark while the Sun is up, nearly full through the lunar night, when its earthshine tints the
+  // ground blue
+  const phase = REDUCED_MOTION ? 1.3 : 1.35 - 1.1 * dark;   // radians between the Sun and us, seen from the Earth: half lit by day
+  if (dark > 0.3) { ctx.fillStyle = `rgba(70, 95, 170, ${0.07 * dark})`; ctx.fillRect(0, horizon, w, h - horizon); }
+  drawEarthFromMoon(ctx, Math.round(w * 0.8), Math.round(h * 0.16), 10, t * 0.3, phase);
   pixelText(ctx, 'MARE IMBRIUM', 4, h - 10, '#e8ecff');
   const day = `LUNAR DAY ${1 + (Math.floor((REDUCED_MOTION ? 0 : t) / 32) % 11)}`;
   pixelText(ctx, dark > 0.5 ? 'LUNAR NIGHT' : day, w - textWidth(dark > 0.5 ? 'LUNAR NIGHT' : day) - 4, h - 10, '#e8ecff');
