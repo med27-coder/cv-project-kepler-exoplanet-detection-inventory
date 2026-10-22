@@ -6,7 +6,7 @@
 Then, with a free Hugging Face account (https://huggingface.co/join):
     .venv\\Scripts\\pip install huggingface_hub
     .venv\\Scripts\\hf auth login
-    .venv\\Scripts\\hf repo create star-gazer --repo-type space --space_sdk gradio
+    .venv\\Scripts\\hf repo create star-gazer --repo-type space --space_sdk docker
     .venv\\Scripts\\hf upload <your-username>/star-gazer build\\hf_space . --repo-type space
 In the Space's Settings > Variables and secrets add:
     secret   STAR_GAZER_KEY = <contents of .secrets/star_gazer.key>
@@ -14,6 +14,9 @@ In the Space's Settings > Variables and secrets add:
 
 The trained model is uploaded only encrypted (secure/*.enc + MANIFEST.json) and decrypted
 inside the Space at start-up with the secret key; the key itself is never uploaded.
+
+The app is Streamlit (app.py), which Hugging Face runs as a Docker Space: the Dockerfile written here installs
+the requirements and starts space_app.py, which decrypts the model and then runs `streamlit run app.py`.
 """
 
 import shutil
@@ -31,8 +34,8 @@ title: Star Gazer
 emoji: 🔭
 colorFrom: indigo
 colorTo: blue
-sdk: gradio
-app_file: space_app.py
+sdk: docker
+app_port: 7860
 pinned: false
 license: other
 short_description: Kepler exoplanet vetting with a multi-view CNN
@@ -56,9 +59,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-# The Space installs only requirements.txt, not this package, so src/ goes on the path here.
-# The imports below must also wait until the model is decrypted, hence the noqa: E402 markers.
-sys.path.insert(0, str(ROOT / 'src'))
+# The Space installs only requirements.txt, not this package: src/ is on PYTHONPATH (the Dockerfile sets it).
+# The import below must wait until the model is decrypted, hence the noqa: E402 marker.
 
 if not (ROOT / 'models' / 'v3' / 'star_gazer.keras').exists():
     if not os.environ.get('STAR_GAZER_KEY'):
@@ -68,12 +70,21 @@ if not (ROOT / 'models' / 'v3' / 'star_gazer.keras').exists():
 from kepler_cnn import star_gazer as S  # noqa: E402
 
 S.load_catalog()   # downloads the KOI table on first start
-
-sys.argv = ['app.py', '--host', '0.0.0.0', '--model', 'v3']
-import app  # noqa: E402
-
-app.main()
+os.execv(sys.executable, [sys.executable, '-m', 'streamlit', 'run', str(ROOT / 'app.py'),
+                          '--server.address', '0.0.0.0', '--server.port', '7860', '--', '--model', 'v3'])
 '''
+
+DOCKERFILE = """FROM python:3.12-slim
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user PATH=/home/user/.local/bin:$PATH PYTHONPATH=/home/user/app/src
+WORKDIR /home/user/app
+COPY --chown=user requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY --chown=user . .
+EXPOSE 7860
+CMD ["python", "space_app.py"]
+"""
 
 SPACE_REQUIREMENTS = """numpy>=1.26
 pandas>=2.3.3
@@ -85,6 +96,8 @@ matplotlib>=3.7
 seaborn>=0.13.2
 tqdm>=4.66.3
 cryptography>=50.0.2
+streamlit>=1.66.1
+pillow>=13.0.0
 """
 
 
@@ -116,12 +129,14 @@ def main():
     shutil.copytree(ROOT / 'src' / 'kepler_cnn', OUT / 'src' / 'kepler_cnn',
                     ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT / 'secure', OUT / 'secure')
-    for f in ('app.py', 'TERMS_OF_USE.md', 'pyproject.toml'):
+    for f in ('app.py', 'TERMS_OF_USE.md', 'pyproject.toml', '.streamlit/config.toml'):
+        (OUT / f).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / f, OUT / f)
     shutil.copy2(ROOT / 'scripts' / 'tools' / 'secure_artifacts.py', OUT / 'scripts' / 'secure_artifacts.py')   # flat in the Space
     (OUT / 'README.md').write_text(SPACE_README, encoding='utf-8')
     (OUT / 'space_app.py').write_text(SPACE_APP, encoding='utf-8')
     (OUT / 'requirements.txt').write_text(SPACE_REQUIREMENTS, encoding='utf-8')
+    (OUT / 'Dockerfile').write_text(DOCKERFILE, encoding='utf-8')
     n = sum(1 for p in OUT.rglob('*') if p.is_file())
     print(f'Built {OUT.relative_to(ROOT)} ({n} files). Upload instructions: see this script\'s docstring.')
 

@@ -307,13 +307,13 @@ else:
 
 # %% [markdown]
 # ## 🌐 Step 10: Web Demo
-# The Gradio app is in `app.py`. Start it from the VS Code terminal:
+# The web app is in `app.py` (Streamlit; it was Gradio until October 2026). Start it from the VS Code terminal:
 #
 # ```powershell
-# .venv\Scripts\python app.py           # http://127.0.0.1:7860 (local only)
-# .venv\Scripts\python app.py --share   # temporary public link (read Terms §6 first)
+# .venv\Scripts\streamlit run app.py                 # http://localhost:8501 (local only)
+# .venv\Scripts\streamlit run app.py -- --model v2   # this notebook's model
 # ```
 #
-# You can also use **Run and Debug ▸ "Gradio app (local)"**.
+# You can also use **Run and Debug ▸ "Star Gazer app (local)"**.
 #
 # All figures from this notebook are saved in `results/v2/`.
