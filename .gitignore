@@ -51,3 +51,6 @@ logs/
 # Test coverage output
 .coverage
 coverage.xml
+
+# Serena (code-navigation tool) settings: personal tooling, kept local
+.serena/
