@@ -16,6 +16,7 @@ only used in an ablation. Star Gazer computes its own versions from the light cu
 
 import json
 import warnings
+from typing import Literal, overload
 
 import numpy as np
 import pandas as pd
@@ -445,7 +446,18 @@ def predict_views(models, pre, catalog_rows, v):
     return float(predict(models, lambda m: _inputs(m, available))[0])
 
 
-def predict_koi(models, pre, catalog, kepoi_name, threshold=0.5, return_inputs=False):
+Prediction = tuple[float, str, dict, pd.Series]
+
+
+@overload
+def predict_koi(models, pre, catalog, kepoi_name, threshold=..., return_inputs: Literal[False] = ...) -> Prediction: ...
+@overload
+def predict_koi(models, pre, catalog, kepoi_name, threshold=..., *,
+                return_inputs: Literal[True]) -> tuple[float, str, dict, pd.Series, dict]: ...
+
+
+def predict_koi(models, pre, catalog, kepoi_name, threshold=0.5,
+                return_inputs=False) -> Prediction | tuple[float, str, dict, pd.Series, dict]:
     """Planet probability for one KOI by name. Returns (prob, verdict, views dict, catalog row),
     plus the model inputs it built (for saliency.explain) when return_inputs=True."""
     match = catalog[catalog.kepoi_name == kepoi_name]
