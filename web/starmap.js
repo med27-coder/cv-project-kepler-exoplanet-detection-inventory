@@ -4419,8 +4419,9 @@
                      toured: false,   // first-visit tour (49c-ui.js)
                      daily: { last: '', streak: 0 }, lastExport: '', lastStars: 0,   // 49d-connect.js
                      backdrop: 'animated',   // page background (55-backdrop.js)
-                     outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],
-                     comets: 0, asteroids: 0, ufos: 0, meteors: 0, model: 'stargazer' };   // sky events caught (05-sky-events.js)   // the lost astronaut's wardrobe (47c-astronaut.js)
+                     outfit: '', outfits: [], astroVisits: 0, astroLastRoll: 0, astroDry: 0, astroDays: [],   // the lost astronaut's wardrobe (47c-astronaut.js)
+                     comets: 0, asteroids: 0, ufos: 0, meteors: 0,   // sky events caught (05-sky-events.js)
+                     model: 'stargazer' };   // the case files' score switch (48d-models.js)
   const ID = /^[\w-]{1,40}$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
   function mergeProgress(saved) {   // from storage or an imported file; keeps the earliest date of each
     if (!saved || typeof saved !== 'object') return false;
