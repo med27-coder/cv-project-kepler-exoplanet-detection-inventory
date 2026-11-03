@@ -17,7 +17,7 @@ still open. (Merged into `main` in October 2026.)
 | 9 | [SKY_EVENTS_DRAFTS.md](SKY_EVENTS_DRAFTS.md): the UFO crossing space (a rare version with a passing asteroid, WHAT WAS THAT?), asteroids, comets and meteors drawn after real photos | **comets, asteroids and the UFO built** (v1.1.0, 18 Oct); **meteors built both ways** (v1.9.9: catchable from the ISS, the page background) | done |
 | 10 | [COMMIT_IDENTITY.md](COMMIT_IDENTITY.md): only the med27-coder account can change the project (signed commits, rulesets, push protection) | research notes | later, when the user is ready |
 | 11 | [LOOP_BACKLOG.md](LOOP_BACKLOG.md): the unattended loop's work list | in progress | top item first |
-| 12 | [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md): accounts and access (IAM): log in with a proxy account and your progress loads in any browser; roles (visitor, player, tester, admin, owner); Firebase on Google Cloud suggested, with its Cloud IAM and Firestore rules | plan only (2 Nov) | **6 decisions** at the end; then step 1, local emulator only |
+| 12 | [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md): accounts and access (IAM): log in with a proxy account and your progress loads in any browser; roles (visitor, player, tester, admin, owner); Firebase on Google Cloud suggested, with its Cloud IAM and Firestore rules | plan only (2 Nov): privileges per role, limits, records, server rules draft, admin commands | **8 decisions** at the end; then step 1, local emulator only |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 
