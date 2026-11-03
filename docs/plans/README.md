@@ -23,4 +23,12 @@ still open. (Merged into `main` in October 2026.)
 
 Concept art: `pixel-art/concepts/` (`scripts/starmap/draft_concepts.py`), references in `pixel-art/references/`.
 
-Housekeeping still open (user): back up `.secrets/star_gazer.key`; GitHub Dependabot security updates and 2FA.
+## Tools and housekeeping
+
+| Item | Status | Next step |
+|---|---|---|
+| **Pixel reader keeps translucency** (the `read_pixel_art` mod, kept outside this repo): today a cell under 50% opacity becomes fully transparent and one above becomes solid, so glows, glass and smoke are lost. Planned: keep each cell's real opacity in `native.png` and the preview, colours with opacity in the palette and `grid.txt` legend (8-digit hex, e.g. `#5f6fbf66`), near-equal opacities merged like near-equal colours, and a known half-transparent sprite added to its accuracy bench. Translucency already blended into a flat image (JPEG, screenshot) can't be separated from its background; it reads as the blended colour. | planned (2 Nov), about an hour | build when the user says go |
+| **Private workshop repo** for plans while they're decided, egg spoilers, the cheat sheet and unready drafts; this repo stays public (free GitHub Pages needs it). Kept as a sibling folder, not a submodule. Never in either repo: keys, account passwords, the user's inspiration images, other local-only work. | suggested (2 Nov) | the user decides; also whether `plan/1.9.9.2` moves there |
+| Running V3 without retraining: the model is only in the repo encrypted; publish it openly or host the demo on a Hugging Face Space | open question (2 Nov) | the user decides |
+
+Still open (user): back up `.secrets/star_gazer.key`; GitHub Dependabot security updates and 2FA; finish the history purge (the "Protect main" rule must be paused for one push).
