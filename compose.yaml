@@ -1,0 +1,33 @@
+# Run the whole project locally with one command:
+#   docker compose up --build
+#   Star Gazer -> http://localhost:8501     Star Map -> http://localhost:8080
+#
+# Secrets go in a file named .env next to this one (git-ignored and docker-ignored), e.g.
+#   STAR_GAZER_KEY=<contents of .secrets/star_gazer.key>
+# Without it Star Gazer still starts and says it has no model to serve.
+
+services:
+  star-gazer:
+    build: .
+    image: star-gazer:local
+    ports:
+      - "8501:8501"
+    environment:
+      KEPLER_ACCEPT_TERMS: "1"
+      STAR_GAZER_KEY: ${STAR_GAZER_KEY:-}
+      STAR_GAZER_PASSPHRASE: ${STAR_GAZER_PASSPHRASE:-}   # only if your key file has a passphrase
+    volumes:
+      - star-gazer-data:/app/data          # keep downloaded NASA data between restarts
+    restart: unless-stopped
+
+  star-map:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    image: star-map:local
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  star-gazer-data:

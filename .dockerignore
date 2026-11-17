@@ -1,0 +1,38 @@
+# What `docker build` may NOT see. The build context is everything else in the repo, so this file is what
+# keeps secrets, local caches and big folders out of the image (and makes builds faster).
+
+# Secrets: never in an image (the model key arrives at run time as the STAR_GAZER_KEY variable)
+.secrets/
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+.streamlit/secrets.toml
+.terms_accepted
+
+# Version control, editors, local tooling
+.git/
+.github/
+.claude/
+.vscode/
+.serena/
+.venv/
+**/__pycache__/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+.coverage
+
+# Local data, models and outputs (the container downloads data and decrypts the model itself)
+data/
+models/
+results/
+logs/
+build/
+notebooks/
+pixel-art/
+tests/
+docs/
