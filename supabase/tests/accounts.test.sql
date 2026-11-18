@@ -1,7 +1,7 @@
 -- The account rules (docs/plans/ACCOUNTS_AND_ACCESS.md): run with `npx supabase@2.122.1 test db`.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(31);
+select plan(44);
 
 -- helpers: sign up as the auth service would, and act as a signed-in player
 create function pg_temp.sign_up(pilot text, email text default null) returns uuid language plpgsql as $$
@@ -86,6 +86,41 @@ reset role;
 select pg_temp.act_as((select orbiter from ids));
 select is((select count(*)::int from public.finds), 0, 'another player sees none of these finds');
 select is((select count(*)::int from public.profiles), 1, 'another player sees only its own profile');
+
+-- ---------------------------------------------------------------- the security review's fixes
+reset role;
+select throws_ok($$ update auth.users set email = 'real.person@example.com' where id = (select orbiter from ids) $$,
+                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot change to a real email');
+select throws_ok($$ update auth.users set email_change = 'real.person@example.com' where id = (select orbiter from ids) $$,
+                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot start an email change');
+select throws_ok($$ update auth.users set phone = '15550100' where id = (select orbiter from ids) $$,
+                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot add a phone');
+select lives_ok($$ update auth.users set last_sign_in_at = now() where id = (select orbiter from ids) $$,
+                'normal sign-ins still update the account');
+select pg_temp.act_as((select orbiter from ids));
+select lives_ok($$ select public.save_progress(jsonb_build_object('eggs',
+                     (select jsonb_object_agg('egg-' || n, '2026-11-01') from generate_series(1, 300) n))) $$,
+                '300 eggs fit');
+select throws_ok($$ select public.save_progress('{"eggs": {"one-more": "2026-11-02"}}') $$, '22023', 'Too many finds.',
+                 'the cap counts the account total, not one save');
+reset role;
+update public.limits set save_gap = interval '1 hour';
+select pg_temp.act_as((select orbiter from ids));
+select throws_ok($$ select public.reset_progress() $$, 'P0002', 'Saving too often.', 'reset obeys the save gap');
+select throws_ok($$ select public.admin_set_role('ORBITER-7', 'admin') $$, '42501', null,
+                 'a player cannot call the admin functions');
+reset role;
+update public.limits set save_gap = interval '0';
+
+-- ---------------------------------------------------------------- the admin role (owner only, at most one)
+select lives_ok($$ select public.admin_set_role('pilot-0001', 'admin') $$, 'the owner makes the admin');
+select throws_ok($$ select public.admin_set_role('ORBITER-7', 'admin') $$, 'P0001', 'Admin limit reached.',
+                 'only one admin');
+select is((select count(*)::int from public.admin_audit where action = 'role admin'), 1, 'role changes are logged');
+select throws_ok($$ select public.admin_set_role('NOBODY', 'admin') $$, 'P0001', 'No pilot named NOBODY.',
+                 'an unknown pilot is reported');
+select pg_temp.act_as((select pilot from ids));
+select is(public.load_progress() ->> 'role', 'admin', 'the admin sees its role on load');
 
 -- ---------------------------------------------------------------- reset and delete
 reset role;

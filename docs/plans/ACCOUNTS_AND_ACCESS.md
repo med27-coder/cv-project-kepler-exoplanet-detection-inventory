@@ -358,6 +358,22 @@ save that leaves something out keeps the stored value, so no save can erase prog
 (`supabase/tests/accounts.test.sql`) cover every rule. Next: the admin script, then the page (sign up, sign in,
 sync, SAVED), then the landing and privacy pages.
 
+**Admin sign-in (17 November, user request: "an admin credential to log in, to access a personalised version"):**
+this changes section 3, where the admin worked only from a script. Now the owner also has an **admin account**
+(`MED27-CODER`) that signs in on the page like any pilot and gets the personal view: the tester panel, sync details,
+an admin badge, and later the account tools. The guard rails:
+
+- the `admin` role (at most one) can be granted only by the database owner, through `admin_set_role`, which no page
+  can call; every role change is logged in `admin_audit`;
+- `scripts/accounts/admin.py create-admin` made it; its password is long and random, written only to
+  `.secrets/<name>.admin.txt` (git-ignored, refused by the commit hooks) and never printed;
+- before anything goes online, every admin-only function will also require **two-step sign-in** (an authenticator
+  app code; Supabase's `aal2`), so a stolen password alone is not enough.
+
+The security review of the first migration found three gaps, fixed in `20261117010000_admin_and_fixes.sql`: a
+pilot could change its sign-in email (or add a phone) to a real one; the 300-finds cap counted one save, not the
+account; and reset moved the save clock back, skipping the save gap. Now 44 tests.
+
 1. **Backend:** Supabase (suggested now that sign-up is wanted), or Firebase?
 2. **Sign-up:** open, with pilot names and no email (suggested); or admin-made accounts only, as first planned?
 3. **Local first:** build and test on the local backend only, going online later (suggested), or online straight

@@ -23,7 +23,8 @@ npx supabase@2.122.1 start | test db | db reset | stop             # player acco
 
 Player accounts (`docs/plans/ACCOUNTS_AND_ACCESS.md`): `supabase/migrations/` is the database (tables, row-level
 security, the sign-up check and the only write paths, `save_progress` and friends); `supabase/tests/` are its pgTAP
-tests. Local only so far: nothing is online. The local keys `supabase start` prints are Supabase's public demo keys.
+tests; `scripts/accounts/admin.py` the admin commands (passwords only ever to `.secrets/`). Local only so far:
+nothing is online. The local keys `supabase start` prints are Supabase's public demo keys.
 
 CI (`.github/workflows/tests.yml`) runs ruff, mypy, pytest with coverage, `build_web.py --check` and
 `node --check web/starmap.js`. Dependencies are hash-locked (`requirements*.lock`, regenerated with
