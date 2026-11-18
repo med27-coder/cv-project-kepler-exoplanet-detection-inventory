@@ -5,7 +5,7 @@
 -- Players read their own rows; they never write a table directly. Every write goes through one of the functions
 -- at the end (security definer), which check the data and the limits.
 
--- ---------------------------------------------------------------- limits (one row, admin only)
+-- ---------------------------------------------------------------- limits (one row, the owner only)
 create table public.limits (
   id            boolean primary key default true check (id),   -- a single row
   max_accounts  integer not null default 200 check (max_accounts > 0),
@@ -19,7 +19,7 @@ create table public.profiles (
   user_id     uuid primary key references auth.users (id) on delete cascade,
   pilot_name  text not null unique check (pilot_name ~ '^[A-Z0-9][A-Z0-9-]{1,18}[A-Z0-9]$'),
   emblem      text check (emblem ~ '^[a-z0-9-]{1,40}$'),   -- one of the game's emblems, as the picture
-  role        text not null default 'player' check (role in ('player', 'tester')),   -- the admin sets it
+  role        text not null default 'player' check (role in ('player', 'tester')),   -- the owner sets it
   created_at  timestamptz not null default now()
 );
 
@@ -52,8 +52,8 @@ create table public.progress (
   updated_at  timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- the admin log (no web page can read it)
-create table public.admin_audit (
+-- ---------------------------------------------------------------- the owner's log of role changes (no web page can read it)
+create table public.audit_log (
   id      bigint generated always as identity primary key,
   at      timestamptz not null default now(),
   action  text not null,
@@ -68,9 +68,9 @@ alter table public.profiles    enable row level security;
 alter table public.preferences enable row level security;
 alter table public.finds       enable row level security;
 alter table public.progress    enable row level security;
-alter table public.admin_audit enable row level security;
+alter table public.audit_log enable row level security;
 
-revoke all on public.limits, public.profiles, public.preferences, public.finds, public.progress, public.admin_audit
+revoke all on public.limits, public.profiles, public.preferences, public.finds, public.progress, public.audit_log
   from anon, authenticated;
 grant select on public.profiles, public.preferences, public.finds, public.progress to authenticated;
 
@@ -78,7 +78,7 @@ create policy "own profile"     on public.profiles    for select to authenticate
 create policy "own preferences" on public.preferences for select to authenticated using (user_id = (select auth.uid()));
 create policy "own finds"       on public.finds       for select to authenticated using (user_id = (select auth.uid()));
 create policy "own progress"    on public.progress    for select to authenticated using (user_id = (select auth.uid()));
--- limits and admin_audit: no policies, so only the service role (the admin script) sees them.
+-- limits and audit_log: no policies, so only the service role (the owner's script) sees them.
 
 -- ---------------------------------------------------------------- sign-up: name rules, the account cap, a profile
 create function public.on_new_account() returns trigger

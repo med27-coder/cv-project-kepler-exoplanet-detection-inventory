@@ -1,36 +1,17 @@
--- The owner's admin account, and three fixes from the security review of 20261117000000_accounts.sql.
+-- Setting roles (the owner only), and three fixes from the security review of 20261117000000_accounts.sql.
 
--- ---------------------------------------------------------------- 1. an admin role (the owner only)
--- An admin signs in on the page like any pilot and gets the personal view (the tester panel, sync details, the
--- admin badge). Granting the role is possible only for the database owner: admin_set_role is callable by the
--- service role (the admin script), never by a page.
-alter table public.profiles drop constraint profiles_role_check;
-alter table public.profiles add constraint profiles_role_check check (role in ('player', 'tester', 'admin'));
-alter table public.limits add column max_admins integer not null default 1 check (max_admins >= 0);
-
-create or replace function public.check_testers() returns trigger
-language plpgsql security definer set search_path = '' as $$
-begin
-  if new.role = 'tester' and old.role is distinct from 'tester'
-     and (select count(*) from public.profiles where role = 'tester') >= (select max_testers from public.limits) then
-    raise exception 'Tester limit reached.' using errcode = 'P0001';
-  end if;
-  if new.role = 'admin' and old.role is distinct from 'admin'
-     and (select count(*) from public.profiles where role = 'admin') >= (select max_admins from public.limits) then
-    raise exception 'Admin limit reached.' using errcode = 'P0001';
-  end if;
-  return new;
-end $$;
-
-create function public.admin_set_role(pilot text, new_role text) returns void
+-- ---------------------------------------------------------------- 1. roles are set by the owner
+-- set_role (player or tester, at most limits.max_testers testers) is callable only by the service role, that is the
+-- owner's script (scripts/accounts/manage.py), never by a page. Every change is logged.
+create function public.set_role(pilot text, new_role text) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   update public.profiles set role = new_role where pilot_name = upper(pilot);
   if not found then raise exception 'No pilot named %.', upper(pilot) using errcode = 'P0001'; end if;
-  insert into public.admin_audit (action, target, result) values ('role ' || new_role, upper(pilot), 'ok');
+  insert into public.audit_log (action, target, result) values ('role ' || new_role, upper(pilot), 'ok');
 end $$;
-revoke execute on function public.admin_set_role(text, text) from public, anon, authenticated;
-grant execute on function public.admin_set_role(text, text) to service_role;
+revoke execute on function public.set_role(text, text) from public, anon, authenticated;
+grant execute on function public.set_role(text, text) to service_role;
 
 -- ---------------------------------------------------------------- 2. sign-in names can't become real emails
 -- A player could otherwise change its email (or add a phone) through the auth service and store a real identity.

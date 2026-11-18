@@ -43,9 +43,9 @@ select throws_ok($$ select pg_temp.sign_up('LATECOMER') $$, 'P0001', 'The star m
                  'sign-ups past the cap are refused');
 update public.limits set max_accounts = 200;
 
--- ---------------------------------------------------------------- testers (only the admin, at most max_testers)
-update public.limits set max_testers = 1;
-select lives_ok($$ update public.profiles set role = 'tester' where pilot_name = 'ORBITER-7' $$, 'the admin makes a tester');
+-- ---------------------------------------------------------------- testers (only the owner, at most max_testers)
+update public.limits set max_testers = (select count(*) from public.profiles where role = 'tester') + 1;   -- room for one more
+select lives_ok($$ update public.profiles set role = 'tester' where pilot_name = 'ORBITER-7' $$, 'the owner makes a tester directly');
 select throws_ok($$ update public.profiles set role = 'tester' where pilot_name = 'PILOT-0001' $$, 'P0001',
                  'Tester limit reached.', 'testers past the limit are refused');
 update public.limits set max_testers = 5;
@@ -81,7 +81,7 @@ select is(public.load_progress() ->> 'backdrop', 'still', 'an invalid setting va
 select throws_ok($$ insert into public.finds values ((select orbiter from ids), 'egg', 'x', current_date) $$, '42501',
                  null, 'a player cannot write a table directly');
 select throws_ok($$ update public.profiles set role = 'tester' $$, '42501', null, 'a player cannot make itself a tester');
-select throws_ok($$ select * from public.admin_audit $$, '42501', null, 'a player cannot read the admin log');
+select throws_ok($$ select * from public.audit_log $$, '42501', null, 'a player cannot read the audit log');
 reset role;
 select pg_temp.act_as((select orbiter from ids));
 select is((select count(*)::int from public.finds), 0, 'another player sees none of these finds');
@@ -107,20 +107,19 @@ reset role;
 update public.limits set save_gap = interval '1 hour';
 select pg_temp.act_as((select orbiter from ids));
 select throws_ok($$ select public.reset_progress() $$, 'P0002', 'Saving too often.', 'reset obeys the save gap');
-select throws_ok($$ select public.admin_set_role('ORBITER-7', 'admin') $$, '42501', null,
-                 'a player cannot call the admin functions');
+select throws_ok($$ select public.set_role('ORBITER-7', 'tester') $$, '42501', null,
+                 'a player cannot set roles');
 reset role;
 update public.limits set save_gap = interval '0';
 
--- ---------------------------------------------------------------- the admin role (owner only, at most one)
-select lives_ok($$ select public.admin_set_role('pilot-0001', 'admin') $$, 'the owner makes the admin');
-select throws_ok($$ select public.admin_set_role('ORBITER-7', 'admin') $$, 'P0001', 'Admin limit reached.',
-                 'only one admin');
-select is((select count(*)::int from public.admin_audit where action = 'role admin'), 1, 'role changes are logged');
-select throws_ok($$ select public.admin_set_role('NOBODY', 'admin') $$, 'P0001', 'No pilot named NOBODY.',
+-- ---------------------------------------------------------------- set_role (the owner's script only)
+select lives_ok($$ select public.set_role('pilot-0001', 'tester') $$, 'the owner makes a tester');
+select throws_ok($$ select public.set_role('ORBITER-7', 'owner') $$, '23514', null, 'only player and tester exist');
+select is((select count(*)::int from public.audit_log where action = 'role tester' and target = 'PILOT-0001'), 1, 'role changes are logged');
+select throws_ok($$ select public.set_role('NOBODY', 'tester') $$, 'P0001', 'No pilot named NOBODY.',
                  'an unknown pilot is reported');
 select pg_temp.act_as((select pilot from ids));
-select is(public.load_progress() ->> 'role', 'admin', 'the admin sees its role on load');
+select is(public.load_progress() ->> 'role', 'tester', 'a tester sees its role on load');
 
 -- ---------------------------------------------------------------- reset and delete
 reset role;

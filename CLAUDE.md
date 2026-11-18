@@ -23,7 +23,7 @@ npx supabase@2.122.1 start | test db | db reset | stop             # player acco
 
 Player accounts (`docs/plans/ACCOUNTS_AND_ACCESS.md`): `supabase/migrations/` is the database (tables, row-level
 security, the sign-up check and the only write paths, `save_progress` and friends); `supabase/tests/` are its pgTAP
-tests; `scripts/accounts/admin.py` the admin commands (passwords and `backup`s only ever to `.secrets/`; run `backup` before `db reset`, which erases the accounts). Local only so far:
+tests; `scripts/accounts/manage.py` the owner's commands (passwords and `backup`s only ever to `.secrets/`; run `backup` before `db reset`, which erases the accounts). Local only so far:
 nothing is online. The local keys `supabase start` prints are Supabase's public demo keys.
 
 CI (`.github/workflows/tests.yml`) runs ruff, mypy, pytest with coverage, `build_web.py --check` and

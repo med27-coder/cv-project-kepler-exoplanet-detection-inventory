@@ -26,13 +26,12 @@ rebuilt.
 |---|---|---|
 | **Visitor** | anyone, no login | plays as today; progress stays in that browser |
 | **Player** | a proxy account | its own progress, in any browser |
-| **Tester** | a proxy account the admin marked tester | a player with a test panel, on its own record only |
-| **Admin** | the owner, from a script on this PC | manages accounts; never from the web page |
-| **Owner** | med27-coder (GitHub) and its Google account (cloud project), two-factor sign-in | the project itself: who is admin, the rules, deleting everything |
+| **Tester** | a proxy account the owner marked tester | a player with a test panel, on its own record only |
+| **Owner** | med27-coder (GitHub) and its Google account (cloud project), two-factor sign-in | the project itself: manages accounts from a script on this PC (never from the web page), the rules, deleting everything |
 | **Machines** | GitHub Actions | test the rules; optionally deploy them; never see player data |
 
 A role lives in the account's sign-in token (a Firebase "custom claim", `role: player` or `role: tester`), which only
-the admin script can set. The page reads it to show or hide buttons; the **server rules** read it to allow or refuse.
+the owner's script can set. The page reads it to show or hide buttons; the **server rules** read it to allow or refuse.
 No moderator: players can't post anything others see, so there is nothing to moderate.
 
 ## 3. What each role can and cannot do
@@ -46,10 +45,10 @@ No moderator: players can't post anything others see, so there is nothing to mod
 
 | Can | Cannot |
 |---|---|
-| log in and out in any browser | have more than one account (with open sign-up, section 9, they create their own; without it, only the admin does) |
+| log in and out in any browser | have more than one account (with open sign-up, section 9, they create their own; without it, only the owner does) |
 | read **its own** progress record | read or even list anyone else's |
 | save its own progress (merged, nothing lost) | write a record that doesn't look like progress (wrong keys, oversized, bad dates) |
-| reset its own progress (deletes its record; the browser copy stays unless they choose otherwise) | delete its account without the admin (asks the admin; with open sign-up, section 9, a DELETE MY ACCOUNT button does it) |
+| reset its own progress (deletes its record; the browser copy stays unless they choose otherwise) | delete its account without the owner (asks the owner; with open sign-up, section 9, a DELETE MY ACCOUNT button does it) |
 | change its own password (12 characters or more; decision 7) | rename itself (names are fixed `PILOT-0001` style, so no name needs checking) |
 | see its role and account name in Settings | see the test panel, or give itself the tester role |
 
@@ -64,7 +63,7 @@ No moderator: players can't post anything others see, so there is nothing to mod
 
 Tester records are kept apart from any future statistics by their `test` mark.
 
-### Admin (a script on this PC: `scripts/accounts/admin.py`)
+### The owner's tools (a script on this PC: `scripts/accounts/manage.py`)
 
 | Command | What it does |
 |---|---|
@@ -78,18 +77,18 @@ Tester records are kept apart from any future statistics by their `test` mark.
 | `restore NAME FILE` | replaces the record from a backup file the **player** gave |
 | `wipe NAME` | deletes the record, keeps the account |
 | `delete NAME` | deletes the account and its record |
-| `audit [--last N]` | the admin log |
+| `audit [--last N]` | the audit log |
 
-The admin **cannot**: see any password (Firebase keeps only hashes); sign in as a player; edit single achievements
+The script **cannot**: see any password (Firebase keeps only hashes); sign in as a player; edit single achievements
 in someone's record (only wipe, or restore from the player's own file); change the server rules (owner, through the
-repo); make anyone else an admin (owner, through Cloud IAM). Every admin command writes a log line (time, command,
+repo); give anyone else these tools (only the owner holds its key). Every command writes a log line (time, command,
 account, result) to the `audit` collection, which no web page can read or write, and to a git-ignored local log.
 
 ### Owner
 
 - The only member of the Google Cloud project (Owner role), with two-factor sign-in.
 - The only one who changes the rules (a pull request: CI tests the rules first, then they are deployed).
-- Holds the admin script's service-account key in `.secrets/` (git-blocked), and renews it every 90 days.
+- Holds the account script's service-account key in `.secrets/` (git-blocked), and renews it every 90 days.
 - Can turn sign-in off for everyone (Firebase setting), and can delete the whole project.
 
 ### Machines
@@ -97,15 +96,15 @@ account, result) to the `audit` collection, which no web page can read or write,
 - **CI on every push:** runs the rules tests on the emulator (fake project `demo-kepler-star-map`; the `demo-` prefix
   means it cannot reach any real cloud). No cloud access at all.
 - **Optional deploy job:** only on `main`, only when `firebase/` changes, only after the tests and a manual approval;
-  signs in with Workload Identity Federation (no stored key) and holds only the "Firebase Rules Admin" role.
+  signs in with Workload Identity Federation (no stored key) and holds only the role that deploys rules.
 
 ## 4. Limits
 
-| Limit | Player | Tester | Admin | Enforced by |
+| Limit | Player | Tester | Owner | Enforced by |
 |---|---|---|---|---|
-| accounts | 1 each | 1 each | - | admin script |
-| total accounts | 50 at most (200 with open sign-up) | 5 at most | - | admin script refuses more; with open sign-up, a server check refuses new accounts past the cap |
-| how they're made | by the admin only, or by the player at SIGN UP (section 9) | by the admin only | - | the backend's sign-up setting; sign-ups per address are rate-limited |
+| accounts | 1 each | 1 each | - | the owner's script |
+| total accounts | 50 at most (200 with open sign-up) | 5 at most | - | the owner's script refuses more; with open sign-up, a server check refuses new accounts past the cap |
+| how they're made | by the owner only, or by the player at SIGN UP (section 9) | by the owner only | - | the backend's sign-up setting; sign-ups per address are rate-limited |
 | wrong passwords | blocked for a while after repeated tries | same | can disable the account | Firebase's built-in throttling |
 | session | 1-hour token, renewed quietly; ends at LOG OUT, `sign-out`, password reset or disable | same | - | Firebase |
 | saves | at most one every 5 seconds (the page waits 10 s after a change, and saves on closing) | same | - | server rules (the page also waits) |
@@ -128,9 +127,9 @@ firebase/
   firestore.rules          the server rules (draft below)
   tests/rules.test.mjs     a test for every row of section 3 and 4 (allowed and refused)
   package.json             pinned test tools (firebase-tools, @firebase/rules-unit-testing)
-scripts/accounts/admin.py  the admin commands (firebase-admin, its own requirements-accounts file)
+scripts/accounts/manage.py the owner's commands (Firebase's server library, its own requirements file)
 web/src/48e-accounts.js    LOG IN / LOG OUT in Settings, the sync, the tester panel
-tests/test_accounts.py     admin script against the emulator
+tests/test_accounts.py     the owner's script against the emulator
 tests/test_browser.py      log in, play, log in on a second browser, same progress
 ```
 
@@ -139,8 +138,8 @@ tests/test_browser.py      log in, play, log in on a second browser, same progre
 | Collection | One per | Holds | Who can read | Who can write |
 |---|---|---|---|---|
 | `progress/{account id}` | account | the same fields as the browser's saved progress, plus `updatedAt` (server time), `schema: 1`, and `test: true` for testers | that account | that account, within the limits |
-| `accounts/{account id}` | account | name, role, created, created by | that account (its own name and role) | admin script only |
-| `audit/{id}` | admin command | time, command, account, result | admin script only | admin script only |
+| `accounts/{account id}` | account | name, role, created, created by | that account (its own name and role) | the owner's script only |
+| `audit/{id}` | owner's command | time, command, account, result | the owner's script only | the owner's script only |
 
 ### Logging in and syncing
 
@@ -191,24 +190,24 @@ service cloud.firestore {
 ## 6. Google Cloud policies (if Firebase is chosen)
 
 1. **Cloud IAM (who manages the project):** Owner is only your Google account; no other members. One service account
-   for the admin script with only "Firebase Authentication Admin" and "Cloud Datastore User"; no keys for anything
-   else. GitHub Actions, if it deploys, uses Workload Identity Federation with only "Firebase Rules Admin".
+   for the owner's script with only the sign-in and database roles it needs; no keys for anything
+   else. GitHub Actions, if it deploys, uses Workload Identity Federation with only the role that deploys rules.
 2. **The web key:** Firebase's web API key is public by design (it identifies the project, it doesn't unlock it), but
    we restrict it to the sign-in and Firestore services and to the GitHub Pages address.
 3. **Firestore rules:** section 5; the only door to player data.
 4. **The free plan (Spark) with no billing account**, so it can't run up a bill; it stops at the free limits.
 5. **Logs:** Cloud Audit Logs record changes to the project's IAM and settings; our `audit` collection records
-   admin commands.
+   the owner's commands.
 
 ## 7. Privacy and Terms
 
 Records hold only game progress. No analytics, no real identities. Before anything goes online: a short "Accounts"
 section in the Terms of Use (version 1.2) and the site's Terms page, and a line in SECURITY.md. A player who wants
-their account gone asks the admin, who runs `delete` (the record goes with it).
+their account gone asks the owner, who runs `delete` (the record goes with it).
 
 ## 8. Steps
 
-1. **Local only** (nothing online): `firebase/` with the emulator, the rules and their tests in CI, the admin script
+1. **Local only** (nothing online): `firebase/` with the emulator, the rules and their tests in CI, the owner's script
    making five players and two testers, LOG IN in Settings pointed at the emulator, the tester panel, browser tests.
 2. **Online** (only after step 1 passes and you say so): a free Firebase project, rules deployed, the page's security
    policy updated, Terms 1.2, released as the next version number.
@@ -259,7 +258,7 @@ signed in:     the map, with a small SAVED mark in the header after each save (n
 
 - **CREATE ACCOUNT:** a pilot name (3 to 20 letters, digits and dashes, unique), a password typed twice (12
   characters or more), and a tick for the Terms of Use. **No email.** The form says plainly: there is no reset email,
-  so write the password down; the admin can reset it on request.
+  so write the password down; the owner can reset it on request.
 - **SIGN IN:** pilot name and password; after five wrong tries in a row, a pause before the next try (and the
   provider's own lockout behind it).
 - **After either:** progress merges as in section 5 (nothing in this browser or the account is lost), and the guide
@@ -272,10 +271,10 @@ One table of 80 fields is avoided; each part has its own record and its own merg
 | Record | Holds | Merge when two browsers differ |
 |---|---|---|
 | `users` (the provider's own) | id, sign-in name, created | - |
-| `profiles` | pilot name, emblem as picture, role (set only by the admin), created | the newest wins |
+| `profiles` | pilot name, emblem as picture, role (set only by the owner), created | the newest wins |
 | `preferences` | sound, pop-ups, background, score switch, outfit worn | the newest wins |
 | `progress` | everything earned: achievements, eggs, systems, stars seen, calls, trophies, streak, outfits owned, sky events | **merged**: the earliest date of every find, nothing lost (`mergeProgress`) |
-| `activity` | not kept (decision 6): only the admin log of admin commands | - |
+| `activity` | not kept (decision 6): only the audit log of the owner's commands | - |
 
 One game per account, so the structure's `project_id` isn't needed.
 
@@ -314,7 +313,7 @@ back." It never gives away an easter egg.
 4. The privacy page.
 5. The landing page and its trust sections.
 6. The guide.
-7. Later: the admin log in full, two-step sign-in for the owner and admin. Unusual-activity detection is left out:
+7. Later: the audit log in full, two-step sign-in for the owner. Unusual-activity detection is left out:
    the limits cover a site this size.
 
 ### The backend, again
@@ -326,9 +325,9 @@ Open sign-up needs checks **on the server at sign-up time** (the account cap, th
   are a setting. Its catch: a free project **pauses after a week with no activity** and must be resumed by hand (or
   kept awake by a weekly check).
 - **Firebase** never pauses, but checks at sign-up time need Cloud Functions, which its free plan doesn't include; the
-  cap would be enforced afterwards (the admin script cleans up), not at the door.
+  cap would be enforced afterwards (the owner's script cleans up), not at the door.
 
-So with open sign-up the suggestion changes to **Supabase**; with admin-made accounts only, Firebase stays simpler.
+So with open sign-up the suggestion changes to **Supabase**; with owner-made accounts only, Firebase stays simpler.
 Both are reached with plain HTTPS requests from the page, so the security policy only gains one `connect-src` line.
 
 ## 10. Decisions for you
@@ -349,47 +348,46 @@ AI, so the concierge and the model pages feel like one character), and **remembe
 | `finds` | one row per achievement or easter egg with the date found | read their own |
 | `progress` | everything else earned (one checked JSON record) | read their own |
 | `limits` | 200 accounts, 5 testers, 5 seconds between saves | nothing |
-| `admin_audit` | the admin log | nothing |
+| `audit_log` | the owner's log of role changes | nothing |
 
 Players never write a table: every change goes through `save_progress`, `load_progress`, `set_emblem`,
 `reset_progress` or `delete_my_account`, which check the data and the limits. Sign-up runs a check that refuses bad
 names, taken names, real emails and sign-ups past the cap. Finds keep their earliest date on the server too, and a
 save that leaves something out keeps the stored value, so no save can erase progress. 31 database tests
-(`supabase/tests/accounts.test.sql`) cover every rule. Next: the admin script, then the page (sign up, sign in,
+(`supabase/tests/accounts.test.sql`) cover every rule. Next: the owner's script, then the page (sign up, sign in,
 sync, SAVED), then the landing and privacy pages.
 
-**Admin sign-in (17 November, user request: "an admin credential to log in, to access a personalised version"):**
-this changes section 3, where the admin worked only from a script. Now the owner also has an **admin account**
-(`MED27-CODER`) that signs in on the page like any pilot and gets the personal view: the tester panel, sync details,
-an admin badge, and later the account tools. The guard rails:
+**The owner's tester account (17 November, user request: a login "to access a personalised version"):** the
+owner has a **tester account** (`MED27-CODER`) that signs in on the page like any pilot and gets the tester's view:
+the test panel and sync details. The guard rails:
 
-- the `admin` role (at most one) can be granted only by the database owner, through `admin_set_role`, which no page
-  can call; every role change is logged in `admin_audit`;
-- `scripts/accounts/admin.py create-admin` made it; its password is long and random, written only to
-  `.secrets/<name>.admin.txt` (git-ignored, refused by the commit hooks) and never printed;
-- before anything goes online, every admin-only function will also require **two-step sign-in** (an authenticator
-  app code; Supabase's `aal2`), so a stolen password alone is not enough.
+- roles are set only by the owner, through `set_role`, which no page can call; every role change is logged in
+  `audit_log`;
+- `scripts/accounts/manage.py create-tester` made it; its password is long and random, written only to
+  `.secrets/<name>.tester.txt` (git-ignored, refused by the commit hooks) and never printed;
+- if account tools ever come to the page, they will first require **two-step sign-in** (an authenticator app code;
+  Supabase's `aal2`), so a stolen password alone is not enough.
 
-The security review of the first migration found three gaps, fixed in `20261117010000_admin_and_fixes.sql`: a
+The security review of the first migration found three gaps, fixed in `20261117010000_roles_and_fixes.sql`: a
 pilot could change its sign-in email (or add a phone) to a real one; the 300-finds cap counted one save, not the
 account; and reset moved the save clock back, skipping the save gap. Now 44 tests.
 
 **Keeping the data (17 November):** the local database is several containers (database, sign-in, the API, the
 gateway that joins them at one address) with the database files in a Docker volume, so closing Docker or
-`supabase stop` keeps every account. `supabase db reset` and `supabase stop --no-backup` erase them. `admin.py
+`supabase stop` keeps every account. `supabase db reset` and `supabase stop --no-backup` erase them. `manage.py
 backup` saves all accounts and progress to `.secrets/db-backups/` (it holds the scrambled passwords; sessions and
-logs are left out) and `admin.py restore FILE --yes` rebuilds the database and loads it, after saving the current
-state first. Tested end to end: back up, wipe, restore, and the admin signs in with its old password. Online, the
+logs are left out) and `manage.py restore FILE --yes` rebuilds the database and loads it, after saving the current
+state first. Tested end to end: back up, wipe, restore, and the tester signs in with its old password. Online, the
 database will be a managed Supabase project: outside our Docker altogether, with its own backups.
 
 1. **Backend:** Supabase (suggested now that sign-up is wanted), or Firebase?
-2. **Sign-up:** open, with pilot names and no email (suggested); or admin-made accounts only, as first planned?
+2. **Sign-up:** open, with pilot names and no email (suggested); or owner-made accounts only, as first planned?
 3. **Local first:** build and test on the local backend only, going online later (suggested), or online straight
    away?
 4. **Landing page:** shown on the first visit and from a HOME button, returning players straight to the map
    (suggested), or every time?
 5. **The guide:** which existing character speaks the lines?
-6. **Activity history:** none beyond the admin log (suggested), or a list of each player's events?
+6. **Activity history:** none beyond the audit log (suggested), or a list of each player's events?
 7. **Testers:** the full test panel (unlock all, lock all, pretend clock) (suggested), or only reset?
 8. **Remember me:** stay signed in on that browser until SIGN OUT (handy), or sign out when the tab closes (safer on
    shared computers)?
