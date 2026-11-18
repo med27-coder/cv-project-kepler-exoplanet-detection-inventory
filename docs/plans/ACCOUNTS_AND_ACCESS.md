@@ -4,6 +4,10 @@
 the user's words: "people just need to log in and their progress loads, in case they want to open up in a different
 browser", with **proxy accounts only** (made-up test accounts, no real people's details).
 
+**Updated 17 November 2026:** the user wants a landing page with log in **and sign up**, and gave a structure to
+build from (a "trust page": why the site exists, what gets saved, how it is protected, then sign up). Section 9
+adapts that structure to the star map; where open sign-up changes sections 3 and 4, those sections say so.
+
 ## 1. What exists today
 
 | Part | Who can use it now | How access is controlled |
@@ -42,10 +46,10 @@ No moderator: players can't post anything others see, so there is nothing to mod
 
 | Can | Cannot |
 |---|---|
-| log in and out in any browser | create accounts, or have more than one |
+| log in and out in any browser | have more than one account (with open sign-up, section 9, they create their own; without it, only the admin does) |
 | read **its own** progress record | read or even list anyone else's |
 | save its own progress (merged, nothing lost) | write a record that doesn't look like progress (wrong keys, oversized, bad dates) |
-| reset its own progress (deletes its record; the browser copy stays unless they choose otherwise) | delete its account (asks the admin; see 6) |
+| reset its own progress (deletes its record; the browser copy stays unless they choose otherwise) | delete its account without the admin (asks the admin; with open sign-up, section 9, a DELETE MY ACCOUNT button does it) |
 | change its own password (12 characters or more; decision 7) | rename itself (names are fixed `PILOT-0001` style, so no name needs checking) |
 | see its role and account name in Settings | see the test panel, or give itself the tester role |
 
@@ -100,8 +104,8 @@ account, result) to the `audit` collection, which no web page can read or write,
 | Limit | Player | Tester | Admin | Enforced by |
 |---|---|---|---|---|
 | accounts | 1 each | 1 each | - | admin script |
-| total accounts | 50 at most | 5 at most of the 50 | - | admin script refuses more |
-| how they're made | by the admin only | by the admin only | - | Firebase setting: public sign-up off |
+| total accounts | 50 at most (200 with open sign-up) | 5 at most | - | admin script refuses more; with open sign-up, a server check refuses new accounts past the cap |
+| how they're made | by the admin only, or by the player at SIGN UP (section 9) | by the admin only | - | the backend's sign-up setting; sign-ups per address are rate-limited |
 | wrong passwords | blocked for a while after repeated tries | same | can disable the account | Firebase's built-in throttling |
 | session | 1-hour token, renewed quietly; ends at LOG OUT, `sign-out`, password reset or disable | same | - | Firebase |
 | saves | at most one every 5 seconds (the page waits 10 s after a change, and saves on closing) | same | - | server rules (the page also waits) |
@@ -211,14 +215,134 @@ their account gone asks the admin, who runs `delete` (the record goes with it).
 3. **Roles written down** for the other parts: section 1's table goes into SECURITY.md, plus
    [COMMIT_IDENTITY.md](COMMIT_IDENTITY.md) (2FA, signed commits).
 
-## 9. Decisions for you
+## 9. Landing page, sign up and the trust pages (17 November)
 
-1. **Backend:** Firebase on Google Cloud (suggested), Supabase, or Cloudflare?
-2. **Who gets accounts:** only proxy accounts the admin makes (suggested), or open sign-up later?
-3. **Local first:** build and test on the emulator only, going online later (suggested), or online straight away?
-4. **Testers:** the full test panel (unlock all, lock all, pretend clock) (suggested), or only reset?
-5. **Remember me:** stay logged in on that browser until LOG OUT (handy), or log out when the tab closes (safer on
+The user's structure, adapted. Its idea is right for this site: the account exists to answer three questions
+(will I lose my progress, is it private, can I carry on elsewhere), so the landing page answers them **before**
+asking anyone to sign up. Two changes for a game: **PLAY NOW needs no account** (the map never waits behind a
+form), and every claim on the page must be **literally true** of what we build (no "we monitor for abuse" unless we
+do).
+
+### The flow
+
+```text
+first visit:   LANDING  ->  PLAY NOW (no account, as today)  or  CREATE ACCOUNT  or  SIGN IN
+                  |
+                  +-- WHAT WE SAVE / HOW IT'S PROTECTED (privacy page, also linked from Settings)
+returning:     straight to the map; a HOME button in the header brings the landing back (decision 4)
+signed in:     the map, with a small SAVED mark in the header after each save (no save buttons)
+```
+
+### The landing page (one screen, pixel style, the site's own font and icons)
+
+1. **Hero:** KEPLER STAR MAP; "Your discoveries don't reset when you close the browser." Buttons: PLAY NOW, SIGN IN,
+   CREATE ACCOUNT.
+2. **Why it exists:** every star NASA's Kepler telescope watched, its planets and candidates, and Star Gazer's
+   predictions, as a map to explore and collect.
+3. **What gets saved** (the exact list, from the progress record): achievements and the date of each; easter eggs
+   found; systems saved and visited; stars seen; your planet-or-not calls; trophies and showcase; the daily mystery
+   streak; the astronaut's outfits; sky events caught; settings (sound, pop-ups, background, the score switch). Your
+   pilot name and, if you choose one, an emblem as your picture.
+   **What is not saved:** no email, no real name, no location, no analytics or tracking, no ads; nothing is sold.
+   (The hosting provider keeps its own standard server logs; the page says so and links its policy.)
+4. **How it's protected** (true statements only):
+   - **Encrypted in transit:** every request uses HTTPS.
+   - **Passwords never seen:** the sign-in provider stores only a scrambled form (bcrypt or scrypt); we can't read
+     them.
+   - **Only you:** server rules let an account read and write its own record and nothing else.
+   - **Limits:** repeated wrong passwords are slowed and locked for a while; saves and sign-ups are rate-limited.
+   - **You control it:** download your progress as a file any time (the existing backup), reset it, or DELETE MY
+     ACCOUNT, which removes the account and its record.
+5. **Sign up / sign in** forms (below).
+
+### Sign up and sign in
+
+- **CREATE ACCOUNT:** a pilot name (3 to 20 letters, digits and dashes, unique), a password typed twice (12
+  characters or more), and a tick for the Terms of Use. **No email.** The form says plainly: there is no reset email,
+  so write the password down; the admin can reset it on request.
+- **SIGN IN:** pilot name and password; after five wrong tries in a row, a pause before the next try (and the
+  provider's own lockout behind it).
+- **After either:** progress merges as in section 5 (nothing in this browser or the account is lost), and the guide
+  says "Welcome back, PILOT NAME. Your progress is restored."
+
+### The records, split as the structure suggests
+
+One table of 80 fields is avoided; each part has its own record and its own merge rule:
+
+| Record | Holds | Merge when two browsers differ |
+|---|---|---|
+| `users` (the provider's own) | id, sign-in name, created | - |
+| `profiles` | pilot name, emblem as picture, role (set only by the admin), created | the newest wins |
+| `preferences` | sound, pop-ups, background, score switch, outfit worn | the newest wins |
+| `progress` | everything earned: achievements, eggs, systems, stars seen, calls, trophies, streak, outfits owned, sky events | **merged**: the earliest date of every find, nothing lost (`mergeProgress`) |
+| `activity` | not kept (decision 6): only the admin log of admin commands | - |
+
+One game per account, so the structure's `project_id` isn't needed.
+
+### The guide
+
+The structure suggests a small guide, "not a chatbot, more like a concierge". The site already has characters, so
+the guide is one of them (decision 5) speaking scripted lines, no AI calls: "New here? Want a quick tour?" (starts
+the existing first-visit tour), "Ready to carry on where you left off? Sign in to restore your progress.", "Welcome
+back." It never gives away an easter egg.
+
+### Parts of the structure we don't adopt, and why
+
+| Suggested | Here instead | Why |
+|---|---|---|
+| email sign-up, email verification, Google / Microsoft / GitHub sign-in | pilot name and password only | proxy accounts only: these would collect real identities. They can come later if real accounts are ever wanted. |
+| HTTP-only cookies and CSRF tokens | the sign-in token is sent in a request header, kept in memory (or for the session, decision 8) | the site is a static page on GitHub Pages with no server of ours to set cookies. Without cookies a CSRF attack has nothing to ride on; the real risk is a script stealing the token, which the strict security policy and escaping everything already guard against. |
+| "industry-standard encryption protects your account" | the exact statements above | a trust page must say only what is literally true |
+| emoji icons on the cards | the site's pixel icons | the pixel font has no emoji, and the docs avoid them |
+| several projects per user | one progress record | one game per account |
+
+### Where it goes in the code
+
+| Piece | File |
+|---|---|
+| landing screen, guide lines | `web/src/49f-landing.js` (before `50-wiring`, like the tour in `49c-ui.js`) |
+| sign up, sign in, sync, SAVED mark, delete account | `web/src/48e-accounts.js` |
+| privacy page "What we save and how it's protected" | `web/privacy.html` (same strict security policy) |
+| server checks (caps, name rules, record shape, save rate) | the backend's rules (section 5 for Firebase; row-level security and triggers for Supabase) |
+| tests | rules tests in CI; browser tests: sign up, sign in on a second browser, same progress; delete account |
+
+### Build order (the structure's order, adapted)
+
+1. Sign-in and sign-up on the local test backend, with fake accounts only.
+2. Profiles and preferences.
+3. Progress sync and the SAVED mark.
+4. The privacy page.
+5. The landing page and its trust sections.
+6. The guide.
+7. Later: the admin log in full, two-step sign-in for the owner and admin. Unusual-activity detection is left out:
+   the limits cover a site this size.
+
+### The backend, again
+
+Open sign-up needs checks **on the server at sign-up time** (the account cap, the name rules, rate limits):
+
+- **Supabase** (the structure's suggestion) does all of this on its free plan: Postgres tables match the split above,
+  row-level security keeps each record private, a trigger can refuse sign-ups past the cap, and sign-up rate limits
+  are a setting. Its catch: a free project **pauses after a week with no activity** and must be resumed by hand (or
+  kept awake by a weekly check).
+- **Firebase** never pauses, but checks at sign-up time need Cloud Functions, which its free plan doesn't include; the
+  cap would be enforced afterwards (the admin script cleans up), not at the door.
+
+So with open sign-up the suggestion changes to **Supabase**; with admin-made accounts only, Firebase stays simpler.
+Both are reached with plain HTTPS requests from the page, so the security policy only gains one `connect-src` line.
+
+## 10. Decisions for you
+
+1. **Backend:** Supabase (suggested now that sign-up is wanted), or Firebase?
+2. **Sign-up:** open, with pilot names and no email (suggested); or admin-made accounts only, as first planned?
+3. **Local first:** build and test on the local backend only, going online later (suggested), or online straight
+   away?
+4. **Landing page:** shown on the first visit and from a HOME button, returning players straight to the map
+   (suggested), or every time?
+5. **The guide:** which existing character speaks the lines?
+6. **Activity history:** none beyond the admin log (suggested), or a list of each player's events?
+7. **Testers:** the full test panel (unlock all, lock all, pretend clock) (suggested), or only reset?
+8. **Remember me:** stay signed in on that browser until SIGN OUT (handy), or sign out when the tab closes (safer on
    shared computers)?
-6. **On LOG OUT:** keep the progress in that browser (suggested), or clear it?
-7. **Passwords:** players may change their own (suggested), or only the admin sets them?
-8. **Account cap:** 50 accounts with up to 5 testers (suggested), or other numbers?
+9. **On SIGN OUT:** keep the progress in that browser (suggested), or clear it?
+10. **Account cap:** 200 accounts with up to 5 testers (suggested), or other numbers?
