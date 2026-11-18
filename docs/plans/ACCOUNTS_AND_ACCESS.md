@@ -374,6 +374,14 @@ The security review of the first migration found three gaps, fixed in `202611170
 pilot could change its sign-in email (or add a phone) to a real one; the 300-finds cap counted one save, not the
 account; and reset moved the save clock back, skipping the save gap. Now 44 tests.
 
+**Keeping the data (17 November):** the local database is several containers (database, sign-in, the API, the
+gateway that joins them at one address) with the database files in a Docker volume, so closing Docker or
+`supabase stop` keeps every account. `supabase db reset` and `supabase stop --no-backup` erase them. `admin.py
+backup` saves all accounts and progress to `.secrets/db-backups/` (it holds the scrambled passwords; sessions and
+logs are left out) and `admin.py restore FILE --yes` rebuilds the database and loads it, after saving the current
+state first. Tested end to end: back up, wipe, restore, and the admin signs in with its old password. Online, the
+database will be a managed Supabase project: outside our Docker altogether, with its own backups.
+
 1. **Backend:** Supabase (suggested now that sign-up is wanted), or Firebase?
 2. **Sign-up:** open, with pilot names and no email (suggested); or admin-made accounts only, as first planned?
 3. **Local first:** build and test on the local backend only, going online later (suggested), or online straight
