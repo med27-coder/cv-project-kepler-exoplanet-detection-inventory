@@ -333,6 +333,31 @@ Both are reached with plain HTTPS requests from the page, so the security policy
 
 ## 10. Decisions for you
 
+**Taken 17 November 2026:** the user chose "proceed as the planner suggests, for a real database structure", so
+every suggested answer below stands: Supabase, open sign-up with pilot names and no email, local first, the landing
+page on the first visit and from HOME, no activity history, the full tester panel, progress kept on SIGN OUT, 200
+accounts and 5 testers. The two with no suggestion are set provisionally: **the guide is Star Gazer** (the site's own
+AI, so the concierge and the model pages feel like one character), and **remember me is a tick box, off by default**
+(signed in for the tab only unless the player ticks it). Either can change.
+
+**Step 1 progress (17 November):** the database is built and tested locally (`supabase/`):
+
+| Table | Holds | Players can |
+|---|---|---|
+| `profiles` | pilot name (unique, `A-Z 0-9 -`, 3 to 20), emblem, role | read their own |
+| `preferences` | sound, pop-ups, background, score switch, outfit (typed columns) | read their own |
+| `finds` | one row per achievement or easter egg with the date found | read their own |
+| `progress` | everything else earned (one checked JSON record) | read their own |
+| `limits` | 200 accounts, 5 testers, 5 seconds between saves | nothing |
+| `admin_audit` | the admin log | nothing |
+
+Players never write a table: every change goes through `save_progress`, `load_progress`, `set_emblem`,
+`reset_progress` or `delete_my_account`, which check the data and the limits. Sign-up runs a check that refuses bad
+names, taken names, real emails and sign-ups past the cap. Finds keep their earliest date on the server too, and a
+save that leaves something out keeps the stored value, so no save can erase progress. 31 database tests
+(`supabase/tests/accounts.test.sql`) cover every rule. Next: the admin script, then the page (sign up, sign in,
+sync, SAVED), then the landing and privacy pages.
+
 1. **Backend:** Supabase (suggested now that sign-up is wanted), or Firebase?
 2. **Sign-up:** open, with pilot names and no email (suggested); or admin-made accounts only, as first planned?
 3. **Local first:** build and test on the local backend only, going online later (suggested), or online straight

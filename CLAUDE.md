@@ -18,7 +18,12 @@ Windows, Python venv at `.venv` (use `.venv/Scripts/python`, not `python`). The 
 .venv\Scripts\python -m http.server 8000 --directory web             # view the site locally
 .venv\Scripts\streamlit run app.py                                  # the Star Gazer demo (Streamlit; tests use its AppTest)
 .venv\Scripts\python scripts\pipeline\run_pipeline.py --list         # V3 ML pipeline steps (--from <step> resumes)
+npx supabase@2.122.1 start | test db | db reset | stop             # player accounts, local only (needs Docker Desktop running)
 ```
+
+Player accounts (`docs/plans/ACCOUNTS_AND_ACCESS.md`): `supabase/migrations/` is the database (tables, row-level
+security, the sign-up check and the only write paths, `save_progress` and friends); `supabase/tests/` are its pgTAP
+tests. Local only so far: nothing is online. The local keys `supabase start` prints are Supabase's public demo keys.
 
 CI (`.github/workflows/tests.yml`) runs ruff, mypy, pytest with coverage, `build_web.py --check` and
 `node --check web/starmap.js`. Dependencies are hash-locked (`requirements*.lock`, regenerated with
