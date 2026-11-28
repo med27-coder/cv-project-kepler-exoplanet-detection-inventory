@@ -12,20 +12,49 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 
 ## Platform queue (27 November), top first
 
-From [PLATFORM_HARDENING.md](PLATFORM_HARDENING.md). Everything local; nothing goes online; no email; no new sign-in
-providers; anything that needs a choice stops and goes in the hand-off notes. Run `manage.py backup` before any
-`supabase db reset`.
+The user's order (27 November, after reviewing PLATFORM_HARDENING.md and EXPLORER_JOURNEY.md). Everything local;
+nothing goes online; no email; no new sign-in providers; anything that needs a choice stops and goes in the hand-off
+notes. Run `scripts/accounts/manage.py backup` before any `supabase db reset`. Read the specific official page a
+step needs (Supabase Auth and row-level security, OWASP cheat sheets, PostgreSQL, Docker, GitHub Actions), not
+documentation for its own sake.
 
-1. **Versioned saves** (EXPLORER_JOURNEY A): `schema: 2` in saved progress and the backup file, upgrade steps on
-   load; tests that old saves and files still load.
-2. **Catalogue table**: generate a `catalog` table of shipped achievement and egg ids from `SHIPPED_IDS`, so the
-   database refuses made-up ids; a test that the two lists match.
-3. **Database tests in CI**: a job that starts Supabase and runs `supabase test db`.
-4. **Landing page, second version** (PLATFORM_HARDENING section 1), still behind `?landing`, screenshots at desktop
-   and phone width.
-5. **Sign up, sign in and sync in the page** against the local Supabase only, behind `?landing`; browser tests:
-   sign up, play, sign in on a second browser, same progress.
-6. **Docs**: threat model, sequence diagrams (sign up, sign in, save, merge, delete), go-online checklist.
+**Tier 0, the foundation (finish first):**
+
+1. **Versioned saves** (EXPLORER_JOURNEY A): saved progress and the backup file carry `schema: 2` (a whole number;
+   today's saves count as 1), `gameVersion` (the site's version) and `exportedAt`; upgrade steps run on load from
+   the browser, a backup file or the account; `mergeProgress` stays the tolerant reader. Tests: old saves and old
+   backup files still load, and a file from a newer schema is refused politely.
+2. **Achievement and easter-egg registry tables**: `achievement_catalog` and `easter_egg_catalog` in the database,
+   **generated from the game's own lists** (the code stays the master copy, `SHIPPED_IDS`), so `finds` can refuse
+   ids that don't exist; a test that fails if the code and the tables ever differ.
+3. **Database tests on every push**: a CI job that starts Supabase and runs `supabase test db` (migrations,
+   foreign keys, the catalogue, importing a save, the row rules); a browser test that NASA's rulings still settle
+   predictions.
+
+**Tier 1, the best overnight work:**
+
+4. **Captain's Log foundation** (EXPLORER_JOURNEY B): build the journal from the dates already kept (achievements,
+   eggs, calls, NASA's rulings, daily mysteries), newest first, no spoilers; a draft view in the Galleria behind a
+   preview switch until it is released.
+5. **Incoming Transmission data model**: give `HISTORY` (`00-version.js`) the shape of a future `transmissions`
+   table (version, category, title, body, date; categories: patch notes, developer logs, mission updates,
+   announcements), still in code and still shipped with each release; the antenna reads the new shape. No database
+   table yet.
+6. **Landing page, second version** (PLATFORM_HARDENING section 1), behind `?landing`: the journey in four steps
+   (explore 3,600+ systems, predict planets before NASA confirms them, collect achievements and secrets, build your
+   explorer journey), START EXPLORING beside JOIN THE EXPLORER REGISTRY, the visitor's own stats; screenshots at
+   desktop and phone width.
+7. **Explorer Registry screens**: "pilot" becomes **explorer** everywhere (the database column and messages, the
+   sign-in address `<name>@explorers.invalid`, the landing text, `manage.py`), a new migration, the tests updated;
+   then the sign-up and sign-in screens with CONTINUE AS GUEST beside JOIN.
+8. **Local-only account simulation**: sign up, sign in and sync in the page against the local Supabase only,
+   behind `?landing`; browser tests: sign up, play, sign in on a second browser, same progress.
+9. **Threat model** and sequence diagrams (sign up, sign in, save, merge, delete) in `docs/`.
+10. **Cloud migration plan**: the go-online checklist (project, keys, security policy, Terms 1.2, backups,
+    two-step sign-in for the owner), written, not done.
+
+**Next cycle (not overnight):** cloud sync online, the Explorer Registry live, the prediction dashboard, the explorer
+profile, star card 2, Star Gazer's notes.
 
 ## Queue (top first)
 

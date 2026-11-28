@@ -108,13 +108,14 @@ Database-backed transmissions; public explorer pages and community features; an 
 Each step is a normal release in the project's numbering, after the 1.9.9.2 easter eggs already planned:
 A and B together, then C, then D, then E (when the accounts are ready to go online), then F and G.
 
-## 5. Decisions for you
+## 5. Decisions (taken 27 November 2026)
 
-1. **Your name in the game:** "pilot" (as in the accounts so far) or "explorer" (as in these notes, with the
-   Explorer Registry and Captain's Log)? Suggested: **explorer**, since the journey and the log fit it.
-2. **Order:** the no-account pieces first (versioned saves, Captain's Log, the prediction dashboard, the profile and
-   card) before accounts go online (suggested), or accounts first?
-3. **Transmissions:** stay in code for now (suggested), or move to the database?
-4. **Community features:** not now (suggested), or plan them?
-5. **New achievement families:** all three (suggested), or which?
-6. **Sign-in:** stay with names and passwords only (suggested, as decided), or add Google / Microsoft / GitHub?
+1. **Name: explorer**, not pilot (Explorer Registry, Explorer Profile, Explorer Card, Captain's Log). Renamed in the
+   accounts work while nothing is online (overnight queue, step 7).
+2. **Order:** the no-account pieces first. Captain's Log moves up, before accounts go online.
+3. **Transmissions:** a proper data model now, **in code** (version, category, title, body, date), shaped like a
+   future `transmissions` table; a database table only when posting without a release is worth it.
+4. **Community features:** not now.
+5. **New achievement families:** later, after the foundation (none yet decided individually).
+6. **Sign-in:** names and passwords only. Email stays out of accounts; an optional, off-by-default email list may
+   come later (PLATFORM_HARDENING section 7).

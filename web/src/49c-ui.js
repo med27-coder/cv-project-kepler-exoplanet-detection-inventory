@@ -119,5 +119,5 @@ queueMicrotask(() => {
   const mark = () => { busy = true; };
   addEventListener('keydown', mark, { once: true, capture: true });
   addEventListener('pointerdown', mark, { once: true, capture: true });
-  if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => { if (forced || !busy) showTourStep(0); }, forced ? 0 : 900);
+  if ((!progress.toured && !navigator.webdriver) || forced) setTimeout(() => { if ((forced || !busy) && !landingOpen()) showTourStep(0); }, forced ? 0 : 900);
 });

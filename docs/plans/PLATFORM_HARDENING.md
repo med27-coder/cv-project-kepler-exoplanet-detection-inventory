@@ -81,8 +81,11 @@ Safe without the user (all local, tested, nothing goes online, no new decisions)
 Never unattended: going online, pushing the history rewrite, anything with email or new sign-in providers, choosing
 between the open decisions, merging someone else's branch.
 
-## 7. Decisions for you
+## 7. Decisions (taken 27 November 2026)
 
-1. **Email:** transmissions in the game only (suggested), or an optional email list later?
-2. **Landing page:** the second version above (suggested), including your own stats on it?
-3. **Overnight:** let an agent work the platform queue unattended (`/loop` on LOOP_BACKLOG.md)?
+1. **Email:** in-game transmissions stay the main channel. An optional email list ("Explorer Bulletin": major
+   updates, prediction rulings, a monthly explorer report) may come later, **opt-in, every box off by default**, with
+   double opt-in and an unsubscribe link. When it does, the landing page's "No email" becomes "No email unless you
+   ask for updates", and the Terms say so. Not part of the overnight work.
+2. **Landing page:** the second version, with the visitor's own stats.
+3. **Overnight:** the queue in LOOP_BACKLOG.md, in the user's 10-step order.
