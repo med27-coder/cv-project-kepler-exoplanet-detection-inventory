@@ -558,6 +558,34 @@ def test_captains_log_preview(browser, site):
     assert not errors, errors
 
 
+def test_explorer_profile_preview(browser, site):
+    """The profile (behind ?profile): the rank opens it, status first, a bar per group, unfound secrets only as '+ ?'."""
+    errors = []
+    page = open_page(browser, site, errors)
+    assert page.locator('#tab-profile').is_hidden()                   # a preview: no tab without the switch
+    saved = {'toured': True, 'showcase': ['first-rock'],
+             'ach': {'first-light': '2026-09-01', 'dice': '2026-09-02', 'first-rock': '2026-09-05', 'night': '2026-09-10'},
+             'systems': ['Kepler-10', 'Kepler-22']}
+    page.evaluate("s => localStorage.setItem('starmap.progress.v1', JSON.stringify(s))", saved)
+    page.goto(site + '?profile')
+    assert page.locator('#rank-badges').is_hidden() and '%' in page.locator('#rank-count').inner_text()
+    page.click('#rank')
+    pane = page.locator('#pane-profile')
+    pane.wait_for(state='visible')
+    text = pane.inner_text()
+    assert 'NIGHT SHIFT\nNEWEST' in text and 'RAREST · SECRET' in text   # the newest and the rarest, a secret earned
+    assert 'EXPLORING SINCE' in text and '1 Sep 2026' in text and '2\nSYSTEMS OPENED' in text
+    counts = dict(zip(pane.locator('.profile-group').all_inner_texts(), pane.locator('.profile-count').all_inner_texts(),
+                      strict=True))
+    assert counts['SECRET'] == '1 / 1 + ?' and counts['EXPLORER'].startswith('2 / ')
+    assert 'TRUE STAR GAZER' not in text and 'HOUSTON' not in text    # no spoilers
+    next_title = pane.locator('.dash-tile').nth(2).inner_text()
+    assert not any(a in next_title for a in ('PATIENT', 'WARP SPEED', 'GOODNIGHT'))   # never a secret
+    page.click('[data-go="log"]')
+    assert page.locator('#pane-log').is_visible() and page.locator('#tab-log').is_visible()
+    assert not errors, errors
+
+
 def test_landing_preview(browser, site):
     """The landing page (behind ?landing): the journey, the visitor's own numbers, JOIN opens the form, which sends nothing."""
     errors = []

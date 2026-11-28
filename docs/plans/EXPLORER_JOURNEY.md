@@ -90,6 +90,8 @@ The user rates this a **signature feature**: the predictions game is more unusua
 
 ### D2. Status in the header, the collection in the museum (the user's note, 27 November)
 
+**Built as a preview (28 November 2026), behind `?profile` (`web/src/49h-profile.js`):** the header shows the percentage and drops its badges and showcase; the rank opens the PROFILE tab: the status panel (newest, rarest by tier, suggested next, collection focus), systems opened, stars seen, calls right, exploring since, a bar per group (unfound secrets only as "+ ?"), the badges and showcase, and links to the collection, the log and the predictions. Not yet: the favourite world (it needs a new saved field: a choice) and star card 2. It goes live for every player when the user says so.
+
 Today the header shows the rank (emblem, name, bar, count), the badges and up to three showcase trophies as small
 icons. A new player can't tell what the icons mean, which achievements are close, which categories are complete,
 what is rare or what to chase next. The fix, as in Steam, PlayStation and Xbox: **progress first, icons second.**

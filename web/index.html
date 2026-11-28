@@ -159,6 +159,7 @@
       <button type="button" id="gallery-close" class="ghost" aria-label="Close">✕</button>
     </div>
     <div class="tabs" role="tablist" aria-label="Galleria sections">
+      <button type="button" role="tab" id="tab-profile" aria-controls="pane-profile" aria-selected="false" tabindex="-1" hidden>PROFILE</button>
       <button type="button" role="tab" id="tab-eggs" aria-controls="pane-eggs" aria-selected="true">EASTER EGGS</button>
       <button type="button" role="tab" id="tab-ach" aria-controls="pane-ach" aria-selected="false" tabindex="-1">ACHIEVEMENTS</button>
       <button type="button" role="tab" id="tab-pred" aria-controls="pane-pred" aria-selected="false" tabindex="-1">PREDICTIONS</button>
@@ -169,6 +170,7 @@
       <canvas id="holo-canvas" width="120" height="96" aria-hidden="true"></canvas>
       <div id="holo-data" aria-live="polite"></div>
     </div>
+    <section id="pane-profile" role="tabpanel" aria-labelledby="tab-profile" hidden></section>
     <section id="pane-eggs" role="tabpanel" aria-labelledby="tab-eggs"></section>
     <section id="pane-ach" role="tabpanel" aria-labelledby="tab-ach" hidden></section>
     <section id="pane-pred" role="tabpanel" aria-labelledby="tab-pred" hidden></section>

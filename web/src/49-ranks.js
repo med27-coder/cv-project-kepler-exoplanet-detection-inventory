@@ -374,7 +374,8 @@ const rankCanvas = document.getElementById('rank-emblem');
 function renderHeaderRank() {
   const i = rankIndex(), n = ACHIEVEMENTS.filter(a => progress.ach[a.id]).length;
   document.getElementById('rank-name').textContent = rankName(i) + (progress.ach['star-gazer'] ? ' · STAR GAZER' : '');
-  document.getElementById('rank-count').textContent = `${n}/${ACHIEVEMENTS.length}`;
+  document.getElementById('rank-count').textContent = `${n}/${ACHIEVEMENTS.length}`
+    + (profilePreview() ? ` · ${Math.round(100 * n / ACHIEVEMENTS.length)}%` : '');   // 49h-profile.js
   document.getElementById('rank-bar').style.width = `${Math.round(100 * n / ACHIEVEMENTS.length)}%`;
   const badges = earnedBadges();
   document.getElementById('rank-badges').innerHTML = badges.map(g =>
@@ -408,7 +409,7 @@ function pulseHeader() {
   void rankBox.offsetWidth;
   rankBox.classList.add('pulse');
 }
-rankBox.addEventListener('click', () => { detailEgg = null; galleryDialog.showModal(); showTab('ach'); });
+rankBox.addEventListener('click', () => { detailEgg = null; galleryDialog.showModal(); showTab(profilePreview() ? 'profile' : 'ach'); });
 
 // Called by achieve() with the rank and badges from before the new achievement.
 function afterAchievement(rankBefore, badgesBefore) {

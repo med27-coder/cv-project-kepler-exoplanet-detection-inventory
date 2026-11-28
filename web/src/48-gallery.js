@@ -549,7 +549,7 @@ function drawEggArt(canvas, egg, t, silhouette) {
 // ---- the Galleria dialog
 const galleryDialog = document.getElementById('gallery');
 const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'),
-                pred: document.getElementById('pane-pred'), log: document.getElementById('pane-log'),   // log: 49g-log.js (preview)
+                pred: document.getElementById('pane-pred'), log: document.getElementById('pane-log'), profile: document.getElementById('pane-profile'),   // log: 49g-log.js (preview)
                 set: document.getElementById('pane-set') };
 let detailEgg = null, detailFrame = 0;
 const blanks = name => [...name].map(ch => (/[A-Za-z0-9]/.test(ch) ? '_' : ch === ' ' ? ' ' : ch)).join('');
@@ -863,6 +863,7 @@ function showTab(name) {
   if (name === 'set') renderSettings();
   if (name === 'pred') renderPredictions();
   if (name === 'log') renderLog();
+  if (name === 'profile') renderProfile();   // 49h-profile.js (preview)
 }
 const tabs = [...document.querySelectorAll('#gallery [role="tab"]')];
 tabs.forEach(tab => {

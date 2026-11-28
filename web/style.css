@@ -251,6 +251,23 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 .dash-tile.wrong b { color: var(--alert); }
 /* Captain's Log (49g-log.js, preview) */
 .log { list-style: none; margin: 8px 0 0; padding: 0; }
+/* the explorer profile (49h-profile.js, preview) */
+.profile-preview #rank-badges, .profile-preview #rank-showcase { display: none; }
+.profile-head { display: flex; gap: 12px; align-items: center; margin: 4px 0 8px; }
+.profile-emblem { width: 64px; height: 64px; image-rendering: pixelated; flex: none; }
+.profile-rank { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.profile-rank b { font-family: var(--pixel); font-size: 14px; font-weight: normal; color: var(--accent); }
+.profile-rank > span:not(.note) { font-family: var(--pixel); font-size: 9px; }
+.profile-track { display: block; height: 8px; border: 1px solid var(--edge); background: var(--bg); }
+.profile-bar { display: block; height: 100%; width: 0; background: var(--accent); }
+.profile-h { font-family: var(--pixel); font-size: 10px; font-weight: normal; margin: 14px 0 6px; }
+.profile-groups { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.profile-groups li { display: grid; grid-template-columns: 11em 1fr 6em; gap: 10px; align-items: center; }
+.profile-group, .profile-count { font-family: var(--pixel); font-size: 8px; }
+.profile-count { text-align: right; }
+.profile-shelf canvas { width: 32px; height: 32px; image-rendering: pixelated; margin-right: 6px; }
+.profile-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+@media (max-width: 520px) { .profile-groups li { grid-template-columns: 1fr 5em; } .profile-groups .profile-track { grid-column: 1 / -1; grid-row: 2; } }
 .log-entry { display: grid; grid-template-columns: 8.5em 1fr; gap: 2px 12px; padding: 8px 0; border-bottom: 2px solid var(--edge); }
 .log-date, .log-kind { font-family: var(--pixel); font-size: 9px; color: var(--ink-2); }
 .log-kind { grid-column: 2; }

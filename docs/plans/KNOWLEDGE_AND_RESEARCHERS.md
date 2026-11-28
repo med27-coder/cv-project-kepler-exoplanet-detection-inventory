@@ -108,9 +108,9 @@ landing, dashboard):
 
 ## 7. Decisions for you
 
-1. **NASA updates:** keep the monthly pull request that you merge (suggested: a person still glances at each
+1. **Taken (28 Nov): hybrid**, see section 11. **NASA updates:** keep the monthly pull request that you merge (suggested: a person still glances at each
    month's changes, and the tests run first), or merge it automatically when every test passes?
-2. **Community sources:** may an agent read forums for trivia ideas at all (suggested: only player suggestions and
+2. **Taken (28 Nov): forums later, ideas only**, see section 11. **Community sources:** may an agent read forums for trivia ideas at all (suggested: only player suggestions and
    papers for now; forums later)?
 3. **Characters:** Star Gazer as the curious scientist and Colossus as the blunt specialist (suggested), or other
    personalities?
@@ -219,4 +219,4 @@ a world matters, not just see its numbers.
   down first (what counts, who decided), or they become invented numbers; they wait for the first reviewed worlds.
 - **On the open decisions,** the note recommends the suggested options: decision 1 as a hybrid (the monthly report
   and the pull request are generated automatically, a person approves the merge) and decision 2, forums later, as
-  ideas and trivia suggestions only, never database inputs. Both stay open until you confirm.
+  ideas and trivia suggestions only, never database inputs. **Both taken on 28 November 2026** (the user accepted the note's recommendations): the monthly pull request and its knowledge report are generated automatically and a person approves every merge; forums wait, and when they come they only suggest ideas for the review queue. Decisions 3 (the characters) and 5 (how often the report runs) stay open.
