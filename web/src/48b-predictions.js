@@ -12,7 +12,7 @@ function callOutcome(koi) {   // 'waiting' | 'early' (NASA ruled before the call
   const planet = r[0] === 'confirmed';
   if (!(r[1] > c[1])) return { state: 'early', ruling: r[0], date: r[1] };
   return { state: (c[0] === 'planet') === planet ? 'right' : 'wrong', ruling: r[0], date: r[1],
-           sgRight: c[2] ? (c[2] === 'planet') === planet : null };
+           sgRight: c[2] ? (c[2] === 'planet') === planet : null, cgRight: c[4] ? (c[4] === 'planet') === planet : null };
 }
 
 const CALL_WORD = { planet: 'PLANET', not: 'NOT A PLANET' };
@@ -26,7 +26,8 @@ function callMarkup(p, system) {
     return `<br><span class="call made">YOUR CALL: <b>${CALL_WORD[c[0]]}</b> · ${esc(niceDate(c[1]))} · ${OUTCOME_WORD[callOutcome(p.koi).state]}</span>`;
   }
   const sg = p.sg_planet === true ? 'planet' : p.sg_planet === false ? 'not' : '';
-  return `<br><span class="call" data-koi="${esc(p.koi)}" data-system="${esc(system)}" data-sg="${sg}">YOUR CALL:
+  const cg = p.cg == null ? '' : p.cg >= COLOSSUS_THRESHOLD ? 'planet' : 'not';   // Colossus scores giants only
+  return `<br><span class="call" data-koi="${esc(p.koi)}" data-system="${esc(system)}" data-sg="${sg}" data-cg="${cg}">YOUR CALL:
     <button type="button" class="ghost" data-call="planet">PLANET</button>
     <button type="button" class="ghost" data-call="not">NOT A PLANET</button></span>`;
 }
@@ -44,7 +45,7 @@ function callCell(row) {
 function wireCalls(root) {
   root.querySelectorAll('.call[data-koi] button[data-call]').forEach(b => b.addEventListener('click', () => {
     const span = b.closest('.call'), koi = span.dataset.koi;
-    progress.calls[koi] = [b.dataset.call, today(), span.dataset.sg, span.dataset.system];
+    progress.calls[koi] = [b.dataset.call, today(), span.dataset.sg, span.dataset.system, span.dataset.cg || ''];
     saveProgress();
     span.outerHTML = `<span class="call made">YOUR CALL: <b>${CALL_WORD[b.dataset.call]}</b> · saved · waiting for NASA
       (see ⚙ → PREDICTIONS)</span>`;
@@ -53,14 +54,20 @@ function wireCalls(root) {
 }
 
 function predictionStats() {
-  const s = { calls: 0, waiting: 0, early: 0, right: 0, wrong: 0, sgRight: 0, sgWrong: 0, cassandra: 0, contrarian: 0, patience: 0 };
+  const s = { calls: 0, waiting: 0, early: 0, right: 0, wrong: 0, sgRight: 0, sgWrong: 0, cassandra: 0, contrarian: 0, patience: 0,
+              sgAsked: 0, sgAgreed: 0, cgAsked: 0, cgAgreed: 0, cgRight: 0, cgWrong: 0, waitDays: 0 };
   for (const [koi, c] of Object.entries(progress.calls)) {
     s.calls++;
+    if (c[2]) { s.sgAsked++; if (c[2] === c[0]) s.sgAgreed++; }   // agreement: on every call, settled or not
+    if (c[4]) { s.cgAsked++; if (c[4] === c[0]) s.cgAgreed++; }
     const o = callOutcome(koi);
     s[o.state]++;
     if (o.state !== 'right' && o.state !== 'wrong') continue;
+    s.waitDays += Math.max(0, Math.round((Date.parse(o.date) - Date.parse(c[1])) / 86_400_000));
     if (o.sgRight === true) s.sgRight++;
     if (o.sgRight === false) s.sgWrong++;
+    if (o.cgRight === true) s.cgRight++;
+    if (o.cgRight === false) s.cgWrong++;
     if (o.state === 'right' && o.sgRight === false) s.contrarian++;
     if (o.state === 'right' && c[0] === 'not' && c[2] === 'planet') s.cassandra++;
     if ((Date.parse(o.date) - Date.parse(c[1])) / 86_400_000 >= 365) s.patience++;
@@ -97,11 +104,24 @@ function renderPredictions() {
       <td>${o.state === 'right' ? '✔' : o.state === 'wrong' ? '✖' : o.state === 'early' ? '(too late)' : ''}</td></tr>`;
   }).join('');
   const settled = s.right + s.wrong;
+  const tile = (value, label, cls = '') => `<div class="dash-tile${cls}"><b>${esc(value)}</b><span>${esc(label)}</span></div>`;
+  const ratio = (a, b) => (b ? `${a} / ${b}` : '-');
+  const dashboard = s.calls ? `<div class="dash" aria-label="Your prediction record">
+      ${tile(String(s.calls), 'CALLS MADE')}
+      ${tile(String(s.right), 'CORRECT', ' right')}
+      ${tile(String(s.wrong), 'WRONG', ' wrong')}
+      ${tile(String(s.waiting), 'WAITING FOR NASA')}
+      ${tile(settled ? `${Math.round(s.waitDays / settled)} d` : '-', 'AVERAGE WAIT')}
+      ${tile(ratio(s.sgAgreed, s.sgAsked), 'AGREED WITH STAR GAZER')}
+      ${tile(ratio(s.cgAgreed, s.cgAsked), 'AGREED WITH COLOSSUS (GIANTS)')}
+      ${tile(ratio(s.sgRight, s.sgRight + s.sgWrong), 'STAR GAZER RIGHT')}
+      ${s.cgRight + s.cgWrong ? tile(ratio(s.cgRight, s.cgRight + s.cgWrong), 'COLOSSUS RIGHT') : ''}
+    </div>` : '';
   pane.innerHTML = `
     <p>Call a candidate before NASA does: open a system with candidates (try 🏆 next planets) and choose
        <b>PLANET</b> or <b>NOT A PLANET</b> in its case files. When NASA confirms it or rules it a false positive,
        your call is scored here. It's a slow game: NASA settles a few Kepler candidates at a time.</p>
-    <p class="gallery-progress"><b>${s.calls}</b> CALLS · <b>${s.right}</b> RIGHT · <b>${s.wrong}</b> WRONG · ${s.waiting} WAITING</p>
+    ${dashboard || '<p class="gallery-progress"><b>0</b> CALLS</p>'}
     ${settled ? `<p>You vs Star Gazer on the same settled calls: you <b>${s.right}/${settled}</b>, Star Gazer
       <b>${s.sgRight}/${s.sgRight + s.sgWrong}</b>.</p>` : ''}
     ${rows ? `<div class="table-wrap"><table>

@@ -482,6 +482,12 @@ def test_predictions(browser, site):
     page.click('.call[data-koi="K03444.01"] button[data-call="planet"]')
     page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('K03444.01')")
     assert 'first-call' in page.evaluate("localStorage.getItem('starmap.progress.v1')")
+    page.fill('#query', 'KOI-1095')                                    # a giant candidate: Colossus's call is kept too
+    page.press('#query', 'Enter')
+    page.wait_for_selector('.call[data-koi="K01095.01"]')
+    page.click('.call[data-koi="K01095.01"] button[data-call="not"]')
+    page.wait_for_function(f"() => ({SAVED}.calls || {{}})['K01095.01']")
+    assert page.evaluate(SAVED)['calls']['K01095.01'][2:] == ['planet', 'KOI-1095', 'planet']
     ruling = ('window.STARMAP_RESOLUTIONS = {"since": "2026-10-14", '
               '"resolved": {"K03444.01": ["confirmed", "2099-01-01"]}};')   # NASA confirms it, after the call
     page.route('**/data/resolutions.js', lambda r: r.fulfill(status=200, content_type='text/javascript', body=ruling))
@@ -491,7 +497,7 @@ def test_predictions(browser, site):
     page.wait_for_function("() => (localStorage.getItem('starmap.progress.v1') || '').includes('prophet')")
     page.click('#open-gallery')
     page.click('#tab-pred')
-    assert '1RIGHT' in ''.join(page.locator('#pane-pred .gallery-progress').inner_text().split())
+    assert re.search(r'\b1\s+CORRECT', page.locator('#pane-pred .dash').inner_text())
     assert not errors, errors
 
 
@@ -499,7 +505,7 @@ def test_rulings_settle_only_calls_made_before_them(browser, site):
     """NASA's rulings settle calls both ways; a ruling dated before the call never counts; no ruling, still waiting."""
     errors = []
     page = open_page(browser, site, errors)
-    calls = {'K03444.01': ['planet', '2026-11-01', 'planet', 'KOI-3444'],   # ruled a false positive later: wrong
+    calls = {'K03444.01': ['planet', '2026-11-01', 'planet', 'KOI-3444', 'planet'],   # ruled a false positive later: wrong
              'K09998.01': ['not', '2026-11-01', 'not', 'KOI-9998'],         # NASA confirmed it before the call
              'K09999.01': ['planet', '2026-11-01', '', 'KOI-9999']}        # no ruling yet
     page.evaluate("calls => localStorage.setItem('starmap.progress.v1', JSON.stringify({ toured: true, calls }))", calls)
@@ -516,8 +522,12 @@ def test_rulings_settle_only_calls_made_before_them(browser, site):
     assert saved['notified'] == ['K03444.01'] and 'prophet' not in saved.get('ach', {})
     page.click('#open-gallery')
     page.click('#tab-pred')
-    assert '3CALLS·0RIGHT·1WRONG·1WAITING' in ''.join(page.locator('#pane-pred .gallery-progress').inner_text().split())
     assert page.locator('#pane-pred tr.early').inner_text().count('(too late)') == 1
+    dash = ' '.join(page.locator('#pane-pred .dash-tile').all_inner_texts()).replace('\n', ' ')
+    assert '3 CALLS MADE' in dash and '0 CORRECT' in dash and '1 WAITING FOR NASA' in dash and '1 WRONG' in dash
+    assert '2 / 2 AGREED WITH STAR GAZER' in dash and '1 / 1 AGREED WITH COLOSSUS (GIANTS)' in dash
+    assert '0 / 1 COLOSSUS RIGHT' in dash
+    assert '0 / 1 STAR GAZER RIGHT' in dash and '26359 d AVERAGE WAIT' in dash    # called 1 Nov 2026, ruled 1 Jan 2099
     assert not errors, errors
 
 
@@ -1054,6 +1064,7 @@ def test_saves_are_versioned(browser, site, tmp_path):
     page.reload()
     page.click('#open-gallery')
     page.click('#tab-set')
+    page.evaluate("document.getElementById('set-reset-note').textContent = ''")   # so each wait sees its own load
     page.set_input_files('#set-import-file', str(archive))
     page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('loaded')")
     restored = page.evaluate(SAVED)
@@ -1063,12 +1074,14 @@ def test_saves_are_versioned(browser, site, tmp_path):
     old = tmp_path / 'old.json'                                           # a backup file from before format numbers
     old.write_text(json.dumps({'app': 'kepler-star-map', 'version': 1, 'saved': '2026-09-01',
                                'eggs': {'sun': '2026-09-01'}, 'ach': {}, 'systems': []}), encoding='utf-8')
+    page.evaluate("document.getElementById('set-reset-note').textContent = ''")   # so each wait sees its own load
     page.set_input_files('#set-import-file', str(old))
     page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('loaded')")
     assert page.evaluate(SAVED)['eggs']['sun'] == '2026-09-01'
 
     newer = tmp_path / 'newer.json'                                       # a file from a future version: refused
     newer.write_text(json.dumps({'app': 'kepler-star-map', 'saveFormat': 99, 'eggs': {'moon': '2026-09-02'}}), encoding='utf-8')
+    page.evaluate("document.getElementById('set-reset-note').textContent = ''")   # so each wait sees its own load
     page.set_input_files('#set-import-file', str(newer))
     page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('newer version')")
     assert 'moon' not in page.evaluate(SAVED)['eggs']

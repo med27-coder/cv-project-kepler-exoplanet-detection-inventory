@@ -48,7 +48,7 @@ documentation for its own sake.
    (explore 3,600+ systems, predict planets before NASA confirms them, collect achievements and secrets, build your
    explorer journey), START EXPLORING beside JOIN THE EXPLORER REGISTRY, the visitor's own stats; screenshots at
    desktop and phone width.
-8. **Prediction dashboard foundation** (EXPLORER_JOURNEY C): calls made, correct, wrong, waiting, the average wait,
+8. **[done 27 Nov, see the commit "Prediction dashboard"; a call now also keeps Colossus's opinion on giants (the fifth item of a call), so agreement with Colossus counts from calls made from now on]** **Prediction dashboard foundation** (EXPLORER_JOURNEY C): calls made, correct, wrong, waiting, the average wait,
    agreement with Star Gazer and (on giants) with Colossus; built from data the page already has.
 9. **Explorer Registry mockups**: "pilot" becomes **explorer** everywhere (the database column and messages, the
    sign-in address `<name>@explorers.invalid`, `manage.py`), a new migration, the tests updated; the sign-up and

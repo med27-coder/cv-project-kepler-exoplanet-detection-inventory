@@ -287,10 +287,11 @@ function mergeProgress(saved) {   // from storage or an imported file; keeps the
   if (Array.isArray(saved.astroDays)) progress.astroDays = [...new Set([...progress.astroDays, ...saved.astroDays.filter(d => DATE.test(String(d)))])].slice(-30);
   if (Array.isArray(saved.outfits)) progress.outfits = [...new Set([...progress.outfits, ...saved.outfits.filter(o => typeof o === 'string' && ID.test(o))])].slice(0, 40);
   const calls = saved.calls && typeof saved.calls === 'object' ? Object.entries(saved.calls).slice(0, 2000) : [];
-  for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system]; the earliest call wins
+  for (const [koi, c] of calls) {   // [call, date, Star Gazer's call, system, Colossus's call]; the earliest call wins
     if (!/^K\d{5}\.\d{2}$/.test(koi) || !Array.isArray(c) || !['planet', 'not'].includes(c[0]) || !DATE.test(String(c[1]))) continue;
     if (progress.calls[koi] && progress.calls[koi][1] <= c[1]) continue;
-    progress.calls[koi] = [c[0], c[1], ['planet', 'not'].includes(c[2]) ? c[2] : '', typeof c[3] === 'string' ? c[3].slice(0, 60) : ''];
+    progress.calls[koi] = [c[0], c[1], ['planet', 'not'].includes(c[2]) ? c[2] : '', typeof c[3] === 'string' ? c[3].slice(0, 60) : '',
+                           ['planet', 'not'].includes(c[4]) ? c[4] : ''];   // Colossus: giants only, since 1.9.9.1
   }
   if (Array.isArray(saved.showcase)) progress.showcase = saved.showcase.filter(v => typeof v === 'string' && ID.test(v)).slice(-3);
   if (saved.levels && Number.isInteger(saved.levels.census)) progress.levels.census = Math.min(3, Math.max(progress.levels.census || 0, saved.levels.census));
