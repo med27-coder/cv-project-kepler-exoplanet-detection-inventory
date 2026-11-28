@@ -51,7 +51,8 @@ patches, write a script file (scratchpad) and run it, or use the Edit tool.
   scripts. Flow: `views.py` (all-quarter light curves -> global/local/odd/even/secondary/centroid views) ->
   `star_gazer.py` (catalog features, star-grouped split, hybrid model, evaluation) -> `training.py` (variants,
   checkpoints, scoring; used by the pipeline, cross-validation and ablation scripts).
-- `scripts/` is grouped by job: `pipeline/`, `starmap/`, `experiments/`, `data/`, `tools/` (see `scripts/README.md`).
+- `scripts/` is grouped by job: `pipeline/`, `starmap/`, `experiments/`, `data/`, `accounts/`, `knowledge/`, `tools/` (see `scripts/README.md`).
+- `knowledge/` is the reviewed knowledge about each world (sources on every fact; nothing invented; never written by an unattended run): see `knowledge/README.md`.
 - The trained model (`models/v3/`) and detailed results (`results/v3/`) are git-ignored and committed only
   encrypted in `secure/` (`scripts/tools/secure_artifacts.py unlock|lock|verify`, key `.secrets/star_gazer.key`,
   never committed). `results/v3_public/` holds the few published outputs.

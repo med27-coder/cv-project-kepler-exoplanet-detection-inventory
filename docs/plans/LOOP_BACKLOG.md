@@ -59,7 +59,7 @@ documentation for its own sake.
 
 **Tier 2, if time is left (frameworks, no new facts):**
 
-11. **Universe Enrichment framework** (KNOWLEDGE_AND_RESEARCHERS section 11): `knowledge/` with a README of the
+11. **[done 27 Nov: `knowledge/`, `scripts/knowledge/enrich.py`, `tests/test_knowledge.py`; no world files written]** **Universe Enrichment framework** (KNOWLEDGE_AND_RESEARCHERS section 11): `knowledge/` with a README of the
     rules (evidence tiers, provenance, review by pull request), `knowledge/queue/` and `knowledge/worlds/` templates
     (summary, discovery story, interesting facts, why scientists care, Star Gazer's note, Colossus's comparison,
     related worlds, sources), and a script that **computes** the generated fields for a world from the catalogue
