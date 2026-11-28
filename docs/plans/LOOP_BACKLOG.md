@@ -24,7 +24,8 @@ documentation for its own sake.
    number; today's saves count as 1, so upgrade steps stay simple), `gameVersion` (the site's version) and
    `exportedAt`; upgrade steps run on load from the browser, a backup file or the account; `mergeProgress` stays the
    tolerant reader. Tests: old saves and old backup files still load; a file from a newer format is refused politely.
-2. **Achievement and easter-egg registry validation**: `achievement_catalog` and `easter_egg_catalog` in the
+2. **[done 27 Nov, see the commit "Catalog"; one `public.catalog` table with a `kind` column instead of two, so `finds`
+   has a real foreign key; an unknown id in a save is skipped, not the whole save]** **Achievement and easter-egg registry validation**: `achievement_catalog` and `easter_egg_catalog` in the
    database, **generated from the game's own lists** (the code stays the master copy, `SHIPPED_IDS`), so `finds`
    refuses ids that don't exist; a test that fails if the code and the tables ever differ.
 3. **Database migration tests on every push**: a CI job that starts Supabase and runs `supabase test db`

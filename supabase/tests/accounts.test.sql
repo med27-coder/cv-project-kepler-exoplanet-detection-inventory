@@ -1,7 +1,7 @@
 -- The account rules (docs/plans/ACCOUNTS_AND_ACCESS.md): run with `npx supabase@2.122.1 test db`.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(44);
+select plan(51);
 
 -- helpers: sign up as the auth service would, and act as a signed-in player
 create function pg_temp.sign_up(pilot text, email text default null) returns uuid language plpgsql as $$
@@ -52,7 +52,7 @@ update public.limits set max_testers = 5;
 
 -- ---------------------------------------------------------------- saving and loading (as PILOT-0001)
 select pg_temp.act_as((select pilot from ids));
-select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-10"}, "ach": {"first-step": "2026-11-12"},
+select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-10"}, "ach": {"first-light": "2026-11-12"},
   "sound": false, "backdrop": "still", "systems": ["Kepler-16"], "seen": "abc,1z", "comets": 3, "junk": "x"}') $$,
   'a save is accepted');
 select throws_ok($$ select public.save_progress('{}') $$, 'P0002', 'Saving too often.', 'a second save at once is refused');
@@ -60,10 +60,10 @@ reset role;
 update public.limits set save_gap = interval '0';   -- the rest of the tests save freely
 select pg_temp.act_as((select pilot from ids));
 
-select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-15"}, "ach": {"first-step": "2026-11-11"}}') $$,
+select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-15"}, "ach": {"first-light": "2026-11-11"}}') $$,
                 'a partial save from an older browser is accepted');
 select is(public.load_progress() -> 'eggs' ->> 'pluto', '2026-11-10', 'a find keeps its earliest date (later date ignored)');
-select is(public.load_progress() -> 'ach' ->> 'first-step', '2026-11-11', 'a find keeps its earliest date (earlier date taken)');
+select is(public.load_progress() -> 'ach' ->> 'first-light', '2026-11-11', 'a find keeps its earliest date (earlier date taken)');
 select is(public.load_progress() -> 'systems', '["Kepler-16"]'::jsonb, 'a partial save keeps what it left out');
 select is((public.load_progress() -> 'comets')::int, 3, 'counters are kept');
 select ok(not public.load_progress() ? 'junk', 'unknown keys are dropped');
@@ -77,11 +77,18 @@ select throws_ok($$ select public.save_progress('{"systems": "not a list"}') $$,
 select lives_ok($$ select public.save_progress('{"backdrop": "neon"}') $$, 'a save with an invalid setting is accepted');
 select is(public.load_progress() ->> 'backdrop', 'still', 'an invalid setting value is ignored');
 
+-- ---------------------------------------------------------------- the catalog: only real ids are kept
+select lives_ok($$ select public.save_progress('{"eggs": {"no-such-egg": "2026-11-20", "sun": "2026-11-20"}}') $$,
+                'a save naming an unknown id is still accepted');
+select ok(not (public.load_progress() -> 'eggs' ? 'no-such-egg'), 'the unknown id is skipped');
+select is(public.load_progress() -> 'eggs' ->> 'sun', '2026-11-20', 'the rest of that save is kept');
+
 -- ---------------------------------------------------------------- privacy
 select throws_ok($$ insert into public.finds values ((select orbiter from ids), 'egg', 'x', current_date) $$, '42501',
                  null, 'a player cannot write a table directly');
 select throws_ok($$ update public.profiles set role = 'tester' $$, '42501', null, 'a player cannot make itself a tester');
 select throws_ok($$ select * from public.audit_log $$, '42501', null, 'a player cannot read the audit log');
+select throws_ok($$ select * from public.catalog $$, '42501', null, 'a player cannot read the catalog');
 reset role;
 select pg_temp.act_as((select orbiter from ids));
 select is((select count(*)::int from public.finds), 0, 'another player sees none of these finds');
@@ -89,6 +96,10 @@ select is((select count(*)::int from public.profiles), 1, 'another player sees o
 
 -- ---------------------------------------------------------------- the security review's fixes
 reset role;
+select ok((select count(*) from public.catalog where kind = 'ach') >= 81, 'the catalog holds the achievements');
+select ok((select count(*) from public.catalog where kind = 'egg') >= 38, 'the catalog holds the easter eggs');
+select fk_ok('public', 'finds', array['kind', 'item_id'], 'public', 'catalog', array['kind', 'item_id'],
+             'a find must name a catalog id');
 select throws_ok($$ update auth.users set email = 'real.person@example.com' where id = (select orbiter from ids) $$,
                  'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot change to a real email');
 select throws_ok($$ update auth.users set email_change = 'real.person@example.com' where id = (select orbiter from ids) $$,
@@ -97,6 +108,8 @@ select throws_ok($$ update auth.users set phone = '15550100' where id = (select 
                  'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot add a phone');
 select lives_ok($$ update auth.users set last_sign_in_at = now() where id = (select orbiter from ids) $$,
                 'normal sign-ins still update the account');
+insert into public.catalog (kind, item_id, added_on)   -- 301 test ids, so the cap can be reached
+  select 'egg', 'egg-' || n, current_date from generate_series(1, 300) n union all select 'egg', 'one-more', current_date;
 select pg_temp.act_as((select orbiter from ids));
 select lives_ok($$ select public.save_progress(jsonb_build_object('eggs',
                      (select jsonb_object_agg('egg-' || n, '2026-11-01') from generate_series(1, 300) n))) $$,

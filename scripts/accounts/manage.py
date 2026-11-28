@@ -40,7 +40,8 @@ BACKUPS = SECRETS / 'db-backups'
 DB_CONTAINER = 'supabase_db_kepler-star-map'   # project_id in supabase/config.toml
 # Left out of backups: sessions, tokens and logs, which only matter while someone is signed in.
 NOT_BACKED_UP = ['auth.sessions', 'auth.refresh_tokens', 'auth.mfa_amr_claims', 'auth.audit_log_entries',
-                 'auth.flow_state', 'auth.one_time_tokens', 'auth.mfa_challenges']
+                 'auth.flow_state', 'auth.one_time_tokens', 'auth.mfa_challenges',
+                 'public.catalog']   # rebuilt by the migrations (build_catalog.py)
 PILOT = re.compile(r'^[A-Z0-9][A-Z0-9-]{1,18}[A-Z0-9]$')   # the same rule as the database
 CLI = ['npx.cmd' if os.name == 'nt' else 'npx', '--yes', 'supabase@2.122.1']
 

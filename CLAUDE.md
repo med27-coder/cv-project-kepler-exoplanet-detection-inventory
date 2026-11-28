@@ -83,7 +83,8 @@ patches, write a script file (scratchpad) and run it, or use the Edit tool.
   escape every interpolated value with `esc()`.
 - The canvas pixel font (`GLYPHS` in `20-system.js`) has only A-Z, digits, space and `. - / ? % : ,`.
 - **Saved progress** lives in `localStorage` key `starmap.progress.v1`. Achievement and easter-egg ids must
-  never be renamed or removed (`SHIPPED_IDS` in `tests/test_web_data.py`); add new ids there.
+  never be renamed or removed (`SHIPPED_IDS` in `tests/test_web_data.py`); add new ids there, and run
+  `scripts/accounts/build_catalog.py` (the account database's catalog migration; a test fails until you do).
 - Browser tests (`tests/test_browser.py`, Playwright) run on a fixed clock (time-of-day achievements), and
   `navigator.webdriver` skips the first-visit tour. Pop-ups queue, so waits must allow for that.
 
