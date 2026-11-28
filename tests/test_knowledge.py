@@ -70,3 +70,39 @@ def test_it_reads_the_maps_detail_files(enrich, tmp_path):
                                     encoding='utf-8')
     assert enrich.load_systems(tmp_path) == chunk
     assert any(w['name'] == 'Kepler-22 b' for w in enrich.worlds(enrich.load_systems()))   # the real data too
+
+
+@pytest.fixture
+def report(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts' / 'knowledge'))
+    return importlib.import_module('knowledge_report')
+
+
+def test_the_knowledge_report_finds_what_changed(report):
+    before = ({'Sunny': {'planets': [planet('Sunny b', 1.0, 1.0, 365),
+                                     {**planet('KOI-7 c', 2, 3, 30), 'status': 'candidate', 'koi': 'K00007.02',
+                                      'sg_planet': True},
+                                     {**planet('KOI-7 d', 2, 3, 40), 'status': 'candidate', 'koi': 'K00007.03',
+                                      'sg_planet': True}]},
+               'Gone': {'planets': [planet('Gone b', 1, 1, 10)]}},
+              {})
+    after = ({'Sunny': {'planets': [planet('Sunny b', 1.2, 1.0, 365),                  # radius +20%
+                                    {**planet('Kepler-99 c', 2, 3, 30), 'koi': 'K00007.02'}]},
+              'New': {'planets': [planet('New b', 1, 1, 10)]}},
+             {'K00007.02': ['confirmed', '2026-12-03'], 'K00007.03': ['false positive', '2026-12-03']})
+    diff = report.compare(before, after)
+    assert [r['sg_right'] for r in diff['rulings']] == [True, False]
+    assert diff['confirmed'] == ['Kepler-99 c', 'New b']
+    assert diff['new_systems'] == ['New'] and diff['gone_systems'] == ['Gone']
+    assert diff['gone_planets'] == ['KOI-7 d']     # dropped: flagged for a person (KOI-7 c was renamed, same KOI)
+    assert diff['changed'] == [{'planet': 'Sunny b', 'what': "radius (Earth's)", 'before': 1.0, 'after': 1.2}]
+    text = report.render(diff)
+    assert 'NASA ruled on 2 candidate(s)' in text and 'Star Gazer had called 1 of 2 right' in text
+    assert 'Sunny b: radius' in text and 'No longer in the data' in text
+
+
+def test_the_knowledge_report_reads_the_repository(report):
+    same = report.load('HEAD')
+    assert same[0] and report.render(report.compare(same, same)).count('No changes') == 1
+    text = 'window.STARMAP_RESOLUTIONS = {"since":"2026-10-14","resolved":{"K00001.01":["confirmed","2026-11-03"]}};'
+    assert report.parse_js_json(text, 'resolutions')['resolved']['K00001.01'][0] == 'confirmed'

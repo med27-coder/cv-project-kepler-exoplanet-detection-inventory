@@ -65,7 +65,7 @@ documentation for its own sake.
     related worlds, sources), and a script that **computes** the generated fields for a world from the catalogue
     (starlight relative to Earth, size class, the most similar known worlds), with tests. No facts or stories are
     written overnight.
-12. **The knowledge report** in the monthly data refresh's pull request (new confirmations, rulings, changed
+12. **[done 27 Nov: `scripts/knowledge/knowledge_report.py`, the data-refresh pull request's text]** **The knowledge report** in the monthly data refresh's pull request (new confirmations, rulings, changed
     values, dropped objects, predictions settled), built by a script with tests; the workflow itself only gains a
     step that adds the report to the pull request's text.
 

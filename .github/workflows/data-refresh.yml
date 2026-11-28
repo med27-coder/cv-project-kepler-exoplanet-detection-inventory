@@ -1,7 +1,8 @@
 # Monthly star map refresh: re-downloads NASA's tables (KOI, confirmed planets, TESS objects),
 # Gaia stellar properties and spacecraft positions, re-exports the map data with the public
 # Star Gazer scores, checks the prediction scoreboard, and opens a pull request if anything
-# changed. Nothing is merged automatically.
+# changed, with the knowledge report (scripts/knowledge/knowledge_report.py) as its text. Nothing is merged
+# automatically.
 # Needs: Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests".
 name: data-refresh
 
@@ -47,6 +48,8 @@ jobs:
       - name: Check the prediction scoreboard
         run: |
           if ls results/scoreboard/scores_*.csv >/dev/null 2>&1; then python scripts/pipeline/scoreboard.py check; fi
+      - name: Write the knowledge report (what NASA's new data changed) into the pull request's text
+        run: python scripts/knowledge/knowledge_report.py --out "$RUNNER_TEMP/pr-body.md"
       - name: Open a pull request with the changes
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
         with:
@@ -54,10 +57,7 @@ jobs:
           delete-branch: true
           commit-message: 'Monthly data refresh (NASA tables, Gaia, spacecraft positions)'
           title: 'Monthly data refresh'
-          body: |
-            Automated monthly refresh of the star map data from NASA's Exoplanet Archive, Gaia
-            (Berger et al. 2020) and JPL Horizons, plus the prediction scoreboard. Review the
-            changes, then merge to publish them.
+          body-path: ${{ runner.temp }}/pr-body.md   # the intro and the knowledge report
           add-paths: |
             web/data/**
             web/og.png

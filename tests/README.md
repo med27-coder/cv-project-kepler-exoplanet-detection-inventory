@@ -21,6 +21,6 @@ They use small synthetic data and need no NASA downloads. The browser tests need
 | `test_web_data.py` | The committed map data and page: structure, size budgets, security policy, build in sync |
 | `test_browser.py` + `browser/harness.js` | The real page in headless Chromium: search, zoom, easter eggs, on-demand loading, trails fix, clickjacking guard |
 | `test_accounts.py` | The account database's files: its catalog of achievement and easter-egg ids matches the game's code; new ids get a migration, removed ones are refused (the database itself: `supabase test db`) |
-| `test_knowledge.py` | The knowledge framework: Kepler's size classes, similar worlds, the generated block, reviewed text kept when the numbers are refreshed |
+| `test_knowledge.py` | The knowledge framework: Kepler's size classes, similar worlds, the generated block, reviewed text kept when the numbers are refreshed; the monthly knowledge report (rulings, confirmations, renames are not losses) |
 | `test_palette.py` | Meaningful colours stay distinguishable under simulated colour blindness |
 | `test_notebooks.py` | The notebooks' plain-Python mirrors match the notebooks |
