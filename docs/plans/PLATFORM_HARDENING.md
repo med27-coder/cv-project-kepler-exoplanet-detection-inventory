@@ -42,8 +42,8 @@ such features are planned.
 | email verification, password reset by email | **no email** (decided): the owner resets a forgotten password on request; the sign-up form says so |
 | MFA ready | Supabase supports authenticator-app codes; planned for the owner before going online |
 
-Still to write: a **threat model** (who might attack what, and what stops them), **sequence diagrams** (sign up,
-sign in, save, merge, delete), and a **go-online checklist** (keys, security policy, Terms 1.2, backups).
+The **threat model**, the **sequence diagrams** (sign up, sign in and load, save, delete) and the **go-online
+checklist** are written: [docs/star-map/THREAT_MODEL.md](../star-map/THREAT_MODEL.md) (27 November).
 
 ## 4. Email (the note's biggest new idea) and its clash with "no email"
 

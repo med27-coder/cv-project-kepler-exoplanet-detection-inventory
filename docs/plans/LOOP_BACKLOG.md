@@ -53,7 +53,7 @@ documentation for its own sake.
 9. **[rename done 27 Nov, see the commit "Explorers"; the screens' connection to the local Supabase waits for a choice in the hand-off notes (the page's security policy would have to allow it)]** **Explorer Registry mockups**: "pilot" becomes **explorer** everywhere (the database column and messages, the
    sign-in address `<name>@explorers.invalid`, `manage.py`), a new migration, the tests updated; the sign-up and
    sign-in screens with CONTINUE AS GUEST beside JOIN, behind `?landing`, talking only to the local Supabase.
-10. **Threat model and launch checklist** in `docs/`: who might attack what and what stops them; sequence diagrams
+10. **[done 27 Nov: `docs/star-map/THREAT_MODEL.md`]** **Threat model and launch checklist** in `docs/`: who might attack what and what stops them; sequence diagrams
     (sign up, sign in, save, merge, delete); the go-online checklist (project, keys, security policy, Terms 1.2,
     backups, two-step sign-in for the owner), written, not done.
 

@@ -21,6 +21,7 @@
 | [DATA_DICTIONARY.md](star-map/DATA_DICTIONARY.md) | Every field in the star map's data files, with units and sources |
 | [EASTER_EGGS.md](star-map/EASTER_EGGS.md) | Spoilers: every easter egg and achievement, and how to find them |
 | [STAR_GAZER_MISSION.md](star-map/STAR_GAZER_MISSION.md) | The game's design: the final TRUE STAR GAZER mission, rank emblems from stardust to a black hole |
+| [THREAT_MODEL.md](star-map/THREAT_MODEL.md) | The player accounts: what could go wrong, what stops it, the main flows as diagrams, and the go-online checklist |
 | [STARMAP_PLAN.md](star-map/STARMAP_PLAN.md) | The star map's roadmap, phase by phase |
 
 ## Planning and everything else
