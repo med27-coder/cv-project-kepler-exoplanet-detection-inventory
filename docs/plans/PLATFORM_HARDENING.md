@@ -1,6 +1,6 @@
 # Plan: the platform (landing page, Explorer Registry, security, email, overnight work)
 
-**Status: plan only (27 November 2026).** From a fourth note the user shared, about what an agent should work on
+**Status: the overnight queue is done (28 November 2026);** going online waits for the user. Planned on 27 November 2026. From a fourth note the user shared, about what an agent should work on
 overnight. Its main point, which this plan keeps: **the game layer is already strong; the weak part is the
 platform** (first impression, accounts, never losing progress, security, documentation). It builds on
 [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md) and [EXPLORER_JOURNEY.md](EXPLORER_JOURNEY.md).

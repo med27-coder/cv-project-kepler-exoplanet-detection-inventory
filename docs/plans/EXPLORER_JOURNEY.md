@@ -1,6 +1,6 @@
 # Plan: the explorer's journey (persistence, identity, a log of discoveries)
 
-**Status: plan only (27 November 2026).** Built from three roadmap notes the user shared ("take this all into
+**Status: partly built (28 November 2026):** A versioned saves, A2 the Explorer Archive, B the Captain's Log (preview, `?log`), C the prediction dashboard, E's rename to explorer and its screens (preview, `?landing`). Planned on 27 November 2026. Built from three roadmap notes the user shared ("take this all into
 consideration"). Their main point, which this plan keeps: **do not redesign the game.** The achievements,
 easter eggs, mysteries, wardrobe, spacecraft, daily mystery and the prediction game are the strongest part of the
 project. What is missing is a lasting **explorer journey**: an identity, a history of what you found, and progress
