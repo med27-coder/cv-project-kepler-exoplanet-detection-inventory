@@ -6,6 +6,11 @@
 // words, no spoilers for hidden easter eggs, and only "new" and "fixed" (no technical or security details; those
 // live in CHANGELOG.md). Its first entry is the WHAT'S NEW the antenna announces.
 const HISTORY = [
+  { v: '1.9.9.1.2', date: '28 Nov 2026', notes: [
+    'New: keep your whole journey in one Explorer Archive file, to back it up or move it to another browser.',
+    'New: a dashboard for your predictions: how many came true, how long NASA took, and how often you agreed with the AIs.',
+    'New: updates from the antenna now say what kind of message they are and who sent them.',
+  ] },
   { v: '1.9.9.1.1', date: '21 Oct 2026', notes: [
     "New: the Earth above the Moon now looks like NASA's photos taken from there, half lit by day and nearly full through the lunar night.",
   ] },

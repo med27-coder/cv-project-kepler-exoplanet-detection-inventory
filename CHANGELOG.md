@@ -8,6 +8,27 @@ planned release adds one more (1.9.9.1.1), so they always read in order. The NAS
 `web/src/00-version.js`; each version also gets a git tag and a GitHub Release. Star Gazer, the model, has its own
 history in `docs/star-gazer/`.
 
+## [1.9.9.1.2] - 2026-11-28
+
+### Added
+- **The Explorer Archive:** the backup file becomes one archive (`kepler-explorer-archive-<date>.json`) with a
+  summary, the whole progress and the Captain's Log; older backup files still load, and saves carry a format number
+  and the game version (newer files are refused, newer progress is never overwritten).
+- **The prediction dashboard:** calls made, correct, wrong and waiting, the average wait for NASA's ruling, and how
+  often the player agreed with Star Gazer and, on giants, with Colossus (new calls on giants record Colossus's view).
+- **Transmissions:** the antenna's UPDATES read a structured list (category, sender, title, body, date, version).
+- Previews, not linked from the page: the Captain's Log (`?log`) and landing page v2 (`?landing`).
+
+### Changed
+- The player-account database (local only, nothing online): a catalog of every achievement and easter-egg id, pilots
+  renamed explorers, its 52 pgTAP tests run in CI; a threat model and go-online checklist
+  (`docs/star-map/THREAT_MODEL.md`).
+- The monthly data refresh's pull request carries a knowledge report of what NASA's new data changed;
+  `knowledge/` holds the framework for reviewed knowledge about each world.
+
+### Fixed
+- Two timing-dependent browser tests.
+
 ## [1.9.9.1.1] - 2026-10-21
 
 ### Changed
@@ -254,6 +275,10 @@ The first full release, gathering everything built since the star map went onlin
 - Easter eggs searched again open their view without an extra pop-up; the UNSEEN highlight updates as you explore.
 - Animation trails after the tab was in the background; a timing race in Settings; stacked animation loops.
 
+[1.9.9.1.2]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.9.1.2
+[1.9.9.1.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.9.1.1
+[1.9.9.1]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.9.1
+[1.9.9]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.9
 [1.9.8]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.8
 [1.9.7]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.7
 [1.9.6]: https://github.com/med27-coder/cv-project-kepler-exoplanet-detection-inventory/releases/tag/v1.9.6
