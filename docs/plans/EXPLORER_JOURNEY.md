@@ -54,6 +54,11 @@ The backup file grows into the **Explorer Archive**: one format for the local ba
 move, holding achievements, easter eggs, predictions, mysteries, settings, favourites, discovery history and the
 Captain's Log, with `saveFormat`, `gameVersion` and `exportedAt`. Old backup files keep loading.
 
+**Built 27 November** (`explorerArchive()` in `48-gallery.js`): DOWNLOAD MY EXPLORER ARCHIVE writes
+`kepler-explorer-archive-<date>.json` with `kind: "explorer-archive"`, the format fields, a `summary` (counts for
+people reading the file), the whole saved progress and the Captain's Log as `[date, kind, title]` rows. Loading
+reads only the progress; the summary and the log are rebuilt from it, so a hand-edited log changes nothing.
+
 ### B. Captain's Log
 
 A journal built from dates the game already keeps, newest first, in the Galleria:

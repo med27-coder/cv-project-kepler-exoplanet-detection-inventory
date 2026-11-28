@@ -1015,6 +1015,20 @@ def test_saves_are_versioned(browser, site, tmp_path):
     exported = json.loads(Path(dl.value.path()).read_text(encoding='utf-8'))
     assert exported['saveFormat'] == 2 and exported['gameVersion'] == saved['gameVersion'] and 'T' in exported['exportedAt']
     assert exported['eggs']['kepler'] == '2026-10-01'
+    assert dl.value.suggested_filename.startswith('kepler-explorer-archive-')   # the Explorer Archive
+    assert exported['kind'] == 'explorer-archive' and exported['summary']['easterEggs'].startswith('1 / ')
+    assert any(e[0] == '2026-10-01' and e[1] == 'EASTER EGG' for e in exported['log'])
+    page.evaluate("localStorage.clear()")                                 # a whole archive loads into a new browser
+    archive = tmp_path / 'archive.json'
+    archive.write_text(json.dumps(exported), encoding='utf-8')
+    page.reload()
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    page.set_input_files('#set-import-file', str(archive))
+    page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('loaded')")
+    restored = page.evaluate(SAVED)
+    assert restored['eggs'] == exported['eggs'] and restored['ach'] == exported['ach']
+    assert 'log' not in restored and 'summary' not in restored             # rebuilt, never stored
 
     old = tmp_path / 'old.json'                                           # a backup file from before format numbers
     old.write_text(json.dumps({'app': 'kepler-star-map', 'version': 1, 'saved': '2026-09-01',

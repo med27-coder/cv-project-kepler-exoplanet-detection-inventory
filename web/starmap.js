@@ -4971,17 +4971,27 @@
     document.getElementById('set-final').hidden = !progress.ach['star-gazer'];
     document.getElementById('set-final-emblem').value = progress.finalEmblem;
     const note = kept => `✓ Saved in this browser: updates to the site keep it.${kept} It's only lost if this ` +
-      'site\'s data is cleared, in a private window, or on another browser or device: keep a backup file for those.';
+      'site\'s data is cleared, in a private window, or on another browser or device: keep an Explorer Archive for those.';
     storageNote.textContent = note('');   // right away; the browser's answer below only adds to it
     try { if (await navigator.storage?.persisted?.()) storageNote.textContent = note(' Protected from automatic clean-up.'); } catch { /* older browser */ }
   }
+  // The Explorer Archive (docs/plans/EXPLORER_JOURNEY.md A2): one file for a backup, a move to another browser and,
+  // later, the cloud copy. It is the saved progress itself (what mergeProgress reads back), plus a summary and the
+  // Captain's Log for people reading the file; loading ignores those two, since they are rebuilt from the rest.
+  function explorerArchive() {
+    return { app: 'kepler-star-map', kind: 'explorer-archive', saveFormat: SAVE_FORMAT, gameVersion: VERSION,
+             exportedAt: new Date().toISOString(),
+             summary: { achievements: `${Object.keys(progress.ach).filter(id => ACH.has(id)).length} / ${ACHIEVEMENTS.length}`,
+                        easterEggs: `${Object.keys(progress.eggs).filter(id => EGG.has(id)).length} / ${EGGS.length}`,
+                        calls: Object.keys(progress.calls).length, systemsOpened: progress.systems.length },
+             ...progress,
+             log: logEntries().map(e => [e.date, e.kind, e.title]) };
+  }
   document.getElementById('set-export').addEventListener('click', () => {
-    const file = new Blob([JSON.stringify({ app: 'kepler-star-map', saveFormat: SAVE_FORMAT, gameVersion: VERSION,
-                                            exportedAt: new Date().toISOString(), ...progress }, null, 1)],
-                          { type: 'application/json' });
+    const file = new Blob([JSON.stringify(explorerArchive(), null, 1)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
-    a.download = `kepler-star-map-progress-${today()}.json`;
+    a.download = `kepler-explorer-archive-${today()}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     try { navigator.storage?.persist?.(); } catch { /* best effort: ask the browser to keep our data */ }
@@ -4994,14 +5004,14 @@
     if (!file) return;
     let ok = false, newer = false;
     try {
-      const saved = file.size < 200_000 ? JSON.parse(await file.text()) : null;
+      const saved = file.size < 500_000 ? JSON.parse(await file.text()) : null;   // an archive, or an older backup file
       newer = saveFormatOf(saved) > SAVE_FORMAT;
       ok = !newer && mergeProgress(upgradeSave(saved));
     } catch { ok = false; }
     if (ok) { syncSeen(); saveProgress(); renderHeaderRank(); }
-    resetNote.textContent = ok ? 'Progress loaded and merged with what you had.'
+    resetNote.textContent = ok ? 'Explorer Archive loaded and merged with what you had.'
       : newer ? 'That file comes from a newer version of the star map: reload the page to update it, then load the file again.'
-      : 'That file isn\'t a star map progress file.';
+      : 'That file isn\'t an Explorer Archive (or an older star map progress file).';
   });
 
   function showTab(name) {

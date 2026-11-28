@@ -37,7 +37,7 @@ documentation for its own sake.
 4. **[done 27 Nov, see the commit "Captain's Log"; `web/src/49g-log.js`, the LOG tab with `?log`]** **Captain's Log foundation** (EXPLORER_JOURNEY B): the journal from the dates already kept (achievements, eggs,
    calls, NASA's rulings, daily mysteries), newest first, no spoilers; a draft view behind a preview switch until
    it is released.
-5. **Explorer Archive export format**: the backup file becomes the **Explorer Archive**, one format for a local
+5. **[done 27 Nov, see the commit "Explorer Archive"; still `saveFormat` 2, since the archive only adds `kind`, `summary` and `log`, which loading ignores]** **Explorer Archive export format**: the backup file becomes the **Explorer Archive**, one format for a local
    backup, the cloud copy and any future move: achievements, easter eggs, predictions, mysteries, settings,
    favourites (saved systems), discovery history and the Captain's Log, with `saveFormat`, `gameVersion` and
    `exportedAt`. DOWNLOAD / LOAD keep working with old files.
