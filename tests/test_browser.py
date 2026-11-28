@@ -9,6 +9,7 @@ Skipped when Playwright or its Chromium isn't installed:
 import functools
 import http.server
 import json
+import re
 import threading
 from pathlib import Path
 
@@ -934,4 +935,62 @@ def test_next_planets_list_is_not_replaced_by_a_late_system(browser, site):
         route.continue_()
     page.wait_for_timeout(600)
     assert page.locator('#sys-title').inner_text() == 'NEXT PLANETS'
+    assert not errors, errors
+
+
+SAVED = "JSON.parse(localStorage.getItem('starmap.progress.v1'))"
+
+
+def test_saves_are_versioned(browser, site, tmp_path):
+    """Saves and backup files carry saveFormat 2 and the game version; old saves and old files still load; a file from
+    a newer format is refused; progress a newer version saved in this browser is never overwritten."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.setItem('starmap.progress.v1', JSON.stringify({eggs: {kepler: '2026-10-01'}, ach: {},"
+                  " systems: [], toured: true, toasts: false}))")          # a save from before format numbers (format 1)
+    page.reload()
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.wait_for_function(f"() => {SAVED}.saveFormat === 2")
+    saved = page.evaluate(SAVED)
+    version = re.search(r"v: '([\d.]+)'", (WEB / 'src' / '00-version.js').read_text(encoding='utf-8')).group(1)
+    assert saved['eggs']['kepler'] == '2026-10-01' and saved['gameVersion'] == version
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    with page.expect_download() as dl:                                    # the backup file
+        page.click('#set-export')
+    exported = json.loads(Path(dl.value.path()).read_text(encoding='utf-8'))
+    assert exported['saveFormat'] == 2 and exported['gameVersion'] == saved['gameVersion'] and 'T' in exported['exportedAt']
+    assert exported['eggs']['kepler'] == '2026-10-01'
+
+    old = tmp_path / 'old.json'                                           # a backup file from before format numbers
+    old.write_text(json.dumps({'app': 'kepler-star-map', 'version': 1, 'saved': '2026-09-01',
+                               'eggs': {'sun': '2026-09-01'}, 'ach': {}, 'systems': []}), encoding='utf-8')
+    page.set_input_files('#set-import-file', str(old))
+    page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('loaded')")
+    assert page.evaluate(SAVED)['eggs']['sun'] == '2026-09-01'
+
+    newer = tmp_path / 'newer.json'                                       # a file from a future version: refused
+    newer.write_text(json.dumps({'app': 'kepler-star-map', 'saveFormat': 99, 'eggs': {'moon': '2026-09-02'}}), encoding='utf-8')
+    page.set_input_files('#set-import-file', str(newer))
+    page.wait_for_function("() => document.getElementById('set-reset-note').textContent.includes('newer version')")
+    assert 'moon' not in page.evaluate(SAVED)['eggs']
+    assert not errors, errors
+
+
+def test_newer_save_is_never_overwritten(browser, site):
+    """Progress saved by a newer version of the page (a higher saveFormat) is shown but never saved over."""
+    errors = []
+    page = open_page(browser, site, errors)
+    newer = json.dumps({'saveFormat': 99, 'gameVersion': '9.9.9.9', 'eggs': {'kepler': '2026-10-01'}, 'ach': {},
+                        'systems': [], 'toured': True, 'toasts': False, 'futureThing': {'kept': True}})
+    page.evaluate(f"localStorage.setItem('starmap.progress.v1', {json.dumps(newer)})")
+    page.reload()
+    page.fill('#query', 'Kepler-90')
+    page.press('#query', 'Enter')
+    page.wait_for_timeout(500)
+    assert page.evaluate("localStorage.getItem('starmap.progress.v1')") == newer   # untouched
+    page.click('#open-gallery')
+    page.click('#tab-set')
+    assert 'newer version' in page.locator('#set-storage').inner_text()
     assert not errors, errors

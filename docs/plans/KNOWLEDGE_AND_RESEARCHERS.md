@@ -156,3 +156,29 @@ system). The third is where the user sees the most character.
   does).
 - **Knowledge freshness charter:** as section 2. NASA data is synchronised by the monthly refresh with a knowledge
   report; papers go to the review queue; forums only to the suggestion queue; every fact keeps its source.
+
+## 10. The charter and the Researcher's Journal (the user's note, 27 November)
+
+**The key adjustment:** the background system **observes, records, compares and reports**. It never quietly edits
+facts, except the NASA synchronisation already allowed (Tier 1).
+
+- **Four principles:** trust before speed ("correct and slightly delayed" beats "immediate but wrong"); provenance
+  for every fact (source, source date, review status, confidence); history is kept, never overwritten (revisions
+  and rulings are recorded so players can follow a discovery over time); people review everything that isn't NASA.
+- **NASA may change automatically:** statuses, rulings, confirmations, values, archive corrections. **Never
+  automatically:** lore, achievements, trivia, stories, educational text; those stay reviewed.
+- **The Researcher's Journal** is the scientists' story beside the explorer's Captain's Log. Entry types: NASA
+  update, discovery, reclassification, prediction settled, research note, Star Gazer opinion, Colossus review,
+  knowledge audit. Each entry: type, researcher, the object it is about, title, summary, details, source, confidence,
+  date, and **published** (false until reviewed, except NASA-sourced facts).
+- **Star Gazer writes** when a ruling changes, a call settles, a discovery is added, or its score changes; **Colossus**
+  only on giants, unusual systems and disagreements ("I disagreed with Star Gazer on KOI-8120; NASA ruled against
+  me"). Every entry is generated from a real change, never written as fiction.
+- **Debate records:** the object, each researcher's position, the winner, when it was settled.
+- **Where it lives:** this is universe data, so it stays out of the players' database: the journal and debate
+  records are generated files in the repository and in the map's exported data, published with each refresh.
+- **When it runs:** NASA's tables change slowly, so the suggestion is a **weekly** check that only writes a report
+  (new rulings, settled predictions, open debates) and the **monthly** refresh that changes the data by pull request
+  with the knowledge report and the audit; a daily check would mostly find nothing (decision 5).
+
+5. **Background cadence:** a weekly report plus the monthly refresh (suggested), or daily checks too?

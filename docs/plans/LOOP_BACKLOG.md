@@ -20,7 +20,7 @@ documentation for its own sake.
 
 **Tier 0, the foundation (finish first):**
 
-1. **Versioned save format** (EXPLORER_JOURNEY A): saved progress and the backup file carry `saveFormat: 2` (a whole
+1. **[done 27 Nov, see the commit "Versioned saves"]** **Versioned save format** (EXPLORER_JOURNEY A): saved progress and the backup file carry `saveFormat: 2` (a whole
    number; today's saves count as 1, so upgrade steps stay simple), `gameVersion` (the site's version) and
    `exportedAt`; upgrade steps run on load from the browser, a backup file or the account; `mergeProgress` stays the
    tolerant reader. Tests: old saves and old backup files still load; a file from a newer format is refused politely.

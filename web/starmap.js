@@ -4470,15 +4470,31 @@
     if (Array.isArray(saved.notified)) progress.notified = [...new Set([...progress.notified, ...saved.notified.filter(k => /^K\d{5}\.\d{2}$/.test(k))])];
     return true;
   }
+  // Saves and backup files carry a format number (a whole number; saves from before it count as 1) and the version of
+  // the game that wrote them. An older format is upgraded one step at a time as it loads. A backup file from a newer
+  // format is refused (this page is out of date); progress a newer version saved in this browser is shown but never
+  // saved over, so nothing it wrote is lost.
+  const SAVE_FORMAT = 2;
+  const SAVE_UPGRADES = { 1: saved => saved };   // 1 -> 2: the same fields; only the format number and game version are new
+  const saveFormatOf = saved => (Number.isInteger(saved?.saveFormat) ? saved.saveFormat : 1);
+  function upgradeSave(saved) {   // the save in this version's format, or null if it isn't one or is from a newer version
+    if (!saved || typeof saved !== 'object' || saveFormatOf(saved) > SAVE_FORMAT) return null;
+    for (let f = saveFormatOf(saved); f < SAVE_FORMAT; f++) saved = SAVE_UPGRADES[f](saved);
+    return saved;
+  }
   let storageOK = false;   // false in private windows or with site data blocked: progress lasts for this visit
+  let newerSave = false;   // this browser holds progress from a newer version of the page: show it, don't overwrite it
   try {
-    mergeProgress(JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null'));
+    const stored = JSON.parse(localStorage.getItem(PROGRESS_KEY) || 'null');
+    newerSave = !!stored && saveFormatOf(stored) > SAVE_FORMAT;
+    mergeProgress(newerSave ? stored : upgradeSave(stored));
     localStorage.setItem('starmap.check', '1');
     localStorage.removeItem('starmap.check');
     storageOK = true;
   } catch { /* see above */ }
   function saveProgress() {
-    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch { /* see above */ }
+    if (newerSave) return;
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({ saveFormat: SAVE_FORMAT, gameVersion: VERSION, ...progress })); } catch { /* see above */ }
   }
   const today = () => new Date().toISOString().slice(0, 10);
 
@@ -4941,6 +4957,11 @@
   // Settings: is progress being kept, and a backup file to download or load.
   const storageNote = document.getElementById('set-storage');
   async function renderSettings() {
+    if (newerSave) {
+      storageNote.textContent = '⚠ A newer version of the star map saved your progress in this browser. Reload the ' +
+        'page to update it: until then, nothing from this visit is saved, so your progress stays as it was.';
+      return;
+    }
     if (!storageOK) {
       storageNote.textContent = '⚠ This browser isn\'t saving your progress (a private window, or site data is ' +
         'blocked). It will be lost when you close the page: download it below to keep it.';
@@ -4954,7 +4975,8 @@
     try { if (await navigator.storage?.persisted?.()) storageNote.textContent = note(' Protected from automatic clean-up.'); } catch { /* older browser */ }
   }
   document.getElementById('set-export').addEventListener('click', () => {
-    const file = new Blob([JSON.stringify({ app: 'kepler-star-map', version: 1, saved: today(), ...progress }, null, 1)],
+    const file = new Blob([JSON.stringify({ app: 'kepler-star-map', saveFormat: SAVE_FORMAT, gameVersion: VERSION,
+                                            exportedAt: new Date().toISOString(), ...progress }, null, 1)],
                           { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
@@ -4969,10 +4991,16 @@
     const file = importInput.files[0];
     importInput.value = '';
     if (!file) return;
-    let ok = false;
-    try { ok = file.size < 200_000 && mergeProgress(JSON.parse(await file.text())); } catch { ok = false; }
+    let ok = false, newer = false;
+    try {
+      const saved = file.size < 200_000 ? JSON.parse(await file.text()) : null;
+      newer = saveFormatOf(saved) > SAVE_FORMAT;
+      ok = !newer && mergeProgress(upgradeSave(saved));
+    } catch { ok = false; }
     if (ok) { syncSeen(); saveProgress(); renderHeaderRank(); }
-    resetNote.textContent = ok ? 'Progress loaded and merged with what you had.' : 'That file isn\'t a star map progress file.';
+    resetNote.textContent = ok ? 'Progress loaded and merged with what you had.'
+      : newer ? 'That file comes from a newer version of the star map: reload the page to update it, then load the file again.'
+      : 'That file isn\'t a star map progress file.';
   });
 
   function showTab(name) {
