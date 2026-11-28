@@ -10,6 +10,23 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 - Never commit secrets, film stills or ESA images; never tune Star Gazer on the test split; replaced art goes to
   `pixel-art/archive/` first.
 
+## Platform queue (27 November), top first
+
+From [PLATFORM_HARDENING.md](PLATFORM_HARDENING.md). Everything local; nothing goes online; no email; no new sign-in
+providers; anything that needs a choice stops and goes in the hand-off notes. Run `manage.py backup` before any
+`supabase db reset`.
+
+1. **Versioned saves** (EXPLORER_JOURNEY A): `schema: 2` in saved progress and the backup file, upgrade steps on
+   load; tests that old saves and files still load.
+2. **Catalogue table**: generate a `catalog` table of shipped achievement and egg ids from `SHIPPED_IDS`, so the
+   database refuses made-up ids; a test that the two lists match.
+3. **Database tests in CI**: a job that starts Supabase and runs `supabase test db`.
+4. **Landing page, second version** (PLATFORM_HARDENING section 1), still behind `?landing`, screenshots at desktop
+   and phone width.
+5. **Sign up, sign in and sync in the page** against the local Supabase only, behind `?landing`; browser tests:
+   sign up, play, sign in on a second browser, same progress.
+6. **Docs**: threat model, sequence diagrams (sign up, sign in, save, merge, delete), go-online checklist.
+
 ## Queue (top first)
 
 **Queue finished 18 October 2026.** The user then chose: meteors both ways and the Moon rovers (built in v1.9.9),
