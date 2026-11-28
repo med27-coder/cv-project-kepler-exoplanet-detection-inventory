@@ -83,6 +83,27 @@ The user rates this a **signature feature**: the predictions game is more unusua
 - The star card gains the prediction record, favourite world and start date. PNG as today; a PDF or a public link
   only with the community layer (section 2).
 
+### D2. Status in the header, the collection in the museum (the user's note, 27 November)
+
+Today the header shows the rank (emblem, name, bar, count), the badges and up to three showcase trophies as small
+icons. A new player can't tell what the icons mean, which achievements are close, which categories are complete,
+what is rare or what to chase next. The fix, as in Steam, PlayStation and Xbox: **progress first, icons second.**
+
+- **The header answers "who am I, how far along am I":** the rank emblem, PULSAR, 64 / 81 and the percentage. The
+  badge and trophy icons move out of the header to the explorer profile.
+- **The rank opens the explorer profile**, starting with a status panel: the bar and percentage; NEWEST (the last
+  achievement earned); RAREST (by the game's own rarity tiers, `TIER_OF`, since there are no player statistics:
+  no analytics); SUGGESTED NEXT (the closest unearned achievement that isn't secret, so no spoilers); the
+  collection focus (the category you have earned most in lately).
+- **Categories with bars:** exploration, science, predictions, mysteries, spacecraft, easter eggs (from the
+  achievements' existing groups, checked one by one), e.g. PREDICTIONS 5 / 10, so "17 missing" becomes "3 science
+  left". Secret achievements count as "?" until found.
+- **The achievement museum** (VIEW COLLECTION): the full collection, as the achievements tab is today.
+- **The showcase** you choose (`progress.showcase`) stays, shown on the profile and the star card instead of the
+  header.
+- **Later, the profile gathers everything:** the explorer card, Captain's Log, the museum, the prediction dashboard
+  and the Explorer Registry in one place.
+
 ### E. The Explorer Registry (accounts)
 
 The accounts plan, presented as joining the **Explorer Registry**: "Save your journey forever", always optional,
