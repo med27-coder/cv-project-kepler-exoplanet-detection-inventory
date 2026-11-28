@@ -495,6 +495,32 @@ def test_predictions(browser, site):
     assert not errors, errors
 
 
+def test_rulings_settle_only_calls_made_before_them(browser, site):
+    """NASA's rulings settle calls both ways; a ruling dated before the call never counts; no ruling, still waiting."""
+    errors = []
+    page = open_page(browser, site, errors)
+    calls = {'K03444.01': ['planet', '2026-11-01', 'planet', 'KOI-3444'],   # ruled a false positive later: wrong
+             'K09998.01': ['not', '2026-11-01', 'not', 'KOI-9998'],         # NASA confirmed it before the call
+             'K09999.01': ['planet', '2026-11-01', '', 'KOI-9999']}        # no ruling yet
+    page.evaluate("calls => localStorage.setItem('starmap.progress.v1', JSON.stringify({ toured: true, calls }))", calls)
+    ruling = ('window.STARMAP_RESOLUTIONS = {"since": "2026-10-14", "resolved": {'
+              '"K03444.01": ["false positive", "2099-01-01"], "K09998.01": ["confirmed", "2026-10-20"]}};')
+    page.route('**/data/resolutions.js', lambda r: r.fulfill(status=200, content_type='text/javascript', body=ruling))
+    page.reload()
+    page.wait_for_selector('.toast:has-text("NASA RULED")')
+    toasts = page.locator('.toast:has-text("NASA RULED")')
+    assert 'not this time' in toasts.first.inner_text() and 'K03444.01' in toasts.first.inner_text()
+    page.wait_for_timeout(500)
+    assert 'K09998.01' not in ' '.join(toasts.all_inner_texts())       # too late to count: no pop-up
+    saved = page.evaluate(SAVED)
+    assert saved['notified'] == ['K03444.01'] and 'prophet' not in saved.get('ach', {})
+    page.click('#open-gallery')
+    page.click('#tab-pred')
+    assert '3CALLS·0RIGHT·1WRONG·1WAITING' in ''.join(page.locator('#pane-pred .gallery-progress').inner_text().split())
+    assert page.locator('#pane-pred tr.early').inner_text().count('(too late)') == 1
+    assert not errors, errors
+
+
 def test_tour_icons_and_suggestions(browser, site):
     """First-visit tour (forced with ?tour), pixel icons, found eggs and recent systems in the suggestions."""
     errors = []

@@ -28,7 +28,7 @@ documentation for its own sake.
    has a real foreign key; an unknown id in a save is skipped, not the whole save]** **Achievement and easter-egg registry validation**: `achievement_catalog` and `easter_egg_catalog` in the
    database, **generated from the game's own lists** (the code stays the master copy, `SHIPPED_IDS`), so `finds`
    refuses ids that don't exist; a test that fails if the code and the tables ever differ.
-3. **Database migration tests on every push**: a CI job that starts Supabase and runs `supabase test db`
+3. **[done 27 Nov, see the commit "CI: the database"]** **Database migration tests on every push**: a CI job that starts Supabase and runs `supabase test db`
    (migrations, foreign keys, the catalogue, importing a save, the row rules); a browser test that NASA's rulings
    still settle predictions.
 
