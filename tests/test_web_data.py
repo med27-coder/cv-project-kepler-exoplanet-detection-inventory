@@ -224,6 +224,16 @@ def test_progress_ids_are_stable():
     assert SHIPPED_IDS['ach'] <= set(re.findall(r"\bid: '([\w-]+)'", ach))
 
 
+def test_release_dates_read_as_transmission_dates():
+    """The antenna turns each release's date ('21 Oct 2026') into a transmission date: keep that exact form."""
+    js = (WEB / 'src' / '00-version.js').read_text(encoding='utf-8')
+    dates = re.findall(r"^  \{ v: '[\d.]+', date: '([^']*)'", js, re.MULTILINE)
+    assert len(dates) == js.count("{ v: '") and dates
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    for d in dates:
+        assert re.fullmatch(r'\d{1,2} [A-Z][a-z]{2} \d{4}', d) and d.split()[1] in months, d
+
+
 def test_outside_systems_use_their_kepler_names(data):
     """NASA files some Kepler discoveries under KIC or 2MASS numbers; the map shows their Kepler names, keeps the
     catalogue names as aliases (old links, searches and saved progress) and keeps all of the system's planets."""

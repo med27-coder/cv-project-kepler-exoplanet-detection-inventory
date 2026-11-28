@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------- the antenna: a thank-you note, and the updates
 // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note from the
 // site's maker, in two tabs: MESSAGE (the note, led by WHAT'S NEW IN VX when this browser hasn't seen the version)
-// and UPDATES (every version, newest first: HISTORY in 00-version.js). A new version lights the dish up; opening it
+// and UPDATES (every transmission, newest first: TRANSMISSIONS in 00-version.js, each release's notes among them). A new version lights the dish up; opening it
 // marks the version as seen. Clicking outside the note closes it too.
 const SEEN_VERSION_KEY = 'starmap.seenVersion';
 const thanksDialog = document.getElementById('thanks');
@@ -27,14 +27,18 @@ if (versionIsNew) {
   document.getElementById('thanks-news-list').replaceWith(Object.assign(noteList(RELEASE_NOTES), { id: 'thanks-news-list' }));
 }
 const updatesList = document.getElementById('thanks-updates');
-for (const h of HISTORY) {
+for (const t of TRANSMISSIONS) {
   const li = document.createElement('li');
+  li.dataset.category = t.category;
   const title = document.createElement('h3');
-  title.textContent = `V${h.v}`;
+  title.textContent = t.title;
   const date = document.createElement('span');
-  date.textContent = h.date.toUpperCase();
+  date.textContent = niceDate(t.date).toUpperCase();
   title.append(date);
-  li.append(title, noteList(h.notes));
+  const meta = document.createElement('p');
+  meta.className = 'tx-meta';
+  meta.textContent = `${TRANSMISSION_KINDS[t.category]} · FROM ${t.from}`;
+  li.append(title, meta, noteList(t.body));
   updatesList.append(li);
 }
 

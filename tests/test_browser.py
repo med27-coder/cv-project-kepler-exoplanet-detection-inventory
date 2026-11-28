@@ -721,6 +721,9 @@ def test_antenna_opens_the_thank_you_note(browser, site):
     assert page.locator('#thanks-updates > li').count() >= 10
     text = page.locator('#thanks-updates').inner_text().lower()
     assert 'security' not in text and 'v1.0.0' in text
+    first = page.locator('#thanks-updates > li').first                   # structured transmissions
+    assert first.get_attribute('data-category') == 'patch-notes'
+    assert first.locator('.tx-meta').inner_text() == 'PATCH NOTES · FROM MISSION CONTROL'
     page.click('#thanks-tab-msg')
     page.click('#thanks-close')
     assert not page.evaluate('() => document.getElementById("thanks").open')

@@ -208,6 +208,31 @@
   const VERSION = HISTORY[0].v;
   const RELEASE_NOTES = HISTORY[0].notes;
 
+  // ---------------------------------------------------------------- transmissions
+  // Everything the antenna's UPDATES tab lists, in the shape of a future `transmissions` table (one row each): id,
+  // category, from, title, body (lines), date (YYYY-MM-DD) and, for patch notes, the version. Still shipped in the
+  // code with each release. Every release in HISTORY becomes PATCH NOTES from MISSION CONTROL; the other kinds go in
+  // MORE_TRANSMISSIONS, written by hand (same rules as HISTORY: plain words, no spoilers, nothing technical). Notes
+  // FROM STAR GAZER or COLOSSUS must come from real data (a NASA ruling, a score), never invented
+  // (docs/plans/KNOWLEDGE_AND_RESEARCHERS.md).
+  const TRANSMISSION_KINDS = { 'patch-notes': 'PATCH NOTES', 'developer-log': 'DEVELOPER LOG',
+                               'mission-update': 'MISSION UPDATE', announcement: 'ANNOUNCEMENT' };
+  const TRANSMISSION_SENDERS = ['MISSION CONTROL', 'STAR GAZER', 'COLOSSUS'];
+  const MORE_TRANSMISSIONS = [
+    // { id: 'log-2026-12-01', category: 'developer-log', from: 'MISSION CONTROL', title: '...', body: ['...'], date: '2026-12-01' },
+  ];
+  const HISTORY_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const historyDay = d => {   // '21 Oct 2026' -> '2026-10-21'
+    const [day, month, year] = d.split(' ');
+    return `${year}-${String(HISTORY_MONTHS.indexOf(month) + 1).padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+  const TRANSMISSIONS = [   // newest first; a stable sort keeps HISTORY's order within a day
+    ...HISTORY.map(h => ({ id: `v${h.v}`, category: 'patch-notes', from: 'MISSION CONTROL', title: `V${h.v}`,
+                           body: h.notes, date: historyDay(h.date), version: h.v })),
+    ...MORE_TRANSMISSIONS,
+  ].filter(t => TRANSMISSION_KINDS[t.category] && TRANSMISSION_SENDERS.includes(t.from))
+   .sort((a, b) => b.date.localeCompare(a.date));
+
   // ---------------------------------------------------------------- sky events: comets, asteroids, the odd UFO
   // Every 3 to 6 minutes of use, something crosses the Kepler field map: a comet (a bright head, a curved dust
   // tail and a faint blue ion tail, both pointing away from the Sun, off to the left) or a dark tumbling asteroid.
@@ -6543,7 +6568,7 @@
   // ---------------------------------------------------------------- the antenna: a thank-you note, and the updates
   // The little dish on the left edge of the page (its pixel art: ICONS.antenna in 49c-ui.js) opens a note from the
   // site's maker, in two tabs: MESSAGE (the note, led by WHAT'S NEW IN VX when this browser hasn't seen the version)
-  // and UPDATES (every version, newest first: HISTORY in 00-version.js). A new version lights the dish up; opening it
+  // and UPDATES (every transmission, newest first: TRANSMISSIONS in 00-version.js, each release's notes among them). A new version lights the dish up; opening it
   // marks the version as seen. Clicking outside the note closes it too.
   const SEEN_VERSION_KEY = 'starmap.seenVersion';
   const thanksDialog = document.getElementById('thanks');
@@ -6569,14 +6594,18 @@
     document.getElementById('thanks-news-list').replaceWith(Object.assign(noteList(RELEASE_NOTES), { id: 'thanks-news-list' }));
   }
   const updatesList = document.getElementById('thanks-updates');
-  for (const h of HISTORY) {
+  for (const t of TRANSMISSIONS) {
     const li = document.createElement('li');
+    li.dataset.category = t.category;
     const title = document.createElement('h3');
-    title.textContent = `V${h.v}`;
+    title.textContent = t.title;
     const date = document.createElement('span');
-    date.textContent = h.date.toUpperCase();
+    date.textContent = niceDate(t.date).toUpperCase();
     title.append(date);
-    li.append(title, noteList(h.notes));
+    const meta = document.createElement('p');
+    meta.className = 'tx-meta';
+    meta.textContent = `${TRANSMISSION_KINDS[t.category]} · FROM ${t.from}`;
+    li.append(title, meta, noteList(t.body));
     updatesList.append(li);
   }
 

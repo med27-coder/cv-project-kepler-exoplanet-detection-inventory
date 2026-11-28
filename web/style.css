@@ -501,6 +501,7 @@ dialog#thanks .updates > li { border-top: 2px solid var(--edge); padding: 8px 0;
 dialog#thanks .updates h3 { font: 11px/1.7 var(--pixel); color: var(--accent); margin: 0 0 2px; }
 dialog#thanks .updates h3 span { color: var(--ink-2); font-size: 9px; margin-left: 8px; }
 dialog#thanks .updates ul { margin: 2px 0; padding-left: 18px; }
+dialog#thanks .updates .tx-meta { font: 8px/1.6 var(--pixel); color: var(--ink-2); margin: 0 0 4px; }
 dialog#thanks .tabs [role="tab"] { padding: 8px 14px; line-height: 1.2; font-size: 11px; }
 
 /* landing page (preview, 49f-landing.js): why the map exists, what an account saves, how it is protected */

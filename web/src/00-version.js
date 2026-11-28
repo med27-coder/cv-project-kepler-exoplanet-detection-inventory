@@ -91,3 +91,28 @@ const HISTORY = [
 ];
 const VERSION = HISTORY[0].v;
 const RELEASE_NOTES = HISTORY[0].notes;
+
+// ---------------------------------------------------------------- transmissions
+// Everything the antenna's UPDATES tab lists, in the shape of a future `transmissions` table (one row each): id,
+// category, from, title, body (lines), date (YYYY-MM-DD) and, for patch notes, the version. Still shipped in the
+// code with each release. Every release in HISTORY becomes PATCH NOTES from MISSION CONTROL; the other kinds go in
+// MORE_TRANSMISSIONS, written by hand (same rules as HISTORY: plain words, no spoilers, nothing technical). Notes
+// FROM STAR GAZER or COLOSSUS must come from real data (a NASA ruling, a score), never invented
+// (docs/plans/KNOWLEDGE_AND_RESEARCHERS.md).
+const TRANSMISSION_KINDS = { 'patch-notes': 'PATCH NOTES', 'developer-log': 'DEVELOPER LOG',
+                             'mission-update': 'MISSION UPDATE', announcement: 'ANNOUNCEMENT' };
+const TRANSMISSION_SENDERS = ['MISSION CONTROL', 'STAR GAZER', 'COLOSSUS'];
+const MORE_TRANSMISSIONS = [
+  // { id: 'log-2026-12-01', category: 'developer-log', from: 'MISSION CONTROL', title: '...', body: ['...'], date: '2026-12-01' },
+];
+const HISTORY_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const historyDay = d => {   // '21 Oct 2026' -> '2026-10-21'
+  const [day, month, year] = d.split(' ');
+  return `${year}-${String(HISTORY_MONTHS.indexOf(month) + 1).padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+const TRANSMISSIONS = [   // newest first; a stable sort keeps HISTORY's order within a day
+  ...HISTORY.map(h => ({ id: `v${h.v}`, category: 'patch-notes', from: 'MISSION CONTROL', title: `V${h.v}`,
+                         body: h.notes, date: historyDay(h.date), version: h.v })),
+  ...MORE_TRANSMISSIONS,
+].filter(t => TRANSMISSION_KINDS[t.category] && TRANSMISSION_SENDERS.includes(t.from))
+ .sort((a, b) => b.date.localeCompare(a.date));
