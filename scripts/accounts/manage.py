@@ -5,10 +5,10 @@
     .venv\\Scripts\\python scripts\\accounts\\manage.py backup
     .venv\\Scripts\\python scripts\\accounts\\manage.py restore .secrets\\db-backups\\kepler-20261117-1950.sql --yes
 
-create-tester makes a tester account (the owner's own, for one): a pilot name, a long random password and the
+create-tester makes a tester account (the owner's own, for one): an explorer name, a long random password and the
               tester role. The password is written to .secrets/<name>.tester.txt (git-ignored, refused by the
               commit hooks) and never printed; move it to a password manager.
-role          makes a pilot a player or a tester (logged in the audit log).
+role          makes an explorer a player or a tester (logged in the audit log).
 backup        saves every account and its progress to .secrets/db-backups/kepler-<date>-<time>.sql (it holds the
               scrambled passwords, so it lives with the other secrets). Sign-in sessions and logs are left out.
 restore       rebuilds the database from the migrations and loads a backup into it. It replaces everything, so it
@@ -42,7 +42,7 @@ DB_CONTAINER = 'supabase_db_kepler-star-map'   # project_id in supabase/config.t
 NOT_BACKED_UP = ['auth.sessions', 'auth.refresh_tokens', 'auth.mfa_amr_claims', 'auth.audit_log_entries',
                  'auth.flow_state', 'auth.one_time_tokens', 'auth.mfa_challenges',
                  'public.catalog']   # rebuilt by the migrations (build_catalog.py)
-PILOT = re.compile(r'^[A-Z0-9][A-Z0-9-]{1,18}[A-Z0-9]$')   # the same rule as the database
+EXPLORER = re.compile(r'^[A-Z0-9][A-Z0-9-]{1,18}[A-Z0-9]$')   # the same rule as the database
 CLI = ['npx.cmd' if os.name == 'nt' else 'npx', '--yes', 'supabase@2.122.1']
 
 
@@ -79,18 +79,18 @@ def call(url: str, key: str, path: str, body: dict) -> dict:
 
 def create_tester(name: str) -> None:
     name = name.upper()
-    if not PILOT.match(name):
-        sys.exit('Pilot names are 3 to 20 letters, digits or dashes.')
+    if not EXPLORER.match(name):
+        sys.exit('Explorer names are 3 to 20 letters, digits or dashes.')
     out = SECRETS / f'{name.lower()}.tester.txt'
     if out.exists():
         sys.exit(f'{out.relative_to(ROOT)} already exists: that tester was made already.')
     url, key = connection()
     password = secrets.token_urlsafe(24)   # 32 characters
-    call(url, key, '/auth/v1/admin/users', {'email': f'{name.lower()}@pilots.invalid', 'password': password,
-                                            'email_confirm': True, 'user_metadata': {'pilot_name': name}})
-    call(url, key, '/rest/v1/rpc/set_role', {'pilot': name, 'new_role': 'tester'})
+    call(url, key, '/auth/v1/admin/users', {'email': f'{name.lower()}@explorers.invalid', 'password': password,
+                                            'email_confirm': True, 'user_metadata': {'explorer_name': name}})
+    call(url, key, '/rest/v1/rpc/set_role', {'explorer': name, 'new_role': 'tester'})
     SECRETS.mkdir(exist_ok=True)
-    out.write_text(f'Kepler Star Map tester account ({url})\npilot name: {name}\npassword: {password}\n', encoding='utf-8')
+    out.write_text(f'Kepler Star Map tester account ({url})\nexplorer name: {name}\npassword: {password}\n', encoding='utf-8')
     if os.name != 'nt':
         out.chmod(0o600)
     print(f'Tester {name} created. Its password is in {out.relative_to(ROOT)}: move it to a password manager.')
@@ -126,11 +126,18 @@ def psql(sql: str | None = None, script: str | None = None) -> subprocess.Comple
     return subprocess.run(cmd, input=script, capture_output=True, text=True, check=False)
 
 
+def upgrade_backup(text: str) -> str:
+    """A backup from before 28 November 2026 (pilots) in today's shape (explorers, 20261128010000_explorers.sql)."""
+    return (text.replace('"pilot_name"', '"explorer_name"')
+                .replace('@pilots.invalid', '@explorers.invalid')
+                .replace('\\"pilot_name\\"', '\\"explorer_name\\"'))   # inside the metadata's JSON text
+
+
 def restore(path: Path, yes: bool) -> None:
     path = path.resolve()
     if not path.is_file():
         sys.exit(f'No backup at {path}.')
-    text = path.read_text(encoding='utf-8')
+    text = upgrade_backup(path.read_text(encoding='utf-8'))
     if 'session_replication_role = replica' not in text or '"public"."profiles"' not in text:
         sys.exit(f'{path.name} is not a backup made by this script.')
     if not yes:
@@ -149,8 +156,8 @@ def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest='command', required=True)
     p = sub.add_parser('create-tester', help='make a tester account')
-    p.add_argument('--name', required=True, help='pilot name, 3 to 20 letters, digits or dashes')
-    p = sub.add_parser('role', help="change a pilot's role")
+    p.add_argument('--name', required=True, help='explorer name, 3 to 20 letters, digits or dashes')
+    p = sub.add_parser('role', help="change an explorer's role")
     p.add_argument('name')
     p.add_argument('new_role', choices=['player', 'tester'])
     sub.add_parser('backup', help='save every account and its progress to .secrets/db-backups/')
@@ -162,7 +169,7 @@ def main(argv=None) -> None:
         create_tester(args.name)
     elif args.command == 'role':
         url, key = connection()
-        call(url, key, '/rest/v1/rpc/set_role', {'pilot': args.name, 'new_role': args.new_role})
+        call(url, key, '/rest/v1/rpc/set_role', {'explorer': args.name, 'new_role': args.new_role})
         print(f'{args.name.upper()} is now a {args.new_role} (from its next sign-in).')
     elif args.command == 'backup':
         backup()

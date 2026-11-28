@@ -574,13 +574,13 @@ def test_landing_preview(browser, site):
     page.click('[data-landing="signup"]')
     form = page.locator('[data-form="signup"]')
     assert form.is_visible()
-    form.locator('[name=pilot]').fill('NOVA-9')
+    form.locator('[name=explorer]').fill('NOVA-9')
     form.locator('[name=password]').fill('correct horse battery')
     form.locator('[name=again]').fill('correct horse battery')
     form.locator('[name=terms]').check()
     form.locator('button[type=submit]').click()
     assert 'preview' in form.locator('.landing-msg').inner_text()       # nothing is sent anywhere yet
-    page.click('[data-landing="play"]')
+    form.locator('[data-landing="play"]').click()                        # CONTINUE AS GUEST
     assert page.locator('#landing').count() == 0
     assert not errors, errors
 
@@ -695,8 +695,8 @@ def test_view_links_kepler_view_and_pinch(browser, site):
     assert page.get_attribute('#sys-edge', 'aria-pressed') == 'true'
     assert page.locator('#sys-level').inner_text() == '4×'
     page.click('#sys-in')
-    page.wait_for_timeout(600)                                  # the URL update is debounced
-    assert 'zoom=6' in page.evaluate('location.hash') and 'edge=1' in page.evaluate('location.hash')
+    page.wait_for_function("() => location.hash.includes('zoom=6')")   # the URL update is debounced (slow under load)
+    assert 'edge=1' in page.evaluate('location.hash')
     page.evaluate("""() => {
       const c = document.getElementById('system'), r = c.getBoundingClientRect();
       const ev = (type, id, x) => c.dispatchEvent(new PointerEvent(type, {pointerId: id, bubbles: true,

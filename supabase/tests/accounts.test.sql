@@ -1,14 +1,14 @@
 -- The account rules (docs/plans/ACCOUNTS_AND_ACCESS.md): run with `npx supabase@2.122.1 test db`.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(51);
+select plan(52);
 
 -- helpers: sign up as the auth service would, and act as a signed-in player
-create function pg_temp.sign_up(pilot text, email text default null) returns uuid language plpgsql as $$
+create function pg_temp.sign_up(explorer text, email text default null) returns uuid language plpgsql as $$
 declare id uuid := gen_random_uuid();
 begin
   insert into auth.users (id, email, raw_user_meta_data, aud, role)
-    values (id, coalesce(email, lower(pilot) || '@pilots.invalid'), jsonb_build_object('pilot_name', pilot),
+    values (id, coalesce(email, lower(explorer) || '@explorers.invalid'), jsonb_build_object('explorer_name', explorer),
             'authenticated', 'authenticated');
   return id;
 end $$;
@@ -19,22 +19,24 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- sign-up
-select lives_ok($$ select pg_temp.sign_up('PILOT-0001') $$, 'a pilot name signs up');
+select lives_ok($$ select pg_temp.sign_up('NOVA-0001') $$, 'an explorer name signs up');
 select is((select count(*)::int from public.profiles p join public.preferences using (user_id)
-           join public.progress using (user_id) where pilot_name = 'PILOT-0001'), 1,
+           join public.progress using (user_id) where explorer_name = 'NOVA-0001'), 1,
           'sign-up makes the profile, preferences and progress rows');
-select is((select role from public.profiles where pilot_name = 'PILOT-0001'), 'player', 'new accounts are players');
-select throws_ok($$ select pg_temp.sign_up('X') $$, 'P0001', 'Pilot names are 3 to 20 letters, digits or dashes.',
+select is((select role from public.profiles where explorer_name = 'NOVA-0001'), 'player', 'new accounts are players');
+select throws_ok($$ select pg_temp.sign_up('X') $$, 'P0001', 'Explorer names are 3 to 20 letters, digits or dashes.',
                  'too short a name is refused');
-select throws_ok($$ select pg_temp.sign_up('-BAD-') $$, 'P0001', 'Pilot names are 3 to 20 letters, digits or dashes.',
+select throws_ok($$ select pg_temp.sign_up('-BAD-') $$, 'P0001', 'Explorer names are 3 to 20 letters, digits or dashes.',
                  'a name starting with a dash is refused');
-select throws_ok($$ select pg_temp.sign_up('PILOT-0002', 'someone@example.com') $$, 'P0001',
-                 'Sign up with a pilot name only.', 'a real email is refused');
-select throws_ok($$ select pg_temp.sign_up('pilot-0001', 'pilot-0001@pilots.invalid') $$, '23505', null,
+select throws_ok($$ select pg_temp.sign_up('NOVA-0002', 'someone@example.com') $$, 'P0001',
+                 'Sign up with an explorer name only.', 'a real email is refused');
+select throws_ok($$ select pg_temp.sign_up('NOVA-0003', 'nova-0003@pilots.invalid') $$, 'P0001',
+                 'Sign up with an explorer name only.', 'the old pilot address is refused');
+select throws_ok($$ select pg_temp.sign_up('nova-0001', 'nova-0001@explorers.invalid') $$, '23505', null,
                  'a taken name is refused, whatever its case');
 
 create temp table ids as select pg_temp.sign_up('ORBITER-7') as orbiter,
-                                (select user_id from public.profiles where pilot_name = 'PILOT-0001') as pilot;
+                                (select user_id from public.profiles where explorer_name = 'NOVA-0001') as explorer;
 grant select on ids to authenticated;
 
 -- ---------------------------------------------------------------- the account cap
@@ -45,20 +47,20 @@ update public.limits set max_accounts = 200;
 
 -- ---------------------------------------------------------------- testers (only the owner, at most max_testers)
 update public.limits set max_testers = (select count(*) from public.profiles where role = 'tester') + 1;   -- room for one more
-select lives_ok($$ update public.profiles set role = 'tester' where pilot_name = 'ORBITER-7' $$, 'the owner makes a tester directly');
-select throws_ok($$ update public.profiles set role = 'tester' where pilot_name = 'PILOT-0001' $$, 'P0001',
+select lives_ok($$ update public.profiles set role = 'tester' where explorer_name = 'ORBITER-7' $$, 'the owner makes a tester directly');
+select throws_ok($$ update public.profiles set role = 'tester' where explorer_name = 'NOVA-0001' $$, 'P0001',
                  'Tester limit reached.', 'testers past the limit are refused');
 update public.limits set max_testers = 5;
 
--- ---------------------------------------------------------------- saving and loading (as PILOT-0001)
-select pg_temp.act_as((select pilot from ids));
+-- ---------------------------------------------------------------- saving and loading (as NOVA-0001)
+select pg_temp.act_as((select explorer from ids));
 select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-10"}, "ach": {"first-light": "2026-11-12"},
   "sound": false, "backdrop": "still", "systems": ["Kepler-16"], "seen": "abc,1z", "comets": 3, "junk": "x"}') $$,
   'a save is accepted');
 select throws_ok($$ select public.save_progress('{}') $$, 'P0002', 'Saving too often.', 'a second save at once is refused');
 reset role;
 update public.limits set save_gap = interval '0';   -- the rest of the tests save freely
-select pg_temp.act_as((select pilot from ids));
+select pg_temp.act_as((select explorer from ids));
 
 select lives_ok($$ select public.save_progress('{"eggs": {"pluto": "2026-11-15"}, "ach": {"first-light": "2026-11-11"}}') $$,
                 'a partial save from an older browser is accepted');
@@ -68,7 +70,7 @@ select is(public.load_progress() -> 'systems', '["Kepler-16"]'::jsonb, 'a partia
 select is((public.load_progress() -> 'comets')::int, 3, 'counters are kept');
 select ok(not public.load_progress() ? 'junk', 'unknown keys are dropped');
 select is(public.load_progress() ->> 'backdrop', 'still', 'preferences are saved');
-select is(public.load_progress() ->> 'pilot', 'PILOT-0001', 'the load names the pilot');
+select is(public.load_progress() ->> 'explorer', 'NOVA-0001', 'the load names the explorer');
 
 select throws_ok($$ select public.save_progress(jsonb_build_object('seen', repeat('a,', 45000))) $$, '22023',
                  'That does not look like saved progress.', 'an oversized stars-seen list is refused');
@@ -101,11 +103,11 @@ select ok((select count(*) from public.catalog where kind = 'egg') >= 38, 'the c
 select fk_ok('public', 'finds', array['kind', 'item_id'], 'public', 'catalog', array['kind', 'item_id'],
              'a find must name a catalog id');
 select throws_ok($$ update auth.users set email = 'real.person@example.com' where id = (select orbiter from ids) $$,
-                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot change to a real email');
+                 'P0001', 'Explorer accounts have no email or phone.', 'an explorer cannot change to a real email');
 select throws_ok($$ update auth.users set email_change = 'real.person@example.com' where id = (select orbiter from ids) $$,
-                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot start an email change');
+                 'P0001', 'Explorer accounts have no email or phone.', 'an explorer cannot start an email change');
 select throws_ok($$ update auth.users set phone = '15550100' where id = (select orbiter from ids) $$,
-                 'P0001', 'Pilot accounts have no email or phone.', 'a pilot cannot add a phone');
+                 'P0001', 'Explorer accounts have no email or phone.', 'an explorer cannot add a phone');
 select lives_ok($$ update auth.users set last_sign_in_at = now() where id = (select orbiter from ids) $$,
                 'normal sign-ins still update the account');
 insert into public.catalog (kind, item_id, added_on)   -- 301 test ids, so the cap can be reached
@@ -126,22 +128,22 @@ reset role;
 update public.limits set save_gap = interval '0';
 
 -- ---------------------------------------------------------------- set_role (the owner's script only)
-select lives_ok($$ select public.set_role('pilot-0001', 'tester') $$, 'the owner makes a tester');
+select lives_ok($$ select public.set_role('nova-0001', 'tester') $$, 'the owner makes a tester');
 select throws_ok($$ select public.set_role('ORBITER-7', 'owner') $$, '23514', null, 'only player and tester exist');
-select is((select count(*)::int from public.audit_log where action = 'role tester' and target = 'PILOT-0001'), 1, 'role changes are logged');
-select throws_ok($$ select public.set_role('NOBODY', 'tester') $$, 'P0001', 'No pilot named NOBODY.',
-                 'an unknown pilot is reported');
-select pg_temp.act_as((select pilot from ids));
+select is((select count(*)::int from public.audit_log where action = 'role tester' and target = 'NOVA-0001'), 1, 'role changes are logged');
+select throws_ok($$ select public.set_role('NOBODY', 'tester') $$, 'P0001', 'No explorer named NOBODY.',
+                 'an unknown explorer is reported');
+select pg_temp.act_as((select explorer from ids));
 select is(public.load_progress() ->> 'role', 'tester', 'a tester sees its role on load');
 
 -- ---------------------------------------------------------------- reset and delete
 reset role;
-select pg_temp.act_as((select pilot from ids));
+select pg_temp.act_as((select explorer from ids));
 select public.reset_progress();
 select is(public.load_progress() -> 'eggs', '{}'::jsonb, 'reset forgets every find');
 select public.delete_my_account();
 reset role;
-select is((select count(*)::int from public.profiles where pilot_name = 'PILOT-0001'), 0,
+select is((select count(*)::int from public.profiles where explorer_name = 'NOVA-0001'), 0,
           'DELETE MY ACCOUNT removes the account and its rows');
 
 select * from finish();

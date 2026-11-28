@@ -54,3 +54,15 @@ def test_the_catalog_is_not_backed_up(monkeypatch):
     """The catalog comes from the migrations, so a backup leaves it out (a restore would clash with it)."""
     monkeypatch.syspath_prepend(str(ROOT / 'scripts' / 'accounts'))
     assert 'public.catalog' in importlib.import_module('manage').NOT_BACKED_UP
+
+
+def test_a_backup_from_before_the_explorer_rename_still_restores(monkeypatch):
+    """Backups made while accounts were "pilots" load into today's explorer columns and addresses."""
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts' / 'accounts'))
+    manage = importlib.import_module('manage')
+    old = ('INSERT INTO "public"."profiles" ("user_id", "pilot_name", "role") VALUES (\'u1\', \'NOVA-3\', \'player\');\n'
+           'INSERT INTO "auth"."users" ("email", "raw_user_meta_data") VALUES '
+           '(\'nova-3@pilots.invalid\', \'{"pilot_name": "NOVA-3"}\');\n')
+    new = manage.upgrade_backup(old)
+    assert 'pilot' not in new
+    assert '"explorer_name"' in new and 'nova-3@explorers.invalid' in new and '{"explorer_name": "NOVA-3"}' in new

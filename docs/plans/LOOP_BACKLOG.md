@@ -50,7 +50,7 @@ documentation for its own sake.
    desktop and phone width.
 8. **[done 27 Nov, see the commit "Prediction dashboard"; a call now also keeps Colossus's opinion on giants (the fifth item of a call), so agreement with Colossus counts from calls made from now on]** **Prediction dashboard foundation** (EXPLORER_JOURNEY C): calls made, correct, wrong, waiting, the average wait,
    agreement with Star Gazer and (on giants) with Colossus; built from data the page already has.
-9. **Explorer Registry mockups**: "pilot" becomes **explorer** everywhere (the database column and messages, the
+9. **[rename done 27 Nov, see the commit "Explorers"; the screens' connection to the local Supabase waits for a choice in the hand-off notes (the page's security policy would have to allow it)]** **Explorer Registry mockups**: "pilot" becomes **explorer** everywhere (the database column and messages, the
    sign-in address `<name>@explorers.invalid`, `manage.py`), a new migration, the tests updated; the sign-up and
    sign-in screens with CONTINUE AS GUEST beside JOIN, behind `?landing`, talking only to the local Supabase.
 10. **Threat model and launch checklist** in `docs/`: who might attack what and what stops them; sequence diagrams

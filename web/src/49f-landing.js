@@ -75,7 +75,7 @@ Object.assign(ICONS, {
 const LANDING_SAVED = ['Achievements, and the day you earned each', 'Easter eggs found', 'Systems saved and visited',
   'Stars you have looked at', 'Your planet-or-not calls', 'Trophies and your showcase', 'The daily mystery streak',
   'The astronaut\'s outfits', 'Sky events caught', 'Settings: sound, pop-ups, background, the score switch',
-  'Your pilot name, and an emblem as your picture if you pick one'];
+  'Your explorer name, and an emblem as your picture if you pick one'];
 const LANDING_NOT_SAVED = ['No email', 'No real name', 'No location', 'No analytics or tracking', 'No ads',
   'Nothing is ever sold'];
 const LANDING_FEATURES = [   // the journey in four steps
@@ -140,22 +140,24 @@ function landingMarkup() {
     <section class="landing-forms" hidden>
       <form class="landing-form" data-form="signin" hidden>
         <h2>SIGN IN</h2>
-        <label>Pilot name <input name="pilot" autocomplete="username" required maxlength="20" spellcheck="false"></label>
+        <label>Explorer name <input name="explorer" autocomplete="username" required maxlength="20" spellcheck="false"></label>
         <label>Password <input name="password" type="password" autocomplete="current-password" required minlength="12"></label>
-        <button type="submit">SIGN IN</button>
+        <div class="landing-actions"><button type="submit">SIGN IN</button>
+          <button type="button" class="ghost" data-landing="play">CONTINUE AS GUEST</button></div>
         <p class="landing-msg" role="status"></p>
       </form>
       <form class="landing-form" data-form="signup" hidden>
         <h2>JOIN THE EXPLORER REGISTRY</h2>
-        <label>Pilot name <small>3 to 20 letters, digits or dashes</small>
-          <input name="pilot" autocomplete="username" required minlength="3" maxlength="20" spellcheck="false"
+        <label>Explorer name <small>3 to 20 letters, digits or dashes</small>
+          <input name="explorer" autocomplete="username" required minlength="3" maxlength="20" spellcheck="false"
                  pattern="[A-Za-z0-9][A-Za-z0-9\\-]{1,18}[A-Za-z0-9]"></label>
         <label>Password <small>12 characters or more</small>
           <input name="password" type="password" autocomplete="new-password" required minlength="12"></label>
         <label>Password again <input name="again" type="password" autocomplete="new-password" required minlength="12"></label>
         <label class="landing-check"><input name="terms" type="checkbox" required> I agree to the Terms of Use</label>
         <p class="landing-warn">There is no email, so there is no reset link: write your password down.</p>
-        <button type="submit">JOIN</button>
+        <div class="landing-actions"><button type="submit">JOIN</button>
+          <button type="button" class="ghost" data-landing="play">CONTINUE AS GUEST</button></div>
         <p class="landing-msg" role="status"></p>
       </form>
     </section>
@@ -223,10 +225,10 @@ function showLanding() {
       msg.textContent = 'The two passwords differ.';
       return;
     }
-    msg.textContent = 'Accounts are not open yet: this is a preview. Your progress is still kept in this browser.';
+    msg.textContent = 'The Explorer Registry is not open yet: this is a preview. Your progress is still kept in this browser.';
   }));
   box.addEventListener('keydown', e => { if (e.key === 'Escape') closeLanding(); });
-  box.querySelector('[data-landing="play"]').focus({ preventScroll: true });
+  box.querySelector('.landing-hero [data-landing="play"]').focus({ preventScroll: true });
 }
 
 function closeLanding() {

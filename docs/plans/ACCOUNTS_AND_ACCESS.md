@@ -4,6 +4,12 @@
 the user's words: "people just need to log in and their progress loads, in case they want to open up in a different
 browser", with **proxy accounts only** (made-up test accounts, no real people's details).
 
+**Updated 28 November 2026: pilots are now explorers.** The column is `explorer_name`, the sign-in address
+`<name>@explorers.invalid`, the sign-up metadata key `explorer_name` (migration `20261128010000_explorers.sql`, which
+moved the existing accounts' addresses; `manage.py restore` upgrades older backups). Where this plan says "pilot",
+read "explorer". The database also has a **catalog** of every achievement and easter-egg id (`public.catalog`,
+filled by migrations that `scripts/accounts/build_catalog.py` writes from the game's code); a find must name one.
+
 **Updated 17 November 2026:** the user wants a landing page with log in **and sign up**, and gave a structure to
 build from (a "trust page": why the site exists, what gets saved, how it is protected, then sign up). Section 9
 adapts that structure to the star map; where open sign-up changes sections 3 and 4, those sections say so.
@@ -343,7 +349,7 @@ AI, so the concierge and the model pages feel like one character), and **remembe
 
 | Table | Holds | Players can |
 |---|---|---|
-| `profiles` | pilot name (unique, `A-Z 0-9 -`, 3 to 20), emblem, role | read their own |
+| `profiles` | explorer name (unique, `A-Z 0-9 -`, 3 to 20), emblem, role | read their own |
 | `preferences` | sound, pop-ups, background, score switch, outfit (typed columns) | read their own |
 | `finds` | one row per achievement or easter egg with the date found | read their own |
 | `progress` | everything else earned (one checked JSON record) | read their own |
