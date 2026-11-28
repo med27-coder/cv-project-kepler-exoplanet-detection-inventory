@@ -521,6 +521,33 @@ def test_rulings_settle_only_calls_made_before_them(browser, site):
     assert not errors, errors
 
 
+def test_captains_log_preview(browser, site):
+    """The log (behind ?log) lists what was found and called, newest first; the timeline keeps the firsts only."""
+    errors = []
+    page = open_page(browser, site, errors)
+    assert page.locator('#tab-log').is_hidden()                       # a preview: no tab without the switch
+    saved = {'toured': True, 'ach': {'first-light': '2026-10-02', 'star-hopper': '2026-10-05', 'no-such': '2026-10-09'},
+             'eggs': {'pluto': '2026-10-03'},
+             'calls': {'K03444.01': ['planet', '2026-10-04', 'planet', 'KOI-3444']}}
+    page.evaluate("s => localStorage.setItem('starmap.progress.v1', JSON.stringify(s))", saved)
+    ruling = ('window.STARMAP_RESOLUTIONS = {"since": "2026-10-14", '
+              '"resolved": {"K03444.01": ["confirmed", "2026-10-12"]}};')
+    page.route('**/data/resolutions.js', lambda r: r.fulfill(status=200, content_type='text/javascript', body=ruling))
+    page.goto(site + '?log')
+    page.click('#open-gallery')
+    page.click('#tab-log')
+    titles = page.locator('#pane-log .log-title').all_inner_texts()
+    assert titles[-1] == 'FIRST LIGHT' and titles[:2] == ['FIRST CALL', 'PROPHET'], titles   # earned today (the test clock)
+    assert 'K03444.01: A PLANET' in titles and 'STAR HOPPER' in titles and 'PLUTO' in titles and 'K03444.01: PLANET' in titles
+    assert not any('NO-SUCH' in t.upper() for t in titles)            # unknown ids are left out
+    assert 'after 8 days of waiting' in page.locator('#pane-log').inner_text()
+    page.click('#log-firsts')
+    kinds = page.locator('#pane-log .log-kind').all_inner_texts()
+    assert len(kinds) == 4 and 'STAR HOPPER' not in page.locator('#pane-log').inner_text()
+    assert any('FIRST CORRECT CALL' in k for k in kinds)
+    assert not errors, errors
+
+
 def test_tour_icons_and_suggestions(browser, site):
     """First-visit tour (forced with ?tour), pixel icons, found eggs and recent systems in the suggestions."""
     errors = []

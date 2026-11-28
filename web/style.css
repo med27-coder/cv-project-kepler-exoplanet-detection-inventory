@@ -242,6 +242,20 @@ dialog#gallery::backdrop { background: rgba(7, 11, 26, 0.8); }
 .gallery-progress { font-family: var(--pixel); font-size: 12px; display: flex; gap: 10px; align-items: center; }
 .gallery-progress .bar { flex: 1; max-width: 240px; height: 10px; border: 2px solid var(--edge); background: var(--bg); }
 .gallery-progress .bar span { display: block; height: 100%; width: 0; background: var(--accent); }
+/* Captain's Log (49g-log.js, preview) */
+.log { list-style: none; margin: 8px 0 0; padding: 0; }
+.log-entry { display: grid; grid-template-columns: 8.5em 1fr; gap: 2px 12px; padding: 8px 0; border-bottom: 2px solid var(--edge); }
+.log-date, .log-kind { font-family: var(--pixel); font-size: 9px; color: var(--ink-2); }
+.log-kind { grid-column: 2; }
+.log-title { grid-column: 2; font-family: var(--pixel); font-size: 11px; color: var(--accent); font-weight: normal; }
+.log-text { grid-column: 2; }
+.log-date { grid-row: 1 / span 3; padding-top: 1px; }
+#log-firsts { margin-left: auto; }
+@media (max-width: 520px) {
+  .log-entry { grid-template-columns: 1fr; }
+  .log-date { grid-row: auto; }
+  .log-kind, .log-title, .log-text { grid-column: 1; }
+}
 .egg-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .egg-card {

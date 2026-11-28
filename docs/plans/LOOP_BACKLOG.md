@@ -34,7 +34,7 @@ documentation for its own sake.
 
 **Tier 1, the best overnight work:**
 
-4. **Captain's Log foundation** (EXPLORER_JOURNEY B): the journal from the dates already kept (achievements, eggs,
+4. **[done 27 Nov, see the commit "Captain's Log"; `web/src/49g-log.js`, the LOG tab with `?log`]** **Captain's Log foundation** (EXPLORER_JOURNEY B): the journal from the dates already kept (achievements, eggs,
    calls, NASA's rulings, daily mysteries), newest first, no spoilers; a draft view behind a preview switch until
    it is released.
 5. **Explorer Archive export format**: the backup file becomes the **Explorer Archive**, one format for a local

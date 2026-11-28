@@ -548,7 +548,8 @@ function drawEggArt(canvas, egg, t, silhouette) {
 // ---- the Galleria dialog
 const galleryDialog = document.getElementById('gallery');
 const panes = { eggs: document.getElementById('pane-eggs'), ach: document.getElementById('pane-ach'),
-                pred: document.getElementById('pane-pred'), set: document.getElementById('pane-set') };
+                pred: document.getElementById('pane-pred'), log: document.getElementById('pane-log'),   // log: 49g-log.js (preview)
+                set: document.getElementById('pane-set') };
 let detailEgg = null, detailFrame = 0;
 const blanks = name => [...name].map(ch => (/[A-Za-z0-9]/.test(ch) ? '_' : ch === ' ' ? ' ' : ch)).join('');
 
@@ -850,14 +851,16 @@ function showTab(name) {
   if (name === 'ach') renderAchievements();
   if (name === 'set') renderSettings();
   if (name === 'pred') renderPredictions();
+  if (name === 'log') renderLog();
 }
 const tabs = [...document.querySelectorAll('#gallery [role="tab"]')];
-tabs.forEach((tab, i) => {
+tabs.forEach(tab => {
   tab.addEventListener('click', () => showTab(tab.id.slice(4)));
   tab.addEventListener('keydown', e => {   // arrow keys move between tabs
     const dir = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
     if (!dir) return;
-    const next = tabs[(i + dir + tabs.length) % tabs.length];
+    const shown = tabs.filter(t => !t.hidden), at = shown.indexOf(tab);   // a preview tab may be hidden
+    const next = shown[(at + dir + shown.length) % shown.length];
     next.focus();
     showTab(next.id.slice(4));
   });
