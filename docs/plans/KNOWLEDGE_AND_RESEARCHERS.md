@@ -182,3 +182,26 @@ facts, except the NASA synchronisation already allowed (Tier 1).
   with the knowledge report and the audit; a daily check would mostly find nothing (decision 5).
 
 5. **Background cadence:** a weekly report plus the monthly refresh (suggested), or daily checks too?
+
+## 11. Universe Enrichment (the user's note, 27 November)
+
+The phase after the platform: deeper, **verified** information for every world and system, so the map becomes an
+observatory, an encyclopedia and a discovery museum, not only a planet database. Players should understand **why**
+a world matters, not just see its numbers.
+
+- **Every fact carries provenance:** source (NASA archive, a paper, a community suggestion), confidence (high,
+  medium, low), reviewed or not. Only NASA data is accepted without review (section 2).
+- **A planet or system page can grow:** known as (a nickname with its source), interesting facts, discovery story,
+  why scientists care, habitability notes (a habitable-zone orbit does not mean habitable), research milestones,
+  similar worlds, related achievements, Star Gazer's note, Colossus's comparison, sources.
+- **Star Gazer becomes the knowledge interpreter:** explorer notes ("it receives about as much starlight as Earth",
+  computed from the catalogue), research notes (history, from reviewed sources), science notes (explanations).
+- **Colossus becomes the comparative analyst:** the most similar known worlds by radius, starlight and orbit,
+  computed from the catalogue, and what is unusual about a world ("a large radius for the starlight it gets").
+- **Where it lives:** universe data, so in the repository and the map's exported data, not the players' database:
+  one enrichment file per world (`knowledge/worlds/<name>.md` with its sources), reviewed by pull request, exported
+  into the map's detail files. The fields a script can compute (similar worlds, starlight, size class) are
+  generated; the written ones (stories, facts) are reviewed.
+- **Overnight builds the framework, not the facts:** the templates, the provenance fields, the review queue folder
+  and the generated comparisons. Facts and stories are written and reviewed one world at a time, starting with the
+  famous worlds the game already features.

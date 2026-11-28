@@ -56,6 +56,18 @@ documentation for its own sake.
     (sign up, sign in, save, merge, delete); the go-online checklist (project, keys, security policy, Terms 1.2,
     backups, two-step sign-in for the owner), written, not done.
 
+**Tier 2, if time is left (frameworks, no new facts):**
+
+11. **Universe Enrichment framework** (KNOWLEDGE_AND_RESEARCHERS section 11): `knowledge/` with a README of the
+    rules (evidence tiers, provenance, review by pull request), `knowledge/queue/` and `knowledge/worlds/` templates
+    (summary, discovery story, interesting facts, why scientists care, Star Gazer's note, Colossus's comparison,
+    related worlds, sources), and a script that **computes** the generated fields for a world from the catalogue
+    (starlight relative to Earth, size class, the most similar known worlds), with tests. No facts or stories are
+    written overnight.
+12. **The knowledge report** in the monthly data refresh's pull request (new confirmations, rulings, changed
+    values, dropped objects, predictions settled), built by a script with tests; the workflow itself only gains a
+    step that adds the report to the pull request's text.
+
 **Next cycle (not overnight):** cloud sync online and the Explorer Registry live, the explorer profile, star card 2,
 Star Gazer's notes, then the knowledge and researchers plan ([KNOWLEDGE_AND_RESEARCHERS.md](KNOWLEDGE_AND_RESEARCHERS.md)).
 

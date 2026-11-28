@@ -3,6 +3,24 @@
 Plans waiting to be built, in the suggested order. Each file has the details, concept art and the decisions
 still open. (Merged into `main` in October 2026.)
 
+## The roadmap in three phases (27 November 2026)
+
+1. **Collection** (built): the map, planets, achievements, easter eggs, predictions, mysteries, the wardrobe and
+   spacecraft. Plans 1 to 11 below.
+2. **Platform** (now): versioned saves, the Explorer Archive, Captain's Log, the prediction dashboard, the explorer
+   profile with status in the header, the landing page, the Explorer Registry and cloud sync, security.
+   [EXPLORER_JOURNEY.md](EXPLORER_JOURNEY.md) (13), [PLATFORM_HARDENING.md](PLATFORM_HARDENING.md) (14),
+   [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md) (12); overnight: the Platform queue in
+   [LOOP_BACKLOG.md](LOOP_BACKLOG.md).
+3. **Knowledge** (next): knowledge freshness with an evidence hierarchy, the Researcher's Journal, Star Gazer and
+   Colossus as the observatory's researchers, the debates, Universe Enrichment.
+   [KNOWLEDGE_AND_RESEARCHERS.md](KNOWLEDGE_AND_RESEARCHERS.md) (15).
+
+The three layers they build: **the universe** (stars, planets, discoveries), **the explorer** (their journey) and
+**the researchers** (Star Gazer, Colossus, later the Archivist).
+
+## All plans
+
 | # | Plan | Status | Next step |
 |---|---|---|---|
 | - | [BACKGROUND.md](BACKGROUND.md): pixel night-sky page background | **done** (October 2026, `web/src/55-backdrop.js`) | - |
@@ -20,7 +38,7 @@ still open. (Merged into `main` in October 2026.)
 | 12 | [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md): accounts and access (IAM): log in with a proxy account and your progress loads in any browser; roles (visitor, player, tester, owner); a landing page with sign up; Supabase chosen | decisions taken (17 Nov: the suggested answers); **step 1 started**: the database (Supabase, local only) built with 44 tests; the owner's script (tester accounts, backup, restore) | sign up / sign in / sync in the page, then the landing page |
 | 13 | [EXPLORER_JOURNEY.md](EXPLORER_JOURNEY.md): the explorer's journey (from the user's roadmap notes): keep the game as it is; add versioned saves, a Captain's Log and a prediction dashboard (no account needed), an explorer profile and card, the Explorer Registry (the accounts), Star Gazer's contextual notes, long-term achievement families | plan only; **decisions taken** (27 Nov): explorer, no-account pieces first, transmissions modelled in code | the overnight queue (LOOP_BACKLOG.md), steps 1, 4 and 5 |
 | 14 | [PLATFORM_HARDENING.md](PLATFORM_HARDENING.md): the platform (from the user's overnight note): landing page second version, Explorer Registry UX, the security checklist against what exists, email vs the no-email decision, architecture, a safe overnight queue (LOOP_BACKLOG.md) | plan only; **decisions taken** (27 Nov): email later, opt-in and off by default; landing v2 | the overnight queue, 10 steps in the user's order |
-| 15 | [KNOWLEDGE_AND_RESEARCHERS.md](KNOWLEDGE_AND_RESEARCHERS.md): knowledge freshness with an evidence hierarchy (NASA changes data, papers need review, forums only suggest), a review queue in the repository, a knowledge report in the monthly refresh; Star Gazer and Colossus as the observatory's researchers, speaking only from real data; ASK STAR GAZER as a menu | plan only (27 Nov) | **4 decisions** at the end; after the overnight queue |
+| 15 | [KNOWLEDGE_AND_RESEARCHERS.md](KNOWLEDGE_AND_RESEARCHERS.md): knowledge freshness with an evidence hierarchy (NASA changes data, papers need review, forums only suggest), a review queue in the repository, a knowledge report in the monthly refresh; Star Gazer and Colossus as the observatory's researchers, speaking only from real data; ASK STAR GAZER as a menu, then guarded conversations; the debates; the Researcher's Journal; Universe Enrichment | plan only (27 Nov); decision 4 taken (menu first) | **decisions 1, 2, 3, 5** open; its frameworks are overnight steps 11 and 12 |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 
