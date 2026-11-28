@@ -131,3 +131,28 @@ landing, dashboard):
 | reputation: Star Gazer trust, Colossus agreement | yes, on the prediction dashboard: how often you agreed with each, and how often each was right |
 | achievements: Star Gazer's Apprentice (agree 25 times), Colossus Disciple, Independent Thinker (right against both) | added to section 5's list, same rules |
 | transmissions from the researchers ("From: Star Gazer, Subject: KOI-1934") | yes: the structured transmissions (overnight queue, step 6) get a **from** field; research notes are built from real rulings and scores, never invented |
+
+## 9. Decisions recorded (the user's note, 27 November)
+
+The game has three layers: **the universe** (stars, planets, discoveries), **the explorer** (achievements,
+predictions, Captain's Log, the Explorer Registry) and **the researchers** (Star Gazer, Colossus, the knowledge
+system). The third is where the user sees the most character.
+
+- **Star Gazer grows in three phases:** (1) the menu of questions answered from data (the first version; cheap,
+  reliable, can't be misled, easy to test); (2) conversations with guardrails, which remember what you were looking
+  at ("what else is similar?" still means Kepler-452b), answering only from the map's data and the approved
+  knowledge, with a server for the key, rate limits and a cost budget; (3) a lasting researcher character across the
+  game. Phase 2 gets its own plan and safety rules before any building (this settles decision 4: the menu first, an
+  AI-backed version later).
+- **Colossus appears only when it matters:** on giant candidates, as "COLOSSUS REQUESTED A REVIEW", never as a
+  second chatbot. It is the skeptic and creates the debates.
+- **The debate is a signature feature:** both researchers' real scores side by side, the explorer picks a side,
+  and NASA's ruling arrives later as a transmission naming the winner.
+- **A future third researcher, the Archivist:** mission historian, keeper of the lore and the achievements. Star
+  Gazer the discoverer, Colossus the skeptic, the Archivist the historian.
+- **A Researcher's Journal**, separate from the Captain's Log: how the researchers' views changed and why, for
+  example a score that moved after NASA's new data at a monthly refresh, with the source of each change. Entries
+  come only from real changes between exports (Star Gazer's design is frozen, so its view moves only when the data
+  does).
+- **Knowledge freshness charter:** as section 2. NASA data is synchronised by the monthly refresh with a knowledge
+  report; papers go to the review queue; forums only to the suggestion queue; every fact keeps its source.
