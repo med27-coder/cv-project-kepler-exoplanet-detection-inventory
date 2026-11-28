@@ -18,6 +18,7 @@ still open. (Merged into `main` in October 2026.)
 | 10 | [COMMIT_IDENTITY.md](COMMIT_IDENTITY.md): only the med27-coder account can change the project (signed commits, rulesets, push protection) | research notes | later, when the user is ready |
 | 11 | [LOOP_BACKLOG.md](LOOP_BACKLOG.md): the unattended loop's work list | in progress | top item first |
 | 12 | [ACCOUNTS_AND_ACCESS.md](ACCOUNTS_AND_ACCESS.md): accounts and access (IAM): log in with a proxy account and your progress loads in any browser; roles (visitor, player, tester, owner); a landing page with sign up; Supabase chosen | decisions taken (17 Nov: the suggested answers); **step 1 started**: the database (Supabase, local only) built with 44 tests; the owner's script (tester accounts, backup, restore) | sign up / sign in / sync in the page, then the landing page |
+| 13 | [EXPLORER_JOURNEY.md](EXPLORER_JOURNEY.md): the explorer's journey (from the user's roadmap notes): keep the game as it is; add versioned saves, a Captain's Log and a prediction dashboard (no account needed), an explorer profile and card, the Explorer Registry (the accounts), Star Gazer's contextual notes, long-term achievement families | plan only (27 Nov) | **6 decisions** at the end |
 | - | [BADGES_AND_ICONS.md](BADGES_AND_ICONS.md) | done (October 2026) | - |
 | - | [TATOOINE_AND_PROPHET.md](TATOOINE_AND_PROPHET.md) | done (October 2026) | - |
 
