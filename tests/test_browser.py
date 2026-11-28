@@ -548,6 +548,33 @@ def test_captains_log_preview(browser, site):
     assert not errors, errors
 
 
+def test_landing_preview(browser, site):
+    """The landing page (behind ?landing): the journey, the visitor's own numbers, JOIN opens the form, which sends nothing."""
+    errors = []
+    page = open_page(browser, site, errors)
+    page.evaluate("localStorage.setItem('starmap.progress.v1', JSON.stringify({ toured: true, toasts: false,"
+                  " eggs: { pluto: '2026-10-01' }, systems: ['Kepler-10', 'Kepler-22'] }))")
+    page.goto(site + '?landing')
+    page.wait_for_selector('#landing')
+    text = page.locator('#landing').inner_text()
+    for words in ('START EXPLORING', 'JOIN THE EXPLORER REGISTRY', 'YOUR CAPTAIN\'S LOG', 'CLOUD SYNC · COMING'):
+        assert words in text, words
+    stats = page.locator('.landing-stats').inner_text()                   # this browser's own numbers
+    assert re.search(r'\b1 / \d+\s+EASTER EGGS', stats) and re.search(r'\b2\s+SYSTEMS EXPLORED', stats), stats
+    page.click('[data-landing="signup"]')
+    form = page.locator('[data-form="signup"]')
+    assert form.is_visible()
+    form.locator('[name=pilot]').fill('NOVA-9')
+    form.locator('[name=password]').fill('correct horse battery')
+    form.locator('[name=again]').fill('correct horse battery')
+    form.locator('[name=terms]').check()
+    form.locator('button[type=submit]').click()
+    assert 'preview' in form.locator('.landing-msg').inner_text()       # nothing is sent anywhere yet
+    page.click('[data-landing="play"]')
+    assert page.locator('#landing').count() == 0
+    assert not errors, errors
+
+
 def test_tour_icons_and_suggestions(browser, site):
     """First-visit tour (forced with ?tour), pixel icons, found eggs and recent systems in the suggestions."""
     errors = []

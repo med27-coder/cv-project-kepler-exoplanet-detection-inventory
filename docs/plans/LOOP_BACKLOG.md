@@ -44,7 +44,7 @@ documentation for its own sake.
 6. **[done 27 Nov, see the commit "Transmissions"; `TRANSMISSIONS` in `00-version.js`, HISTORY unchanged so `/release` works as before]** **Incoming Transmission structured model**: `HISTORY` (`00-version.js`) gets the shape of a future
    `transmissions` table (version, category, title, body, date; categories: patch notes, developer logs, mission
    updates, announcements), still in code and still shipped with each release; the antenna reads the new shape.
-7. **Landing page, second version** (PLATFORM_HARDENING section 1), behind `?landing`: the journey in four steps
+7. **[done 27 Nov, see the commit "Landing page v2"; screenshots at desktop and phone width checked; cloud sync says COMING]** **Landing page, second version** (PLATFORM_HARDENING section 1), behind `?landing`: the journey in four steps
    (explore 3,600+ systems, predict planets before NASA confirms them, collect achievements and secrets, build your
    explorer journey), START EXPLORING beside JOIN THE EXPLORER REGISTRY, the visitor's own stats; screenshots at
    desktop and phone width.

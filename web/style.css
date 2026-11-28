@@ -507,7 +507,17 @@ dialog#thanks .tabs [role="tab"] { padding: 8px 14px; line-height: 1.2; font-siz
 /* landing page (preview, 49f-landing.js): why the map exists, what an account saves, how it is protected */
 body.landing-open { overflow: hidden; }
 .landing { position: fixed; inset: 0; z-index: 40; overflow-y: auto; padding: 24px 16px 40px;
-           background: rgba(7, 11, 26, 0.975); }
+           background: var(--bg); }
+.landing-four { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.landing-you { display: flex; gap: 12px; align-items: center; }
+.landing-you canvas { width: 48px; height: 48px; image-rendering: pixelated; }
+.landing-you p { display: flex; flex-direction: column; margin: 0; }
+.landing-you b { font-family: var(--pixel); font-size: 12px; color: var(--accent); font-weight: normal; }
+.landing-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
+.landing-stat { border: 2px solid var(--edge); padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+.landing-stat b { font-family: var(--pixel); font-size: 13px; font-weight: normal; }
+.landing-stat span { font-family: var(--pixel); font-size: 8px; color: var(--ink-2); }
+.landing-note .linkish { margin-left: 6px; }
 .landing [hidden] { display: none !important; }
 .landing-inner { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
 .landing section > p, .landing-hero p { margin: 0 0 8px; }
