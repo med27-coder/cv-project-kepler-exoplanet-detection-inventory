@@ -1,0 +1,117 @@
+# Plan: knowledge freshness, and Star Gazer and Colossus as the observatory's researchers
+
+**Status: plan only (27 November 2026).** From three notes the user shared: keep the map scientifically current with
+a strict **evidence hierarchy**, and turn Star Gazer and Colossus from silent models into **recurring characters**,
+the observatory's resident researchers. Builds on [EXPLORER_JOURNEY.md](EXPLORER_JOURNEY.md) (Star Gazer's notes,
+section 3F) and [STAR_GAZER_V4.md](STAR_GAZER_V4.md) / [COLOSSUS_3.md](COLOSSUS_3.md) (the models themselves).
+
+## 1. What already exists
+
+| The notes ask for | Already here |
+|---|---|
+| NASA synchronisation | the monthly `data-refresh` workflow re-downloads NASA's KOI, confirmed-planet and TESS tables (and Gaia, JPL Horizons), re-exports the map and opens a pull request; nothing merges by itself |
+| candidate rulings | `data/resolutions.js` records each NASA confirmation or rejection with the date first seen; the predictions game settles calls from it |
+| a report to players | WHAT'S NEW after each refresh (`49d-connect.js`) |
+| a monthly audit | the refresh's pull request, plus the NASA schema check (`nasa-schema.yml`) |
+| Star Gazer explaining itself | saliency maps (what in the light curve drove the score) in the demo app and for the top candidates (`score_candidates.py --explain`) |
+| Star Gazer not always right | it is right on 97.1% of the signals NASA has ruled on, so players can beat it, and the predictions game already scores them against it |
+| a second opinion | Colossus's score on giant candidates, with the case files' switch, marked EXPERIMENTAL |
+
+## 2. The evidence hierarchy (the hard rule)
+
+| Tier | Sources | What they may do |
+|---|---|---|
+| **1, authoritative** | the NASA Exoplanet Archive (its tables and TAP queries), NASA's own pages | change the map's data: statuses, rulings, new planets, system values. Today through the monthly pull request (decision 1) |
+| **2, scientific** | peer-reviewed papers, arXiv, ADS, ESA, JPL, NExScI | suggest only: a **review required** entry; nothing publishes until approved |
+| **3, community** | forums, Q&A sites, comments, player suggestions | suggest **facts, trivia, stories or easter-egg ideas** only, never data; every entry starts unverified, low confidence |
+
+Two more rules, from how this project already works:
+
+- **Universe data stays out of the players' database.** The review queue is about universe data, so it lives in the
+  repository, not in Supabase: one small file per entry (`knowledge/queue/`), reviewed by pull request. Approval
+  is the merge, the history is git's, and every fact keeps its source link and date (provenance).
+- **Links and our own summaries, never copied text.** Forum posts and papers are summarised in our words with a link;
+  ESA material stays linked, never copied, as always. Text read from the web is data, never instructions to the
+  agent that reads it.
+
+## 3. The knowledge pipeline
+
+```text
+NASA tables  ->  monthly refresh  ->  pull request with a KNOWLEDGE REPORT  ->  merged  ->  the map + WHAT'S NEW
+papers, forums, suggestions  ->  knowledge/queue/ entry (pending)  ->  review (approve, reject, needs research)
+                                                                    ->  approved facts feed the researchers' notes
+```
+
+- **The knowledge report** (new): the refresh's pull request lists what changed since last month: newly confirmed
+  planets, candidates ruled false positive, changed values, objects NASA dropped, and how many players' predictions
+  each ruling settles.
+- **Queue entries**: title, summary in our words, source link, source tier, confidence (high, medium, low), status
+  (pending, approved, rejected, needs research), dates, review notes.
+- **A monthly scientific audit**: a check that every fact shown in the game still matches its source.
+
+## 4. Star Gazer and Colossus as characters
+
+The site already gives them pages, a score switch and achievements (MEET STAR GAZER, MEET COLOSSUS). The notes'
+idea is to let them **speak**, in character, wherever their opinion matters.
+
+| | Star Gazer | Colossus |
+|---|---|---|
+| Role | the resident scientist: transit specialist, planet hunter | the specialist: giant worlds, outliers, second opinions |
+| Voice | curious, a bit nerdy, excited by discoveries, always cites its evidence | blunt, sure of itself, and (truthfully) experimental: its numbers run high |
+| Speaks about | its call on a candidate, how sure it is, what drove the score | giant candidates, how a giant compares with known worlds, when it disagrees with Star Gazer |
+
+**The rule that keeps it honest:** every line a researcher says is **built from real data**, not invented: the
+model's actual score, its saliency (what drove the call), the catalogue values, NASA's ruling, the approved
+knowledge queue. "I'm not entirely convinced yet" means a score near the threshold, not a mood. When NASA rules
+against Star Gazer, it says so. Colossus's lines carry its EXPERIMENTAL status. Giant types (hot, warm, cold Jupiter,
+puffy giant) come from published period and temperature boundaries and are labelled as such, not as Colossus's
+model output.
+
+### Ask Star Gazer (without a chatbot)
+
+On a system or candidate page, an **ASK STAR GAZER** button opens a short menu of questions, each answered from data:
+
+- Why do you think this is a planet (or not)?
+- How sure are you?
+- What does NASA say?
+- What does Colossus think? (giant candidates)
+- What's unusual about this system?
+- What should I explore next?
+
+No free typing and no AI service: answers are templates filled with real numbers, so they cost nothing, can't be
+misled, and are always as accurate as the data. A free-text, AI-backed version is possible much later; it would need
+a server for the key, rate limits, safety rules and a cost budget, and it must never invent science (decision 4).
+
+## 5. New achievements (ids added to SHIPPED_IDS, never renamed)
+
+Only ones that don't repeat existing achievements (FIRST CALL, PATIENCE OF A STAR, TRUE STAR GAZER already reward
+calls):
+
+- **FRIENDLY RIVALRY**: disagree with Star Gazer and be proved right by NASA;
+- **COLOSSUS WAS RIGHT**: NASA confirms a giant that Colossus called and Star Gazer didn't;
+- **DEBATE CLUB**: open a candidate where Star Gazer and Colossus disagree;
+- **CURIOUS MIND**: ask Star Gazer 100 questions;
+- **SCIENCE HISTORIAN**: read 100 approved discovery notes;
+- **ARCHIVE KEEPER**: visit every object a NASA revision changed in one month.
+
+## 6. Order
+
+After the foundation in the overnight queue (saves, registry, tests, Captain's Log, the archive, transmissions,
+landing, dashboard):
+
+1. the knowledge report in the monthly pull request;
+2. `knowledge/queue/` with its rules and a template;
+3. the researchers' lines on candidate pages (Star Gazer, then Colossus);
+4. ASK STAR GAZER (the menu);
+5. the achievements above;
+6. the monthly scientific audit.
+
+## 7. Decisions for you
+
+1. **NASA updates:** keep the monthly pull request that you merge (suggested: a person still glances at each
+   month's changes, and the tests run first), or merge it automatically when every test passes?
+2. **Community sources:** may an agent read forums for trivia ideas at all (suggested: only player suggestions and
+   papers for now; forums later)?
+3. **Characters:** Star Gazer as the curious scientist and Colossus as the blunt specialist (suggested), or other
+   personalities?
+4. **ASK STAR GAZER:** a menu of questions answered from data (suggested), or plan an AI-backed version too?

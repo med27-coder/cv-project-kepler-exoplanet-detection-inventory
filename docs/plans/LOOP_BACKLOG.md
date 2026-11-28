@@ -12,7 +12,7 @@ drafts and ideas"). One item per loop turn; mark it done here with the version o
 
 ## Platform queue (27 November), top first
 
-The user's order (27 November, after reviewing PLATFORM_HARDENING.md and EXPLORER_JOURNEY.md). Everything local;
+The user's order (27 November, refined in a second note after reviewing PLATFORM_HARDENING.md and EXPLORER_JOURNEY.md). Everything local;
 nothing goes online; no email; no new sign-in providers; anything that needs a choice stops and goes in the hand-off
 notes. Run `scripts/accounts/manage.py backup` before any `supabase db reset`. Read the specific official page a
 step needs (Supabase Auth and row-level security, OWASP cheat sheets, PostgreSQL, Docker, GitHub Actions), not
@@ -20,41 +20,44 @@ documentation for its own sake.
 
 **Tier 0, the foundation (finish first):**
 
-1. **Versioned saves** (EXPLORER_JOURNEY A): saved progress and the backup file carry `schema: 2` (a whole number;
-   today's saves count as 1), `gameVersion` (the site's version) and `exportedAt`; upgrade steps run on load from
-   the browser, a backup file or the account; `mergeProgress` stays the tolerant reader. Tests: old saves and old
-   backup files still load, and a file from a newer schema is refused politely.
-2. **Achievement and easter-egg registry tables**: `achievement_catalog` and `easter_egg_catalog` in the database,
-   **generated from the game's own lists** (the code stays the master copy, `SHIPPED_IDS`), so `finds` can refuse
-   ids that don't exist; a test that fails if the code and the tables ever differ.
-3. **Database tests on every push**: a CI job that starts Supabase and runs `supabase test db` (migrations,
-   foreign keys, the catalogue, importing a save, the row rules); a browser test that NASA's rulings still settle
-   predictions.
+1. **Versioned save format** (EXPLORER_JOURNEY A): saved progress and the backup file carry `saveFormat: 2` (a whole
+   number; today's saves count as 1, so upgrade steps stay simple), `gameVersion` (the site's version) and
+   `exportedAt`; upgrade steps run on load from the browser, a backup file or the account; `mergeProgress` stays the
+   tolerant reader. Tests: old saves and old backup files still load; a file from a newer format is refused politely.
+2. **Achievement and easter-egg registry validation**: `achievement_catalog` and `easter_egg_catalog` in the
+   database, **generated from the game's own lists** (the code stays the master copy, `SHIPPED_IDS`), so `finds`
+   refuses ids that don't exist; a test that fails if the code and the tables ever differ.
+3. **Database migration tests on every push**: a CI job that starts Supabase and runs `supabase test db`
+   (migrations, foreign keys, the catalogue, importing a save, the row rules); a browser test that NASA's rulings
+   still settle predictions.
 
 **Tier 1, the best overnight work:**
 
-4. **Captain's Log foundation** (EXPLORER_JOURNEY B): build the journal from the dates already kept (achievements,
-   eggs, calls, NASA's rulings, daily mysteries), newest first, no spoilers; a draft view in the Galleria behind a
-   preview switch until it is released.
-5. **Incoming Transmission data model**: give `HISTORY` (`00-version.js`) the shape of a future `transmissions`
-   table (version, category, title, body, date; categories: patch notes, developer logs, mission updates,
-   announcements), still in code and still shipped with each release; the antenna reads the new shape. No database
-   table yet.
-6. **Landing page, second version** (PLATFORM_HARDENING section 1), behind `?landing`: the journey in four steps
+4. **Captain's Log foundation** (EXPLORER_JOURNEY B): the journal from the dates already kept (achievements, eggs,
+   calls, NASA's rulings, daily mysteries), newest first, no spoilers; a draft view behind a preview switch until
+   it is released.
+5. **Explorer Archive export format**: the backup file becomes the **Explorer Archive**, one format for a local
+   backup, the cloud copy and any future move: achievements, easter eggs, predictions, mysteries, settings,
+   favourites (saved systems), discovery history and the Captain's Log, with `saveFormat`, `gameVersion` and
+   `exportedAt`. DOWNLOAD / LOAD keep working with old files.
+6. **Incoming Transmission structured model**: `HISTORY` (`00-version.js`) gets the shape of a future
+   `transmissions` table (version, category, title, body, date; categories: patch notes, developer logs, mission
+   updates, announcements), still in code and still shipped with each release; the antenna reads the new shape.
+7. **Landing page, second version** (PLATFORM_HARDENING section 1), behind `?landing`: the journey in four steps
    (explore 3,600+ systems, predict planets before NASA confirms them, collect achievements and secrets, build your
    explorer journey), START EXPLORING beside JOIN THE EXPLORER REGISTRY, the visitor's own stats; screenshots at
    desktop and phone width.
-7. **Explorer Registry screens**: "pilot" becomes **explorer** everywhere (the database column and messages, the
-   sign-in address `<name>@explorers.invalid`, the landing text, `manage.py`), a new migration, the tests updated;
-   then the sign-up and sign-in screens with CONTINUE AS GUEST beside JOIN.
-8. **Local-only account simulation**: sign up, sign in and sync in the page against the local Supabase only,
-   behind `?landing`; browser tests: sign up, play, sign in on a second browser, same progress.
-9. **Threat model** and sequence diagrams (sign up, sign in, save, merge, delete) in `docs/`.
-10. **Cloud migration plan**: the go-online checklist (project, keys, security policy, Terms 1.2, backups,
-    two-step sign-in for the owner), written, not done.
+8. **Prediction dashboard foundation** (EXPLORER_JOURNEY C): calls made, correct, wrong, waiting, the average wait,
+   agreement with Star Gazer and (on giants) with Colossus; built from data the page already has.
+9. **Explorer Registry mockups**: "pilot" becomes **explorer** everywhere (the database column and messages, the
+   sign-in address `<name>@explorers.invalid`, `manage.py`), a new migration, the tests updated; the sign-up and
+   sign-in screens with CONTINUE AS GUEST beside JOIN, behind `?landing`, talking only to the local Supabase.
+10. **Threat model and launch checklist** in `docs/`: who might attack what and what stops them; sequence diagrams
+    (sign up, sign in, save, merge, delete); the go-online checklist (project, keys, security policy, Terms 1.2,
+    backups, two-step sign-in for the owner), written, not done.
 
-**Next cycle (not overnight):** cloud sync online, the Explorer Registry live, the prediction dashboard, the explorer
-profile, star card 2, Star Gazer's notes.
+**Next cycle (not overnight):** cloud sync online and the Explorer Registry live, the explorer profile, star card 2,
+Star Gazer's notes, then the knowledge and researchers plan ([KNOWLEDGE_AND_RESEARCHERS.md](KNOWLEDGE_AND_RESEARCHERS.md)).
 
 ## Queue (top first)
 

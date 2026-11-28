@@ -27,7 +27,7 @@ none of its decisions unless one below says so.
 
 | The notes say | Here | Why |
 |---|---|---|
-| "Kepler v2.0", save format `"version": "2.0"`, Versions 1 to 7 | releases keep counting 1.9.9.2, 1.9.9.3...; the saved data gets its own **schema number** (`schema: 2`) | the project's rule: versions never jump to 2.0, so players read them in order. A schema number is internal and separate |
+| "Kepler v2.0", save format `"version": "2.0"`, Versions 1 to 7 | releases keep counting 1.9.9.2, 1.9.9.3...; the saved data gets its own **format number** (`saveFormat: 2`) | the project's rule: versions never jump to 2.0, so players read them in order. A schema number is internal and separate |
 | OAuth (Google, Microsoft, GitHub) and email | pilot names and passwords only | decided 17 November: proxy accounts, no real identities. Can be revisited if real accounts are ever wanted |
 | analytics in the platform services | none | the landing page promises "no analytics or tracking" |
 | containers: web, api, worker, ai-guide, postgres, redis | web (the static site; nginx in the `docker-setup` branch), Supabase (sign-in, API and Postgres in its own containers), GitHub Actions as the worker | Supabase's API is our API; the monthly data workflow already fetches NASA updates and records rulings; Redis has nothing to cache at this size |
@@ -43,10 +43,16 @@ The first three need **no accounts and no server**: they work for every player, 
 
 ### A. Versioned saves (foundation)
 
-- `schema: 2` in the saved data, and a list of small upgrade steps (`1 -> 2`, later `2 -> 3`), run when progress
+- `saveFormat: 2` in the saved data, and a list of small upgrade steps (`1 -> 2`, later `2 -> 3`), run when progress
   loads from the browser, a backup file or the account. `mergeProgress` stays the tolerant reader.
 - The backup file carries the schema number; old files keep loading.
 - The database's `progress` record already has a `schema` column.
+
+### A2. The Explorer Archive
+
+The backup file grows into the **Explorer Archive**: one format for the local backup, the cloud copy and any future
+move, holding achievements, easter eggs, predictions, mysteries, settings, favourites, discovery history and the
+Captain's Log, with `saveFormat`, `gameVersion` and `exportedAt`. Old backup files keep loading.
 
 ### B. Captain's Log
 
@@ -67,7 +73,8 @@ first habitable world, first correct call, 1,000 stars seen).
 ### C. Prediction dashboard
 
 In the predictions tab: calls made, correct, wrong, waiting, the average wait for a ruling, and how often you agreed
-with Star Gazer. All from data the page already has.
+with Star Gazer, and on giants how often you agreed with Colossus. All from data the page already has.
+The user rates this a **signature feature**: the predictions game is more unusual than the achievements.
 
 ### D. Explorer profile and card
 
