@@ -115,3 +115,19 @@ landing, dashboard):
 3. **Characters:** Star Gazer as the curious scientist and Colossus as the blunt specialist (suggested), or other
    personalities?
 4. **ASK STAR GAZER:** a menu of questions answered from data (suggested), or plan an AI-backed version too?
+
+## 8. Interactive researchers, in more detail (the user's note, 27 November)
+
+| The note | Here |
+|---|---|
+| ASK STAR GAZER on system pages, CONTACT STAR GAZER on the explorer profile, WHAT DOES STAR GAZER THINK? on predictions | yes, all three, as the panel below |
+| the panel: current candidate, opinion, confidence, evidence, suggested questions | yes: the opinion and confidence are the model's real score; the evidence is its real saliency and catalogue values |
+| a free-text input box | only if decision 4 chooses an AI-backed version; until then the suggested questions are the whole interface |
+| Star Gazer: curious, optimistic, evidence-based, patient, admits uncertainty and its mistakes | yes; "I predicted a planet, NASA ruled it a false positive; that's part of discovery" is built from the real ruling |
+| Colossus: analytical, reserved, skeptical, the reviewer and rival | yes, and honest that it is experimental |
+| **DEBATE DETECTED** when the two disagree, the explorer picks a side (Star Gazer, Colossus, neither), NASA settles it years later | yes: disagreements come from the two models' real scores on giant candidates; picking a side is a prediction call, settled by `resolutions.js` like any other |
+| debates on habitability, giant type, significance | only where a published rule decides the answer (the habitable zone, period and temperature boundaries); otherwise it would be an invented disagreement |
+| tables `ai_personas`, `ai_opinions`, `ai_debates` | **universe data**, so not in the players' database: the opinions are the model scores already exported to the map; the personas are text in the code; a debate is a candidate where the two scores fall on opposite sides of their thresholds |
+| reputation: Star Gazer trust, Colossus agreement | yes, on the prediction dashboard: how often you agreed with each, and how often each was right |
+| achievements: Star Gazer's Apprentice (agree 25 times), Colossus Disciple, Independent Thinker (right against both) | added to section 5's list, same rules |
+| transmissions from the researchers ("From: Star Gazer, Subject: KOI-1934") | yes: the structured transmissions (overnight queue, step 6) get a **from** field; research notes are built from real rulings and scores, never invented |
